@@ -1,0 +1,41 @@
+#!/bin/bash
+set -e
+
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[1;31m'
+NC='\033[0m'
+
+FIERY_NATIVE_VERSION="0.0.1"
+DEFAULT_VERSION=oracle/graalvm-ce:1.0.0-rc16
+VERSION=""
+VOLUME_PATH=""
+CONTAINER_NAME="fnative_$(openssl rand -hex 10)"
+
+printf "$GREEN Version of fnative: $FIERY_NATIVE_VERSION $NC\n"
+
+if [ -z "$1" -a "$1" != " " ]; then
+    printf "$RED ERROR: You did not pass any arguments to fnative utility. Exiting... $NC\n"
+    exit
+fi
+
+if [ -z "$2" -a "$2" != " " ]; then
+    printf "$YELLOW You did not specify GraalVM version! $NC\n"
+    printf "$GREEN Defaulting to supported one: $DEFAULT_VERSION. (You can always pass the new version of GraalVM via the second parameter) $NC\n"
+    VERSION=$DEFAULT_VERSION
+else
+    VERSION=$2
+fi
+
+printf "$GREEN Directory bound: $PWD $NC\n"
+printf "$GREEN Name of the container: $CONTAINER_NAME $NC\n\n"
+
+docker run --name $CONTAINER_NAME -v $PWD:/project:Z -it $VERSION /bin/bash -c "cd /project && native-image $1"
+
+printf "$GREEN Successfully compiled project to native $NC\n\n"
+
+printf "$GREEN Removing intermediate container: $CONTAINER_NAME $NC\n\n"
+
+docker rm $CONTAINER_NAME
+
+printf "$GREEN Exiting... $NC\n\n"

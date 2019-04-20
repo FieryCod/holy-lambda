@@ -1,0 +1,14 @@
+/target
+bootstrap
+/classes
+/checkouts
+profiles.clj
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+node_modules
+/.lein-*
+/.nrepl-port
+.hgignore
+.hg/
