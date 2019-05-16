@@ -6,7 +6,7 @@ Description: >
 Parameters:
   Runtime:
     Type: String
-    Default: java8
+    Default: provided
   Timeout:
     Type: Number
     Default: 40
@@ -15,7 +15,7 @@ Parameters:
     Default: 2000
   CodeUri:
     Type: String
-    Default: target/hello-lambda.jar
+    Default: latest.zip
 
 Globals:
   Function:

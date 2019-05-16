@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'Example basic lambda using `holy-lambda` micro library
+
+  '
+Parameters:
+  Runtime:
+    Type: String
+    Default: provided
+  Timeout:
+    Type: Number
+    Default: 40
+  MemorySize:
+    Type: Number
+    Default: 2000
+  CodeUri:
+    Type: String
+    Default: latest.zip
+Globals:
+  Function:
+    Runtime:
+      Ref: Runtime
+    Timeout:
+      Ref: Timeout
+    MemorySize:
+      Ref: MemorySize
+    CodeUri:
+      Ref: CodeUri
+Resources:
+  GetOrderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: hello-lambda.core.HelloLambda
+      FunctionName: HelloLambdaFunction
+      Events:
+        HelloLambda:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+      CodeUri: s3://holy-lambda--hello-lambda/hello-lambda-latest/42c3700297f855bc99543ad80034ce5d

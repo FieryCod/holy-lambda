@@ -1,8 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
-  Example basic lambda using `holy-lambda` micro library
+Description: 'Example basic lambda using `holy-lambda` micro library
 
+  '
 Parameters:
   Runtime:
     Type: String
@@ -16,23 +16,26 @@ Parameters:
   CodeUri:
     Type: String
     Default: target/hello-lambda.jar
-
 Globals:
   Function:
-    Runtime: !Ref Runtime
-    Timeout: !Ref Timeout
-    MemorySize: !Ref MemorySize
-    CodeUri: !Ref CodeUri
-
+    Runtime:
+      Ref: Runtime
+    Timeout:
+      Ref: Timeout
+    MemorySize:
+      Ref: MemorySize
+    CodeUri:
+      Ref: CodeUri
 Resources:
   GetOrderFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Type: AWS::Serverless::Function
     Properties:
       Handler: hello-lambda.core.HelloLambda
       FunctionName: HelloLambdaFunction
       Events:
         HelloLambda:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Type: Api
           Properties:
             Path: /
             Method: get
+      CodeUri: s3://holy-lambda--hello-lambda/hello-lambda-latest/353cd8a931c84b187ce9790e579c265b

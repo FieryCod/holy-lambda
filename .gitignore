@@ -1,4 +1,7 @@
 /target
+packaged.yml
+native-packaged.yml
+*.zip
 bootstrap
 /classes
 /checkouts

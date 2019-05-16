@@ -2,6 +2,7 @@
   ^{:doc ""
     :author "Karol Wójcik"}
   (:require
+   [clojure.string :as string]
    [clojure.data.json :as json]
    [clojure.tools.macro :as macro])
   (:import
@@ -13,7 +14,9 @@
    [com.amazonaws.services.lambda.runtime RequestStreamHandler Context CognitoIdentity ClientContext Client]))
 
 (def ^:dynamic runtime nil)
-(def ^:dynamic request-id nil)
+(def ^:dynamic invocation-id nil)
+
+(def ^:private success-codes #{200 202})
 
 (defn- gen-class-lambda
   [prefix gfullname]
@@ -30,24 +33,25 @@
      (seq (get headers prop)) first)))
 
 (defn- ctx
-  [rem-time fn-name fn-version fn-invoked-arn memory-limit
-   aws-request-id log-group-name log-stream-name
+  [envs rem-time fn-name fn-version fn-invoked-arn memory-limit
+   aws-invocation-id log-group-name log-stream-name
    identity client-context logger]
   {:remainingTimeInMs rem-time
    :fnName fn-name
    :fnVersion fn-version
    :fnInvokedArn fn-invoked-arn
    :memoryLimitInMb memory-limit
-   :awsRequestId aws-request-id
+   :awsInvocationId aws-invocation-id
    :logGroupName log-group-name
    :logStreamName log-stream-name
    :identity identity
    :clientContext client-context
+   :envs envs
    :logger logger})
 
 (defn- ctx-object->ctx-edn
-  [^Context context]
-  (ctx (.getRemainingTimeInMillis context) (.getFunctionName context) (.getFunctionVersion context) (.getInvokedFunctionArn context)
+  [envs ^Context context]
+  (ctx envs (.getRemainingTimeInMillis context) (.getFunctionName context) (.getFunctionVersion context) (.getInvokedFunctionArn context)
        (.getMemoryLimitInMB context) (.getAwsRequestId context) (.getLogGroupName context) (.getLogStreamName context)
        (when-let [^CognitoIdentity identity (.getIdentity context)]
          {:identityId (.getIdentityId identity)
@@ -65,7 +69,7 @@
 
 (defn- in->edn-event
   [^InputStream event]
-  (json/read (InputStreamReader. event "utf-8") :key-fn keyword))
+  (json/read (InputStreamReader. event "UTF-8") :key-fn keyword))
 
 (defn- define-synthetic-name
   [aname sym]
@@ -85,7 +89,7 @@
             (~lambda event# context#))
            ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
             (let [event# (#'fierycod.holy-lambda.core/in->edn-event in#)
-                  context# (#'fierycod.holy-lambda.core/ctx-object->ctx-edn ctx#)
+                  context# (#'fierycod.holy-lambda.core/ctx-object->ctx-edn ctx# (into {} (System/getenv)))
                   aws-event# (-> (~lambda event# context#) (json/write-str))]
               (.write out# (.getBytes ^String aws-event# "UTF-8"))))))
       3
@@ -115,7 +119,7 @@
   [headers event env-vars]
   (let [get-env (partial get env-vars)
         getf-header (getf-header* headers)]
-    (ctx (- (Long/parseLong (getf-header "Lambda-Runtime-Deadline-Ms")) (System/currentTimeMillis))
+    (ctx env-vars (- (Long/parseLong (getf-header "Lambda-Runtime-Deadline-Ms")) (System/currentTimeMillis))
          (get-env "AWS_LAMBDA_FUNCTION_NAME")
          (get-env "AWS_LAMBDA_FUNCTION_VERSION")
          (str "arn:aws:lambda:" (get-env "AWS_REGION")
@@ -132,10 +136,7 @@
          {:client nil :custom nil :environment nil}
          ;; #6
          nil
-         ))
-  )
-
-(def ^:private success-codes #{200 202})
+         )))
 
 (defn- retrieve-body
   [^HttpURLConnection http-conn status]
@@ -143,55 +144,43 @@
     (.getErrorStream http-conn)
     (.getInputStream http-conn)))
 
-(defn- http-get
-  "Internal http GET method used to communicate with lambda API"
-  [url-s]
-  (let [^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
-        _ (doto http-conn
-            (.setDoOutput false)
-            (.setRequestMethod  "GET"))
-        headers (into {} (.getHeaderFields http-conn))
-        status (.getResponseCode http-conn)
-        aws-event {:headers headers
-                   :status status
-                   :body (in->edn-event (retrieve-body http-conn status))}]
-    aws-event))
-
-(defn- http-post
-  "Internal http POST method used to communicate with lambda API"
-  [url-s body]
-  (let [^String body-s (if (string? body) body (json/write-str body))
+(defn- http
+  "Internal http method which sends/receive data from AWS"
+  [method url-s & [payload]]
+  (let [push? (= method "POST")
+        ^String payload-s (when push? (if (string? payload) payload
+                                          (json/write-str (assoc payload
+                                                                 :body (json/write-str (:body payload))))))
         ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
         _ (doto http-conn
-            (.setDoOutput true)
-            (.setRequestMethod  "POST"))
-        _ (doto (.getOutputStream http-conn)
-            (.write (.getBytes body-s "UTF-8"))
-            (.flush)
-            (.close))
+            (.setDoOutput push?)
+            (.setRequestProperty "Content-Type" "application/json")
+            (.setRequestMethod method))
+        _ (when push?
+            (doto (.getOutputStream http-conn)
+              (.write (.getBytes payload-s "UTF-8"))
+              (.close)))
         headers (into {} (.getHeaderFields http-conn))
-        status (.getResponseCode http-conn)
-        aws-event {:headers headers
-                   :status status
-                   :body (in->edn-event (retrieve-body http-conn status))}]
-    aws-event))
+        status (.getResponseCode http-conn)]
+    {:headers headers
+     :status status
+     :body (in->edn-event (retrieve-body http-conn status))}))
 
 (defn- send-runtime-error
   [^Exception err]
   (let [exit! #(System/exit -1)
-        {:keys [status]} (http-post (str "http://" runtime "/2018-06-01/runtime/invocation/" request-id "/error")
-                                    {:errorMessage (.getMessage err)
-                                     :errorType (-> err (.getClass) (.getCanonicalName))})]
-    (if (success-codes status)
-      (exit!)
-      (do
-        ;; #5 Log error via custom logger
-        (exit!)))))
+        url (str "http://" runtime "/2018-06-01/runtime/invocation/" invocation-id "/error")
+        payload {:errorMessage (.getMessage err)
+                 :errorType (-> err (.getClass) (.getCanonicalName))}]
+    (when-not (success-codes (:status (http "POST" url payload)))
+      ;; #5 Log error via custom logger
+      (exit!))))
 
 (defn- fetch-aws-event
   [runtime]
-  (let [aws-event (http-get (str "http://" runtime "/2018-06-01/runtime/invocation/next"))]
-    (assoc aws-event :request-id (getf-header* (:headers aws-event) "Lambda-Runtime-Aws-Request-Id"))))
+  (let [url (str "http://" runtime "/2018-06-01/runtime/invocation/next")
+        aws-event (http "GET" url)]
+    (assoc aws-event :invocation-id (getf-header* (:headers aws-event) "Lambda-Runtime-Aws-Request-Id"))))
 
 (defn call
   "Resolves the lambda function using provided ns and calls it with the event and context"
@@ -211,9 +200,8 @@
 
 (defn- send-response
   [response]
-  (println (str "http://" runtime "/2018-06-01/runtime/invocation/" request-id "/response"))
-  (let [{:keys [status body]} (http-post (str "http://" runtime "/2018-06-01/runtime/invocation/" request-id "/response")
-                                                 (json/write-str response))]
+  (let [url (str "http://" runtime "/2018-06-01/runtime/invocation/" invocation-id "/response")
+        {:keys [status body]} (http "POST" url response)]
     (when-not (success-codes status)
       (send-runtime-error (Exception. (str "AWS did not accept the your lambda payload:\n" body))))))
 
@@ -231,14 +219,14 @@
   (let [runtime* (get env-vars "AWS_LAMBDA_RUNTIME_API")
         handler-name (get env-vars "_HANDLER")
         aws-event (fetch-aws-event runtime*)
-        request-id* (:request-id aws-event)
+        invocation-id* (:invocation-id aws-event)
         handler (get routes handler-name)]
     (binding [runtime runtime*
-              request-id request-id*]
-      (println handler request-id* runtime)
+              invocation-id invocation-id*]
+
       (if-not handler
         (send-runtime-error (Exception. (str "Handler: " handler-name " not found!")))
-        (if (and request-id (success-codes (:status aws-event)))
+        (if (and invocation-id (success-codes (:status aws-event)))
           (process-event aws-event env-vars (call handler))
           ;; Log the error #10
           nil)))))
@@ -266,8 +254,9 @@
   `(defn ~'-main []
      (let [fnames# (map (comp #(str (str (:ns %) "." (str (:name %)))) meta) ~lambdas)
            routes# (into {} (mapv vector fnames# ~lambdas))]
-       (#'fierycod.holy-lambda.core/next-iter routes#
-                                              (into {} (System/getenv))))))
+       (while true
+         (#'fierycod.holy-lambda.core/next-iter routes#
+                                                (into {} (System/getenv)))))))
 
 (comment
   (deflambda HolyHandler

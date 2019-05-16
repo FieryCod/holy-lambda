@@ -6,9 +6,11 @@
 (h/deflambda HelloLambda
   [event context]
   {:statusCode 200
-   :body "Hello"
+   :body {:message "Hello"
+          "it's" "me"
+          :you "looking"
+          :for true}
    :isBase64Encoded false
-   :headers {"content-type" "text/html"}}
-  )
+   :headers {"Content-Type" "application/json"}})
 
 (h/gen-main [#'HelloLambda])
