@@ -1,9 +1,15 @@
 (ns fierycod.holy-lambda.core-test
   (:require
-   [clojure.test :refer :all]
-   [fierycod.holy-lambda.core :refer :all]))
+   [clojure.test :as t]
+   [fierycod.holy-lambda.core :as h]))
 
-(deftest extract-event-fn
-  (testing "should read json string and transform it to clojure datastructure"
-    ((#'fierycod.holy-lambda.core/extract-event escaped-event-str))
-    (is (= 0 1))))
+(t/deftest call-lambda-fn-test
+  (t/testing "should take the lambda and invoke it passing correct result"
+    (h/deflambda call-lambda-01-valid-internal [event _] event)
+    (t/is (= (h/call #'call-lambda-01-valid-internal {:ok "OK"} {}) {:ok "OK"})))
+
+  (t/testing "should take the lambda, invoke it and throw AssertionError due to incorrect arity"
+    (h/deflambda call-lambda-02-invalid-internal [event _] event)
+    (t/is (thrown? java.lang.AssertionError (h/call #'call-lambda-02-invalid-internal {:ok "OK"})))))
+
+;; TODO Write more tests

@@ -1,6 +1,6 @@
 /target
-packaged.yml
-native-packaged.yml
+packaged.yaml
+native-packaged.yaml
 *.zip
 bootstrap
 /classes

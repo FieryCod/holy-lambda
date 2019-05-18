@@ -5,6 +5,7 @@
 
 (h/deflambda HelloLambda
   [event context]
+  (h/info "Logging...")
   {:statusCode 200
    :body {:message "Hello"
           "it's" "me"
@@ -13,4 +14,12 @@
    :isBase64Encoded false
    :headers {"Content-Type" "application/json"}})
 
-(h/gen-main [#'HelloLambda])
+(h/deflambda ByeLambda
+  [event context]
+  {:statusCode 200
+   :body "Bye bye"
+   :isBase64Encoded false
+   :headers {"Content-Type" "application/json"}})
+
+(h/gen-main [#'HelloLambda
+             #'ByeLambda])

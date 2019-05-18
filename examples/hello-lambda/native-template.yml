@@ -25,14 +25,26 @@ Globals:
     CodeUri: !Ref CodeUri
 
 Resources:
-  GetOrderFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+  HelloLambdaFunction:
+    Type: AWS::Serverless::Function
     Properties:
       Handler: hello-lambda.core.HelloLambda
       FunctionName: HelloLambdaFunction
       Events:
         HelloLambda:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Type: Api
           Properties:
             Path: /
+            Method: get
+
+  ByeLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: hello-lambda.core.ByeLambda
+      FunctionName: ByeLambdaFunction
+      Events:
+        HelloLambda:
+          Type: Api
+          Properties:
+            Path: /bye
             Method: get

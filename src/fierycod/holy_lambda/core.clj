@@ -1,5 +1,13 @@
 (ns fierycod.holy-lambda.core
-  ^{:doc ""
+  ^{:doc "This namespace integrates the Clojure code with two different runtimes: Java Lambda Runtime, Native Provided Runtime.
+          The former is the Official Java Runtime for AWS Lambda which is well tested and works perfectly fine, but it's rather slow due to cold starts.
+          The latter is a custom [runtime](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html) made by me.
+          It's a significantly faster than the Java runtime due to the use of GraalVM.
+
+          *Namespace includes:*
+          - Utilities for Logging
+          - Friendly macro for generating Lambda functions which run on both runtimes
+          - TODO Utilities which help produce valid response"
     :author "Karol Wójcik"}
   (:require
    [clojure.string :as string]
@@ -10,13 +18,51 @@
    [java.util Date]
    [java.net URL HttpURLConnection]
    [java.io InputStream OutputStream InputStreamReader]
-   [org.apache.logging.log4j LogManager]
-   [com.amazonaws.services.lambda.runtime RequestStreamHandler Context CognitoIdentity ClientContext Client]))
+   [com.amazonaws.services.lambda.runtime
+    RequestStreamHandler Context CognitoIdentity ClientContext Client LambdaLogger]))
 
-(def ^:dynamic runtime nil)
-(def ^:dynamic invocation-id nil)
+(defn- logger-factory
+  [& [logger-impl]]
+  (let [unified-logger (proxy [LambdaLogger] []
+                         (log [s]
+                           (println s)))]
+    (or logger-impl unified-logger)))
 
+(defn- ^String decorate-log
+  [severity vvs]
+  (str (condp = severity
+         :log ""
+         :info "[INFO] "
+         :warn "[WARN] "
+         :error "[ERROR] "
+         :fatal "[FATAL] "
+         :else "")  ;; native runtime error
+       (string/join " " vvs)))
+
+(def ^:dynamic ^:private runtime nil)
+(def ^:dynamic ^:private invocation-id nil)
+(def ^:dynamic ^:private ^LambdaLogger logger (logger-factory))
 (def ^:private success-codes #{200 202})
+
+(defn log
+  [& vs]
+  (.log logger (decorate-log :log vs)))
+
+(defn info
+  [& vs]
+  (.log logger (decorate-log :info vs)))
+
+(defn warn
+  [& vs]
+  (.log logger (decorate-log :warn vs)))
+
+(defn error
+  [& vs]
+  (.log logger (decorate-log :error vs)))
+
+(defn- fatal
+  [& vs]
+  (.log logger (decorate-log :fatal vs)))
 
 (defn- gen-class-lambda
   [prefix gfullname]
@@ -35,7 +81,7 @@
 (defn- ctx
   [envs rem-time fn-name fn-version fn-invoked-arn memory-limit
    aws-invocation-id log-group-name log-stream-name
-   identity client-context logger]
+   identity client-context logger-impl]
   {:remainingTimeInMs rem-time
    :fnName fn-name
    :fnVersion fn-version
@@ -47,10 +93,10 @@
    :identity identity
    :clientContext client-context
    :envs envs
-   :logger logger})
+   :logger logger-impl})
 
 (defn- ctx-object->ctx-edn
-  [envs ^Context context]
+  [^Context context envs]
   (ctx envs (.getRemainingTimeInMillis context) (.getFunctionName context) (.getFunctionVersion context) (.getInvokedFunctionArn context)
        (.getMemoryLimitInMB context) (.getAwsRequestId context) (.getLogGroupName context) (.getLogStreamName context)
        (when-let [^CognitoIdentity identity (.getIdentity context)]
@@ -84,14 +130,17 @@
       `(do
          ~gclass
          (defn ~gmethod-sym
-           ;; This arity is used for testing and native runtime invocation
+           ;; Arity used for testing and native runtime invocation
            ([event# context#]
             (~lambda event# context#))
+           ;; Arity used for Java runtime
            ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
-            (let [event# (#'fierycod.holy-lambda.core/in->edn-event in#)
-                  context# (#'fierycod.holy-lambda.core/ctx-object->ctx-edn ctx# (into {} (System/getenv)))
-                  aws-event# (-> (~lambda event# context#) (json/write-str))]
-              (.write out# (.getBytes ^String aws-event# "UTF-8"))))))
+            (binding [logger (#'fierycod.holy-lambda.core/logger-factory (.getLogger ctx#))]
+              (let [event# (#'fierycod.holy-lambda.core/in->edn-event in#)
+                    context# (#'fierycod.holy-lambda.core/ctx-object->ctx-edn ctx# (into {} (System/getenv)))
+                    response# (~lambda event# context#)
+                    f-response# (assoc response# :body (json/write-str (:body response#)))]
+                (.write out# (.getBytes ^String (json/write-str f-response#) "UTF-8")))))))
       3
       ;; TODO: Validate whether lambada style would be helpful
 
@@ -110,10 +159,7 @@
       (throw (Exception. "Lambada style is not supported for now. Check source code!"))
 
       ;; default
-      (throw (Exception. "Invalid arity. Skipping wrap!"))
-
-      )
-    ))
+      (throw (Exception. "Invalid arity..")))))
 
 (defn- native->aws-context
   [headers event env-vars]
@@ -134,9 +180,7 @@
           :identityPoolId (-> event :requestContext :identity :cognitoIdentityPoolId)}
          ;; #7
          {:client nil :custom nil :environment nil}
-         ;; #6
-         nil
-         )))
+         logger)))
 
 (defn- retrieve-body
   [^HttpURLConnection http-conn status]
@@ -149,6 +193,7 @@
   [method url-s & [payload]]
   (let [push? (= method "POST")
         ^String payload-s (when push? (if (string? payload) payload
+                                          ;; TODO Refactor those places so that we are prepared for other Content-Types
                                           (json/write-str (assoc payload
                                                                  :body (json/write-str (:body payload))))))
         ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
@@ -171,10 +216,13 @@
   (let [exit! #(System/exit -1)
         url (str "http://" runtime "/2018-06-01/runtime/invocation/" invocation-id "/error")
         payload {:errorMessage (.getMessage err)
-                 :errorType (-> err (.getClass) (.getCanonicalName))}]
-    (when-not (success-codes (:status (http "POST" url payload)))
-      ;; #5 Log error via custom logger
-      (exit!))))
+                 :errorType (-> err (.getClass) (.getCanonicalName))}
+        response (http "POST" url payload)]
+    (if (success-codes (:status response))
+      ;; When response is "ok" then do nothing
+      nil
+      (do (fatal "AWS did not accept the response. Error message:" (:body response))
+          (exit!)))))
 
 (defn- fetch-aws-event
   [runtime]
@@ -183,7 +231,7 @@
     (assoc aws-event :invocation-id (getf-header* (:headers aws-event) "Lambda-Runtime-Aws-Request-Id"))))
 
 (defn call
-  "Resolves the lambda function using provided ns and calls it with the event and context"
+  "Resolves the lambda function calls it with the event and context "
   {:added "0.0.1"
    :arglists '([afn-sym]
                [afn-sym event context]
@@ -222,21 +270,20 @@
         invocation-id* (:invocation-id aws-event)
         handler (get routes handler-name)]
     (binding [runtime runtime*
+              logger (logger-factory)
               invocation-id invocation-id*]
-
       (if-not handler
         (send-runtime-error (Exception. (str "Handler: " handler-name " not found!")))
-        (if (and invocation-id (success-codes (:status aws-event)))
-          (process-event aws-event env-vars (call handler))
-          ;; Log the error #10
-          nil)))))
+        (when (and invocation-id (success-codes (:status aws-event)))
+          (process-event aws-event env-vars (call handler)))))))
 
 (defmacro deflambda
-  ""
+  "Similiar to `defn`, with the limitation that it only allows the
+  2 arity definition. Defined Lambda is safe to use either in Java Runtime or
+  with the Custom Runtime alongside this library."
   {:arglists '([name doc-string? attrs-map? [event context] prepost-map? fn-body]
                [name doc-string? attrs-map? [input output context] prepost-map? fn-body])
    :added "0.0.1"}
-
   [name & attrs]
   (let [[aname [fn-args & fn-body]] (macro/name-with-attributes name attrs)
         aname (vary-meta aname assoc :arity (count fn-args))
@@ -249,6 +296,8 @@
          ~(define-synthetic-name aname gmethod-sym))))
 
 (defmacro gen-main
+  "Generates the main function. The -main is then used by AWS to run Custom runtime
+  which then proxies function names to corresponding handler"
   {:added "0.0.1"}
   [lambdas]
   `(defn ~'-main []
@@ -268,4 +317,4 @@
   ;;   [in out ctx]
   ;;   (println "Hello"))
 
-  (call #'HolyHandler {:username "FieryCod"}))
+  (call #'HolyHandler {:username "FieryCod"} nil))

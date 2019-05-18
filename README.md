@@ -1,17 +1,43 @@
-# Holy-lambda
+# Holy Lambda
+
+[![Clojars Project](https://img.shields.io/clojars/v/fierycod/holy-lambda.svg)](https://clojars.org/fierycod/holy-lambda)
+[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
+
+---
+
 Tiny native AWS Custom Lambda Runtime which fulfills your needs!
 
-## Usage
+## What it does?
+It allows you to write one code which might run either on Official Java AWS Runtime (if you don't care about speed or you want to test your lambdas)
+or on Native Custom AWS Runtime built into your codebase.
+
+## Prerequisites
 You will need following things to start:
 - Node.js >= v8.9.0
 - Java >= 8
 - Docker, Docker Compose >= 1.13.1, 1.22.0
 - Python, Pip >= 3.5.0, 8.9.0
 
-When all of above are installed then:
-1. Install `fnative` utility in your path.
+The last step is to install `fnative` which is a tiny wrapper which builds the `.jar` using `GraalVM` and outputs the binary in your project
+1. Install `fnative` in your path.
+   ```
+   wget https://raw.githubusercontent.com/FieryCod/holy-lambda/master/resources/fnative && chmod +x fnative && sudo mv fnative /usr/local/bin
+   ```
+2. Copy `hello-lambda` from the examples and you have everything to experiment
 
-## Development
+## Installation
+Add the following to your `:dependencies` in `project.clj`:
+
+  ```
+  [fierycod/holy-lambda "0.0.1"]
+  ```
+
+## License
+License
+Copyright © 2019 Karol Wojcik
+
+Released under the MIT license.
 
 ## Acknowledges
 - Daria - Thank you that you were always beside me, fighting for me when I had no faith and energy.
