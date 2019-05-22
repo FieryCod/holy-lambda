@@ -23,6 +23,12 @@ setup: use-nvm
 	@bash -c "chmod +x resources/fnative && sudo cp resources/fnative /usr/local/bin/"
 	@printf "\n ${GREEN} Sucessfully installed fnative utility... ${NC}\n"
 
+install-fnative:
+	@sudo cp -f resources/fnative /usr/local/bin
+
+build-docker:
+	@docker build . -f resources/Dockerfile -t fierycod/graalvm-native-image
+
 release: use-nvm
 	@sh ./resources/github-tag.sh $(VERSION)
 

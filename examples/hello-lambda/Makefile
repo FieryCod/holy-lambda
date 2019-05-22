@@ -26,7 +26,7 @@ dry-api:
 
 native-compile:
 	@rm -Rf latest.zip
-	@fnative "-jar target/hello-lambda.jar --report-unsupported-elements-at-runtime --no-fallback --enable-url-protocols=http,https --no-server -J-Xmx3G -J-Xms3G"
+	@fnative "-jar target/hello-lambda.jar --report-unsupported-elements-at-runtime --no-fallback --enable-url-protocols=http,https --no-server -J-Xmx3G -J-Xms3G --initialize-at-build-time"
 	@mv -f hello-lambda bootstrap
 	@zip latest bootstrap
 

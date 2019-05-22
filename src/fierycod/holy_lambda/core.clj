@@ -158,7 +158,7 @@
       ;;       (~lambda in# out# ctx#))))
       (throw (Exception. "Lambada style is not supported for now. Check source code!"))
 
-      ;; default
+      ;; When arity does not match
       (throw (Exception. "Invalid arity..")))))
 
 (defn- native->aws-context
@@ -219,8 +219,7 @@
                  :errorType (-> err (.getClass) (.getCanonicalName))}
         response (http "POST" url payload)]
     (if (success-codes (:status response))
-      ;; When response is "ok" then do nothing
-      nil
+      nil ;; When response is "ok" then do nothing
       (do (fatal "AWS did not accept the response. Error message:" (:body response))
           (exit!)))))
 

@@ -7,7 +7,7 @@ RED='\033[1;31m'
 NC='\033[0m'
 
 FIERY_NATIVE_VERSION="0.0.1"
-DEFAULT_VERSION=oracle/graalvm-ce:1.0.0-rc16
+DEFAULT_VERSION=fierycod/graalvm-native-image:latest
 VERSION=""
 VOLUME_PATH=""
 CONTAINER_NAME="fnative_$(openssl rand -hex 10)"
