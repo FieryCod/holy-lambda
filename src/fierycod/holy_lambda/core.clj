@@ -80,14 +80,14 @@
 
 (defn- ctx
   [envs rem-time fn-name fn-version fn-invoked-arn memory-limit
-   aws-invocation-id log-group-name log-stream-name
+   aws-request-id log-group-name log-stream-name
    identity client-context logger-impl]
   {:remainingTimeInMs rem-time
    :fnName fn-name
    :fnVersion fn-version
    :fnInvokedArn fn-invoked-arn
    :memoryLimitInMb memory-limit
-   :awsInvocationId aws-invocation-id
+   :aws-request-id aws-request-id
    :logGroupName log-group-name
    :logStreamName log-stream-name
    :identity identity
@@ -142,7 +142,7 @@
                     f-response# (assoc response# :body (json/write-str (:body response#)))]
                 (.write out# (.getBytes ^String (json/write-str f-response#) "UTF-8")))))))
       3
-      ;; TODO: Validate whether lambada style would be helpful
+      ;; TODO: Check whether lambada style would be helpful
 
       ;; If yes then we need to provide following code to support it on native side:
       ;; EVENT:
@@ -172,6 +172,7 @@
               ":" (get-in event [:requestContext :accountId] "0000000")
               ":function:" (get-env "AWS_LAMBDA_FUNCTION_NAME"))
          (get-env "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
+         ;; TODO: Incorrect requestId
          (-> event :requestContext :requestId)
          (get-env "AWS_LAMBDA_LOG_GROUP_NAME")
          (get-env "AWS_LAMBDA_LOG_STREAM_NAME")
@@ -193,7 +194,6 @@
   [method url-s & [payload]]
   (let [push? (= method "POST")
         ^String payload-s (when push? (if (string? payload) payload
-                                          ;; TODO Refactor those places so that we are prepared for other Content-Types
                                           (json/write-str (assoc payload
                                                                  :body (json/write-str (:body payload))))))
         ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
@@ -218,9 +218,9 @@
         payload {:errorMessage (.getMessage err)
                  :errorType (-> err (.getClass) (.getCanonicalName))}
         response (http "POST" url payload)]
-    (if (success-codes (:status response))
-      nil ;; When response is "ok" then do nothing
-      (do (fatal "AWS did not accept the response. Error message:" (:body response))
+    (error (.getMessage err))
+    (when-not (success-codes (:status response))
+      (do (fatal "AWS did not accept the response. Error message: " (:body response))
           (exit!)))))
 
 (defn- fetch-aws-event

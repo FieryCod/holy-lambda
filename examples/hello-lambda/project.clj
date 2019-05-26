@@ -1,6 +1,7 @@
 (defproject hello-lambda "0.1.0-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.9.0"]
-                 [fierycod/holy-lambda "0.0.1"]]
+  :dependencies [[org.clojure/clojure "1.10.1-RC1"]
+                 [fierycod/holy-lambda "0.0.2"]]
+  :global-vars {*warn-on-reflection* true}
   :main ^:skip-aot hello-lambda.core
   :profiles {:uberjar {:aot :all}}
   :uberjar-name "hello-lambda.jar")

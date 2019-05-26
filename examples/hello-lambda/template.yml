@@ -31,7 +31,7 @@ Resources:
       Handler: hello-lambda.core.HelloLambda
       FunctionName: HelloLambdaFunction
       Events:
-        HelloLambda:
+        HelloEvent:
           Type: Api
           Properties:
             Path: /
@@ -43,7 +43,7 @@ Resources:
       Handler: hello-lambda.core.ByeLambda
       FunctionName: ByeLambdaFunction
       Events:
-        HelloLambda:
+        ByeEvent:
           Type: Api
           Properties:
             Path: /bye

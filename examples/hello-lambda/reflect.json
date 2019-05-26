@@ -1,0 +1,7 @@
+[{
+  "name" : "org.apache.commons.logging.impl.Jdk14Logger",
+  "allDeclaredConstructors" : true,
+  "allPublicConstructors" : true,
+  "allDeclaredMethods" : true,
+  "allPublicMethods" : true
+}]

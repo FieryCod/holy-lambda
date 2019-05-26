@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Example sqs lambda using `holy-lambda` micro library
+
+Parameters:
+  Runtime:
+    Type: String
+    Default: provided
+  Timeout:
+    Type: Number
+    Default: 10
+  MemorySize:
+    Type: Number
+    Default: 2000
+  CodeUri:
+    Type: String
+    Default: latest.zip
+
+Globals:
+  Function:
+    Runtime: !Ref Runtime
+    Timeout: !Ref Timeout
+    MemorySize: !Ref MemorySize
+    CodeUri: !Ref CodeUri
+
+Resources:
+  BaseStringSQS:
+    Type: AWS::SQS::Queue
+    Properties:
+      DelaySeconds: 1
+
+  ConcatenatedHolySQS:
+    Type: AWS::SQS::Queue
+    Properties:
+      DelaySeconds: 1
+
+  ReceiveStringLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: sqs-example.core.ReceiveStringLambda
+      FunctionName: ReceiveStringLambdaFunction
+      Events:
+        ReceiveStringEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt BaseStringSQS.Arn
+            BatchSize: 1
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName:
+              !GetAtt ConcatenatedHolySQS.QueueName
+      Environment:
+        Variables:
+          CONCATENATED_HOLY_SQS_URL: !Ref ConcatenatedHolySQS

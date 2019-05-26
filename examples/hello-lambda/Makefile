@@ -26,12 +26,17 @@ dry-api:
 
 native-compile:
 	@rm -Rf latest.zip
-	@fnative "-jar target/hello-lambda.jar --report-unsupported-elements-at-runtime --no-fallback --enable-url-protocols=http,https --no-server -J-Xmx3G -J-Xms3G --initialize-at-build-time"
+	@fnative "-jar target/hello-lambda.jar \
+						--report-unsupported-elements-at-runtime \
+						--no-fallback \
+						--enable-url-protocols=http,https \
+						--no-server -J-Xmx3G -J-Xms3G \
+						--initialize-at-build-time"
 	@mv -f hello-lambda bootstrap
 	@zip latest bootstrap
 
 native-dry-api:
-	@sam local start-api --template ./native-template.yml
+	@sam local start-api --template ./native-template.yml --skip-pull-image
 
 pack:
 	@sam package --template-file ./template.yml --output-template-file packaged.yaml --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda-latest"
