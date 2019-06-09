@@ -11,7 +11,8 @@ LAMBDA_NAME=ReceiveStringLambdaFunction
 EVENT_PAYLOAD_FILE=./sample-receive-event.json
 
 prepare-dependencies:
-	@cp /usr/lib/jvm/java-1.8.0-openjdk/jre/lib/amd64/libsunec.so ./dependencies/
+	@cp /usr/lib64/libcrypt.so resources/native-deps
+	@cp /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.212.b04-0.fc30.x86_64/jre/lib/amd64/libsunec.so resources/native-deps
 
 make-bucket:
 	@aws s3 mb s3://$(BUCKET_NAME)
@@ -34,14 +35,14 @@ native-compile:
 	          --report-unsupported-elements-at-runtime \
 						--no-fallback \
 						--enable-url-protocols=http,https \
-						--no-server -J-Xmx3G -J-Xms3G \
-						--initialize-at-build-time \
-						-H:+PrintClassInitialization \
-						--enable-all-security-services \
-						-H:ReflectionConfigurationFiles=reflect.json \
-						-H:DynamicProxyConfigurationFiles=dynamic-proxies.json"
-	@mv -f sqs-example bootstrap
-	@zip -j latest bootstrap dependencies/libsunec.so
+	 					--no-server -J-Xmx3G -J-Xms3G \
+	 					--initialize-at-build-time \
+	 					-H:ReflectionConfigurationFiles=reflect.json \
+	 					-H:DynamicProxyConfigurationFiles=dynamic-proxies.json \
+	 					--allow-incomplete-classpath \
+            --enable-all-security-services"
+	@mv -f sqs-example server
+	@zip -j latest bootstrap server resources/native-deps/*
 
 native-dry-api:
 	@sam local start-api --template ./native-template.yml --skip-pull-image

@@ -1,5 +1,6 @@
 /target
 packaged.yaml
+server
 native-packaged.yaml
 *.zip
 bootstrap

@@ -32,8 +32,8 @@ native-compile:
 						--enable-url-protocols=http,https \
 						--no-server -J-Xmx3G -J-Xms3G \
 						--initialize-at-build-time"
-	@mv -f hello-lambda bootstrap
-	@zip latest bootstrap
+	@mv -f hello-lambda server
+	@zip latest server bootstrap
 
 native-dry-api:
 	@sam local start-api --template ./native-template.yml --skip-pull-image
