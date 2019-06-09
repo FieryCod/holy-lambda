@@ -8,4 +8,8 @@
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/tools.macro "0.1.5"]
                  [com.amazonaws/aws-lambda-java-core "1.2.0"]]
+
+  :scm {:name "git"
+        :url "https://github.com/FieryCod/holy-lambda"}
+
   :aot :all)

@@ -1,0 +1,87 @@
+version: 2
+
+references:
+  polyglot-defaults: &polyglot-defaults
+    working_directory: ~/holy-lambda
+    docker:
+      - image: circleci/clojure:openjdk-8-lein-2.9.1-node
+
+  restore-node-deps: &restore-node-deps
+     restore_cache:
+        keys:
+          - deps-node-{{ .Branch }}-{{ checksum "yarn.lock" }}
+
+  restore-lein-deps: &restore-lein-deps
+    restore_cache:
+      keys:
+        - deps-lein-{{ checksum "project.clj" }}
+        - deps-lein-
+jobs:
+  install-clojure-deps:
+    <<: *polyglot-defaults
+    environment:
+      LEIN_ROOT: "true"
+      JVM_OPTS: -Xmx3200m
+
+    steps:
+      - checkout
+      - *restore-lein-deps
+      - run: lein deps
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: deps-lein-{{ checksum "project.clj" }}
+
+  install-node-deps:
+    <<: *polyglot-defaults
+    steps:
+      - checkout
+      - *restore-node-deps
+      - run: yarn
+      - save-cache:
+          key: deps-node-{{ .Branch }}-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/holy-lambda/node_modules
+      - persist_to_workspace:
+          root: ~/holy-lambda
+          paths:
+            - node_modules
+
+  release-project:
+     <<: *polyglot-defaults
+     steps:
+       - checkout
+       - *restore-node-deps
+       - *restore-lein-deps
+       - run:
+           name: create a new tag
+           command: |
+             git config user.email "karol.wojcik@tuta.io"
+             git config user.name "Fierycod"
+             ./resources/github-tag
+
+  run-test:
+    <<: *polyglot-defaults
+    steps:
+      - checkout
+      - *restore-lein-deps
+      - run: lein test
+
+workflows:
+  version: 2
+
+  build_and_deploy:
+    jobs:
+      - install-node-deps
+      - install-clojure-deps
+      - run-test:
+          requires:
+            - install-clojure-deps
+
+      - release-project:
+          filters:
+            branches:
+              only: master
+          requires:
+            - run-test
+            - install-node-deps

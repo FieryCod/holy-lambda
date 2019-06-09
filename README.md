@@ -1,6 +1,7 @@
 # Holy Lambda
 
 [![Clojars Project](https://img.shields.io/clojars/v/fierycod/holy-lambda.svg?logo=clojure&logoColor=white)](https://clojars.org/fierycod/holy-lambda)
+[![CircleCI](https://circleci.com/gh/FieryCod/holy-lambda/tree/master.svg?style=svg)](https://circleci.com/gh/FieryCod/holy-lambda/tree/master)
 [![Downloads](https://jarkeeper.com/fierycod/holy-lambda/downloads.svg)](https://jarkeeper.com/fierycod/holy-lambda)
 [![Dependencies Status](https://jarkeeper.com/fierycod/holy-lambda/status.svg)](https://jarkeeper.com/fierycod/holy-lambda)
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
@@ -32,11 +33,10 @@ The last step is to install `fnative` which is a tiny wrapper which builds the `
 Add the following to your `:dependencies` in `project.clj`:
 
   ```
-  [fierycod/holy-lambda "0.0.1"]
+  [fierycod/holy-lambda "0.0.2"]
   ```
 
 ## License
-License
 Copyright © 2019 Karol Wojcik
 
 Released under the MIT license.
