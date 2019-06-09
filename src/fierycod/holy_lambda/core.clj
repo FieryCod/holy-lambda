@@ -230,7 +230,8 @@
     (assoc aws-event :invocation-id (getf-header* (:headers aws-event) "Lambda-Runtime-Aws-Request-Id"))))
 
 (defn call
-  "Resolves the lambda function calls it with the event and context "
+  "Resolves the lambda function and calls it with the event and context.
+   Returns the callable lambda function if only one argument is passed."
   {:added "0.0.1"
    :arglists '([afn-sym]
                [afn-sym event context]
@@ -295,8 +296,8 @@
          ~(define-synthetic-name aname gmethod-sym))))
 
 (defmacro gen-main
-  "Generates the main function. The -main is then used by AWS to run Custom runtime
-  which then proxies function names to corresponding handler"
+  "Generates the main function. The `-main` is then used by AWS to run Custom runtime
+  which then proxies function names to corresponding handler "
   {:added "0.0.1"}
   [lambdas]
   `(defn ~'-main []

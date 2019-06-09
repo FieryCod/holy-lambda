@@ -16,6 +16,7 @@ references:
       keys:
         - deps-lein-{{ checksum "project.clj" }}
         - deps-lein-
+
 jobs:
   install-clojure-deps:
     <<: *polyglot-defaults
@@ -53,11 +54,12 @@ jobs:
        - checkout
        - *restore-node-deps
        - *restore-lein-deps
+
        - run:
-           name: create a new tag
+           name: Create a git user and create a tag
            command: |
-             git config user.email "karol.wojcik@tuta.io"
-             git config user.name "Fierycod"
+             git config --global user.email "karol.wojcik@tuta.io"
+             git config --global user.name "Fierycod"
              ./resources/github-tag
 
   run-test:
@@ -74,6 +76,7 @@ workflows:
     jobs:
       - install-node-deps
       - install-clojure-deps
+
       - run-test:
           requires:
             - install-clojure-deps
@@ -82,6 +85,7 @@ workflows:
           filters:
             branches:
               only: master
+
           requires:
             - run-test
             - install-node-deps

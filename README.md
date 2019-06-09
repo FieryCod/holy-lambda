@@ -15,6 +15,8 @@ Tiny native AWS Custom Lambda Runtime which fulfills your needs!
 It allows you to write one code which might run either on Official Java AWS Runtime (if you don't care about speed or you want to test your lambdas)
 or on Native Custom AWS Runtime built into your codebase.
 
+Jump here to start the journey with the Holy Lambda.
+
 ## Prerequisites
 You will need following things to start:
 - Node.js >= v8.9.0
@@ -28,13 +30,6 @@ The last step is to install `fnative` which is a tiny wrapper which builds the `
    wget https://raw.githubusercontent.com/FieryCod/holy-lambda/master/resources/fnative && chmod +x fnative && sudo mv fnative /usr/local/bin
    ```
 2. Copy `hello-lambda` from the examples and you have everything to experiment
-
-## Installation
-Add the following to your `:dependencies` in `project.clj`:
-
-  ```
-  [fierycod/holy-lambda "0.0.2"]
-  ```
 
 ## License
 Copyright © 2019 Karol Wojcik

@@ -1,17 +1,19 @@
 #!/bin/bash
 
-VERSION="$(cat project.clj | egrep -o -m 1 '[0-9].[0-9].[0-9]')"
+VERSION="$(cat project.clj | egrep -o -m 1 '[0-9].[0-9].[0-9](-[A-Z]+)?')"
 
 echo "VERSION: $VERSION"
 
-if [[ $VERSION == *"SNAPSHOT"* ]]; then
-    echo "Snapshot version"
+if [[ $VERSION =~ "SNAPSHOT" ]];
+then
+    echo "Skipping tagging..."
     exit 0;
 fi
 
+lein pom
 
 ./node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s
-git add CHANGELOG.md
+git add CHANGELOG.md pom.xml
 git commit -q -m "chore(release): Version ${VERSION} :tada: [skip ci]
 
 $(./node_modules/.bin/conventional-changelog -p angular)
@@ -21,4 +23,4 @@ git push
 
 git tag ${VERSION}
 
-git push --tags
+git push origin ${VERSION}
