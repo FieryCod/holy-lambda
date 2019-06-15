@@ -1,0 +1,10 @@
+{
+  "resources":[
+    {"pattern":"clojure/core.clj"}, 
+    {"pattern":"clojure/core/server.clj"}, 
+    {"pattern":"clojure/core/server__init.class"}, 
+    {"pattern":"clojure/core__init.class"}, 
+    {"pattern":"sqs_example/core.clj"}, 
+    {"pattern":"sqs_example/core__init.class"}
+  ]
+}

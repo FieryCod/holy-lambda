@@ -6,7 +6,7 @@ YELLOW='\033[1;33m'
 RED='\033[1;31m'
 NC='\033[0m'
 
-FIERY_NATIVE_VERSION="0.0.1"
+FIERY_NATIVE_VERSION="0.0.2"
 DEFAULT_VERSION=fierycod/graalvm-native-image:latest
 VERSION=""
 VOLUME_PATH=""
@@ -30,7 +30,7 @@ fi
 printf "$GREEN Directory bound: $PWD $NC\n"
 printf "$GREEN Name of the container: $CONTAINER_NAME $NC\n\n"
 
-docker run --name $CONTAINER_NAME -v $PWD:/project:Z -it $VERSION /bin/bash -c "cd /project && native-image $1"
+docker run --name $CONTAINER_NAME -v $PWD:/project:Z -it $VERSION /bin/bash -c "cd /project && $1"
 
 printf "$GREEN Successfully compiled project to native $NC\n\n"
 

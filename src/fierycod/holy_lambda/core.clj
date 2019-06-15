@@ -1,68 +1,55 @@
 (ns fierycod.holy-lambda.core
-  ^{:doc "This namespace integrates the Clojure code with two different runtimes: Java Lambda Runtime, Native Provided Runtime.
-          The former is the Official Java Runtime for AWS Lambda which is well tested and works perfectly fine, but it's rather slow due to cold starts.
-          The latter is a custom [runtime](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html) made by me.
-          It's a significantly faster than the Java runtime due to the use of GraalVM.
+  "This namespace integrates the Clojure code with two different runtimes: Java Lambda Runtime, Native Provided Runtime.
+  The former is the Official Java Runtime for AWS Lambda which is well tested and works perfectly fine, but it's rather slow due to cold starts.
+  The latter is a custom [runtime](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html) integrated within the framework.
+  It's a significantly faster than the Java runtime due to the use of GraalVM.
 
-          *Namespace includes:*
-          - Utilities for Logging
-          - Friendly macro for generating Lambda functions which run on both runtimes
-          - TODO Utilities which help produce valid response"
-    :author "Karol Wójcik"}
+  *Namespace includes:*
+  - Utilities for Logging
+  - Friendly macro for generating Lambda functions which run on both runtimes
+  - TODO Utilities which help produce valid response"
   (:require
-   [clojure.string :as string]
+   [fierycod.holy-lambda.impl.logging]
+   [fierycod.holy-lambda.impl.util :as util]
    [clojure.data.json :as json]
    [clojure.tools.macro :as macro])
   (:import
-   [java.time Instant]
-   [java.util Date]
-   [java.net URL HttpURLConnection]
    [java.io InputStream OutputStream InputStreamReader]
    [com.amazonaws.services.lambda.runtime
-    RequestStreamHandler Context CognitoIdentity ClientContext Client LambdaLogger]))
+    RequestStreamHandler Context CognitoIdentity ClientContext Client]))
 
-(defn- logger-factory
-  [& [logger-impl]]
-  (let [unified-logger (proxy [LambdaLogger] []
-                         (log [s]
-                           (println s)))]
-    (or logger-impl unified-logger)))
+(def ^:dynamic ^:private *runtime* nil)
+(def ^:dynamic ^:private *invocation-id* nil)
 
-(defn- ^String decorate-log
-  [severity vvs]
-  (str (condp = severity
-         :log ""
-         :info "[INFO] "
-         :warn "[WARN] "
-         :error "[ERROR] "
-         :fatal "[FATAL] "
-         :else "")  ;; native runtime error
-       (string/join " " vvs)))
+(def log
+  "Logs to standard output. Uses the proper logger according to the runtime
+  See `fierycod.holy-lambda.impl.logging/log`"
+  #'fierycod.holy-lambda.impl.logging/log)
 
-(def ^:dynamic ^:private runtime nil)
-(def ^:dynamic ^:private invocation-id nil)
-(def ^:dynamic ^:private ^LambdaLogger logger (logger-factory))
-(def ^:private success-codes #{200 202})
+(def info
+  "Similiar to `log`, but adds special [INFO] decoration
+  See `fierycod.holy-lambda.impl.logging/info`"
+  #'fierycod.holy-lambda.impl.logging/info)
 
-(defn log
-  [& vs]
-  (.log logger (decorate-log :log vs)))
+(def warn
+  "Similiar to `log`, but adds special [WARN] decoration
+  See `fierycod.holy-lambda.impl.logging/warn`"
+  #'fierycod.holy-lambda.impl.logging/warn)
 
-(defn info
-  [& vs]
-  (.log logger (decorate-log :info vs)))
+(def error
+  "Similiar to `log`, but adds special [ERROR] decoration
+  See `fierycod.holy-lambda.impl.logging/error`"
+  #'fierycod.holy-lambda.impl.logging/error)
 
-(defn warn
-  [& vs]
-  (.log logger (decorate-log :warn vs)))
-
-(defn error
-  [& vs]
-  (.log logger (decorate-log :error vs)))
-
-(defn- fatal
-  [& vs]
-  (.log logger (decorate-log :fatal vs)))
+(def call
+  "Resolves the lambda function and calls it with the event and context.
+   Returns the callable lambda function if only one argument is passed.
+  See `fierycod.holy-lambda.impl.util/call`"
+  ^{:added "0.0.1"
+    :arglists '([afn-sym]
+               [afn-sym event context]
+               [afn-sym input output context])}
+  #'fierycod.holy-lambda.impl.util/call)
 
 (defn- gen-class-lambda
   [prefix gfullname]
@@ -113,10 +100,6 @@
           :environment (into {} (.getEnvironment client-context))})
        (.getLogger context)))
 
-(defn- in->edn-event
-  [^InputStream event]
-  (json/read (InputStreamReader. event "UTF-8") :key-fn keyword))
-
 (defn- define-synthetic-name
   [aname sym]
   `(def ~(with-meta aname (meta aname))
@@ -135,8 +118,9 @@
             (~lambda event# context#))
            ;; Arity used for Java runtime
            ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
-            (binding [logger (#'fierycod.holy-lambda.core/logger-factory (.getLogger ctx#))]
-              (let [event# (#'fierycod.holy-lambda.core/in->edn-event in#)
+            (binding [fierycod.holy-lambda.core/*logger* (#'fierycod.holy-lambda.impl.logging/logger-factory
+                                                          (.getLogger ctx#))]
+              (let [event# (#'fierycod.holy-lambda.impl.util/in->edn-event in#)
                     context# (#'fierycod.holy-lambda.core/ctx-object->ctx-edn ctx# (into {} (System/getenv)))
                     response# (~lambda event# context#)
                     f-response# (assoc response# :body (json/write-str (:body response#)))]
@@ -165,7 +149,8 @@
   [headers event env-vars]
   (let [get-env (partial get env-vars)
         getf-header (getf-header* headers)]
-    (ctx env-vars (- (Long/parseLong (getf-header "Lambda-Runtime-Deadline-Ms")) (System/currentTimeMillis))
+    (ctx env-vars
+         (- (Long/parseLong (getf-header "Lambda-Runtime-Deadline-Ms")) (System/currentTimeMillis))
          (get-env "AWS_LAMBDA_FUNCTION_NAME")
          (get-env "AWS_LAMBDA_FUNCTION_VERSION")
          (str "arn:aws:lambda:" (get-env "AWS_REGION")
@@ -181,77 +166,32 @@
           :identityPoolId (-> event :requestContext :identity :cognitoIdentityPoolId)}
          ;; #7
          {:client nil :custom nil :environment nil}
-         logger)))
-
-(defn- retrieve-body
-  [^HttpURLConnection http-conn status]
-  (if-not (success-codes status)
-    (.getErrorStream http-conn)
-    (.getInputStream http-conn)))
-
-(defn- http
-  "Internal http method which sends/receive data from AWS"
-  [method url-s & [payload]]
-  (let [push? (= method "POST")
-        ^String payload-s (when push? (if (string? payload) payload
-                                          (json/write-str (assoc payload
-                                                                 :body (json/write-str (:body payload))))))
-        ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
-        _ (doto http-conn
-            (.setDoOutput push?)
-            (.setRequestProperty "Content-Type" "application/json")
-            (.setRequestMethod method))
-        _ (when push?
-            (doto (.getOutputStream http-conn)
-              (.write (.getBytes payload-s "UTF-8"))
-              (.close)))
-        headers (into {} (.getHeaderFields http-conn))
-        status (.getResponseCode http-conn)]
-    {:headers headers
-     :status status
-     :body (in->edn-event (retrieve-body http-conn status))}))
+         #'fierycod.holy-lambda.impl.logging/*logger*)))
 
 (defn- send-runtime-error
   [^Exception err]
   (let [exit! #(System/exit -1)
-        url (str "http://" runtime "/2018-06-01/runtime/invocation/" invocation-id "/error")
+        url (str "http://" *runtime* "/2018-06-01/runtime/invocation/" *invocation-id* "/error")
         payload {:errorMessage (.getMessage err)
                  :errorType (-> err (.getClass) (.getCanonicalName))}
-        response (http "POST" url payload)]
+        response (util/http "POST" url payload)]
     (error (.getMessage err))
-    (when-not (success-codes (:status response))
-      (do (fatal "AWS did not accept the response. Error message: " (:body response))
+    (when-not (util/success-code? (:status response))
+      (do (#'fierycod.holy-lambda.impl.logging/fatal "AWS did not accept the response. Error message: " (:body response))
           (exit!)))))
 
 (defn- fetch-aws-event
   [runtime]
   (let [url (str "http://" runtime "/2018-06-01/runtime/invocation/next")
-        aws-event (http "GET" url)]
+        aws-event (util/http "GET" url)]
     (assoc aws-event :invocation-id (getf-header* (:headers aws-event) "Lambda-Runtime-Aws-Request-Id"))))
-
-(defn call
-  "Resolves the lambda function and calls it with the event and context.
-   Returns the callable lambda function if only one argument is passed."
-  {:added "0.0.1"
-   :arglists '([afn-sym]
-               [afn-sym event context]
-               [afn-sym input output context])}
-  ([afn-sym]
-   (partial call afn-sym))
-  ([afn-sym & args]
-   (let [{:keys [arity ns name]} (meta afn-sym)]
-     (assert (= arity (count args))
-             (str "Function defined with two arguments should call lambda with only two arguments. "
-                  "Otherwise use Lambada style and call with three arguments.\n\n"
-                  "Failed when calling: '" ns "." name "\n"))
-     (apply afn-sym args))))
 
 (defn- send-response
   [response]
-  (let [url (str "http://" runtime "/2018-06-01/runtime/invocation/" invocation-id "/response")
-        {:keys [status body]} (http "POST" url response)]
-    (when-not (success-codes status)
-      (send-runtime-error (Exception. (str "AWS did not accept the your lambda payload:\n" body))))))
+  (let [url (str "http://" *runtime* "/2018-06-01/runtime/invocation/" *invocation-id* "/response")
+        {:keys [status body]} (util/http "POST" url response)]
+    (when-not (util/success-code? status)
+      (send-runtime-error (Exception. ^String (str "AWS did not accept the your lambda payload:\n" body))))))
 
 (defn- process-event
   [aws-event env-vars handler]
@@ -269,13 +209,12 @@
         aws-event (fetch-aws-event runtime*)
         invocation-id* (:invocation-id aws-event)
         handler (get routes handler-name)]
-    (binding [runtime runtime*
-              logger (logger-factory)
-              invocation-id invocation-id*]
+    (binding [*runtime* runtime*
+              *invocation-id* invocation-id*]
       (if-not handler
-        (send-runtime-error (Exception. (str "Handler: " handler-name " not found!")))
-        (when (and invocation-id (success-codes (:status aws-event)))
-          (process-event aws-event env-vars (call handler)))))))
+        (send-runtime-error (Exception. ^String (str "Handler: " handler-name " not found!")))
+        (when (and *invocation-id* (util/success-code? (:status aws-event)))
+          (process-event aws-event env-vars (util/call handler)))))))
 
 (defmacro deflambda
   "Similiar to `defn`, with the limitation that it only allows the
@@ -296,25 +235,36 @@
          ~(define-synthetic-name aname gmethod-sym))))
 
 (defmacro gen-main
-  "Generates the main function. The `-main` is then used by AWS to run Custom runtime
-  which then proxies function names to corresponding handler "
+  "Generates the main function which has the two roles:
+  1. The `-main` might be then launched by AWS in the lambda runtime.
+     Lambda runtime tries to proxy the payloads from AWS to corresponding handlers
+     defined in `native-template.yml`.
+
+  2. The `-main` might be used to generate the configuration necessary to compile
+     the project to native.
+
+     *For more info take a look into the corresponding links:*
+     1. https://github.com/oracle/graal/issues/1367
+     2. https://github.com/oracle/graal/blob/master/substratevm/CONFIGURE.md
+     3. https://github.com/oracle/graal/blob/master/substratevm/REFLECTION.md
+
+     According to the comment of the @cstancu with the help of the agent we can find the majority
+     of the reflective calls and generate the configuration. Generated configuration might then be used
+     by `native-image` tool."
   {:added "0.0.1"}
   [lambdas]
   `(defn ~'-main []
      (let [fnames# (map (comp #(str (str (:ns %) "." (str (:name %)))) meta) ~lambdas)
-           routes# (into {} (mapv vector fnames# ~lambdas))]
-       (while true
-         (#'fierycod.holy-lambda.core/next-iter routes#
-                                                (into {} (System/getenv)))))))
+           routes# (into {} (mapv vector fnames# ~lambdas))
+           executor# (System/getProperty "executor")]
 
-(comment
-  (deflambda HolyHandler
-    {:doc "Holy Lambda Handler documentation"}
-    [{:keys [username]} context]
-    (println "Hello" username "!!!"))
+       ;; executor = agent      -- Indicates that the configuration for compiling via `native-image` will be generated via the agent
+       ;;                          Example in: `examples/sqs-example/Makefile` at `gen-native-configuration` command
+       ;; executor = anything   else
 
-  ;; (deflambda HolyHandlerAlaLambada ;; Not supported for now
-  ;;   [in out ctx]
-  ;;   (println "Hello"))
+       (if (= executor# "agent")
+         ;; When we want to generate the native configuration for the lambdas
 
-  (call #'HolyHandler {:username "FieryCod"} nil))
+         ;; Otherwise just start the runtime loop
+         (while true
+           (#'fierycod.holy-lambda.core/next-iter routes# (into {} (System/getenv))))))))

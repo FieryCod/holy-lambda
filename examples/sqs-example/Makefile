@@ -29,9 +29,12 @@ compile:
 dry-api:
 	@sam local start-api --skip-pull-image
 
+gen-native-configuration:
+	@fnative "java -agentlib:native-image-agent=config-merge-dir=resources/native-configuration -jar target/sqs-example.jar -Dexecutor=native-agent"
+
 native-compile:
 	@rm -Rf latest.zip
-	@fnative "-jar target/sqs-example.jar \
+	@fnative "native-image -jar target/sqs-example.jar \
 	          --report-unsupported-elements-at-runtime \
 						--no-fallback \
 						--enable-url-protocols=http,https \

@@ -1,0 +1,6 @@
+{
+  "name": "fierycod.holy-lambda.core.NewLambda",
+  "event": {"msg": "new-lambda"},
+  "context": {"ctx": "CTX"},
+  "envs": {}
+}

@@ -1,3 +1,0 @@
-[
-  ["org.apache.http.conn.HttpClientConnectionManager", "org.apache.http.pool.ConnPoolControl", "com.amazonaws.http.conn.Wrapped"]
-]

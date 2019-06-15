@@ -11,5 +11,3 @@
   (t/testing "should take the lambda, invoke it and throw AssertionError due to incorrect arity"
     (h/deflambda call-lambda-02-invalid-internal [event _] event)
     (t/is (thrown? java.lang.AssertionError (h/call #'call-lambda-02-invalid-internal {:ok "OK"})))))
-
-;; TODO Write more tests

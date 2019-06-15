@@ -26,7 +26,7 @@ dry-api:
 
 native-compile:
 	@rm -Rf latest.zip
-	@fnative "-jar target/hello-lambda.jar \
+	@fnative "native-image -jar target/hello-lambda.jar \
 						--report-unsupported-elements-at-runtime \
 						--no-fallback \
 						--enable-url-protocols=http,https \

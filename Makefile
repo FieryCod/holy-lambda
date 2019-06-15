@@ -6,7 +6,6 @@ NC='\033[0m'
 .PHONY: use-nvm setup release
 
 .DEFAULT_GOAL := setup
-VERSION=$(cat project.clj | egrep -o -m 1 '[0-9].[0-9].[0-9].*')
 
 use-nvm:
 	@. ~/.nvm/nvm.sh && nvm use > /dev/null 2>&1
@@ -30,7 +29,9 @@ build-docker:
 	@docker build . -f resources/Dockerfile -t fierycod/graalvm-native-image
 
 release: use-nvm
-	@sh ./resources/github-tag.sh $(VERSION)
+	@lein pom
+	@lein deploy
+	@./resources/github-tag
 
 commit: use-nvm
 	@yarn commit

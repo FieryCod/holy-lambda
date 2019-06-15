@@ -48,19 +48,14 @@ jobs:
           paths:
             - node_modules
 
-  release-project:
+  upload-code-coverage:
      <<: *polyglot-defaults
      steps:
        - checkout
        - *restore-node-deps
        - *restore-lein-deps
-
-       - run:
-           name: Create a git user and create a tag
-           command: |
-             git config --global user.email "karol.wojcik@tuta.io"
-             git config --global user.name "Fierycod"
-             ./resources/github-tag
+       - run: lein cloverage --codecov
+       - run: bash <(curl -s https://codecov.io/bash)
 
   run-test:
     <<: *polyglot-defaults
@@ -81,11 +76,6 @@ workflows:
           requires:
             - install-clojure-deps
 
-      - release-project:
-          filters:
-            branches:
-              only: master
-
+      - upload-code-coverage:
           requires:
             - run-test
-            - install-node-deps

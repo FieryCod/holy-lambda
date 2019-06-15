@@ -1,0 +1,4 @@
+{:cljdoc.doc/tree [["Readme" {:file "README.md"}
+                    ["Changelog" {:file "doc/CHANGELOG.md"}]]
+                   ["Tutorial" {:file "doc/holy-lambda-101.md"}
+                    ["Installation" {:file "doc/installation.md"}]]]}

@@ -1,0 +1,6 @@
+{
+  "name": "fierycod.holy-lambda.core.HolyLambda",
+  "event": {"lambda2": 2},
+  "context": {},
+  "envs": {}
+}
