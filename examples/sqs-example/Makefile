@@ -10,10 +10,6 @@ APP_REGION=eu-central-1
 LAMBDA_NAME=ReceiveStringLambdaFunction
 EVENT_PAYLOAD_FILE=./sample-receive-event.json
 
-prepare-dependencies:
-	@cp /usr/lib64/libcrypt.so resources/native-deps
-	@cp /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.212.b04-0.fc30.x86_64/jre/lib/amd64/libsunec.so resources/native-deps
-
 make-bucket:
 	@aws s3 mb s3://$(BUCKET_NAME)
 
@@ -30,25 +26,22 @@ dry-api:
 	@sam local start-api --skip-pull-image
 
 gen-native-configuration:
-	@fnative "java -agentlib:native-image-agent=config-merge-dir=resources/native-configuration -jar target/sqs-example.jar -Dexecutor=native-agent"
+	@fnative "java -agentlib:native-image-agent=config-merge-dir=resources/native-configuration -Dexecutor=native-agent -jar target/sqs-example.jar" \
+	         "--env-file=resources/envs.list"
 
 native-compile:
 	@rm -Rf latest.zip
 	@fnative "native-image -jar target/sqs-example.jar \
 	          --report-unsupported-elements-at-runtime \
+            -H:ConfigurationFileDirectories=resources/native-configuration \
 						--no-fallback \
 						--enable-url-protocols=http,https \
 	 					--no-server -J-Xmx3G -J-Xms3G \
 	 					--initialize-at-build-time \
-	 					-H:ReflectionConfigurationFiles=reflect.json \
-	 					-H:DynamicProxyConfigurationFiles=dynamic-proxies.json \
 	 					--allow-incomplete-classpath \
             --enable-all-security-services"
 	@mv -f sqs-example server
 	@zip -j latest bootstrap server resources/native-deps/*
-
-native-dry-api:
-	@sam local start-api --template ./native-template.yml --skip-pull-image
 
 native-sqs-invoke:
 	@sam local invoke $(LAMBDA_NAME) --template ./native-template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE)

@@ -28,6 +28,9 @@ install-fnative:
 build-docker:
 	@docker build . -f resources/Dockerfile -t fierycod/graalvm-native-image
 
+push-docker:
+	@docker push fierycod/graalvm-native-image
+
 release: use-nvm
 	@lein pom
 	@lein deploy

@@ -4,7 +4,14 @@
     {"pattern":"clojure/core/server.clj"}, 
     {"pattern":"clojure/core/server__init.class"}, 
     {"pattern":"clojure/core__init.class"}, 
+    {"pattern":"com/amazonaws/internal/config/awssdk_config_default.json"}, 
+    {"pattern":"com/amazonaws/sdk/versionInfo.properties"}, 
+    {"pattern":"com/amazonaws/services/sqs/request.handlers"}, 
+    {"pattern":"mozilla/public-suffix-list.txt"}, 
+    {"pattern":"org/apache/http/client/version.properties"}, 
     {"pattern":"sqs_example/core.clj"}, 
-    {"pattern":"sqs_example/core__init.class"}
+    {"pattern":"sqs_example/core__init.class"}, 
+    {"pattern":"sun/net/idn/uidna.spp"}, 
+    {"pattern":"sun/text/resources/unorm.icu"}
   ]
 }

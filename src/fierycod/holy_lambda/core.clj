@@ -10,7 +10,8 @@
   - TODO Utilities which help produce valid response"
   (:require
    [fierycod.holy-lambda.impl.logging]
-   [fierycod.holy-lambda.impl.util :as util]
+   [fierycod.holy-lambda.impl.agent]
+   [fierycod.holy-lambda.impl.util :as u]
    [clojure.data.json :as json]
    [clojure.tools.macro :as macro])
   (:import
@@ -21,34 +22,54 @@
 (def ^:dynamic ^:private *runtime* nil)
 (def ^:dynamic ^:private *invocation-id* nil)
 
-(def log
+(def
+  ^{:added "0.0.1"
+    :arglists '([& msgs])}
+  log
   "Logs to standard output. Uses the proper logger according to the runtime
   See `fierycod.holy-lambda.impl.logging/log`"
   #'fierycod.holy-lambda.impl.logging/log)
 
-(def info
-  "Similiar to `log`, but adds special [INFO] decoration
+(def
+  ^{:added "0.0.1"
+    :arglists '([& msgs])}
+  info
+  "Similiar to `log`, but adds special *[INFO]* decoration
   See `fierycod.holy-lambda.impl.logging/info`"
   #'fierycod.holy-lambda.impl.logging/info)
 
-(def warn
-  "Similiar to `log`, but adds special [WARN] decoration
+(def
+  ^{:added "0.0.1"
+    :arglists '([& msgs])}
+  warn
+  "Similiar to `log`, but adds special *[WARN]* decoration
   See `fierycod.holy-lambda.impl.logging/warn`"
   #'fierycod.holy-lambda.impl.logging/warn)
 
-(def error
-  "Similiar to `log`, but adds special [ERROR] decoration
+(def
+  ^{:added "0.0.1"
+    :arglists '([& msgs])}
+  error
+  "Similiar to `log`, but adds special *[ERROR]* decoration
   See `fierycod.holy-lambda.impl.logging/error`"
   #'fierycod.holy-lambda.impl.logging/error)
 
-(def call
+(def
+  ^{:added "0.0.4"
+    :arglists '([tag x])}
+  trace
+  "Trace the `x` with tag then returns the value
+  See `fierycod.holy-lambda.impl.logging/trace`"
+  #'fierycod.holy-lambda.impl.logging/trace)
+
+(def ^{:added "0.0.1"
+       :arglists '([afn-sym]
+                   [afn-sym event context]
+                   [afn-sym input output context])}
+  call
   "Resolves the lambda function and calls it with the event and context.
-   Returns the callable lambda function if only one argument is passed.
+  Returns the callable lambda function if only one argument is passed.
   See `fierycod.holy-lambda.impl.util/call`"
-  ^{:added "0.0.1"
-    :arglists '([afn-sym]
-               [afn-sym event context]
-               [afn-sym input output context])}
   #'fierycod.holy-lambda.impl.util/call)
 
 (defn- gen-class-lambda
@@ -118,8 +139,8 @@
             (~lambda event# context#))
            ;; Arity used for Java runtime
            ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
-            (binding [fierycod.holy-lambda.core/*logger* (#'fierycod.holy-lambda.impl.logging/logger-factory
-                                                          (.getLogger ctx#))]
+            (binding [fierycod.holy-lambda.impl.logging/*logger*
+                      (#'fierycod.holy-lambda.impl.logging/logger-factory (.getLogger ctx#))]
               (let [event# (#'fierycod.holy-lambda.impl.util/in->edn-event in#)
                     context# (#'fierycod.holy-lambda.core/ctx-object->ctx-edn ctx# (into {} (System/getenv)))
                     response# (~lambda event# context#)
@@ -174,23 +195,23 @@
         url (str "http://" *runtime* "/2018-06-01/runtime/invocation/" *invocation-id* "/error")
         payload {:errorMessage (.getMessage err)
                  :errorType (-> err (.getClass) (.getCanonicalName))}
-        response (util/http "POST" url payload)]
+        response (u/http "POST" url payload)]
     (error (.getMessage err))
-    (when-not (util/success-code? (:status response))
+    (when-not (u/success-code? (:status response))
       (do (#'fierycod.holy-lambda.impl.logging/fatal "AWS did not accept the response. Error message: " (:body response))
           (exit!)))))
 
 (defn- fetch-aws-event
   [runtime]
   (let [url (str "http://" runtime "/2018-06-01/runtime/invocation/next")
-        aws-event (util/http "GET" url)]
+        aws-event (u/http "GET" url)]
     (assoc aws-event :invocation-id (getf-header* (:headers aws-event) "Lambda-Runtime-Aws-Request-Id"))))
 
 (defn- send-response
   [response]
   (let [url (str "http://" *runtime* "/2018-06-01/runtime/invocation/" *invocation-id* "/response")
-        {:keys [status body]} (util/http "POST" url response)]
-    (when-not (util/success-code? status)
+        {:keys [status body]} (u/http "POST" url response)]
+    (when-not (u/success-code? status)
       (send-runtime-error (Exception. ^String (str "AWS did not accept the your lambda payload:\n" body))))))
 
 (defn- process-event
@@ -213,8 +234,8 @@
               *invocation-id* invocation-id*]
       (if-not handler
         (send-runtime-error (Exception. ^String (str "Handler: " handler-name " not found!")))
-        (when (and *invocation-id* (util/success-code? (:status aws-event)))
-          (process-event aws-event env-vars (util/call handler)))))))
+        (when (and *invocation-id* (u/success-code? (:status aws-event)))
+          (process-event aws-event env-vars (u/call handler)))))))
 
 (defmacro deflambda
   "Similiar to `defn`, with the limitation that it only allows the
@@ -258,12 +279,12 @@
            routes# (into {} (mapv vector fnames# ~lambdas))
            executor# (System/getProperty "executor")]
 
-       ;; executor = agent      -- Indicates that the configuration for compiling via `native-image` will be generated via the agent
-       ;;                          Example in: `examples/sqs-example/Makefile` at `gen-native-configuration` command
-       ;; executor = anything   else
-
-       (if (= executor# "agent")
+       ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image` will be generated via the agent
+       ;;                               Example in: `examples/sqs-example/Makefile` at `gen-native-configuration` command
+       ;; executor = anything else   -- Do nothing
+       (if (= executor# "native-agent")
          ;; When we want to generate the native configuration for the lambdas
+         (#'fierycod.holy-lambda.impl.agent/call-lambdas-with-agent-payloads routes#)
 
          ;; Otherwise just start the runtime loop
          (while true

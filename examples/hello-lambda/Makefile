@@ -24,16 +24,20 @@ compile:
 dry-api:
 	@sam local start-api --skip-pull-image
 
+gen-native-configuration:
+	@fnative "java -agentlib:native-image-agent=config-merge-dir=resources/native-configuration -Dexecutor=native-agent -jar target/hello-lambda.jar"
+
 native-compile:
 	@rm -Rf latest.zip
 	@fnative "native-image -jar target/hello-lambda.jar \
 						--report-unsupported-elements-at-runtime \
+            -H:ConfigurationFileDirectories=resources/native-configuration \
 						--no-fallback \
 						--enable-url-protocols=http,https \
 						--no-server -J-Xmx3G -J-Xms3G \
 						--initialize-at-build-time"
 	@mv -f hello-lambda server
-	@zip latest server bootstrap
+	@zip -j latest bootstrap server resources/native-deps/*
 
 native-dry-api:
 	@sam local start-api --template ./native-template.yml --skip-pull-image

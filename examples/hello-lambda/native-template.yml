@@ -15,7 +15,7 @@ Parameters:
     Default: 2000
   CodeUri:
     Type: String
-    Default: latest.zip
+    Default: .
 
 Globals:
   Function:

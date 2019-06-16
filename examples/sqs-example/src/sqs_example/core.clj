@@ -3,14 +3,13 @@
   (:require
    [fierycod.holy-lambda.core :as h])
   (:import
-   [com.amazonaws.auth AWS4Signer]
    [com.amazonaws.services.sqs AmazonSQSClient]
    [com.amazonaws.services.sqs.model SendMessageRequest]))
 
 (h/deflambda ReceiveStringLambda
   [event context]
   (h/info "Received an sqs event" event)
-  (->> (SendMessageRequest. "Hello" (get (:envs context) "CONCATENATED_HOLY_SQS_URL"))
+  (->> (SendMessageRequest. "https://sqs.eu-central-1.amazonaws.com/443526418261/sdasdsdasd" "Hello")
        (.sendMessage (AmazonSQSClient.))
        (println "Result of the message send: "))
     ;; (let [^SendMessageRequest request (-> (SendMessageRequest/builder)

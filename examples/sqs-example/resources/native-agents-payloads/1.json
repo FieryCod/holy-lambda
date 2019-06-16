@@ -1,0 +1,8 @@
+{
+	"name": "sqs-example.core.ReceiveStringLambda",
+	"event": {},
+	"context": {},
+	"envs": {
+		"CONCATENATED_HOLY_SQS_URL": "https://sqs.eu-central-1.amazonaws.com/443526418261/sample-queue"
+	}
+}

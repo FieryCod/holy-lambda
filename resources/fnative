@@ -6,7 +6,7 @@ YELLOW='\033[1;33m'
 RED='\033[1;31m'
 NC='\033[0m'
 
-FIERY_NATIVE_VERSION="0.0.2"
+FIERY_NATIVE_VERSION="0.0.4"
 DEFAULT_VERSION=fierycod/graalvm-native-image:latest
 VERSION=""
 VOLUME_PATH=""
@@ -19,18 +19,22 @@ if [ -z "$1" -a "$1" != " " ]; then
     exit
 fi
 
-if [ -z "$2" -a "$2" != " " ]; then
-    printf "$YELLOW You did not specify GraalVM version! $NC\n"
-    printf "$GREEN Defaulting to supported one: $DEFAULT_VERSION. (You can always pass the new version of GraalVM via the second parameter) $NC\n"
+if [ -z "$3" -a "$3" != " " ]; then
+    printf "$GREEN Using default GraalVM version. Use 3rd parameter to override default version $NC\n"
     VERSION=$DEFAULT_VERSION
 else
-    VERSION=$2
+    VERSION=$3
 fi
 
 printf "$GREEN Directory bound: $PWD $NC\n"
-printf "$GREEN Name of the container: $CONTAINER_NAME $NC\n\n"
+printf "$GREEN Name of the container: $CONTAINER_NAME $NC\n"
 
-docker run --name $CONTAINER_NAME -v $PWD:/project:Z -it $VERSION /bin/bash -c "cd /project && $1"
+if [ -z "$2" -a "$2" != " " ]; then
+    printf "$GREEN No custom docker settings were passed. You can pass extra settings via 2nd parameter $NC\n\n"
+    docker run --name $CONTAINER_NAME -v $PWD:/project:Z -it $VERSION /bin/bash -c "cd /project && $1"
+else
+    docker run --name $CONTAINER_NAME $2 -v $PWD:/project:Z -it $VERSION /bin/bash -c "cd /project && $1"
+fi
 
 printf "$GREEN Successfully compiled project to native $NC\n\n"
 

@@ -1,4 +1,4 @@
-(ns fierycod.holy-lambda.impl.logging
+(ns ^:no-doc ^:private fierycod.holy-lambda.impl.logging
   (:require
    [clojure.string :as string])
   (:import
@@ -45,3 +45,8 @@
 (defn fatal
   [& vs]
   (.log *logger* ^String (decorate-log :fatal vs)))
+
+(defmacro trace
+  [tag x]
+  `(do (info ~tag ~x)
+       ~x))

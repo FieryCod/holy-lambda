@@ -1,9 +1,103 @@
 [
 {
+  "name":"clojure.core$clojure_version",
+  "methods":[{"name":"invokeStatic","parameterTypes":[] }]
+},
+{
   "name":"clojure.core.server__init"
 },
 {
   "name":"clojure.core__init"
+},
+{
+  "name":"com.amazonaws.auth.AWS4Signer",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.amazonaws.internal.config.Builder",
+  "allDeclaredMethods":true
+},
+{
+  "name":"com.amazonaws.internal.config.HostRegexToRegionMappingJsonHelper",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"com.amazonaws.internal.config.HttpClientConfigJsonHelper",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"com.amazonaws.internal.config.InternalConfigJsonHelper",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"com.amazonaws.internal.config.JsonIndex",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"com.amazonaws.internal.config.SignerConfigJsonHelper",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"com.amazonaws.jmx.SdkMBeanRegistrySupport",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.amazonaws.services.sqs.MessageMD5ChecksumHandler",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.amazonaws.services.sqs.QueueUrlHandler",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.amazonaws.services.sqs.internal.SQSRequestHandler",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.amazonaws.services.sqs.model.QueueDoesNotExistException",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"com.sun.org.apache.xpath.internal.XPathContext",
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"getDTMManager","parameterTypes":[] }
+  ]
+},
+{
+  "name":"java.lang.String"
+},
+{
+  "name":"java.lang.Thread",
+  "methods":[{"name":"getContextClassLoader","parameterTypes":[] }]
+},
+{
+  "name":"java.nio.file.LinkOption"
+},
+{
+  "name":"org.apache.commons.logging.LogFactory"
+},
+{
+  "name":"org.apache.commons.logging.impl.Jdk14Logger",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"org.apache.commons.logging.impl.LogFactoryImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.commons.logging.impl.WeakHashtable",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"sqs_example.core__init"

@@ -1,12 +1,9 @@
-(ns fierycod.holy-lambda.impl.util
+(ns ^:no-doc ^:private fierycod.holy-lambda.impl.util
   (:require
    [clojure.data.json :as json])
   (:import
    [java.net URL HttpURLConnection]
-   [java.io InputStream OutputStream InputStreamReader]
-   )
-
-  )
+   [java.io InputStream OutputStream InputStreamReader]))
 
 (def ^:private success-codes #{200 202})
 

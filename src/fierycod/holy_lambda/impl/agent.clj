@@ -1,7 +1,9 @@
-(ns fierycod.holy-lambda.impl.agent
+(ns ^:no-doc ^:private fierycod.holy-lambda.impl.agent
   "Provides util `call-lambdas-with-agent-payloads` which helps GraalVM agent to generate the configuration
   necessary to successfully compile the project with `native-image`"
   (:require
+   [fierycod.holy-lambda.impl.logging :as l]
+   [fierycod.holy-lambda.impl.util :as u]
    [clojure.data.json :as json]
    [clojure.java.io :as io])
   (:import
@@ -17,9 +19,9 @@
        (sort-by :name)))
 
 (defn call-lambdas-with-agent-payloads
-  [caller log-fn]
+  [routes]
   (doseq [{:keys [name event context path]} (native-agents-files->payloads-map)]
-    (log-fn "Calling lambda" name "with payloads from" path)
-    ))
-
-(call-lambdas-with-agent-payloads fierycod.holy-lambda.core/call fierycod.holy-lambda.core/info)
+    (l/info "Calling lambda" name "with payloads from" path)
+    (u/call (routes name) event context)
+    (l/info "Succesfully called" name "with payloads from" path))
+  (l/info "Succesfully called all the lambdas"))

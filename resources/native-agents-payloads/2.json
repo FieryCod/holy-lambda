@@ -1,5 +1,5 @@
 {
-  "name": "fierycod.holy-lambda.core.HolyLambda",
+  "name": "fierycod.holy-lambda.impl.agent-test.HolyLambda",
   "event": {"lambda2": 2},
   "context": {},
   "envs": {}
