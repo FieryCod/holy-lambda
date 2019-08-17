@@ -15,7 +15,7 @@ Parameters:
     Default: 2000
   CodeUri:
     Type: String
-    Default: target/sqs-example.jar
+    Default: target/output.jar
 
 Globals:
   Function:
@@ -39,7 +39,6 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: sqs-example.core.ReceiveStringLambda
-      FunctionName: ReceiveStringLambdaFunction
       Events:
         ReceiveStringEvent:
           Type: SQS

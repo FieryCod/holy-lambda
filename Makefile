@@ -22,8 +22,8 @@ setup: use-nvm
 	@bash -c "chmod +x resources/fnative && sudo cp resources/fnative /usr/local/bin/"
 	@printf "\n ${GREEN} Sucessfully installed fnative utility... ${NC}\n"
 
-install-fnative:
-	@sudo cp -f resources/fnative /usr/local/bin
+install-choly:
+	@cd src/python/choly/ && sudo -H python3 setup.py install
 
 build-docker:
 	@docker build . -f resources/Dockerfile -t fierycod/graalvm-native-image
@@ -34,6 +34,7 @@ push-docker:
 release: use-nvm
 	@lein pom
 	@lein deploy
+	@cd src/python/choly && python3 setup.py sdist && twine upload dist/*
 	@./resources/github-tag
 
 commit: use-nvm

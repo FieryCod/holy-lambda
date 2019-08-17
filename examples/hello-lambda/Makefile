@@ -25,22 +25,25 @@ dry-api:
 	@sam local start-api --skip-pull-image
 
 gen-native-configuration:
-	@fnative "java -agentlib:native-image-agent=config-merge-dir=resources/native-configuration -Dexecutor=native-agent -jar target/hello-lambda.jar"
+	@choly graal -e "java -agentlib:native-image-agent=config-output-dir=resources/native-configuration -Dexecutor=native-agent -jar target/output.jar"
 
 native-compile:
+	@choly template -t template.yml
 	@rm -Rf latest.zip
-	@fnative "native-image -jar target/hello-lambda.jar \
-						--report-unsupported-elements-at-runtime \
-            -H:ConfigurationFileDirectories=resources/native-configuration \
-						--no-fallback \
-						--enable-url-protocols=http,https \
-						--no-server -J-Xmx3G -J-Xms3G \
-						--initialize-at-build-time"
-	@mv -f hello-lambda server
-	@zip -j latest bootstrap server resources/native-deps/*
+	@choly graal -e "native-image -jar target/output.jar \
+			--report-unsupported-elements-at-runtime \
+			-H:ConfigurationFileDirectories=resources/native-configuration \
+			--no-fallback \
+			--enable-url-protocols=http,https \
+			--no-server -J-Xmx3G -J-Xms3G \
+			--initialize-at-build-time"
+	@mv -f output server
+	@zip -j latest resources/bootstrap server resources/native-deps/*
+	@mv latest.zip resources/
+	@rm -Rf server
 
 native-dry-api:
-	@sam local start-api --template ./native-template.yml --skip-pull-image
+	@sam local start-api --template ./resources/native-template.yml --skip-pull-image
 
 pack:
 	@sam package --template-file ./template.yml --output-template-file packaged.yaml --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda-latest"
@@ -49,10 +52,10 @@ deploy:
 	@sam deploy --template-file ./packaged.yaml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
 
 native-pack:
-	@sam package --template-file ./native-template.yml --output-template-file native-packaged.yaml --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda-latest"
+	@sam package --template-file ./resources/native-template.yml --output-template-file resources/native-packaged.yaml --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda-latest"
 
 native-deploy:
-	@sam deploy --template-file ./native-packaged.yaml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
+	@sam deploy --template-file ./resources/native-packaged.yaml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
 
 native-destroy:
 	@aws cloudformation delete-stack --stack-name $(STACK_NAME) --region $(APP_REGION)

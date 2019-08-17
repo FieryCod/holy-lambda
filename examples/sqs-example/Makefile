@@ -26,12 +26,11 @@ dry-api:
 	@sam local start-api --skip-pull-image
 
 gen-native-configuration:
-	@fnative "java -agentlib:native-image-agent=config-merge-dir=resources/native-configuration -Dexecutor=native-agent -jar target/sqs-example.jar" \
-	         "--env-file=resources/envs.list"
+	@choly graal -e "java -agentlib:native-image-agent=config-output-dir=resources/native-configuration -Dexecutor=native-agent -jar target/sqs-example.jar" \
+	 	              "--env-file=resources/envs.list"
 
 native-compile:
-	@rm -Rf latest.zip
-	@fnative "native-image -jar target/sqs-example.jar \
+	@choly graal -e "native-image -jar target/output.jar \
 	          --report-unsupported-elements-at-runtime \
             -H:ConfigurationFileDirectories=resources/native-configuration \
 						--no-fallback \
@@ -40,11 +39,13 @@ native-compile:
 	 					--initialize-at-build-time \
 	 					--allow-incomplete-classpath \
             --enable-all-security-services"
-	@mv -f sqs-example server
-	@zip -j latest bootstrap server resources/native-deps/*
+	@mv -f output server
+	@zip -j latest resources/bootstrap server resources/native-deps/*
+	@mv latest.zip resources/
+	@rm -Rf server
 
 native-sqs-invoke:
-	@sam local invoke $(LAMBDA_NAME) --template ./native-template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE)
+	@sam local invoke $(LAMBDA_NAME) --template ./resources/native-template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE) -n resources/sam-envs.json
 
 sqs-invoke:
 	@sam local invoke $(LAMBDA_NAME) --template ./template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE)
@@ -56,10 +57,10 @@ deploy:
 	@sam deploy --template-file ./packaged.yaml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
 
 native-pack:
-	@sam package --template-file ./native-template.yml --output-template-file native-packaged.yaml --s3-bucket $(BUCKET_NAME) --s3-prefix "sqs-example-latest"
+	@sam package --template-file ./resources/native-template.yml --output-template-file resources/native-packaged.yaml --s3-bucket $(BUCKET_NAME) --s3-prefix "sqs-example-latest"
 
 native-deploy:
-	@sam deploy --template-file ./native-packaged.yaml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
+	@sam deploy --template-file ./resources/native-packaged.yaml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
 
 native-destroy:
 	@aws cloudformation delete-stack --stack-name $(STACK_NAME) --region $(APP_REGION)

@@ -20,8 +20,13 @@
 
 (defn call-lambdas-with-agent-payloads
   [routes]
-  (doseq [{:keys [name event context path]} (native-agents-files->payloads-map)]
+  (doseq [{:keys [name event context path propagate]} (native-agents-files->payloads-map)]
     (l/info "Calling lambda" name "with payloads from" path)
-    (u/call (routes name) event context)
+    (if propagate
+      (u/call (routes name) event context)
+      (try
+        (u/call (routes name) event context)
+        (catch Exception err
+          nil)))
     (l/info "Succesfully called" name "with payloads from" path))
   (l/info "Succesfully called all the lambdas"))

@@ -1,10 +1,12 @@
-(defproject fierycod/holy-lambda "0.0.4"
+(defproject fierycod/holy-lambda "0.0.5"
   :description "Micro framework which turns your code into AWS Lambda functions"
 
   :url "https://github.com/FieryCod/holy-lambda"
 
   :license {:name "MIT"
             :url "https://opensource.org/licenses/MIT"}
+
+  :source-paths ["src/clj"]
 
   :global-vars {*warn-on-reflection* true}
 

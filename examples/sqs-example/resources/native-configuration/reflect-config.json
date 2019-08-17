@@ -101,9 +101,5 @@
 },
 {
   "name":"sqs_example.core__init"
-},
-{
-  "name":"sun.misc.Unsafe",
-  "fields":[{"name":"theUnsafe"}]
 }
 ]

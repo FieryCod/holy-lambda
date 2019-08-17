@@ -1,0 +1,12 @@
+{
+    "OVERRIDED_NAME": {
+        "ANOTHER": 1111,
+        "HELLO": "WORLD",
+        "Something": "1111111"
+    },
+    "TestFunction1": {
+        "ANOTHER": 1111,
+        "HELLO": "WORLD",
+        "Something": "1111111"
+    }
+}

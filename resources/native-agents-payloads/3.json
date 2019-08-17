@@ -2,5 +2,5 @@
   "name": "fierycod.holy-lambda.impl.agent-test.NewLambda",
   "event": {"msg": "new-lambda"},
   "context": {"ctx": "CTX"},
-  "envs": {}
+  "propagate": false
 }

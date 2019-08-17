@@ -14,22 +14,21 @@
 
 (t/deftest native-agents-files->payloads-map-fn-test
   (t/testing "should generate the map from pairs [HandlerName, [{:event sth, :context sth, :envs sth, :path sth}, ...]]"
-    (t/is (= (#'fierycod.holy-lambda.impl.agent/native-agents-files->payloads-map)
-             '({:name "fierycod.holy-lambda.impl.agent-test.HolyLambda",
-               :event {:lambda2 2},
-               :context {},
-               :envs {},
-               :path "resources/native-agents-payloads/2.json"}
-              {:name "fierycod.holy-lambda.impl.agent-test.HolyLambda",
-               :event {},
-               :context {},
-               :envs {},
-               :path "resources/native-agents-payloads/1.json"}
-              {:name "fierycod.holy-lambda.impl.agent-test.NewLambda",
-               :event {:msg "new-lambda"},
-               :context {:ctx "CTX"},
-               :envs {},
-               :path "resources/native-agents-payloads/3.json"})))))
+    (t/is (= (#'fierycod.holy-lambda.impl.agent/native-agents-files->payloads-map) '({:name "fierycod.holy-lambda.impl.agent-test.HolyLambda",
+                :event {:lambda2 2},
+                :context {},
+                :propagate false,
+                :path "resources/native-agents-payloads/2.json"}
+               {:name "fierycod.holy-lambda.impl.agent-test.HolyLambda",
+                :event {},
+                :context {},
+                :propagate false,
+                :path "resources/native-agents-payloads/1.json"}
+               {:name "fierycod.holy-lambda.impl.agent-test.NewLambda",
+                :event {:msg "new-lambda"},
+                :context {:ctx "CTX"},
+                :propagate false,
+                :path "resources/native-agents-payloads/3.json"})))))
 
 (t/deftest call-lambdas-with-agent-payloads-fn-test
   (t/testing "should call all lambdas with corresponding payloads and report on each step"

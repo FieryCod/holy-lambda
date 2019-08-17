@@ -2,5 +2,5 @@
   "name": "fierycod.holy-lambda.impl.agent-test.HolyLambda",
   "event": {},
   "context": {},
-  "envs": {}
+  "propagate": false
 }

@@ -3,7 +3,7 @@
   <groupId>fierycod</groupId>
   <artifactId>holy-lambda</artifactId>
   <packaging>jar</packaging>
-  <version>0.0.4</version>
+  <version>0.0.5</version>
   <name>holy-lambda</name>
   <description>Micro framework which turns your code into AWS Lambda functions</description>
   <url>https://github.com/FieryCod/holy-lambda</url>
@@ -17,10 +17,10 @@
     <url>https://github.com/FieryCod/holy-lambda</url>
     <connection>scm:git:git://github.com/FieryCod/holy-lambda.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/FieryCod/holy-lambda.git</developerConnection>
-    <tag>ca41d3d28dd6e922f9afbea388d41e567b28ee83</tag>
+    <tag>2e5682ba974ae12757e04510552b97ceb7c911d9</tag>
   </scm>
   <build>
-    <sourceDirectory>src</sourceDirectory>
+    <sourceDirectory>src/clj</sourceDirectory>
     <testSourceDirectory>test</testSourceDirectory>
     <resources>
       <resource>

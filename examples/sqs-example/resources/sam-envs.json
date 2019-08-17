@@ -1,0 +1,5 @@
+{
+    "ReceiveStringLambdaFunction": {
+        "CONCATENATED_HOLY_SQS_URL": "<CHANGE IT>"
+    }
+}

@@ -9,19 +9,6 @@
   "name":"hello_lambda.core__init"
 },
 {
-  "name":"java.lang.Integer"
-},
-{
-  "name":"java.lang.Long"
-},
-{
-  "name":"java.lang.String"
-},
-{
   "name":"java.nio.file.LinkOption"
-},
-{
-  "name":"sun.misc.Unsafe",
-  "fields":[{"name":"theUnsafe"}]
 }
 ]
