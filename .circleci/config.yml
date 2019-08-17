@@ -5,6 +5,9 @@ references:
     working_directory: ~/holy-lambda
     docker:
       - image: circleci/clojure:openjdk-8-lein-2.9.1-node
+    environment:
+      JVM_OPTS: -Xmx3200m
+      LEIN_ROOT: nbd
 
   restore-node-deps: &restore-node-deps
      restore_cache:

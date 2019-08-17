@@ -14,7 +14,8 @@
 
 (t/deftest native-agents-files->payloads-map-fn-test
   (t/testing "should generate the map from pairs [HandlerName, [{:event sth, :context sth, :envs sth, :path sth}, ...]]"
-    (t/is (= (#'fierycod.holy-lambda.impl.agent/native-agents-files->payloads-map) '({:name "fierycod.holy-lambda.impl.agent-test.HolyLambda",
+    (t/is (= (#'fierycod.holy-lambda.impl.agent/native-agents-files->payloads-map)
+             '({:name "fierycod.holy-lambda.impl.agent-test.HolyLambda",
                 :event {:lambda2 2},
                 :context {},
                 :propagate false,
