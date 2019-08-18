@@ -1,6 +1,6 @@
+
 <a name=""></a>
 #  (2019-08-18)
-
 
 ### Bug Fixes
 
@@ -17,6 +17,3 @@
 * **runtime,makefiles:** Add workable lambda for both runtimes ([d22906c](https://github.com/FieryCod/holy-lambda/commit/d22906c))
 * **runtime,makefiles,readme:** Add custom logger & log the runtime fatals ([44ebc0d](https://github.com/FieryCod/holy-lambda/commit/44ebc0d)), closes [#3](https://github.com/FieryCod/holy-lambda/issues/3) [#6](https://github.com/FieryCod/holy-lambda/issues/6) [#5](https://github.com/FieryCod/holy-lambda/issues/5)
 * **sqs-example:** Add reproducible error in sqs-example for GraalVM team ([a743570](https://github.com/FieryCod/holy-lambda/commit/a743570))
-
-
-
