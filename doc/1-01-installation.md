@@ -16,4 +16,4 @@ You will need following things to start:
    aws configure
    ```
 
-That's it! Navigate to `holy-lambda-101.md`
+That's it! Navigate to [next section](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/new-project-generation)

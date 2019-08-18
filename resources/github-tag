@@ -12,15 +12,22 @@ fi
 
 lein pom
 
-./node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s
+# Taken from https://github.com/k911/swoole-bundle/blob/develop/deploy/releaser.sh
+## Disclaimer: Thanks @k911 for providing me your solution!
+git tag ${VERSION}
+
+yarn conventional-changelog -p angular -i CHANGELOG.md -s -r 1
+
+git tag -d ${VERSION}
+
 git add CHANGELOG.md pom.xml
 git commit -q -m "chore(release): Version ${VERSION} :tada: [skip ci]
 
-$(./node_modules/.bin/conventional-changelog -p angular)
+$(./node_modules/.bin/conventional-changelog)
 "
 
-git push
+git push origin master
 
 git tag ${VERSION}
 
-git push origin ${VERSION}
+yarn conventional-github-releaser -p angular -r 1 -t ${GH_TOKEN}
