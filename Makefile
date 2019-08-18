@@ -34,7 +34,7 @@ push-docker:
 release: use-nvm
 	@lein pom
 	@lein deploy
-	@cd src/python/choly && python3 setup.py sdist && twine upload dist/*
+	@bash -c "cd src/python/choly && sudo rm -Rf build choly.egg-info dist && python3 setup.py sdist && twine upload dist/*"
 	@./resources/github-tag
 
 commit: use-nvm
