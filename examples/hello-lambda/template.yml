@@ -13,22 +13,19 @@ Parameters:
   MemorySize:
     Type: Number
     Default: 2000
-  CodeUri:
-    Type: String
-    Default: target/output.jar
 
 Globals:
   Function:
     Runtime: !Ref Runtime
     Timeout: !Ref Timeout
     MemorySize: !Ref MemorySize
-    CodeUri: !Ref CodeUri
 
 Resources:
   HelloLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: hello-lambda.core.HelloLambda
+      CodeUri: target/output.jar
       FunctionName: HelloLambdaFunction
       Events:
         HelloEvent:
@@ -41,6 +38,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: hello-lambda.core.ByeLambda
+      CodeUri: target/output.jar
       FunctionName: ByeLambdaFunction
       Events:
         ByeEvent:

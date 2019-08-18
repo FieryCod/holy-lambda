@@ -26,10 +26,20 @@ dry-api:
 	@sam local start-api --skip-pull-image
 
 gen-native-configuration:
-	@choly graal -e "java -agentlib:native-image-agent=config-output-dir=resources/native-configuration -Dexecutor=native-agent -jar target/sqs-example.jar" \
-	 	              "--env-file=resources/envs.list"
+	@choly envs
+	@choly graal -e "java -agentlib:native-image-agent=config-merge-dir=resources/native-configuration -Dexecutor=native-agent -jar target/output.jar" \
+	 	           -s	"--env-file=resources/envs.list"
+
+agent-trace-native-configuration:
+	@choly envs
+	@choly graal -e "java -agentlib:native-image-agent=trace-output=trace.json -Dexecutor=native-agent -jar target/output.jar" \
+	 	           -s	"--env-file=resources/envs.list"
+
+trace-to-configuration:
+	@choly graal -e "native-image-configure generate --trace-input=trace.json --output-dir=trace-configuration"
 
 native-compile:
+	@choly template -t template.yml
 	@choly graal -e "native-image -jar target/output.jar \
 	          --report-unsupported-elements-at-runtime \
             -H:ConfigurationFileDirectories=resources/native-configuration \

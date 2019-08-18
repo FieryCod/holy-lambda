@@ -9,20 +9,16 @@ Parameters:
     Default: java8
   Timeout:
     Type: Number
-    Default: 40
+    Default: 25
   MemorySize:
     Type: Number
     Default: 2000
-  CodeUri:
-    Type: String
-    Default: target/output.jar
 
 Globals:
   Function:
     Runtime: !Ref Runtime
     Timeout: !Ref Timeout
     MemorySize: !Ref MemorySize
-    CodeUri: !Ref CodeUri
 
 Resources:
   BaseStringSQS:
@@ -39,6 +35,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: sqs-example.core.ReceiveStringLambda
+      CodeUri: target/output.jar
       Events:
         ReceiveStringEvent:
           Type: SQS

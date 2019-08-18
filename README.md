@@ -14,10 +14,15 @@ Tiny native AWS Custom Lambda Runtime which fulfills your needs!
 It allows you to write one code which might run either on Official Java AWS Runtime (if you don't care about speed or you want to test your lambdas)
 or on Native Custom AWS Runtime built into your codebase.
 
-[Jump here](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/installation) to learn more and start the journey with the Holy Lambda.
+[Jump here](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/1-01-installation) to learn more and start the journey with the Holy Lambda.
+
+## Quickstart
+```
+lein new holy-lambda <your-project-name>
+```
 
 ## License
-Copyright © 2019 Karol Wojcik
+Copyright © 2019 Karol Wojcik aka Fierycod
 
 Released under the MIT license.
 

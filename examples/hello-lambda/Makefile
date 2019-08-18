@@ -29,7 +29,6 @@ gen-native-configuration:
 
 native-compile:
 	@choly template -t template.yml
-	@rm -Rf latest.zip
 	@choly graal -e "native-image -jar target/output.jar \
 			--report-unsupported-elements-at-runtime \
 			-H:ConfigurationFileDirectories=resources/native-configuration \

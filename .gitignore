@@ -4,11 +4,9 @@ server
 native-packaged.yaml
 invoke-envs.json
 fnative-envs.list
-envs.json
 envs.example.json
 native-template.yml
 *.zip
-bootstrap
 /classes
 /checkouts
 profiles.clj

@@ -9,7 +9,8 @@
 (h/deflambda ReceiveStringLambda
   [event context]
   (h/info "Received an sqs event" event)
-  (->> (SendMessageRequest. (get (:envs context) "CONCATENATED_HOLY_SQS_URL") (str (get-in event [:Records 0 :body]) " HolyLambda!"))
+  (h/info context)
+  (->> (SendMessageRequest. (-> context :envs :CONCATENATED_HOLY_SQS_URL) (str (get-in event [:Records 0 :body] "") " HolyLambda!"))
        (.sendMessage (AmazonSQSClient.)))
   (h/info "Successfully sent a message to ConcatenatedHolySQS")
   ;; Indicates that the message was succesfully processed,

@@ -13,6 +13,7 @@
    [fierycod.holy-lambda.impl.agent]
    [fierycod.holy-lambda.impl.util :as u]
    [clojure.data.json :as json]
+   [clojure.walk :as w]
    [clojure.tools.macro :as macro])
   (:import
    [java.io InputStream OutputStream InputStreamReader]
@@ -86,6 +87,10 @@
    (cond-> (get headers prop)
      (seq (get headers prop)) first)))
 
+(defn- keywordize-hashmap
+  [m]
+  (w/keywordize-keys (into {} m)))
+
 (defn- ctx
   [envs rem-time fn-name fn-version fn-invoked-arn memory-limit
    aws-request-id log-group-name log-stream-name
@@ -117,14 +122,18 @@
                      :appVersionName (.getAppVersionName client)
                      :appVersionCode (.getAppVersionCode client)
                      :appPackageName (.getAppPackageName client)})
-          :custom (into {} (.getCustom client-context))
-          :environment (into {} (.getEnvironment client-context))})
+          :custom (keywordize-hashmap (.getCustom client-context))
+          :environment (keywordize-hashmap (.getEnvironment client-context))})
        (.getLogger context)))
 
 (defn- define-synthetic-name
   [aname sym]
   `(def ~(with-meta aname (meta aname))
      ~sym))
+
+(defn- envs
+  []
+  (keywordize-hashmap (System/getenv)))
 
 (defn- wrap-lambda
   [gmethod-sym fn-args fn-body gclass]
@@ -142,7 +151,7 @@
             (binding [fierycod.holy-lambda.impl.logging/*logger*
                       (#'fierycod.holy-lambda.impl.logging/logger-factory (.getLogger ctx#))]
               (let [event# (#'fierycod.holy-lambda.impl.util/in->edn-event in#)
-                    context# (#'fierycod.holy-lambda.core/ctx-object->ctx-edn ctx# (into {} (System/getenv)))
+                    context# (#'fierycod.holy-lambda.core/ctx-object->ctx-edn ctx# (#'fierycod.holy-lambda.core/envs))
                     response# (~lambda event# context#)
                     f-response# (assoc response# :body (json/write-str (:body response#)))]
                 (.write out# (.getBytes ^String (json/write-str f-response#) "UTF-8")))))))
@@ -172,16 +181,16 @@
         getf-header (getf-header* headers)]
     (ctx env-vars
          (- (Long/parseLong (getf-header "Lambda-Runtime-Deadline-Ms")) (System/currentTimeMillis))
-         (get-env "AWS_LAMBDA_FUNCTION_NAME")
-         (get-env "AWS_LAMBDA_FUNCTION_VERSION")
-         (str "arn:aws:lambda:" (get-env "AWS_REGION")
+         (get-env :AWS_LAMBDA_FUNCTION_NAME)
+         (get-env :AWS_LAMBDA_FUNCTION_VERSION)
+         (str "arn:aws:lambda:" (get-env :AWS_REGION)
               ":" (get-in event [:requestContext :accountId] "0000000")
-              ":function:" (get-env "AWS_LAMBDA_FUNCTION_NAME"))
-         (get-env "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
+              ":function:" (get-env :AWS_LAMBDA_FUNCTION_NAME))
+         (get-env :AWS_LAMBDA_FUNCTION_MEMORY_SIZE)
          ;; TODO: Incorrect requestId
          (-> event :requestContext :requestId)
-         (get-env "AWS_LAMBDA_LOG_GROUP_NAME")
-         (get-env "AWS_LAMBDA_LOG_STREAM_NAME")
+         (get-env :AWS_LAMBDA_LOG_GROUP_NAME)
+         (get-env :AWS_LAMBDA_LOG_STREAM_NAME)
          ;; #8
          {:identityId "????"
           :identityPoolId (-> event :requestContext :identity :cognitoIdentityPoolId)}
@@ -225,8 +234,8 @@
 
 (defn- next-iter
   [routes env-vars]
-  (let [runtime* (get env-vars "AWS_LAMBDA_RUNTIME_API")
-        handler-name (get env-vars "_HANDLER")
+  (let [runtime* (:AWS_LAMBDA_RUNTIME_API env-vars )
+        handler-name (:_HANDLER env-vars)
         aws-event (fetch-aws-event runtime*)
         invocation-id* (:invocation-id aws-event)
         handler (get routes handler-name)]
@@ -281,11 +290,11 @@
 
        ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image` will be generated via the agent
        ;;                               Example in: `examples/sqs-example/Makefile` at `gen-native-configuration` command
-       ;; executor = anything else   -- Do nothing
+       ;; executor = anything else   -- Run provided runtime loop
        (if (= executor# "native-agent")
          ;; When we want to generate the native configuration for the lambdas
          (#'fierycod.holy-lambda.impl.agent/call-lambdas-with-agent-payloads routes#)
 
          ;; Otherwise just start the runtime loop
          (while true
-           (#'fierycod.holy-lambda.core/next-iter routes# (into {} (System/getenv))))))))
+           (#'fierycod.holy-lambda.core/next-iter routes# (#'fierycod.holy-lambda.core/envs)))))))

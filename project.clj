@@ -1,4 +1,4 @@
-(defproject fierycod/holy-lambda "0.0.5"
+(defproject fierycod/holy-lambda "0.0.6"
   :description "Micro framework which turns your code into AWS Lambda functions"
 
   :url "https://github.com/FieryCod/holy-lambda"
@@ -25,4 +25,6 @@
   :scm {:name "git"
         :url "https://github.com/FieryCod/holy-lambda"}
 
-  :aot :all)
+  :profiles {:uberjar {:aot :all
+                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"
+                                  "-Dclojure.spec.skip-macros=true"]}})
