@@ -16,7 +16,7 @@
        file-seq
        (filter #(Files/isRegularFile (.toPath ^File %1) (into-array LinkOption [])))
        (map #(-> % slurp json/read-json (assoc :path (str %))))
-       (sort-by :name)))
+       (sort-by :path)))
 
 (defn call-lambdas-with-agent-payloads
   [routes]

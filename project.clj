@@ -1,4 +1,4 @@
-(defproject fierycod/holy-lambda "0.0.7"
+(defproject fierycod/holy-lambda "0.0.7-SNAPSHOT"
   :description "Micro framework which turns your code into AWS Lambda functions"
 
   :url "https://github.com/FieryCod/holy-lambda"
@@ -15,6 +15,8 @@
                  [org.clojure/tools.macro "0.1.5"]
                  [com.amazonaws/aws-lambda-java-core "1.2.0"]]
 
+  :eftest {:thread-count 4}
+
   :plugins [[lein-cloverage "1.1.1"]]
 
   :deploy-repositories [["releases" {:url "https://clojars.org/repo"
@@ -25,6 +27,8 @@
   :scm {:name "git"
         :url "https://github.com/FieryCod/holy-lambda"}
 
-  :profiles {:uberjar {:aot :all
+  :profiles {:eftest {:global-vars {*warn-on-reflection* false}
+                      :plugins [[lein-eftest "0.5.8"]]}
+             :uberjar {:aot :all
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"
                                   "-Dclojure.spec.skip-macros=true"]}})

@@ -65,7 +65,7 @@ jobs:
     steps:
       - checkout
       - *restore-lein-deps
-      - run: lein test
+      - run: lein with-profile eftest eftest
 
 workflows:
   version: 2
