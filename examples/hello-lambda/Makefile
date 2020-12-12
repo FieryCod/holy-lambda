@@ -44,10 +44,10 @@ native-compile: compile
 native-dry-api:
 	@sam local start-api --template ./resources/native-template.yml --skip-pull-image
 
-pack:
+pack: compile
 	@sam package --template-file ./template.yml --output-template-file packaged.yaml --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda-latest"
 
-deploy:
+deploy: pack
 	@sam deploy --template-file ./packaged.yaml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
 
 native-pack: native-compile
