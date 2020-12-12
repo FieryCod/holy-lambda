@@ -10,7 +10,7 @@ APP_REGION=eu-central-1
 LAMBDA_NAME=HelloLambdaFunction
 
 make-bucket:
-	@aws s3 mb s3://$(BUCKET_NAME)
+	@aws s3 ls s3://holy-lambda--hello-lambda || aws s3 mb s3://$(BUCKET_NAME)
 
 destroy-bucket:
 	@aws s3 rb s3://$(BUCKET_NAME) --force --region $(APP_REGION)
@@ -44,13 +44,13 @@ native-compile: compile
 native-dry-api:
 	@sam local start-api --template ./resources/native-template.yml --skip-pull-image
 
-pack: compile
+pack: compile make-bucket
 	@sam package --template-file ./template.yml --output-template-file packaged.yaml --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda-latest"
 
 deploy: pack
 	@sam deploy --template-file ./packaged.yaml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
 
-native-pack: native-compile
+native-pack: native-compile make-bucket
 	@sam package --template-file ./resources/native-template.yml --output-template-file resources/native-packaged.yaml --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda-latest"
 
 native-deploy: native-pack
