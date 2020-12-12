@@ -50,10 +50,10 @@ pack:
 deploy:
 	@sam deploy --template-file ./packaged.yaml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
 
-native-pack:
+native-pack: native-compile
 	@sam package --template-file ./resources/native-template.yml --output-template-file resources/native-packaged.yaml --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda-latest"
 
-native-deploy:
+native-deploy: native-pack
 	@sam deploy --template-file ./resources/native-packaged.yaml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
 
 native-destroy:
@@ -61,3 +61,6 @@ native-destroy:
 
 logs-tail:
 	sam logs -n $(LAMBDA_NAME) --stack-name $(STACK_NAME) -t
+
+native-invoke:
+	sam local invoke $(LAMBDA_NAME) --template ./resources/native-template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE)
