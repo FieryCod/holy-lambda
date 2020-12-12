@@ -64,3 +64,6 @@ logs-tail:
 
 native-invoke:
 	sam local invoke $(LAMBDA_NAME) --template ./resources/native-template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE)
+
+clean:
+	-rm -rf target/
