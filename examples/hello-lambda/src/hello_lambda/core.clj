@@ -9,7 +9,7 @@
   (h/info "Event body" event)
   (h/info "Event context" context)
   {:statusCode 200
-   :body {:message "Hello from Eugene Koontz`!!!!! Heerlijke kerst!! .."
+   :body {:message "Hello"
           "it's" "me"
           :you "looking"
           :for true}
