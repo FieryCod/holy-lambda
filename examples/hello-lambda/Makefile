@@ -10,7 +10,7 @@ APP_REGION=eu-central-1
 LAMBDA_NAME=HelloLambdaFunction
 
 make-bucket:
-	@aws s3 ls s3://holy-lambda--hello-lambda || aws s3 mb s3://$(BUCKET_NAME)
+	@aws s3 ls s3://$(BUCKET_NAME) || aws s3 mb s3://$(BUCKET_NAME)
 
 destroy-bucket:
 	@aws s3 rb s3://$(BUCKET_NAME) --force --region $(APP_REGION)
