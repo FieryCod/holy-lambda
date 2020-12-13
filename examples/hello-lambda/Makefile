@@ -65,5 +65,10 @@ logs-tail:
 native-invoke:
 	sam local invoke $(LAMBDA_NAME) --template ./resources/native-template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE)
 
-clean:
+delete:
+	aws cloudformation delete-stack --stack-name holy-lambda--hello-lambda
+
+clean: delete
 	-rm -rf target/
+	-rm packaged.yml
+	-rm resources/native-packaged.yml
