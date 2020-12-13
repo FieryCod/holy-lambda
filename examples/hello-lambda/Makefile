@@ -3,7 +3,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-.PHONY: install-holy-lambda native-dry-run compile dry-run native-compile native-pack native-deploy native-destroy logs-tail
+.PHONY: install-holy-lambda native-dry-run compile dry-run native-compile native-pack native-deploy native-destroy logs-tail clean destroy
 BUCKET_NAME=holy-lambda--hello-lambda
 STACK_NAME=holy-lambda--hello-lambda
 APP_REGION=eu-central-1
@@ -56,7 +56,7 @@ native-pack: native-compile make-bucket
 native-deploy: native-pack
 	@sam deploy --template-file ./resources/native-packaged.yml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
 
-native-destroy:
+destroy:
 	@aws cloudformation delete-stack --stack-name $(STACK_NAME) --region $(APP_REGION)
 
 logs-tail:
@@ -65,10 +65,7 @@ logs-tail:
 native-invoke:
 	sam local invoke $(LAMBDA_NAME) --template ./resources/native-template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE)
 
-delete:
-	aws cloudformation delete-stack --stack-name holy-lambda--hello-lambda
-
-clean: delete
+clean: destroy
 	-rm -rf target/
 	-rm packaged.yml
 	-rm resources/native-packaged.yml
