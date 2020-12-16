@@ -34,10 +34,10 @@ native-compile: compile
 			-H:ConfigurationFileDirectories=resources/native-configuration \
 			--no-fallback \
 			--enable-url-protocols=http,https \
-			--no-server -J-Xmx3G -J-Xms3G \
+			--no-server  \
 			--initialize-at-build-time"
 	@mv -f output server
-	@zip -j latest resources/bootstrap server resources/native-deps/*
+	@zip -j latest resources/bootstrap server
 	@mv latest.zip resources/
 	@rm -Rf server
 
