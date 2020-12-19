@@ -18,7 +18,7 @@ destroy-bucket:
 install-holy-lambda:
 	@bash -c "cd ../../ && lein install"
 
-compile:
+target/hello-lambda-0.1.0-SNAPSHOT.jar: 
 	@lein uberjar
 
 dry-api:
@@ -30,14 +30,8 @@ native-compile: output
 	mv latest.zip resources/
 	rm -Rf server
 
-output: compile
-	choly graal -e "native-image -jar target/output.jar \
-			--report-unsupported-elements-at-runtime \
-			-H:ConfigurationFileDirectories=resources/native-configuration \
-			--no-fallback \
-			--enable-url-protocols=http,https \
-			--no-server  \
-			--initialize-at-build-time"
+output: target/hello-lambda-0.1.0-SNAPSHOT.jar
+	docker run -v /Users/ekoontz/holy-lambda/examples/hello-lambda/:/project:Z -it fierycod/graalvm-native-image:latest "/bin/bash -c cd /project && native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server  --initialize-at-build-time"
 
 native-dry-api:
 	@sam local start-api --template ./resources/native-template.yml --skip-pull-image
