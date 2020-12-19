@@ -28,7 +28,6 @@ gen-native-configuration:
 	@choly graal -e "java -agentlib:native-image-agent=config-output-dir=resources/native-configuration -Dexecutor=native-agent -jar target/output.jar"
 
 native-compile: compile
-	@choly template -t template.yml
 	@choly graal -e "native-image -jar target/output.jar \
 			--report-unsupported-elements-at-runtime \
 			-H:ConfigurationFileDirectories=resources/native-configuration \
