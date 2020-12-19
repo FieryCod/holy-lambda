@@ -1,5 +1,0 @@
-{:known-macros [fierycod.holy-lambda.core/deflambda clojure.test/deftest]
- :known-namespaces []
- :known-tags []
- :ignored-unused-namespaces []
- :rules {}}
