@@ -21,7 +21,7 @@ else
         endif
 endif
 
-.PHONY: install-graalvm native-image-install
+.PHONY: install-graalvm
 
 graalvm.tar.gz:
 	@wget -O $@ ${GRAALVM_TAR_GZ}
