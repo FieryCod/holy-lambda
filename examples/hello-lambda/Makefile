@@ -24,12 +24,13 @@ compile:
 dry-api:
 	@sam local start-api --skip-pull-image
 
-gen-native-configuration:
-	@choly graal -e "java -agentlib:native-image-agent=config-output-dir=resources/native-configuration -Dexecutor=native-agent -jar target/output.jar"
+native-compile: output
+	mv -f output server
+	zip -j latest resources/bootstrap server
+	mv latest.zip resources/
+	rm -Rf server
 
-native-compile: server
-
-server:
+output: compile
 	choly graal -e "native-image -jar target/output.jar \
 			--report-unsupported-elements-at-runtime \
 			-H:ConfigurationFileDirectories=resources/native-configuration \
@@ -37,9 +38,6 @@ server:
 			--enable-url-protocols=http,https \
 			--no-server  \
 			--initialize-at-build-time"
-	mv -f output $^
-	zip -j latest resources/bootstrap $^
-	mv latest.zip resources/
 
 native-dry-api:
 	@sam local start-api --template ./resources/native-template.yml --skip-pull-image
