@@ -25,3 +25,4 @@ native-configuration/**
 build
 dist
 choly.egg-info
+.clj-kondo/.cache
