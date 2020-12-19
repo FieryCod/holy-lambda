@@ -18,7 +18,7 @@ destroy-bucket:
 install-holy-lambda:
 	@bash -c "cd ../../ && lein install"
 
-target/hello-lambda-0.1.0-SNAPSHOT.jar: 
+target/hello-lambda-0.1.0-SNAPSHOT.jar: src/hello_lambda/core.clj
 	@lein uberjar
 
 dry-api:
