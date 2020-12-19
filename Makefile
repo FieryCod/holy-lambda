@@ -1,11 +1,5 @@
 # GraalVM releases:
 # https://github.com/graalvm/graalvm-ce-builds/releases
-#
-# Installing native-image for MacOS
-# https://www.graalvm.org/reference-manual/native-image/#install-native-image
-#
-# Creating Linux binaries with MacOS+GraalVM's native-image
-# https://blogs.oracle.com/developers/building-cross-platform-native-images-with-graalvm
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
