@@ -31,7 +31,7 @@ native-compile: output
 	rm -Rf server
 
 output: target/hello-lambda-0.1.0-SNAPSHOT.jar
-	docker run -v /Users/ekoontz/holy-lambda/examples/hello-lambda/:/project:Z -it fierycod/graalvm-native-image:latest "/bin/bash -c cd /project && native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server  --initialize-at-build-time"
+	docker run -v /Users/ekoontz/holy-lambda/examples/hello-lambda/:/project:Z -it fierycod/graalvm-native-image:latest bash -c "cd /project && native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server  --initialize-at-build-time "
 
 native-dry-api:
 	@sam local start-api --template ./resources/native-template.yml --skip-pull-image
