@@ -58,6 +58,4 @@ native-invoke:
 	sam local invoke $(LAMBDA_NAME) --template ./resources/native-template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE)
 
 clean: destroy
-	-rm -rf target/
-	-rm packaged.yml
-	-rm resources/native-packaged.yml
+	-rm -rf target/ packaged.yml resources/native-packaged.yml output
