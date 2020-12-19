@@ -25,20 +25,20 @@ destroy-bucket:
 install-holy-lambda:
 	@bash -c "cd ../../ && lein install"
 
-target/hello-lambda-0.1.0-SNAPSHOT.jar: src/hello_lambda/core.clj
+output.jar: src/hello_lambda/core.clj
 	@lein uberjar
 
 dry-api:
 	@sam local start-api --skip-pull-image
 
 native-compile: output
-	mv -f output server
-	zip -j latest resources/bootstrap server
-	mv latest.zip resources/
-	rm -Rf server
+	@mv -f output server
+	@zip -j latest resources/bootstrap server
+	@mv latest.zip resources/
+	@rm -Rf server
 
-output: target/hello-lambda-0.1.0-SNAPSHOT.jar
-	${native_image_cmd}
+output: output.jar
+	@${native_image_cmd}
 
 native-dry-api:
 	@sam local start-api --template ./resources/native-template.yml --skip-pull-image
