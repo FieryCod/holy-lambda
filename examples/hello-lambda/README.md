@@ -5,7 +5,6 @@
 
 ## Additional prerequisites for building native lambdas:
 
-- choly
 - Docker
 
 # Unoptimized, JVM version
