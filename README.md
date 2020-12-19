@@ -3,7 +3,6 @@
 [![CircleCI](https://circleci.com/gh/FieryCod/holy-lambda/tree/master.svg?style=svg)](https://circleci.com/gh/FieryCod/holy-lambda/tree/master)
 [![codecov](https://codecov.io/gh/FieryCod/holy-lambda/branch/master/graph/badge.svg)](https://codecov.io/gh/FieryCod/holy-lambda)
 [![cljdoc badge](https://cljdoc.org/badge/fierycod/holy-lambda)](https://cljdoc.org/d/fierycod/holy-lambda/0.0.5)
-[![pipi badge](https://img.shields.io/pypi/v/choly)](https://pypi.org/project/choly/)
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
 
 ---

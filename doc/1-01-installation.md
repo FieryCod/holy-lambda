@@ -8,7 +8,7 @@ You will need following things to start:
 
 1. Install all necessary dependencies
     ```
-    pip install --user aws-cli aws-sam-cli choly
+    pip install --user aws-cli aws-sam-cli
     ```
 
 2. Configure default AWS profile via `aws-cli`

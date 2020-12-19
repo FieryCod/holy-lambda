@@ -5,7 +5,7 @@ In order to generate a new project you can use `holy-lambda-template`. Just invo
 lein new holy-lambda example-project && cd example-project
 ```
 
-After that please make sure that you have the latest version of `choly`, `aws`, `sam`
+After that please make sure that you have the latest version of `aws` and `sam`
 command utilities installed. If you find it difficult then you may find this [guide](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/installation) helpful.
 
 ## Project structure
@@ -33,7 +33,7 @@ Generated project should have similiar tree of files/folders:
 
 **Makefile**
 
-Starting from the very beginning you can see `Makefile` file which is used in conjuction with `choly` to provide *decent* support when it comes to:
+Starting from the very beginning you can see `Makefile` file which is used to provide *decent* support when it comes to:
 - Maintenance of local envs for agent, native & java runtime (Automatically generated from `envs.json` via `make gen-envs`)
 - Compilation of sources for both native (Holy Custom Runtime) & Java runtime (provided via `make compile` or `make compile native-compile` respectively)
 - Packaging of the application for both runtimes (provided via `make pack` or `make native-pack`) to s3
