@@ -29,7 +29,7 @@ install-holy-lambda:
 target/output.jar: src/hello_lambda/core.clj
 	@lein uberjar
 
-dry-api:
+dry-api: target/output.jar
 	@sam local start-api --skip-pull-image
 
 native-compile: output
@@ -41,7 +41,7 @@ native-compile: output
 output: target/output.jar
 	@${native_image_cmd}
 
-native-dry-api:
+native-dry-api: native-compile
 	@sam local start-api --template ./resources/native-template.yml --skip-pull-image
 
 pack: target/output.jar make-bucket
