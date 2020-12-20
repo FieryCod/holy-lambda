@@ -10,6 +10,13 @@ APP_REGION=eu-central-1
 LAMBDA_NAME=ReceiveStringLambdaFunction
 EVENT_PAYLOAD_FILE=./sample-receive-event.json
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	native_image_cmd=native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server -J-Xmx3G -J-Xms3G --initialize-at-build-time --allow-incomplete-classpath --enable-all-security-services
+else
+	native_image_cmd=docker run -v ${PWD}:/project:Z -it fierycod/graalvm-native-image:latest bash -c "native_image_cmd=native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server -J-Xmx3G -J-Xms3G --initialize-at-build-time --allow-incomplete-classpath --enable-all-security-services"
+endif
+
 make-bucket:
 	@aws s3 mb s3://$(BUCKET_NAME)
 
@@ -25,30 +32,8 @@ compile:
 dry-api:
 	@sam local start-api --skip-pull-image
 
-gen-native-configuration:
-	@choly envs
-	@choly graal -e "java -agentlib:native-image-agent=config-merge-dir=resources/native-configuration -Dexecutor=native-agent -jar target/output.jar" \
-	 	           -s	"--env-file=resources/envs.list"
-
-agent-trace-native-configuration:
-	@choly envs
-	@choly graal -e "java -agentlib:native-image-agent=trace-output=trace.json -Dexecutor=native-agent -jar target/output.jar" \
-	 	           -s	"--env-file=resources/envs.list"
-
-trace-to-configuration:
-	@choly graal -e "native-image-configure generate --trace-input=trace.json --output-dir=trace-configuration"
-
 native-compile:
-	@choly template -t template.yml
-	@choly graal -e "native-image -jar target/output.jar \
-	          --report-unsupported-elements-at-runtime \
-            -H:ConfigurationFileDirectories=resources/native-configuration \
-						--no-fallback \
-						--enable-url-protocols=http,https \
-	 					--no-server -J-Xmx3G -J-Xms3G \
-	 					--initialize-at-build-time \
-	 					--allow-incomplete-classpath \
-            --enable-all-security-services"
+	@${native_image_cmd}
 	@mv -f output server
 	@zip -j latest resources/bootstrap server resources/native-deps/*
 	@mv latest.zip resources/
