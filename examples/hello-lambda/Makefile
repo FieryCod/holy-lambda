@@ -3,7 +3,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-.PHONY: clean deploy destroy install-holy-lambda logs-tail native-compile native-deploy native-pack
+.PHONY: clean deploy destroy dry-api install-holy-lambda logs-tail native-compile native-deploy native-dry-api native-pack
 BUCKET_NAME=holy-lambda--hello-lambda
 STACK_NAME=holy-lambda--hello-lambda
 APP_REGION=eu-central-1
@@ -13,8 +13,10 @@ PWD=$$(pwd)
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	native_image_cmd=native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server  --initialize-at-build-time
+	DRY_API_WARNING=""
 else
 	native_image_cmd=docker run -v ${PWD}:/project:Z -it fierycod/graalvm-native-image:latest bash -c "cd /project && native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server  --initialize-at-build-time "
+	DRY_API_WARNING="'dry-api' does not work on your platform: use 'native-dry-api' instead to run within Docker."
 endif
 
 make-bucket:
@@ -30,7 +32,7 @@ target/output.jar: src/hello_lambda/core.clj
 	@lein uberjar
 
 dry-api: target/output.jar
-	@sam local start-api --skip-pull-image
+	@if [ ${DRY_API_WARNING} == '' ]; then @sam local start-api --skip-pull-image; else echo ${DRY_API_WARNING}; fi
 
 native-compile: output
 	@mv -f output server
