@@ -4,3 +4,9 @@ install-graalvm:
 	@mv .graalvm/ ~/.graalvm
 	@echo "Use \"export GRAALVM=~/.graalvm/bin/\" in either .zshrc or .bashrc"
 	@rm -Rf graalvm.tar.gz
+
+build-docker:
+	@docker build . -f resources/Dockerfile -t fierycod/graalvm-native-image
+
+push-docker:
+	@docker push fierycod/graalvm-native-image
