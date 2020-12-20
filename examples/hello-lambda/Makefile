@@ -8,12 +8,13 @@ BUCKET_NAME=holy-lambda--hello-lambda
 STACK_NAME=holy-lambda--hello-lambda
 APP_REGION=eu-central-1
 LAMBDA_NAME=HelloLambdaFunction
+PWD=$$(pwd)
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	native_image_cmd=native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server  --initialize-at-build-time
 else
-	native_image_cmd=docker run -v /Users/ekoontz/holy-lambda/examples/hello-lambda/:/project:Z -it fierycod/graalvm-native-image:latest bash -c "cd /project && native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server  --initialize-at-build-time "
+	native_image_cmd=docker run -v ${PWD}:/project:Z -it fierycod/graalvm-native-image:latest bash -c "cd /project && native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server  --initialize-at-build-time "
 endif
 
 make-bucket:
