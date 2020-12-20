@@ -3,7 +3,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-.PHONY: install-holy-lambda native-dry-run compile dry-run native-compile native-pack native-deploy native-destroy logs-tail clean destroy
+.PHONY: clean deploy destroy install-holy-lambda logs-tail native-compile native-deploy native-pack
 BUCKET_NAME=holy-lambda--hello-lambda
 STACK_NAME=holy-lambda--hello-lambda
 APP_REGION=eu-central-1
@@ -26,7 +26,7 @@ destroy-bucket:
 install-holy-lambda:
 	@bash -c "cd ../../ && lein install"
 
-output.jar: src/hello_lambda/core.clj
+target/output.jar: src/hello_lambda/core.clj
 	@lein uberjar
 
 dry-api:
@@ -38,13 +38,13 @@ native-compile: output
 	@mv latest.zip resources/
 	@rm -Rf server
 
-output: output.jar
+output: target/output.jar
 	@${native_image_cmd}
 
 native-dry-api:
 	@sam local start-api --template ./resources/native-template.yml --skip-pull-image
 
-pack: compile make-bucket
+pack: target/output.jar make-bucket
 	@sam package --template-file ./template.yml --output-template-file packaged.yml --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda-latest"
 
 deploy: pack
@@ -62,7 +62,7 @@ destroy:
 logs-tail:
 	sam logs -n $(LAMBDA_NAME) --stack-name $(STACK_NAME) -t
 
-native-invoke:
+native-invoke: 
 	sam local invoke $(LAMBDA_NAME) --template ./resources/native-template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE)
 
 clean: destroy
