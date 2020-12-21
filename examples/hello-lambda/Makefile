@@ -32,7 +32,7 @@ target/output.jar: src/hello_lambda/core.clj
 	@lein uberjar
 
 dry-api: target/output.jar
-	@if [ ${DRY_API_WARNING} == '' ]; then @sam local start-api --skip-pull-image; else echo ${DRY_API_WARNING}; fi
+	@if [ ${DRY_API_WARNING} == '' ]; then sam local start-api --skip-pull-image; else echo ${DRY_API_WARNING}; fi
 
 native-compile: output
 	@mv -f output server
