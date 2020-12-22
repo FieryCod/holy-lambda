@@ -26,18 +26,23 @@ This runs the java artifact `output.jar` using `sam local`.
 
 - `make native-dry-api`
 
-This runs GraalVM to create a Linux x86 binary and then zips it, and
-runs it using `sam local --tamplate ./resources/native-template.yml`. This native template file contains a
-reference to the zip file created in the first step.
+This compiles the Clojure code into a `.jar`, and then runs GraalVM
+(natively, on your workstation) to create a Linux x86 binary from this
+`.jar`, and then zips this binary along with a short bootstrap shell
+script. Then, `sam local` is started, which creates a Docker container running
+Amazon's Lambda hosting environment with `./resources/native-template.yml` as its AWS SAM template file. This 
+a Docker container that runs this template file references the zip file made in the first step.
 
 ### Mac OS or Windows
 
 - `make native-dry-api`
 
-This runs GraalVM within a Docker container to create a Linux x86
-binary and then zips it, and runs it within another Docker container,
-using `sam local --tamplate ./resources/native-template.yml`. This
-native template file contains a reference to the zip file created in the first step.
+This compiles the Clojure code into a `.jar`, and then runs GraalVM
+within a Docker container to create a Linux x86 binary from this
+`.jar`, and then zips this binary along with a short bootstrap shell
+script. Then, `sam local` is started, which creates a Docker container running
+Amazon's Lambda hosting environment with `./resources/native-template.yml` as its AWS SAM template file. This 
+a Docker container that runs this template file references the zip file made in the first step.
 
 - `make dry-api` 
 
