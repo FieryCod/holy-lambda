@@ -4,7 +4,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 .PHONY: all check-service clean deploy deploy-native destroy destroy-bucket dry-api dry-api-native local-test make-bucket
-BUCKET_NAME=hello-lambda
+BUCKET_NAME=hello-lambda-$$(whoami)
 STACK_NAME=hello-lambda
 APP_REGION=eu-central-1
 PWD=$$(pwd)
