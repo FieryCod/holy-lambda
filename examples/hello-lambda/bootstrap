@@ -4,4 +4,4 @@ set -e
 
 ls -la
 
-./server
+./output

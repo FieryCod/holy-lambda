@@ -3,69 +3,62 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-.PHONY: clean deploy destroy dry-api install-holy-lambda logs-tail native-compile native-deploy native-dry-api native-pack
-BUCKET_NAME=holy-lambda--hello-lambda
-STACK_NAME=holy-lambda--hello-lambda
+.PHONY: all check-service clean deploy deploy-native destroy destroy-bucket dry-api dry-api-native local-test make-bucket
+BUCKET_NAME=hello-lambda
+STACK_NAME=hello-lambda
 APP_REGION=eu-central-1
-LAMBDA_NAME=HelloLambdaFunction
 PWD=$$(pwd)
 
-UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-	native_image_cmd=native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server  --initialize-at-build-time
-	DRY_API_WARNING=""
+	native_image_cmd=native-image -jar target/output.jar --report-unsupported-elements-at-runtime --no-fallback --enable-url-protocols=http,https --no-server  --initialize-at-build-time
 else
-	native_image_cmd=docker run -v ${PWD}:/project:Z -it fierycod/graalvm-native-image:latest bash -c "cd /project && native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server  --initialize-at-build-time "
-	DRY_API_WARNING="'dry-api' does not work on your platform: use 'native-dry-api' instead to run within Docker."
+	native_image_cmd=docker run -v ${PWD}:/project:Z -it fierycod/graalvm-native-image:latest bash -c "cd /project && native-image -jar target/output.jar --report-unsupported-elements-at-runtime --no-fallback --verbose --enable-url-protocols=http,https --no-server  --initialize-at-build-time --initialize-at-build-time=org.apache.log4j.CategoryKey --trace-object-instantiation=java.lang.Thread"
 endif
 
-make-bucket:
-	@aws s3 ls s3://$(BUCKET_NAME) || aws s3 mb s3://$(BUCKET_NAME)
+all: deploy-native
 
-destroy-bucket:
-	@aws s3 rb s3://$(BUCKET_NAME) --force --region $(APP_REGION)
+check-service:
+	@(nc -z localhost 3000) || echo "AWS API service is not running: run 'make dry-api' or 'make dry-api-native."
 
-install-holy-lambda:
-	@bash -c "cd ../../ && lein install"
+clean:
+	-rm -rf server target/ packaged.yml packaged-native.yml output latest.zip
 
-target/output.jar: src/hello_lambda/core.clj
-	@lein uberjar
+deploy: packaged.yml
+	sam deploy --template-file packaged.yml        --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
 
-dry-api: target/output.jar
-	@if [ ${DRY_API_WARNING} == '' ]; then sam local start-api --skip-pull-image; else echo ${DRY_API_WARNING}; fi
-
-native-compile: output
-	@mv -f output server
-	@zip -j latest resources/bootstrap server
-	@mv latest.zip resources/
-	@rm -Rf server
-
-output: target/output.jar
-	@${native_image_cmd}
-
-native-dry-api: native-compile
-	@sam local start-api --template ./resources/native-template.yml --skip-pull-image
-
-pack: target/output.jar make-bucket
-	@sam package --template-file ./template.yml --output-template-file packaged.yml --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda-latest"
-
-deploy: pack
-	@sam deploy --template-file ./packaged.yml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
-
-native-pack: native-compile make-bucket
-	@sam package --template-file ./resources/native-template.yml --output-template-file resources/native-packaged.yml --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda-latest"
-
-native-deploy: native-pack
-	@sam deploy --template-file ./resources/native-packaged.yml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
+deploy-native: packaged-native.yml
+	sam deploy --template-file packaged-native.yml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
 
 destroy:
-	@aws cloudformation delete-stack --stack-name $(STACK_NAME) --region $(APP_REGION)
+	aws cloudformation delete-stack --stack-name $(STACK_NAME) --region $(APP_REGION)
 
-logs-tail:
-	sam logs -n $(LAMBDA_NAME) --stack-name $(STACK_NAME) -t
+destroy-bucket:
+	aws s3 rb s3://$(BUCKET_NAME) --force --region $(APP_REGION)
 
-native-invoke: 
-	sam local invoke $(LAMBDA_NAME) --template ./resources/native-template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE)
+dry-api: target/output.jar
+	sam local start-api --template template.yml
 
-clean: destroy
-	-rm -rf target/ packaged.yml resources/native-packaged.yml output resources/latest.zip
+dry-api-native: latest.zip
+	sam local start-api --template template-native.yml
+
+local-test: check-service
+	curl "http://127.0.0.1:3000/"
+	curl "http://127.0.0.1:3000/bye"
+
+make-bucket:
+	aws s3 ls s3://$(BUCKET_NAME) || aws s3 mb s3://$(BUCKET_NAME)
+
+latest.zip: output
+	zip -j latest bootstrap output
+
+output: target/output.jar
+	${native_image_cmd}
+
+packaged.yml: target/output.jar make-bucket
+	sam package --template-file template.yml        --output-template-file packaged.yml        --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda"
+
+packaged-native.yml: latest.zip make-bucket
+	sam package --template-file template-native.yml --output-template-file packaged-native.yml --s3-bucket $(BUCKET_NAME) --s3-prefix "hello-lambda"
+
+target/output.jar: src/hello_lambda/core.clj
+	lein uberjar
