@@ -24,3 +24,5 @@ native-configuration/**
 build
 dist
 .clj-kondo/.cache
+.aws
+output

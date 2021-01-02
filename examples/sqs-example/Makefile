@@ -1,64 +1,86 @@
 SHELL := /bin/bash
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
 
-.PHONY: install-holy-lambda native-dry-run compile dry-run native-compile native-pack native-deploy native-destroy logs-tail
-BUCKET_NAME=holy-lambda--sqs-example
-STACK_NAME=holy-lambda--sqs-example
+.PHONY: all check-service clean deploy deploy-native destroy destroy-bucket dry-api dry-api-native local-test make-bucket
+
 APP_REGION=eu-central-1
-LAMBDA_NAME=ReceiveStringLambdaFunction
-EVENT_PAYLOAD_FILE=./sample-receive-event.json
+BUCKET_NAME=holy-lambda--sqs-example-$$(whoami)
+STACK_NAME=holy-lambda--sqs-example
+S3_PREFIX=sqs-example
+APP_REGION=eu-central-1
+PWD=$$(pwd)
+USER_GID=$$(id -u):$$(id -g)
+LAMBDA_NAME=ApiProxyMessageFunction
+EVENT_FILE=api-payload
+EVENT_PAYLOAD_FILE=./resources/invokable-events/${EVENT_FILE}.json
 
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Linux)
-	native_image_cmd=native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server -J-Xmx3G -J-Xms3G --initialize-at-build-time --allow-incomplete-classpath --enable-all-security-services
-else
-	native_image_cmd=docker run -v ${PWD}:/project:Z -it fierycod/graalvm-native-image:latest bash -c "native_image_cmd=native-image -jar target/output.jar --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=resources/native-configuration --no-fallback --enable-url-protocols=http,https --no-server -J-Xmx3G -J-Xms3G --initialize-at-build-time --allow-incomplete-classpath --enable-all-security-services"
-endif
+all: deploy-native
 
-make-bucket:
-	@aws s3 mb s3://$(BUCKET_NAME)
+check-service:
+	@(nc -z localhost 3000) || echo "AWS API service is not running: run 'make dry-api' or 'make dry-api-native."
+
+clean:
+	@rm -rf server target/ packaged.yml packaged-native.yml output latest.zip
+
+deploy: packaged.yml
+	sam deploy --template-file packaged.yml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
+
+deploy-native: packaged-native.yml
+	sam deploy --template-file packaged-native.yml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
+
+destroy-stack:
+	aws cloudformation delete-stack --stack-name $(STACK_NAME) --region $(APP_REGION)
 
 destroy-bucket:
 	@aws s3 rb s3://$(BUCKET_NAME) --force --region $(APP_REGION)
 
-install-holy-lambda:
-	@bash -c "cd ../../ && lein install"
+dry-api: target/output.jar
+	sam local start-api --template template.yml
 
-compile:
+native-gen-conf: target/output.jar
+	@docker run --user $(USER_GID) \
+		-e "AWS_CREDENTIAL_PROFILES_FILE=/project/.aws/credentials" \
+		-e "AWS_CONFIG_FILE=/project/.aws/config" \
+		-v $(PWD):/project \
+		-v ~/.aws:/project/.aws:ro \
+		-it fierycod/graalvm-native-image:latest \
+		bash -c "cd /project && \
+	          java -agentlib:native-image-agent=config-output-dir=resources/native-configuration \
+			           -Dexecutor=native-agent \
+			           -jar target/output.jar"
+
+local-test: check-service
+	curl "http://127.0.0.1:3000/hello"
+
+dry-api-native: latest.zip
+	sam local start-api --template template-native.yml --debug
+
+make-bucket:
+	aws s3 ls s3://$(BUCKET_NAME) || aws s3 mb s3://$(BUCKET_NAME)
+
+latest.zip: output
+	@chmod +x output && cp resources/bootstrap-native bootstrap && chmod +x bootstrap && cp -r resources/native-deps . && zip -r -j latest bootstrap output native-deps/* && rm -Rf bootstrap native-deps
+
+output: target/output.jar
+	docker run --user $(USER_GID) -v ${PWD}:/project -it fierycod/graalvm-native-image:latest bash -c "cd /project && \
+		native-image -jar target/output.jar \
+			-H:ConfigurationFileDirectories=resources/native-configuration \
+			-H:+AllowIncompleteClasspath \
+			--report-unsupported-elements-at-runtime \
+      --no-fallback \
+      --verbose \
+      --enable-url-protocols=http,https \
+      --no-server \
+      --initialize-at-build-time \
+      --trace-object-instantiation=java.lang.Thread"
+
+packaged.yml: target/output.jar make-bucket
+	sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket $(BUCKET_NAME) --s3-prefix $(S3_PREFIX)
+
+packaged-native.yml: latest.zip make-bucket
+	sam package --template-file template-native.yml --output-template-file packaged-native.yml --s3-bucket $(BUCKET_NAME) --s3-prefix $(S3_PREFIX)
+
+target/output.jar: src/sqs_example/*.clj
 	@lein uberjar
 
-dry-api:
-	@sam local start-api --skip-pull-image
-
-native-compile:
-	@${native_image_cmd}
-	@mv -f output server
-	@zip -j latest resources/bootstrap server resources/native-deps/*
-	@mv latest.zip resources/
-	@rm -Rf server
-
-native-sqs-invoke:
-	@sam local invoke $(LAMBDA_NAME) --template ./resources/native-template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE) -n resources/sam-envs.json
-
-sqs-invoke:
-	@sam local invoke $(LAMBDA_NAME) --template ./template.yml --skip-pull-image -e $(EVENT_PAYLOAD_FILE)
-
-pack:
-	@sam package --template-file ./template.yml --output-template-file packaged.yaml --s3-bucket $(BUCKET_NAME) --s3-prefix "sqs-example-latest"
-
-deploy:
-	@sam deploy --template-file ./packaged.yaml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
-
-native-pack:
-	@sam package --template-file ./resources/native-template.yml --output-template-file resources/native-packaged.yaml --s3-bucket $(BUCKET_NAME) --s3-prefix "sqs-example-latest"
-
-native-deploy:
-	@sam deploy --template-file ./resources/native-packaged.yaml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region $(APP_REGION)
-
-native-destroy:
-	@aws cloudformation delete-stack --stack-name $(STACK_NAME) --region $(APP_REGION)
-
 logs-tail:
-	sam logs -n $(LAMBDA_NAME) --stack-name $(STACK_NAME) -t
+	@sam logs -n $(LAMBDA_NAME) --stack-name $(STACK_NAME) -t

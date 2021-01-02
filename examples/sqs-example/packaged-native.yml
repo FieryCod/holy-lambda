@@ -1,36 +1,36 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
-  Example basic lambda using `holy-lambda` micro library
+Description: 'Example basic lambda using `holy-lambda` micro library
 
+  '
 Parameters:
   Runtime:
     Type: String
-    Default: java11
+    Default: provided
   Timeout:
     Type: Number
     Default: 25
   MemorySize:
     Type: Number
     Default: 2000
-
 Globals:
   Function:
-    Runtime: !Ref Runtime
-    Timeout: !Ref Timeout
-    MemorySize: !Ref MemorySize
-
+    Runtime:
+      Ref: Runtime
+    Timeout:
+      Ref: Timeout
+    MemorySize:
+      Ref: MemorySize
 Resources:
   ExampleSQS:
     Type: AWS::SQS::Queue
     Properties:
       DelaySeconds: 1
-
   ApiProxyMessageFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: sqs-example.core.ApiProxyMessage
-      CodeUri: target/output.jar
+      CodeUri: s3://holy-lambda--sqs-example-fierycod/sqs-example/e98ad29ffad728cafcd0ce536a122964
       FunctionName: ApiProxyMessageFunction
       Events:
         ProxyMessageEvent:
@@ -38,27 +38,31 @@ Resources:
           Properties:
             Path: /{message}
             Method: get
-
       Environment:
         Variables:
-          SQS_URL: !Ref ExampleSQS
-
+          SQS_URL:
+            Ref: ExampleSQS
       Policies:
-        - SQSSendMessagePolicy:
-            QueueName:
-              !GetAtt ExampleSQS.QueueName
-
+      - SQSSendMessagePolicy:
+          QueueName:
+            Fn::GetAtt:
+            - ExampleSQS
+            - QueueName
   SubscribeLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: sqs-example.core.SubscribeLambda
-      CodeUri: target/output.jar
+      CodeUri: s3://holy-lambda--sqs-example-fierycod/sqs-example/e98ad29ffad728cafcd0ce536a122964
       Events:
         ReceiveStringEvent:
           Type: SQS
           Properties:
-            Queue: !GetAtt ExampleSQS.Arn
+            Queue:
+              Fn::GetAtt:
+              - ExampleSQS
+              - Arn
             BatchSize: 1
       Environment:
         Variables:
-          SQS_URL: !Ref ExampleSQS
+          SQS_URL:
+            Ref: ExampleSQS

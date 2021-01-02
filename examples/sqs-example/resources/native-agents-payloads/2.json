@@ -1,14 +1,12 @@
 {
-	"name": "sqs-example.core.ApiProxyMessage",
+	"name": "sqs-example.core.SubscribeLambda",
 	"event": {
-    "pathParameters": {
-      "message": "Hello world"
-    }
+    "Records": [{"body": "Hello"}]
   },
 	"context": {
     "envs": {
       "SQS_URL": "https://sqs.eu-central-1.amazonaws.com/443526418261/ExampleQueue"
     }
   },
-  "propagate": true
+  "propagate": false
 }
