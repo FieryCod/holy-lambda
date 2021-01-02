@@ -2,4 +2,4 @@
                     ["Changelog" {:file "CHANGELOG.md"}]]
                    ["Tutorial" {:file "doc/1-00-tutorial.md"}
                     ["Installation" {:file "doc/1-01-installation.md"}]
-                    ["New project generation" {:file "doc/1-02-new-project.md"}]]]}
+                    ["First project" {:file "doc/1-02-first-project.md"}]]]}

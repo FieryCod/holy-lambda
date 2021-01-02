@@ -1,21 +1,27 @@
 (ns sqs-example.core
   (:gen-class)
   (:require
-   [fierycod.holy-lambda.core :as h])
-  (:import
-   [com.amazonaws.services.sqs AmazonSQSClient]
-   [com.amazonaws.services.sqs.model SendMessageRequest]))
+   [sqs-example.static-load]
+   [cognitect.aws.http.cognitect :as http]
+   [cognitect.aws.client.api :as aws]
+   [fierycod.holy-lambda.core :as h]))
 
-(h/deflambda ReceiveStringLambda
+(def http-client (delay (http/create)))
+(def sqs (delay (aws/client {:api :sqs
+                             :http-client @http-client})))
+
+(h/deflambda SubscribeLambda
   [event context]
-  (h/info "Received an sqs event" event)
-  (h/info context)
-  (->> (SendMessageRequest. (-> context :envs :CONCATENATED_HOLY_SQS_URL) (str (get-in event [:Records 0 :body] "") " HolyLambda!"))
-       (.sendMessage (AmazonSQSClient.)))
-  (h/info "Successfully sent a message to ConcatenatedHolySQS")
-  ;; Indicates that the message was succesfully processed,
-  ;; therefore the message will be automatically removed from the
-  ;; BaseStringSQS
+  (h/info "Received an sqs event with message:" (get-in event [:Records 0 :body]))
   nil)
 
-(h/gen-main [#'ReceiveStringLambda])
+(h/deflambda ApiProxyMessage
+  [{:keys [pathParameters] :as event} context]
+  (let [message (or (:message pathParameters) "Hello")]
+    (println (aws/invoke @sqs {:op :SendMessage
+                               :request {:QueueUrl (-> context :envs :SQS_URL)
+                                         :MessageBody message}}))
+    {:statusCode 200
+     :body (str "Received message: " message)}))
+
+(h/gen-main [#'SubscribeLambda #'ApiProxyMessage])

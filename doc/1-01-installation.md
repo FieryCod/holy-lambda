@@ -1,14 +1,13 @@
 # Installation
 
 You will need following things to start:
-- Node.js >= v8.9.0
-- Java >= 8
+- Homebrew/Linuxbrew
+- Java 11
 - Docker, Docker Compose >= 1.13.1, 1.22.0
-- Python, Pip >= 3.5.0, 8.9.0
 
-1. Install all necessary dependencies
+1. First install all dependencies:
     ```
-    pip install --user aws-cli aws-sam-cli choly
+    brew tap aws/tap && brew install leiningen awscli aws-sam-cli clojure/tools/clojure
     ```
 
 2. Configure default AWS profile via `aws-cli`

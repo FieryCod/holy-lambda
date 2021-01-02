@@ -1,32 +1,27 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-
+Description: "Example basic lambda using `holy-lambda` micro library\n"
 Parameters:
   Runtime:
     Type: String
-    Default: java8
+    Default: provided
   Timeout:
     Type: Number
     Default: 40
   MemorySize:
     Type: Number
     Default: 2000
-  CodeUri:
-    Type: String
-    Default: target/hello-lambda.jar
-
 Globals:
   Function:
-    Runtime: !Ref Runtime
-    Timeout: !Ref Timeout
-    MemorySize: !Ref MemorySize
-    CodeUri: !Ref CodeUri
-
+    Runtime: !Ref 'Runtime'
+    Timeout: !Ref 'Timeout'
+    MemorySize: !Ref 'MemorySize'
 Resources:
   HelloLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: hello-lambda.core.HelloLambda
+      CodeUri: ./latest.zip
       FunctionName: HelloLambdaFunction
       Events:
         HelloEvent:
@@ -34,11 +29,11 @@ Resources:
           Properties:
             Path: /
             Method: get
-
   ByeLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: hello-lambda.core.ByeLambda
+      CodeUri: ./latest.zip
       FunctionName: ByeLambdaFunction
       Events:
         ByeEvent:

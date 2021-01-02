@@ -1,5 +1,0 @@
-#!/bin/sh
-
-set -e
-
-./server -Djavax.net.ssl.trustStore=cacerts -Djavax.net.ssl.trustAnchors=cacerts -Djavax.net.ssl.trustStorePassword=changeit -Djava.library.path=./

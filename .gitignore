@@ -5,7 +5,6 @@ native-packaged.yaml
 invoke-envs.json
 fnative-envs.list
 envs.example.json
-native-template.yml
 *.zip
 /classes
 /checkouts
@@ -24,5 +23,6 @@ node_modules
 native-configuration/**
 build
 dist
-choly.egg-info
 .clj-kondo/.cache
+.aws
+output
