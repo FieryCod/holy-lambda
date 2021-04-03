@@ -6,11 +6,11 @@
   :license {:name "MIT"
             :url "https://opensource.org/licenses/MIT"}
 
-  :source-paths ["src/clj"]
+  :source-paths ["src"]
 
   :global-vars {*warn-on-reflection* true}
 
-  :dependencies [[org.clojure/clojure "1.10.3"]
+  :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/tools.macro "0.1.5"]
                  [com.amazonaws/aws-lambda-java-core "1.2.0"]]

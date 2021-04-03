@@ -6,7 +6,7 @@ Description: >
 Parameters:
   Runtime:
     Type: String
-    Default: java11
+    Default: java8
   Timeout:
     Type: Number
     Default: 40

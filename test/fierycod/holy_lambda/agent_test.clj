@@ -1,7 +1,7 @@
-(ns fierycod.holy-lambda.impl.agent-test
+(ns fierycod.holy-lambda.agent-test
   (:require
    [fierycod.holy-lambda.core :as h]
-   [fierycod.holy-lambda.impl.agent :as agent]
+   [fierycod.holy-lambda.agent :as agent]
    [clojure.test :as t]))
 
 (h/deflambda HolyLambda
@@ -29,7 +29,7 @@
                 :name "fierycod.holy-lambda.impl.agent-test.NewLambda",
                 :path "resources/native-agents-payloads/3.edn",
                 :propagate false})
-             (#'fierycod.holy-lambda.impl.agent/agents-payloads->invoke-map)))))
+             (#'fierycod.holy-lambda.agent/agents-payloads->invoke-map)))))
 
 (t/deftest routes->reflective-call!-test
   (t/testing "should call all lambdas with corresponding payloads and report on each step"

@@ -18,7 +18,7 @@
     <url>https://github.com/FieryCod/holy-lambda</url>
     <connection>scm:git:git://github.com/FieryCod/holy-lambda.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/FieryCod/holy-lambda.git</developerConnection>
-    <tag>6a16cbeb5fc3f81f4e1f02828d4900e95e55e661</tag>
+    <tag>596c421f8b9730200e856f68d443dbca3430d550</tag>
   </scm>
   <build>
     <sourceDirectory>src/clj</sourceDirectory>
@@ -66,7 +66,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.10.3</version>
+      <version>1.10.0</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
