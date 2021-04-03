@@ -1,0 +1,4 @@
+{:name "fierycod.holy-lambda.impl.agent-test.NewLambda",
+ :request {:event {:msg "new-lambda"},
+           :context {:ctx "CTX"}}
+ :propagate false}

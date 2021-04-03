@@ -5,34 +5,34 @@
    [clojure.test :as t]))
 
 (h/deflambda HolyLambda
-  [event context]
-  (println event context))
+  [request]
+  (println request))
 
 (h/deflambda NewLambda
-  [event context]
-  (println event context))
+  [request]
+  (println request))
 
-(t/deftest native-agents-files->payloads-map-fn-test
+(t/deftest agents-payloads->invoke-map-test
   (t/testing "should generate the map from pairs [HandlerName, [{:event sth, :context sth, :envs sth, :path sth}, ...]]"
-    (t/is (= '({:context {},
-                :event {},
+    (t/is (= '({:request {:context {},
+                          :event {}}
                 :name "fierycod.holy-lambda.impl.agent-test.HolyLambda",
-                :path "resources/native-agents-payloads/1.json",
+                :path "resources/native-agents-payloads/1.edn",
                 :propagate false}
-               {:context {},
-                :event {:lambda2 2},
+               {:request {:context {},
+                          :event {:lambda2 2}}
                 :name "fierycod.holy-lambda.impl.agent-test.HolyLambda",
-                :path "resources/native-agents-payloads/2.json",
+                :path "resources/native-agents-payloads/2.edn",
                 :propagate false}
-               {:context {:ctx "CTX"},
-                :event {:msg "new-lambda"},
+               {:request {:context {:ctx "CTX"},
+                          :event {:msg "new-lambda"}}
                 :name "fierycod.holy-lambda.impl.agent-test.NewLambda",
-                :path "resources/native-agents-payloads/3.json",
+                :path "resources/native-agents-payloads/3.edn",
                 :propagate false})
              (#'fierycod.holy-lambda.impl.agent/agents-payloads->invoke-map)))))
 
-(t/deftest call-lambdas-with-agent-payloads-fn-test
+(t/deftest routes->reflective-call!-test
   (t/testing "should call all lambdas with corresponding payloads and report on each step"
-    (t/is (= "[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/1.json\n{} {}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/1.json\n[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/2.json\n{:lambda2 2} {}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/2.json\n[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.NewLambda with payloads from resources/native-agents-payloads/3.json\n{:msg new-lambda} {:ctx CTX}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.NewLambda with payloads from resources/native-agents-payloads/3.json\n[Holy Lambda] Succesfully called all the lambdas\n"
+    (t/is (= "[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/1.edn\n{:event {}, :context {}}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/1.edn\n[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/2.edn\n{:event {:lambda2 2}, :context {}}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/2.edn\n[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.NewLambda with payloads from resources/native-agents-payloads/3.edn\n{:event {:msg new-lambda}, :context {:ctx CTX}}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.NewLambda with payloads from resources/native-agents-payloads/3.edn\n[Holy Lambda] Succesfully called all the lambdas\n"
              (with-out-str (agent/routes->reflective-call! {"fierycod.holy-lambda.impl.agent-test.HolyLambda" #'HolyLambda,
                                                             "fierycod.holy-lambda.impl.agent-test.NewLambda" #'NewLambda}))))))

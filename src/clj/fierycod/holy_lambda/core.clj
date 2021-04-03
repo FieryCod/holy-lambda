@@ -22,8 +22,7 @@
 
 (def ^{:added "0.0.1"
        :arglists '([afn-sym]
-                   [afn-sym event context]
-                   [afn-sym input output context])}
+                   [afn-sym request])}
   call
   "Resolves the lambda function and calls it with the event and context.
   Returns the callable lambda function if only one argument is passed.
@@ -93,40 +92,20 @@
 (defn- wrap-lambda
   [gmethod-sym fn-args fn-body gclass]
   (let [lambda `(fn ~fn-args ~@fn-body)]
-    (condp = (count fn-args)
-      2
-      `(do
-         ~gclass
-         (defn ~gmethod-sym
-           ;; Arity used for testing and native runtime invocation
-           ([event# context#]
-            (~lambda event# context#))
+    `(do
+       ~gclass
+       (defn ~gmethod-sym
+         ;; Arity used for testing and native runtime invocation
+         ([request#]
+          (~lambda request#))
            ;; Arity used for Java runtime
-           ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
-            (let [event# (#'fierycod.holy-lambda.impl.util/in->edn-event in#)
-                  context# (#'fierycod.holy-lambda.core/ctx-object->ctx-edn ctx# (#'fierycod.holy-lambda.core/envs))
-                  response# (~lambda event# context#)
-                  f-response# (assoc response# :body (json/write-str (:body response#)))]
-              (.write out# (.getBytes ^String (json/write-str f-response#) "UTF-8"))))))
-      3
-      ;; TODO: Check whether lambada style would be helpful
-
-      ;; If yes then we need to provide following code to support it on native side:
-      ;; EVENT:
-      ;; 1. Parse string to edn
-      ;; 2. Parse edn to string
-      ;; 3. Change string to InputStream
-      ;; CONTEXT:
-      ;; The same thing we should do with context
-      ;; `(do
-      ;;    ~gclass
-      ;;    (defn ~gmethod-sym
-      ;;      ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
-      ;;       (~lambda in# out# ctx#))))
-      (throw (Exception. "Lambada style is not supported for now. Check source code!"))
-
-      ;; When arity does not match
-      (throw (Exception. "Invalid arity..")))))
+         ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
+          (let [event# (#'fierycod.holy-lambda.impl.util/in->edn-event in#)
+                context# (#'fierycod.holy-lambda.core/ctx-object->ctx-edn ctx# (#'fierycod.holy-lambda.core/envs))
+                response# (~lambda {:event event#
+                                    :ctx context#})
+                f-response# (assoc response# :body (json/write-str (:body response#)))]
+            (.write out# (.getBytes ^String (json/write-str f-response#) "UTF-8"))))))))
 
 (defn- native->aws-context
   [headers event env-vars]
@@ -180,7 +159,8 @@
   (let [event (-> aws-event :body)
         context (native->aws-context (:headers aws-event) event env-vars)]
     (try
-      (send-response (handler event context))
+      (send-response (handler {:event event
+                               :ctx context}))
       (catch Exception err
         (send-runtime-error err)))))
 

@@ -1,0 +1,7 @@
+{:name "sqs-example.core.SubscribeLambda",
+ :request {:event {:Records [{:body "Hello"}]},
+           :context
+           {:envs
+            {:SQS_URL
+             "https://sqs.eu-central-1.amazonaws.com/443526418261/ExampleQueue"}}},
+ :propagate false}

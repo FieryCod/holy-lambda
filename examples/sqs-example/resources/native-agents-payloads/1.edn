@@ -1,0 +1,4 @@
+{:name "sqs-example.core.ApiProxyMessage",
+ :request {:event {:pathParameters {:message "Hello world"}},
+           :context {:envs {:SQS_URL "https://sqs.eu-central-1.amazonaws.com/443526418261/ExampleQueue"}}},
+ :propagate true}

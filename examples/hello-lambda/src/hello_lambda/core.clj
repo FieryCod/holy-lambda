@@ -4,8 +4,8 @@
    [fierycod.holy-lambda.core :as h]))
 
 (h/deflambda HelloLambda
-  [event context]
-  (println event context)
+  [request]
+  (println request)
   {:statusCode 200
    :body {:message "Hello"
           "it's" "me"
@@ -15,8 +15,7 @@
    :headers {"Content-Type" "application/json"}})
 
 (h/deflambda ByeLambda
-  [event context]
-  (println event context)
+  [request]
   {:statusCode 200
    :body "Bye bye"
    :isBase64Encoded false

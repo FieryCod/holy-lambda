@@ -45,10 +45,5 @@
 (defn call
   ([afn-sym]
    (partial call afn-sym))
-  ([afn-sym & args]
-   (let [{:keys [arity ns name]} (meta afn-sym)]
-     (assert (= arity (count args))
-             (str "Function defined with two arguments should call lambda with only two arguments. "
-                  "Otherwise use Lambada style and call with three arguments.\n\n"
-                  "Failed when calling: '" ns "." name "\n"))
-     (apply afn-sym args))))
+  ([afn-sym request]
+   (afn-sym request)))

@@ -11,15 +11,15 @@
                              :http-client @http-client})))
 
 (h/deflambda SubscribeLambda
-  [event context]
+  [{:keys [event]}]
   (println "Received an sqs event with message:" (get-in event [:Records 0 :body]))
   nil)
 
 (h/deflambda ApiProxyMessage
-  [{:keys [pathParameters] :as event} context]
-  (let [message (or (:message pathParameters) "Hello")]
+  [{:keys [event ctx] :as request}]
+  (let [message (or (:message (:pathParameters event)) "Hello")]
     (println (aws/invoke @sqs {:op :SendMessage
-                               :request {:QueueUrl (-> context :envs :SQS_URL)
+                               :request {:QueueUrl (-> ctx :envs :SQS_URL)
                                          :MessageBody message}}))
     {:statusCode 200
      :body (str "Received message: " message)}))
