@@ -5,9 +5,7 @@
 
 (h/deflambda HelloLambda
   [event context]
-  (h/info "Logging...")
-  (h/info "Event body" event)
-  (h/info "Event context" context)
+  (println event context)
   {:statusCode 200
    :body {:message "Hello"
           "it's" "me"
@@ -18,8 +16,7 @@
 
 (h/deflambda ByeLambda
   [event context]
-  (h/info "Event body" event)
-  (h/info "Event context" context)
+  (println event context)
   {:statusCode 200
    :body "Bye bye"
    :isBase64Encoded false

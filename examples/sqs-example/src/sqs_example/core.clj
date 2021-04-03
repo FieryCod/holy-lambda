@@ -12,7 +12,7 @@
 
 (h/deflambda SubscribeLambda
   [event context]
-  (h/info "Received an sqs event with message:" (get-in event [:Records 0 :body]))
+  (println "Received an sqs event with message:" (get-in event [:Records 0 :body]))
   nil)
 
 (h/deflambda ApiProxyMessage

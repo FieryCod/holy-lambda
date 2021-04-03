@@ -16,8 +16,19 @@ or on Native Custom AWS Runtime built into your codebase.
 [Jump here](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/1-01-installation) to learn more and start the journey with the Holy Lambda.
 
 ## Quickstart
+Copy one of the examples. Library still in development
+  
+## Developer documentation
+## Install library locally
+
 ```
-lein new holy-lambda <your-project-name>
+lein install
+```
+
+## Test
+
+``` clojure
+lein with-profile +eftest eftest 
 ```
 
 ## License

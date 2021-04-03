@@ -1,7 +1,7 @@
 (ns fierycod.holy-lambda.impl.agent-test
   (:require
    [fierycod.holy-lambda.core :as h]
-   [fierycod.holy-lambda.impl.agent :as a]
+   [fierycod.holy-lambda.impl.agent :as agent]
    [clojure.test :as t]))
 
 (h/deflambda HolyLambda
@@ -29,10 +29,10 @@
                 :name "fierycod.holy-lambda.impl.agent-test.NewLambda",
                 :path "resources/native-agents-payloads/3.json",
                 :propagate false})
-             (#'fierycod.holy-lambda.impl.agent/native-agents-files->payloads-map)))))
+             (#'fierycod.holy-lambda.impl.agent/agents-payloads->invoke-map)))))
 
 (t/deftest call-lambdas-with-agent-payloads-fn-test
   (t/testing "should call all lambdas with corresponding payloads and report on each step"
-    (t/is (= "[INFO] Calling lambda fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/1.json\n{} {}\n[INFO] Succesfully called fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/1.json\n[INFO] Calling lambda fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/2.json\n{:lambda2 2} {}\n[INFO] Succesfully called fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/2.json\n[INFO] Calling lambda fierycod.holy-lambda.impl.agent-test.NewLambda with payloads from resources/native-agents-payloads/3.json\n{:msg new-lambda} {:ctx CTX}\n[INFO] Succesfully called fierycod.holy-lambda.impl.agent-test.NewLambda with payloads from resources/native-agents-payloads/3.json\n[INFO] Succesfully called all the lambdas\n"
-             (with-out-str (a/call-lambdas-with-agent-payloads {"fierycod.holy-lambda.impl.agent-test.HolyLambda" #'HolyLambda,
-                                                                "fierycod.holy-lambda.impl.agent-test.NewLambda" #'NewLambda}))))))
+    (t/is (= "[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/1.json\n{} {}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/1.json\n[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/2.json\n{:lambda2 2} {}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/2.json\n[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.NewLambda with payloads from resources/native-agents-payloads/3.json\n{:msg new-lambda} {:ctx CTX}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.NewLambda with payloads from resources/native-agents-payloads/3.json\n[Holy Lambda] Succesfully called all the lambdas\n"
+             (with-out-str (agent/routes->reflective-call! {"fierycod.holy-lambda.impl.agent-test.HolyLambda" #'HolyLambda,
+                                                            "fierycod.holy-lambda.impl.agent-test.NewLambda" #'NewLambda}))))))

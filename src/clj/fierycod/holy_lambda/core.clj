@@ -5,11 +5,9 @@
   It's a significantly faster than the Java runtime due to the use of GraalVM.
 
   *Namespace includes:*
-  - Utilities for Logging
   - Friendly macro for generating Lambda functions which run on both runtimes
   - TODO Utilities which help produce valid response"
   (:require
-   [fierycod.holy-lambda.impl.logging]
    [fierycod.holy-lambda.impl.agent]
    [fierycod.holy-lambda.impl.util :as u]
    [clojure.data.json :as json]
@@ -17,51 +15,10 @@
    [clojure.tools.macro :as macro])
   (:import
    [java.io InputStream OutputStream InputStreamReader]
-   [com.amazonaws.services.lambda.runtime
-    RequestStreamHandler Context CognitoIdentity ClientContext Client]))
+   [com.amazonaws.services.lambda.runtime RequestStreamHandler Context CognitoIdentity ClientContext Client]))
 
 (def ^:dynamic ^:private *runtime* nil)
 (def ^:dynamic ^:private *invocation-id* nil)
-
-(def
-  ^{:added "0.0.1"
-    :arglists '([& msgs])}
-  log
-  "Logs to standard output. Uses the proper logger according to the runtime
-  See `fierycod.holy-lambda.impl.logging/log`"
-  #'fierycod.holy-lambda.impl.logging/log)
-
-(def
-  ^{:added "0.0.1"
-    :arglists '([& msgs])}
-  info
-  "Similiar to `log`, but adds special *[INFO]* decoration
-  See `fierycod.holy-lambda.impl.logging/info`"
-  #'fierycod.holy-lambda.impl.logging/info)
-
-(def
-  ^{:added "0.0.1"
-    :arglists '([& msgs])}
-  warn
-  "Similiar to `log`, but adds special *[WARN]* decoration
-  See `fierycod.holy-lambda.impl.logging/warn`"
-  #'fierycod.holy-lambda.impl.logging/warn)
-
-(def
-  ^{:added "0.0.1"
-    :arglists '([& msgs])}
-  error
-  "Similiar to `log`, but adds special *[ERROR]* decoration
-  See `fierycod.holy-lambda.impl.logging/error`"
-  #'fierycod.holy-lambda.impl.logging/error)
-
-(def
-  ^{:added "0.0.4"
-    :arglists '([tag x])}
-  trace
-  "Trace the `x` with tag then returns the value
-  See `fierycod.holy-lambda.impl.logging/trace`"
-  #'fierycod.holy-lambda.impl.logging/trace)
 
 (def ^{:added "0.0.1"
        :arglists '([afn-sym]
@@ -94,7 +51,7 @@
 (defn- ctx
   [envs rem-time fn-name fn-version fn-invoked-arn memory-limit
    aws-request-id log-group-name log-stream-name
-   identity client-context logger-impl]
+   identity client-context]
   {:remainingTimeInMs rem-time
    :fnName fn-name
    :fnVersion fn-version
@@ -105,8 +62,7 @@
    :logStreamName log-stream-name
    :identity identity
    :clientContext client-context
-   :envs envs
-   :logger logger-impl})
+   :envs envs})
 
 (defn- ctx-object->ctx-edn
   [^Context context envs]
@@ -123,8 +79,7 @@
                      :appVersionCode (.getAppVersionCode client)
                      :appPackageName (.getAppPackageName client)})
           :custom (keywordize-hashmap (.getCustom client-context))
-          :environment (keywordize-hashmap (.getEnvironment client-context))})
-       (.getLogger context)))
+          :environment (keywordize-hashmap (.getEnvironment client-context))})))
 
 (defn- define-synthetic-name
   [aname sym]
@@ -148,13 +103,11 @@
             (~lambda event# context#))
            ;; Arity used for Java runtime
            ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
-            (binding [fierycod.holy-lambda.impl.logging/*logger*
-                      (#'fierycod.holy-lambda.impl.logging/logger-factory (.getLogger ctx#))]
-              (let [event# (#'fierycod.holy-lambda.impl.util/in->edn-event in#)
-                    context# (#'fierycod.holy-lambda.core/ctx-object->ctx-edn ctx# (#'fierycod.holy-lambda.core/envs))
-                    response# (~lambda event# context#)
-                    f-response# (assoc response# :body (json/write-str (:body response#)))]
-                (.write out# (.getBytes ^String (json/write-str f-response#) "UTF-8")))))))
+            (let [event# (#'fierycod.holy-lambda.impl.util/in->edn-event in#)
+                  context# (#'fierycod.holy-lambda.core/ctx-object->ctx-edn ctx# (#'fierycod.holy-lambda.core/envs))
+                  response# (~lambda event# context#)
+                  f-response# (assoc response# :body (json/write-str (:body response#)))]
+              (.write out# (.getBytes ^String (json/write-str f-response#) "UTF-8"))))))
       3
       ;; TODO: Check whether lambada style would be helpful
 
@@ -187,7 +140,6 @@
               ":" (get-in event [:requestContext :accountId] "0000000")
               ":function:" (get-env :AWS_LAMBDA_FUNCTION_NAME))
          (get-env :AWS_LAMBDA_FUNCTION_MEMORY_SIZE)
-         ;; TODO: Incorrect requestId
          (-> event :requestContext :requestId)
          (get-env :AWS_LAMBDA_LOG_GROUP_NAME)
          (get-env :AWS_LAMBDA_LOG_STREAM_NAME)
@@ -195,19 +147,19 @@
          {:identityId "????"
           :identityPoolId (-> event :requestContext :identity :cognitoIdentityPoolId)}
          ;; #7
-         {:client nil :custom nil :environment nil}
-         #'fierycod.holy-lambda.impl.logging/*logger*)))
+         {:client nil :custom nil :environment nil})))
 
 (defn- send-runtime-error
   [^Exception err]
   (let [exit! #(System/exit -1)
         url (str "http://" *runtime* "/2018-06-01/runtime/invocation/" *invocation-id* "/error")
-        payload {:errorMessage (.getMessage err)
+        message (.getMessage err)
+        payload {:errorMessage message
                  :errorType (-> err (.getClass) (.getCanonicalName))}
         response (u/http "POST" url payload)]
-    (error (.getMessage err))
+    (println "[Holy Lambda] Runtime error" message)
     (when-not (u/success-code? (:status response))
-      (do (#'fierycod.holy-lambda.impl.logging/fatal "AWS did not accept the response. Error message: " (:body response))
+      (do (println "[Holy Lambda] Response of handler failed to be sent to AWS. " (:body response))
           (exit!)))))
 
 (defn- fetch-aws-event
@@ -256,7 +208,7 @@
   [name & attrs]
   (let [[aname [fn-args & fn-body]] (macro/name-with-attributes name attrs)
         aname (vary-meta aname assoc :arity (count fn-args))
-        prefix (str "LOCAL_NEVER_CALL_DIRECTLY_" aname "--")
+        prefix (str "PRVL" aname "--")
         gmethod-sym (symbol (str prefix "handleRequest"))
         gfullname (symbol (str (ns-name *ns*) "." aname))
         gclass (gen-class-lambda prefix gfullname)]
@@ -293,7 +245,7 @@
        ;; executor = anything else   -- Run provided runtime loop
        (if (= executor# "native-agent")
          ;; When we want to generate the native configuration for the lambdas
-         (#'fierycod.holy-lambda.impl.agent/call-lambdas-with-agent-payloads routes#)
+         (#'fierycod.holy-lambda.impl.agent/routes->reflective-call! routes#)
 
          ;; Otherwise just start the runtime loop
          (while true
