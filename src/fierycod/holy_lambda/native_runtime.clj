@@ -76,8 +76,14 @@
         aws-event (fetch-aws-event runtime)
         handler (get routes handler-name)
         iid (:invocation-id aws-event)]
-    (if-not handler
-      (do (send-runtime-error runtime iid (->ex (str "Handler " handler-name " not found!")))
-          (u/exit!))
-      (when (and (:invocation-id aws-event) (u/success-code? (:status aws-event)))
-        (process-event runtime iid aws-event env-vars (u/call handler))))))
+
+    (when-not handler
+      (send-runtime-error runtime iid (->ex (str "Handler " handler-name " not found!")))
+      (u/exit!))
+
+    (when-not iid
+      (send-runtime-error runtime iid (->ex (str "Failed to determine new invocation-id. Invocation id is:" iid)))
+      (u/exit!))
+
+    (when (and (:invocation-id aws-event) (u/success-code? (:status aws-event)))
+      (process-event runtime iid aws-event env-vars (u/call handler)))))
