@@ -1,4 +1,5 @@
 /target
+.lsp
 packaged.yaml
 server
 native-packaged.yaml
