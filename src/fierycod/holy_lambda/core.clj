@@ -11,7 +11,6 @@
    [fierycod.holy-lambda.native-runtime]
    [fierycod.holy-lambda.agent]
    [fierycod.holy-lambda.util :as u]
-   [clojure.data.json :as json]
    [clojure.tools.macro :as macro])
   (:import
    [java.io InputStream OutputStream]
@@ -21,9 +20,9 @@
        :arglists '([afn-sym]
                    [afn-sym request])}
   call
-  "Resolves the lambda function and calls it with the event and context.
-  Returns the callable lambda function if only one argument is passed.
-  See `fierycod.holy-lambda.util/call`"
+  "Resolves the lambda function and calls it with request map.
+   Returns the callable lambda function if only one argument is passed.
+   See `fierycod.holy-lambda.util/call`"
   #'fierycod.holy-lambda.util/call)
 
 (defn- gen-class-lambda
@@ -68,12 +67,17 @@
           (~lambda request#))
          ;; Arity used for Java runtime
          ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
-          (let [event# (#'fierycod.holy-lambda.util/in->edn-event in#)
-                context# (#'fierycod.holy-lambda.core/java-ctx-object->ctx-edn ctx# (#'fierycod.holy-lambda.util/envs))
-                response# (~lambda {:event event#
-                                    :ctx context#})
-                f-response# (assoc response# :body (json/write-str (:body response#)))]
-            (.write out# (.getBytes ^String (json/write-str f-response#) "UTF-8"))))))))
+          (try
+            (let [event# (#'fierycod.holy-lambda.util/in->edn-event in#)
+                  context# (#'fierycod.holy-lambda.core/java-ctx-object->ctx-edn ctx# (#'fierycod.holy-lambda.util/envs))
+                  response# (#'fierycod.holy-lambda.util/->payload-bytes
+                             (~lambda {:event event#
+                                       :ctx context#}))]
+              (.write out# (bytes response#)))
+            (catch Exception error#
+              (println "[Holy Lambda] Exception during request handling" error#))
+            (finally
+              (.close out#))))))))
 
 (defmacro deflambda
   "Convenience macro for generating defn alike lambdas."

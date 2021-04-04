@@ -84,15 +84,6 @@
   "name":"clojure.core_proxy__init"
 },
 {
-  "name":"clojure.data.json.JSONWriter"
-},
-{
-  "name":"clojure.data.json__init"
-},
-{
-  "name":"clojure.data.json_compat_0_1__init"
-},
-{
   "name":"clojure.edn__init"
 },
 {
@@ -159,9 +150,6 @@
   "name":"clojure.lang.IFn"
 },
 {
-  "name":"clojure.lang.IHashEq"
-},
-{
   "name":"clojure.lang.IKVReduce"
 },
 {
@@ -210,9 +198,6 @@
   "name":"clojure.lang.Murmur3"
 },
 {
-  "name":"clojure.lang.Named"
-},
-{
   "name":"clojure.lang.Namespace"
 },
 {
@@ -220,9 +205,6 @@
 },
 {
   "name":"clojure.lang.PersistentHashSet"
-},
-{
-  "name":"clojure.lang.PersistentQueue"
 },
 {
   "name":"clojure.lang.PersistentVector"
@@ -238,12 +220,6 @@
 },
 {
   "name":"clojure.lang.Reflector"
-},
-{
-  "name":"clojure.lang.SeqIterator"
-},
-{
-  "name":"clojure.lang.Sequential"
 },
 {
   "name":"clojure.lang.StringSeq"
@@ -265,33 +241,6 @@
 },
 {
   "name":"clojure.main__init"
-},
-{
-  "name":"clojure.pprint.PrettyFlush"
-},
-{
-  "name":"clojure.pprint.cl_format__init"
-},
-{
-  "name":"clojure.pprint.column_writer__init"
-},
-{
-  "name":"clojure.pprint.dispatch__init"
-},
-{
-  "name":"clojure.pprint.pprint_base__init"
-},
-{
-  "name":"clojure.pprint.pretty_writer__init"
-},
-{
-  "name":"clojure.pprint.print_table__init"
-},
-{
-  "name":"clojure.pprint.utilities__init"
-},
-{
-  "name":"clojure.pprint__init"
 },
 {
   "name":"clojure.spec.alpha.Spec"
@@ -328,6 +277,47 @@
 },
 {
   "name":"com.amazonaws.services.lambda.runtime.Context"
+},
+{
+  "name":"com.fasterxml.jackson.core.JsonFactory"
+},
+{
+  "name":"com.fasterxml.jackson.core.JsonGenerator$Feature"
+},
+{
+  "name":"com.fasterxml.jackson.databind.DeserializationFeature"
+},
+{
+  "name":"com.fasterxml.jackson.databind.JsonSerializer"
+},
+{
+  "name":"com.fasterxml.jackson.databind.ObjectMapper",
+  "allPublicMethods":true
+},
+{
+  "name":"com.fasterxml.jackson.databind.SerializationFeature"
+},
+{
+  "name":"com.fasterxml.jackson.databind.deser.Deserializers[]"
+},
+{
+  "name":"com.fasterxml.jackson.databind.deser.KeyDeserializers[]"
+},
+{
+  "name":"com.fasterxml.jackson.databind.deser.ValueInstantiators[]"
+},
+{
+  "name":"com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.fasterxml.jackson.databind.module.SimpleModule"
+},
+{
+  "name":"com.fasterxml.jackson.databind.ser.Serializers[]"
+},
+{
+  "name":"com.fasterxml.jackson.datatype.jsr310.JavaTimeModule"
 },
 {
   "name":"double[]"
@@ -378,7 +368,7 @@
   "name":"java.io.Closeable"
 },
 {
-  "name":"java.io.EOFException"
+  "name":"java.io.DataOutput"
 },
 {
   "name":"java.io.File"
@@ -388,9 +378,6 @@
 },
 {
   "name":"java.io.FileOutputStream"
-},
-{
-  "name":"java.io.FileWriter"
 },
 {
   "name":"java.io.InputStream"
@@ -423,19 +410,10 @@
   "name":"java.io.StringReader"
 },
 {
-  "name":"java.io.StringWriter"
-},
-{
   "name":"java.io.Writer"
 },
 {
   "name":"java.lang.Boolean"
-},
-{
-  "name":"java.lang.Byte"
-},
-{
-  "name":"java.lang.CharSequence"
 },
 {
   "name":"java.lang.Character"
@@ -448,9 +426,6 @@
 },
 {
   "name":"java.lang.Float"
-},
-{
-  "name":"java.lang.Integer"
 },
 {
   "name":"java.lang.Iterable"
@@ -466,9 +441,6 @@
 },
 {
   "name":"java.lang.Object[]"
-},
-{
-  "name":"java.lang.Short"
 },
 {
   "name":"java.lang.StackTraceElement"
@@ -500,10 +472,6 @@
 },
 {
   "name":"java.lang.reflect.Field"
-},
-{
-  "name":"java.lang.reflect.Method",
-  "methods":[{"name":"canAccess","parameterTypes":["java.lang.Object"] }]
 },
 {
   "name":"java.lang.reflect.Modifier"
@@ -552,9 +520,6 @@
 },
 {
   "name":"java.nio.file.LinkOption[]"
-},
-{
-  "name":"java.nio.file.attribute.FileAttribute"
 },
 {
   "name":"java.sql.Timestamp"
@@ -606,12 +571,6 @@
   "name":"java.util.concurrent.LinkedBlockingQueue"
 },
 {
-  "name":"java.util.concurrent.atomic.AtomicInteger"
-},
-{
-  "name":"java.util.concurrent.atomic.AtomicLong"
-},
-{
   "name":"java.util.concurrent.locks.ReentrantLock"
 },
 {
@@ -619,6 +578,45 @@
 },
 {
   "name":"java.util.regex.Pattern"
+},
+{
+  "name":"jsonista.core.ReadValue"
+},
+{
+  "name":"jsonista.core.WriteValue"
+},
+{
+  "name":"jsonista.core__init"
+},
+{
+  "name":"jsonista.jackson.DateSerializer"
+},
+{
+  "name":"jsonista.jackson.FunctionalKeyDeserializer"
+},
+{
+  "name":"jsonista.jackson.FunctionalKeywordSerializer"
+},
+{
+  "name":"jsonista.jackson.FunctionalSerializer"
+},
+{
+  "name":"jsonista.jackson.KeywordKeyDeserializer"
+},
+{
+  "name":"jsonista.jackson.KeywordSerializer"
+},
+{
+  "name":"jsonista.jackson.PersistentHashMapDeserializer"
+},
+{
+  "name":"jsonista.jackson.PersistentVectorDeserializer"
+},
+{
+  "name":"jsonista.jackson.RatioSerializer"
+},
+{
+  "name":"jsonista.jackson.SymbolSerializer"
 },
 {
   "name":"long[]"

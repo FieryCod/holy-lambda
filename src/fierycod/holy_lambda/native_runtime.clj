@@ -1,4 +1,4 @@
-(ns fierycod.holy-lambda.native-runtime
+(ns ^:no-doc ^:private fierycod.holy-lambda.native-runtime
   (:require
    [fierycod.holy-lambda.util :as u]))
 
@@ -13,7 +13,8 @@
 (defn- ->aws-context
   [headers event env-vars]
   (let [get-env (partial get env-vars)
-        getf-header (u/getf-header headers)]
+        getf-header #{u/getf-header headers}
+        request-context (:requestContext event)]
     (u/ctx env-vars
            (fn []
              (- (Long/parseLong (getf-header "Lambda-Runtime-Deadline-Ms"))
@@ -21,14 +22,14 @@
            (get-env "AWS_LAMBDA_FUNCTION_NAME")
            (get-env "AWS_LAMBDA_FUNCTION_VERSION")
            (str "arn:aws:lambda:" (get-env "AWS_REGION")
-                ":" (get-in event [:requestContext :accountId] "0000000")
+                ":" (or (:accountId request-context) "0000000")
                 ":function:" (get-env "AWS_LAMBDA_FUNCTION_NAME"))
            (get-env "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
-           (-> event :requestContext :requestId)
+           (:requestId request-context)
            (get-env "AWS_LAMBDA_LOG_GROUP_NAME")
            (get-env "AWS_LAMBDA_LOG_STREAM_NAME")
-           (-> event :requestContext :identity)
-           (-> event :requestContext :clientContext))))
+           (:identity request-context)
+           (:clientContext request-context))))
 
 (defn- send-runtime-error
   [runtime iid ^Exception err]

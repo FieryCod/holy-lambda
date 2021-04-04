@@ -15,11 +15,8 @@
    :headers {"Content-Type" "application/json"}})
 
 (h/deflambda ByeLambda
-  [request]
-  {:statusCode 200
-   :body "Bye bye"
-   :isBase64Encoded false
-   :headers {"Content-Type" "application/json"}})
+  [_request]
+  "Bye bye")
 
 (h/gen-main [#'HelloLambda
              #'ByeLambda])

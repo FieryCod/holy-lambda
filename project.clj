@@ -1,4 +1,4 @@
-(defproject fierycod/holy-lambda "0.0.9"
+(defproject fierycod/holy-lambda "0.1.0"
   :description "Micro framework which turns your code into AWS Lambda functions"
 
   :url "https://github.com/FieryCod/holy-lambda"
@@ -11,9 +11,9 @@
   :global-vars {*warn-on-reflection* true}
 
   :dependencies [[org.clojure/clojure "1.10.0" :scope "provided"]
-                 [org.clojure/data.json "0.2.6"]
+                 [metosin/jsonista "0.3.1"]
                  [org.clojure/tools.macro "0.1.5"]
-                 [com.amazonaws/aws-lambda-java-core "1.2.0"]]
+                 [com.amazonaws/aws-lambda-java-core "1.2.1"]]
 
   :eftest {:thread-count 4}
 

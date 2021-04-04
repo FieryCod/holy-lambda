@@ -49,6 +49,9 @@ local-test: check-service
 	curl "http://127.0.0.1:3000/"
 	curl "http://127.0.0.1:3000/bye"
 
+destroy-bucket:
+	@aws s3 rb s3://$(BUCKET_NAME) --force --region $(APP_REGION)
+
 make-bucket:
 	aws s3 ls s3://$(BUCKET_NAME) || aws s3 mb s3://$(BUCKET_NAME)
 

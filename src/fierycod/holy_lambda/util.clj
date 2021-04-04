@@ -1,11 +1,11 @@
 (ns ^:no-doc ^:private fierycod.holy-lambda.util
   (:require
-   [clojure.data.json :as json])
+   [jsonista.core :as json])
   (:import
    [java.net URL HttpURLConnection]
    [java.io InputStream InputStreamReader]))
 
-(def ^:private success-codes #{200 202})
+(def ^:private success-codes #{200 202 201})
 
 (defn- retrieve-body
   [^HttpURLConnection http-conn status]
@@ -15,26 +15,42 @@
 
 (defn in->edn-event
   [^InputStream event]
-  (json/read (InputStreamReader. event "UTF-8") :key-fn keyword))
+  (json/read-value
+   (slurp (InputStreamReader. event "UTF-8"))
+   (json/object-mapper {:decode-key-fn true})))
 
 (defn success-code?
   [code]
   (success-codes code))
 
+(defn ->payload-bytes
+  [payload]
+  (cond
+    (or (nil? payload)
+        (string? payload))
+    (json/write-value-as-bytes {:body payload
+                                :statusCode 200
+                                :headers {"Content-Type" "text/plain"}})
+
+    (= (get-in payload [:headers "Content-Type"]) "application/json")
+    (json/write-value-as-bytes (assoc payload :body (json/write-value-as-string (:body payload))))
+
+    ;; Corner cases should be handled via interceptor chain
+    :else
+    payload))
+
 (defn http
   [method url-s & [payload]]
   (let [push? (= method "POST")
-        ^String payload-s (when push? (if (string? payload) payload
-                                          (json/write-str (assoc payload
-                                                                 :body (json/write-str (:body payload))))))
-        ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
+       payload-bytes (when push? (->payload-bytes payload))
+       ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
         _ (doto http-conn
             (.setDoOutput push?)
             (.setRequestProperty "Content-Type" "application/json")
             (.setRequestMethod method))
         _ (when push?
             (doto (.getOutputStream http-conn)
-              (.write (.getBytes payload-s "UTF-8"))
+              (.write (bytes payload-bytes))
               (.close)))
         headers (into {} (.getHeaderFields http-conn))
         status (.getResponseCode http-conn)]

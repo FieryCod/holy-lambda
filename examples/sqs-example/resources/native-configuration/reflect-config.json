@@ -745,9 +745,6 @@
   "name":"clojure.lang.Reflector"
 },
 {
-  "name":"clojure.lang.SeqIterator"
-},
-{
   "name":"clojure.lang.Seqable"
 },
 {
@@ -1144,10 +1141,45 @@
   "name":"com.amazonaws.services.lambda.runtime.Context"
 },
 {
-  "name":"com.amazonaws.services.lambda.runtime.LambdaLogger"
+  "name":"com.fasterxml.jackson.core.JsonFactory"
 },
 {
-  "name":"com.amazonaws.services.lambda.runtime.RequestStreamHandler"
+  "name":"com.fasterxml.jackson.core.JsonGenerator$Feature"
+},
+{
+  "name":"com.fasterxml.jackson.databind.DeserializationFeature"
+},
+{
+  "name":"com.fasterxml.jackson.databind.JsonSerializer"
+},
+{
+  "name":"com.fasterxml.jackson.databind.ObjectMapper",
+  "allPublicMethods":true
+},
+{
+  "name":"com.fasterxml.jackson.databind.SerializationFeature"
+},
+{
+  "name":"com.fasterxml.jackson.databind.deser.Deserializers[]"
+},
+{
+  "name":"com.fasterxml.jackson.databind.deser.KeyDeserializers[]"
+},
+{
+  "name":"com.fasterxml.jackson.databind.deser.ValueInstantiators[]"
+},
+{
+  "name":"com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.fasterxml.jackson.databind.module.SimpleModule"
+},
+{
+  "name":"com.fasterxml.jackson.databind.ser.Serializers[]"
+},
+{
+  "name":"com.fasterxml.jackson.datatype.jsr310.JavaTimeModule"
 },
 {
   "name":"com.sun.crypto.provider.AESCipher$General",
@@ -1159,6 +1191,10 @@
 },
 {
   "name":"com.sun.crypto.provider.HmacCore$HmacSHA256",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.crypto.provider.SunJCE",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -1174,6 +1210,14 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"com.sun.net.ssl.internal.ssl.Provider",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.security.sasl.Provider",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"com.sun.xml.internal.stream.XMLInputFactoryImpl",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -1181,16 +1225,16 @@
   "name":"double[]"
 },
 {
+  "name":"fierycod.holy_lambda.agent__init"
+},
+{
   "name":"fierycod.holy_lambda.core__init"
 },
 {
-  "name":"fierycod.holy_lambda.impl.agent__init"
+  "name":"fierycod.holy_lambda.native_runtime__init"
 },
 {
-  "name":"fierycod.holy_lambda.impl.logging__init"
-},
-{
-  "name":"fierycod.holy_lambda.impl.util__init"
+  "name":"fierycod.holy_lambda.util__init"
 },
 {
   "name":"float[]"
@@ -1223,6 +1267,9 @@
   "name":"java.io.Closeable"
 },
 {
+  "name":"java.io.DataOutput"
+},
+{
   "name":"java.io.EOFException"
 },
 {
@@ -1233,9 +1280,6 @@
 },
 {
   "name":"java.io.FileOutputStream"
-},
-{
-  "name":"java.io.FileWriter"
 },
 {
   "name":"java.io.InputStream"
@@ -1314,12 +1358,6 @@
   "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
 },
 {
-  "name":"java.lang.Module"
-},
-{
-  "name":"java.lang.ModuleLayer"
-},
-{
   "name":"java.lang.Number"
 },
 {
@@ -1374,17 +1412,6 @@
 {
   "name":"java.lang.management.RuntimeMXBean",
   "methods":[{"name":"getUptime","parameterTypes":[] }]
-},
-{
-  "name":"java.lang.module.Configuration",
-  "methods":[{"name":"findModule","parameterTypes":["java.lang.String"] }]
-},
-{
-  "name":"java.lang.module.ModuleReference",
-  "methods":[{"name":"location","parameterTypes":[] }]
-},
-{
-  "name":"java.lang.module.ResolvedModule"
 },
 {
   "name":"java.lang.ref.ReferenceQueue"
@@ -1468,9 +1495,6 @@
   "name":"java.nio.file.LinkOption[]"
 },
 {
-  "name":"java.nio.file.attribute.FileAttribute"
-},
-{
   "name":"java.security.AlgorithmParametersSpi"
 },
 {
@@ -1481,9 +1505,6 @@
 },
 {
   "name":"java.security.MessageDigestSpi"
-},
-{
-  "name":"java.security.SecureRandomParameters"
 },
 {
   "name":"java.security.interfaces.ECPrivateKey"
@@ -1692,6 +1713,45 @@
   "name":"javax.xml.transform.stream.StreamSource"
 },
 {
+  "name":"jsonista.core.ReadValue"
+},
+{
+  "name":"jsonista.core.WriteValue"
+},
+{
+  "name":"jsonista.core__init"
+},
+{
+  "name":"jsonista.jackson.DateSerializer"
+},
+{
+  "name":"jsonista.jackson.FunctionalKeyDeserializer"
+},
+{
+  "name":"jsonista.jackson.FunctionalKeywordSerializer"
+},
+{
+  "name":"jsonista.jackson.FunctionalSerializer"
+},
+{
+  "name":"jsonista.jackson.KeywordKeyDeserializer"
+},
+{
+  "name":"jsonista.jackson.KeywordSerializer"
+},
+{
+  "name":"jsonista.jackson.PersistentHashMapDeserializer"
+},
+{
+  "name":"jsonista.jackson.PersistentVectorDeserializer"
+},
+{
+  "name":"jsonista.jackson.RatioSerializer"
+},
+{
+  "name":"jsonista.jackson.SymbolSerializer"
+},
+{
   "name":"long[]"
 },
 {
@@ -1722,6 +1782,14 @@
   "name":"org.eclipse.jetty.client.util.ByteBufferContentProvider"
 },
 {
+  "name":"org.eclipse.jetty.util.TypeUtil",
+  "methods":[
+    {"name":"getClassLoaderLocation","parameterTypes":["java.lang.Class"] }, 
+    {"name":"getCodeSourceLocation","parameterTypes":["java.lang.Class"] }, 
+    {"name":"getSystemClassLoaderLocation","parameterTypes":["java.lang.Class"] }
+  ]
+},
+{
   "name":"org.eclipse.jetty.util.log.Slf4jLog"
 },
 {
@@ -1729,6 +1797,10 @@
 },
 {
   "name":"org.eclipse.jetty.util.ssl.SslContextFactory"
+},
+{
+  "name":"org.jcp.xml.dsig.internal.dom.XMLDSigRI",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"org.objectweb.asm.Type"
@@ -1743,15 +1815,62 @@
   "name":"sqs_example.static_load__init"
 },
 {
+  "name":"sun.misc.Unsafe"
+},
+{
+  "name":"sun.security.ec.ECDHKeyAgreement",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ec.ECDSASignature$Raw",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ec.ECDSASignature$SHA1",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ec.ECDSASignature$SHA224",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ec.ECDSASignature$SHA256",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ec.ECDSASignature$SHA384",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ec.ECDSASignature$SHA512",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ec.ECKeyFactory",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ec.ECKeyPairGenerator",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ec.ECParameters",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ec.SunEC",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.jgss.SunProvider",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.krb5.PrincipalName",
+  "fields":[{"name":"nameStrings", "allowUnsafeAccess":true}]
+},
+{
   "name":"sun.security.pkcs.SignerInfo[]"
-},
-{
-  "name":"sun.security.pkcs12.PKCS12KeyStore",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.pkcs12.PKCS12KeyStore$DualFormatPKCS12",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"sun.security.provider.DSA$SHA224withDSA",
@@ -1794,6 +1913,10 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"sun.security.provider.Sun",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sun.security.provider.X509Factory",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -1815,6 +1938,14 @@
 },
 {
   "name":"sun.security.rsa.RSASignature$SHA256withRSA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.rsa.SunRsaSign",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.smartcardio.SunPCSC",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {

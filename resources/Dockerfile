@@ -1,4 +1,4 @@
-FROM ghcr.io/graalvm/graalvm-ce:latest
+FROM ghcr.io/graalvm/graalvm-ce:ol8-java8-21.0.0.2
 MAINTAINER Karol Wójcik <Karol Wójcik>
 
 RUN gu install native-image
