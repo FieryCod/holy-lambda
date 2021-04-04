@@ -10,7 +10,7 @@
 
   :global-vars {*warn-on-reflection* true}
 
-  :dependencies [[org.clojure/clojure "1.10.0"]
+  :dependencies [[org.clojure/clojure "1.10.0" :scope "provided"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/tools.macro "0.1.5"]
                  [com.amazonaws/aws-lambda-java-core "1.2.0"]]
