@@ -23,7 +23,7 @@
   [code]
   (success-codes code))
 
-(defn ->payload-bytes
+(defn payload->bytes
   [payload]
   (cond
     (or (nil? payload)
@@ -42,7 +42,7 @@
 (defn http
   [method url-s & [payload]]
   (let [push? (= method "POST")
-       payload-bytes (when push? (->payload-bytes payload))
+       payload-bytes (when push? (payload->bytes payload))
        ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
         _ (doto http-conn
             (.setDoOutput push?)

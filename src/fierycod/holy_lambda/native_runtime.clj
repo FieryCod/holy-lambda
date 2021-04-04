@@ -13,7 +13,7 @@
 (defn- ->aws-context
   [headers event env-vars]
   (let [get-env (partial get env-vars)
-        getf-header #{u/getf-header headers}
+        getf-header (u/getf-header headers)
         request-context (:requestContext event)]
     (u/ctx env-vars
            (fn []

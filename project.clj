@@ -12,7 +12,6 @@
 
   :dependencies [[org.clojure/clojure "1.10.0" :scope "provided"]
                  [metosin/jsonista "0.3.1"]
-                 [org.clojure/tools.macro "0.1.5"]
                  [com.amazonaws/aws-lambda-java-core "1.2.1"]]
 
   :eftest {:thread-count 4}
