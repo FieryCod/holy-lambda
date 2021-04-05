@@ -9,11 +9,12 @@
   - TODO Utilities which help produce valid response"
   (:require
    [fierycod.holy-lambda.native-runtime]
+   [fierycod.holy-lambda.java-runtime :as jruntime]
    [fierycod.holy-lambda.agent]
    [fierycod.holy-lambda.util :as u])
   (:import
-   [java.io InputStream OutputStream]
-   [com.amazonaws.services.lambda.runtime Context CognitoIdentity ClientContext Client]))
+   [com.amazonaws.services.lambda.runtime Context]
+   [java.io InputStream OutputStream]))
 
 (def ^{:added "0.0.1"
        :arglists '([afn-sym]
@@ -23,37 +24,6 @@
    Returns the callable lambda function if only one argument is passed.
    See `fierycod.holy-lambda.util/call`"
   #'fierycod.holy-lambda.util/call)
-
-(defn- gen-class-lambda
-  [prefix gfullname]
-  `(gen-class
-    :name ~gfullname
-    :prefix ~prefix
-    :implements [com.amazonaws.services.lambda.runtime.RequestStreamHandler]))
-
-(defn- java-ctx-object->ctx-edn
-  [^Context context envs]
-  (u/ctx envs
-         (fn [] (.getRemainingTimeInMillis context))
-         (.getFunctionName context)
-         (.getFunctionVersion context)
-         (.getInvokedFunctionArn context)
-         (.getMemoryLimitInMB context)
-         (.getAwsRequestId context)
-         (.getLogGroupName context)
-         (.getLogStreamName context)
-         (when-let [^CognitoIdentity _identity (.getIdentity context)]
-           {:identityId (.getIdentityId _identity)
-            :identityPoolId (.getIdentityPoolId _identity)})
-         (when-let [^ClientContext client-context (.getClientContext context)]
-           {:client (when-let [^Client client (.getClient client-context)]
-                      {:installationId (.getInstallationId client)
-                       :appTitle (.getAppTitle client)
-                       :appVersionName (.getAppVersionName client)
-                       :appVersionCode (.getAppVersionCode client)
-                       :appPackageName (.getAppPackageName client)})
-            :custom (into {} (.getCustom client-context))
-            :environment (into {} (.getEnvironment client-context))})))
 
 (defn- wrap-lambda
   [gmethod-sym mixin lambda gclass]
@@ -67,7 +37,7 @@
        ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
         (try
           (let [event# (#'fierycod.holy-lambda.util/in->edn-event in#)
-                context# (#'fierycod.holy-lambda.core/java-ctx-object->ctx-edn ctx# (#'fierycod.holy-lambda.util/envs))
+                context# (#'fierycod.holy-lambda.java-runtime/java-ctx-object->ctx-edn ctx# (#'fierycod.holy-lambda.util/envs))
                 response# (#'fierycod.holy-lambda.util/payload->bytes
                            (~lambda {:event event#
                                      :ctx context#}))]
@@ -117,7 +87,7 @@
         prefix (str "PRVL" lname "--")
         gmethod-sym (symbol (str prefix "handleRequest"))
         gfullname (symbol (str (ns-name *ns*) "." lname))
-        gclass (gen-class-lambda prefix gfullname)
+        gclass (jruntime/gen-lambda-class-with-prefix prefix gfullname)
         lambda `(fn ~@bodies)]
 
     `(do ~(wrap-lambda gmethod-sym mixin lambda gclass)
@@ -142,18 +112,18 @@
      by `native-image` tool."
   {:added "0.0.1"}
   [lambdas]
-  `(defn ~'-main []
-     (let [fnames# (map (comp #(str (str (:ns %) "." (str (:name %)))) meta) ~lambdas)
-           routes# (into {} (mapv vector fnames# ~lambdas))
-           executor# (System/getProperty "executor")]
-
-       ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image` will be generated via the agent
+  `(do
+     (def ~'PRVL_ROUTES (into {} (mapv (fn [l#] [(str (str (:ns (meta l#)) "." (str (:name (meta l#))))) l#]) ~lambdas)))
+     (defn ~'-main []
+       ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image`
+       ;;                               will be generated via the agent.
        ;;                               Example in: `examples/sqs-example/Makefile` at `gen-native-configuration` command
+       ;;
        ;; executor = anything else   -- Run provided runtime loop
-       (if (= executor# "native-agent")
-         ;; When we want to generate the native configuration for the lambdas
-         (#'fierycod.holy-lambda.agent/routes->reflective-call! routes#)
+       (if (= (System/getProperty "executor") "native-agent")
+         ;; Generate the native configuration for the lambdas
+         (#'fierycod.holy-lambda.agent/routes->reflective-call! ~'PRVL_ROUTES)
 
-         ;; Otherwise just start the runtime loop
+         ;; Start native runtime loop
          (while true
-           (#'fierycod.holy-lambda.native-runtime/next-iter routes# (#'fierycod.holy-lambda.util/envs)))))))
+           (#'fierycod.holy-lambda.native-runtime/next-iter ~'PRVL_ROUTES (#'fierycod.holy-lambda.util/envs)))))))
