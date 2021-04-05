@@ -5,8 +5,9 @@
   It's a significantly faster than the Java runtime due to the use of GraalVM.
 
   *Namespace includes:*
-  - Friendly macro for generating Lambda functions which run on both runtimes
-  - TODO Utilities which help produce valid response"
+  - Friendly macro for generating Lambda functions
+  - Macro for generating main function for native runtime
+  - Function for calling the lambda via the var "
   (:require
    [fierycod.holy-lambda.native-runtime]
    [fierycod.holy-lambda.java-runtime :as jruntime]
@@ -51,10 +52,10 @@
   (when (and (seq? form)
              (vector? (first form)))
     (if (= '< (second form))
-      (throw (IllegalArgumentException. "Mixins must be given before argument list"))
+      (throw (IllegalArgumentException. "Mixin must be given before argument list"))
       true)))
 
-(defn >parse-deflambda
+(defn- >parse-deflambda
   ":name  :doc?  <? :mixin* :body+
    symbol string <  expr   fn-body"
   [attrs]
@@ -82,7 +83,6 @@
   (let [{:keys [mixin lname bodies doc]} (>parse-deflambda attrs)
         arglist (mapv (fn [[arglist & _body]] arglist) bodies)
         lname (with-meta lname {:doc doc
-                                :public-var? true
                                 :arglists `(quote ~arglist)})
         prefix (str "PRVL" lname "--")
         gmethod-sym (symbol (str prefix "handleRequest"))

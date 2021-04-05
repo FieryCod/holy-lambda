@@ -34,6 +34,19 @@ Resources:
             Path: /
             Method: get
 
+  RedirectLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: hello-lambda.core.RedirectLambda
+      CodeUri: target/output.jar
+      FunctionName: RedirectLambdaFunction
+      Events:
+        EmptyEvent:
+          Type: Api
+          Properties:
+            Path: /redirect
+            Method: get
+
   ByeLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:

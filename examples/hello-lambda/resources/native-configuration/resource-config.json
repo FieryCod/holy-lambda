@@ -44,6 +44,8 @@
     {"pattern":"\\Qfierycod/holy_lambda/java_runtime__init.class\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/native_runtime.clj\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/native_runtime__init.class\\E"}, 
+    {"pattern":"\\Qfierycod/holy_lambda/response.clj\\E"}, 
+    {"pattern":"\\Qfierycod/holy_lambda/response__init.class\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/util.clj\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/util__init.class\\E"}, 
     {"pattern":"\\Qhello_lambda/core.clj\\E"}, 

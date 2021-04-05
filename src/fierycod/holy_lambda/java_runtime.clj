@@ -1,4 +1,4 @@
-(ns fierycod.holy-lambda.java-runtime
+(ns ^:no-doc ^:private fierycod.holy-lambda.java-runtime
   (:require
    [fierycod.holy-lambda.util :as u])
   (:import

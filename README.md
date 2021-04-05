@@ -31,13 +31,16 @@ lein install
 lein with-profile +eftest eftest 
 ```
 
-## License
-Copyright © 2019 Karol Wojcik aka Fierycod
 
-Released under the MIT license.
-
-## Acknowledges
+## Thanks to
 - Daria - Thank you that you were always beside me, fighting for me when I had no faith and energy.
 - @KrzysztofTucholski - Thank you for boosting my ego
 - @uswitch - Thank you for interests in AWS Lambda Functions and providing us the `lambada`
 - @hjhamala - Thank you for sharing [post](https://dev.solita.fi/2018/12/07/fast-starting-clojure-lambdas-using-graalvm.html) about native lambda functions. You have inspired me to write `holy-lambda`.
+- Rum - deflambda parse mechanism is adapted from rum.
+- Ring - code from fierycod.holy-lambda.response is adapted from ring-core. 
+
+## License
+Copyright © 2021 Karol Wojcik aka Fierycod
+
+Released under the MIT license.

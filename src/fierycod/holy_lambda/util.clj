@@ -26,14 +26,22 @@
 (defn payload->bytes
   [payload]
   (cond
+    ;; Optimize the common case
+    (= (get-in payload [:headers "Content-Type"]) "application/json; charset=utf-8")
+    (json/write-value-as-bytes (assoc payload :body (json/write-value-as-string (:body payload))))
+
+    ;; Ack event
     (or (nil? payload)
         (string? payload))
-    (json/write-value-as-bytes {:body payload
+    (json/write-value-as-bytes {:body (or payload "")
                                 :statusCode 200
-                                :headers {"Content-Type" "text/plain"}})
+                                :headers {"Content-Type" "text/plain; charset=utf-8"}})
 
-    (= (get-in payload [:headers "Content-Type"]) "application/json")
-    (json/write-value-as-bytes (assoc payload :body (json/write-value-as-string (:body payload))))
+    ;; Handle redirect. Redirect should have nil? body
+    (and (get-in payload [:headers "Location"])
+         (nil? (:body payload)))
+    (json/write-value-as-bytes payload)
+
 
     ;; Corner cases should be handled via interceptor chain
     :else

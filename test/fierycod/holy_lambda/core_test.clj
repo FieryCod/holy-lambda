@@ -10,12 +10,13 @@
     (t/is (= {:lname (symbol "Example"),
               :doc "Docstring",
               :mixin {:some-mixin ""}}
-             (select-keys (h/>parse-deflambda [(symbol "Example")
-                                               "Docstring"
-                                               (symbol "<")
-                                               {:some-mixin ""}
-                                               [(symbol "request")]
-                                               `(println (symbol "request"))])
+             (select-keys (#'fierycod.holy-lambda.core/>parse-deflambda
+                           [(symbol "Example")
+                            "Docstring"
+                            (symbol "<")
+                            {:some-mixin ""}
+                            [(symbol "request")]
+                            `(println (symbol "request"))])
                           [:lname :doc :mixin])))))
 
 (t/deftest call-lambda-fn-test

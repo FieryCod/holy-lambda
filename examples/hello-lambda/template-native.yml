@@ -1,6 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: "Example basic lambda using `holy-lambda` micro library\n"
+
 Parameters:
   Runtime:
     Type: String
@@ -16,6 +17,7 @@ Globals:
     Runtime: !Ref 'Runtime'
     Timeout: !Ref 'Timeout'
     MemorySize: !Ref 'MemorySize'
+
 Resources:
   HelloLambdaFunction:
     Type: AWS::Serverless::Function
@@ -29,6 +31,20 @@ Resources:
           Properties:
             Path: /
             Method: get
+
+  RedirectLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: hello-lambda.core.RedirectLambda
+      CodeUri: ./latest.zip
+      FunctionName: RedirectLambdaFunction
+      Events:
+        EmptyEvent:
+          Type: Api
+          Properties:
+            Path: /redirect
+            Method: get
+
   ByeLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
