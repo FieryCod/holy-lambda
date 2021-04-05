@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.2 (05-04-2021)
+*Changes*
+- Add full support for async-retriever (look at examples/hello-world & https://github.com/FieryCod/holy-lambda-async-retriever)
+- Remove unecessary steps for CircleCI
+- Add tests. Allow async handlers (future, promise, map)
+- Add CHANGELOG.md
+- Provide response utils based on ring-core. Add example of redirect
+
 ## 0.1.1 (05-04-2021) (Breaking change) 
 Handler definition has been changed from `[event,context] -> response` to `[request] -> response`.
 

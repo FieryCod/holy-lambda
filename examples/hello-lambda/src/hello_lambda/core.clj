@@ -1,6 +1,7 @@
 (ns hello-lambda.core
   (:gen-class)
   (:require
+   [clojure.core.async :as async]
    [fierycod.holy-lambda.response :as hr]
    [fierycod.holy-lambda.core :as h]))
 
@@ -36,9 +37,14 @@
       (deliver p "Was sleeping good"))
     p))
 
+(h/deflambda AsyncLambdaChannel
+  [_request]
+  (async/go "Yay. Channel"))
+
 (h/gen-main
  [#'HelloLambda
   #'RedirectLambda
   #'ByeLambda
   #'AsyncLambdaFuture
-  #'AsyncLambdaPromise])
+  #'AsyncLambdaPromise
+  #'AsyncLambdaChannel])

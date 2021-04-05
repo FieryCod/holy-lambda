@@ -73,6 +73,19 @@ Resources:
             Path: /async-future
             Method: get
 
+  AsyncLambdaChannelFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: hello-lambda.core.AsyncLambdaChannel
+      CodeUri: target/output.jar
+      FunctionName: AsyncLambdaChannelFunction
+      Events:
+        EmptyEvent:
+          Type: Api
+          Properties:
+            Path: /async-channel
+            Method: get
+
   ByeLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:

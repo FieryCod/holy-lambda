@@ -630,6 +630,9 @@
   "allPublicMethods":true
 },
 {
+  "name":"clojure.lang.IPending"
+},
+{
   "name":"clojure.lang.IPersistentCollection"
 },
 {
@@ -964,9 +967,6 @@
   "name":"clojure.tools.logging__init"
 },
 {
-  "name":"clojure.tools.macro__init"
-},
-{
   "name":"clojure.tools.reader.default_data_readers__init"
 },
 {
@@ -1231,7 +1231,16 @@
   "name":"fierycod.holy_lambda.core__init"
 },
 {
+  "name":"fierycod.holy_lambda.java_runtime__init"
+},
+{
   "name":"fierycod.holy_lambda.native_runtime__init"
+},
+{
+  "name":"fierycod.holy_lambda.response__init"
+},
+{
+  "name":"fierycod.holy_lambda.retriever__init"
 },
 {
   "name":"fierycod.holy_lambda.util__init"

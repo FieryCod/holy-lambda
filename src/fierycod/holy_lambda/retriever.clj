@@ -6,7 +6,8 @@
   - IPersistentMap
   - Promise<IPersistentMap>
 
-  If you looking for channel support then use ... ")
+  If you looking for channel support then use:
+  https://github.com/FieryCod/holy-lambda-async-retriever")
 
 (def ^:private ^:const MAX_TIMEOUT_TIME
   "850 seconds. Max timeout is 900 for AWS Lambda"
@@ -47,5 +48,5 @@
 
     :else
     (do
-      (println "[Holy Lambda] Supposedly not supported response")
+      (println "[Holy Lambda] Supposedly not supported response.\n\n If you looking for channel support then use: https://github.com/FieryCod/holy-lambda-async-retriever")
       response)))
