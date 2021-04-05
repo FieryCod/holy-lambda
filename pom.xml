@@ -18,7 +18,7 @@
     <url>https://github.com/FieryCod/holy-lambda</url>
     <connection>scm:git:git://github.com/FieryCod/holy-lambda.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/FieryCod/holy-lambda.git</developerConnection>
-    <tag>3e3413d81d2e77871ec3911a4f6699e49e00287a</tag>
+    <tag>10b9253d7ef667fd20966dead1cd4533802198aa</tag>
   </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -73,11 +73,6 @@
       <groupId>metosin</groupId>
       <artifactId>jsonista</artifactId>
       <version>0.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>tools.macro</artifactId>
-      <version>0.1.5</version>
     </dependency>
     <dependency>
       <groupId>com.amazonaws</groupId>

@@ -1,4 +1,4 @@
-(defproject fierycod/holy-lambda "0.1.0"
+(defproject fierycod/holy-lambda "0.1.1"
   :description "Micro framework which turns your code into AWS Lambda functions"
 
   :url "https://github.com/FieryCod/holy-lambda"

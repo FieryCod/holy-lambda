@@ -41,7 +41,7 @@
                 response# (#'fierycod.holy-lambda.util/payload->bytes
                            (~lambda {:event event#
                                      :ctx context#}))]
-            (.write out# (bytes response#)))
+            (.write out# ^"[B" response#))
           (catch Exception error#
             (println "[Holy Lambda] Exception during request handling" error#))
           (finally

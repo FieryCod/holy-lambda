@@ -50,7 +50,7 @@
             (.setRequestMethod method))
         _ (when push?
             (doto (.getOutputStream http-conn)
-              (.write (bytes payload-bytes))
+              (.write ^"[B" payload-bytes)
               (.close)))
         headers (into {} (.getHeaderFields http-conn))
         status (.getResponseCode http-conn)]
