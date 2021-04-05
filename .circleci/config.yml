@@ -9,11 +9,6 @@ references:
       JVM_OPTS: -Xmx3200m
       LEIN_ROOT: nbd
 
-  restore-node-deps: &restore-node-deps
-     restore_cache:
-        keys:
-          - deps-node-{{ .Branch }}-{{ checksum "yarn.lock" }}
-
   restore-lein-deps: &restore-lein-deps
     restore_cache:
       keys:
@@ -36,26 +31,10 @@ jobs:
             - ~/.m2
           key: deps-lein-{{ checksum "project.clj" }}
 
-  install-node-deps:
-    <<: *polyglot-defaults
-    steps:
-      - checkout
-      - *restore-node-deps
-      - run: yarn
-      - save-cache:
-          key: deps-node-{{ .Branch }}-{{ checksum "yarn.lock" }}
-          paths:
-            - ~/holy-lambda/node_modules
-      - persist_to_workspace:
-          root: ~/holy-lambda
-          paths:
-            - node_modules
-
   upload-code-coverage:
      <<: *polyglot-defaults
      steps:
        - checkout
-       - *restore-node-deps
        - *restore-lein-deps
        - run: lein cloverage --codecov
        - run: bash <(curl -s https://codecov.io/bash)
@@ -70,9 +49,8 @@ jobs:
 workflows:
   version: 2
 
-  build_and_deploy:
+  test:
     jobs:
-      - install-node-deps
       - install-clojure-deps
 
       - run-test:
