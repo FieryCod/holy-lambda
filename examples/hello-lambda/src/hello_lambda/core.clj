@@ -20,6 +20,25 @@
   [_request]
   (hr/redirect "https://www.google.com"))
 
-(h/gen-main [#'HelloLambda
-             #'RedirectLambda
-             #'ByeLambda])
+(h/deflambda AsyncLambdaFuture
+  [_request]
+  (future
+    (println "I'm sleeping like a baby")
+    (Thread/sleep 3000)
+    "Was sleeping good"))
+
+(h/deflambda AsyncLambdaPromise
+  [_request]
+  (let [p (promise)]
+    (future
+      (println "I'm sleeping like a baby")
+      (Thread/sleep 3000)
+      (deliver p "Was sleeping good"))
+    p))
+
+(h/gen-main
+ [#'HelloLambda
+  #'RedirectLambda
+  #'ByeLambda
+  #'AsyncLambdaFuture
+  #'AsyncLambdaPromise])

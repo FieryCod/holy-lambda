@@ -18,7 +18,7 @@
     <url>https://github.com/FieryCod/holy-lambda</url>
     <connection>scm:git:git://github.com/FieryCod/holy-lambda.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/FieryCod/holy-lambda.git</developerConnection>
-    <tag>365f04b32012aca9af8e51f1d882816ecd0338d4</tag>
+    <tag>10dbe542dfd8a32a88683cbdb9ee19e668640187</tag>
   </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>

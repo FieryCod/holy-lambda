@@ -1,10 +1,10 @@
 (ns fierycod.holy-lambda.core
-  "This namespace integrates the Clojure code with two different runtimes: Java Lambda Runtime, Native Provided Runtime.
+  "Integrates the Clojure code with two different runtimes: Java Lambda Runtime, Native Provided Runtime.
   The former is the Official Java Runtime for AWS Lambda which is well tested and works perfectly fine, but it's rather slow due to cold starts.
   The latter is a custom [runtime](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html) integrated within the framework.
   It's a significantly faster than the Java runtime due to the use of GraalVM.
 
-  *Namespace includes:*
+  *Includes:*
   - Friendly macro for generating Lambda functions
   - Macro for generating main function for native runtime
   - Function for calling the lambda via the var "
@@ -36,10 +36,11 @@
         (~lambda request#))
        ;; Arity used for Java runtime
        ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
+        ;; TODO: Move me to java runtime
         (try
           (let [event# (#'fierycod.holy-lambda.util/in->edn-event in#)
                 context# (#'fierycod.holy-lambda.java-runtime/java-ctx-object->ctx-edn ctx# (#'fierycod.holy-lambda.util/envs))
-                response# (#'fierycod.holy-lambda.util/payload->bytes
+                response# (#'fierycod.holy-lambda.util/response->bytes
                            (~lambda {:event event#
                                      :ctx context#}))]
             (.write out# ^"[B" response#))

@@ -1,5 +1,6 @@
 (ns ^:no-doc ^:private fierycod.holy-lambda.util
   (:require
+   [fierycod.holy-lambda.retriever :as retriever]
    [jsonista.core :as json])
   (:import
    [java.net URL HttpURLConnection]
@@ -23,34 +24,34 @@
   [code]
   (success-codes code))
 
-(defn payload->bytes
-  [payload]
-  (cond
-    ;; Optimize the common case
-    (= (get-in payload [:headers "Content-Type"]) "application/json; charset=utf-8")
-    (json/write-value-as-bytes (assoc payload :body (json/write-value-as-string (:body payload))))
+(defn response->bytes
+  [?response]
+  (let [response (retriever/<-wait-for-response ?response)]
+    (cond
+      ;; Optimize the common case
+      (= (get-in response [:headers "Content-Type"]) "application/json; charset=utf-8")
+      (json/write-value-as-bytes (assoc response :body (json/write-value-as-string (:body response))))
 
-    ;; Ack event
-    (or (nil? payload)
-        (string? payload))
-    (json/write-value-as-bytes {:body (or payload "")
-                                :statusCode 200
-                                :headers {"Content-Type" "text/plain; charset=utf-8"}})
+      ;; Ack event
+      (or (nil? response)
+          (string? response))
+      (json/write-value-as-bytes {:body (or response "")
+                                  :statusCode 200
+                                  :headers {"Content-Type" "text/plain; charset=utf-8"}})
 
-    ;; Handle redirect. Redirect should have nil? body
-    (and (get-in payload [:headers "Location"])
-         (nil? (:body payload)))
-    (json/write-value-as-bytes payload)
+      ;; Handle redirect. Redirect should have nil? body
+      (and (get-in response [:headers "Location"])
+           (nil? (:body response)))
+      (json/write-value-as-bytes response)
 
-
-    ;; Corner cases should be handled via interceptor chain
-    :else
-    payload))
+      ;; Corner cases should be handled via interceptor chain
+      :else
+      response)))
 
 (defn http
-  [method url-s & [payload]]
+  [method url-s & [response]]
   (let [push? (= method "POST")
-       payload-bytes (when push? (payload->bytes payload))
+       response-bytes (when push? (response->bytes response))
        ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
         _ (doto http-conn
             (.setDoOutput push?)
@@ -58,7 +59,7 @@
             (.setRequestMethod method))
         _ (when push?
             (doto (.getOutputStream http-conn)
-              (.write ^"[B" payload-bytes)
+              (.write ^"[B" response-bytes)
               (.close)))
         headers (into {} (.getHeaderFields http-conn))
         status (.getResponseCode http-conn)]

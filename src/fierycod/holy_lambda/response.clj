@@ -110,7 +110,7 @@
                        (s/replace #";\s*charset=[^;]*" "")
                        (str "; charset=" ?charset)))))
 
-(defn cookie
+(defn- cookie
   [k v {:keys [domain expires]}]
   (cond-> (str k "=" v)
     domain (str "; domain=" domain ";")

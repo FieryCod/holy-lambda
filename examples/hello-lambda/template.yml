@@ -47,6 +47,32 @@ Resources:
             Path: /redirect
             Method: get
 
+  AsyncLambdaPromiseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: hello-lambda.core.AsyncLambdaPromise
+      CodeUri: target/output.jar
+      FunctionName: AsyncLambdaPromiseFunction
+      Events:
+        EmptyEvent:
+          Type: Api
+          Properties:
+            Path: /async-promise
+            Method: get
+
+  AsyncLambdaFutureFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: hello-lambda.core.AsyncLambdaFuture
+      CodeUri: target/output.jar
+      FunctionName: AsyncLambdaFutureFunction
+      Events:
+        EmptyEvent:
+          Type: Api
+          Properties:
+            Path: /async-future
+            Method: get
+
   ByeLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
