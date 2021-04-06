@@ -1,4 +1,5 @@
 /target
+.cpcache
 .lsp
 packaged.yaml
 server
