@@ -1,13 +1,13 @@
-(ns ^:no-doc ^:private fierycod.holy-lambda.native-runtime
+(ns fierycod.holy-lambda.native-runtime
   (:require
    [fierycod.holy-lambda.agent]
    [fierycod.holy-lambda.util :as u]))
 
-(defn ->ex
+(defn- ->ex
   [msg]
   (Exception. (str "[Holy Lambda]: " msg)))
 
-(defn url
+(defn- url
   [{:keys [runtime iid path]}]
   (str "http://" runtime "/2018-06-01/runtime/invocation/" iid path))
 
@@ -71,7 +71,7 @@
       (catch Exception err
         (send-runtime-error runtime iid err)))))
 
-(defn next-iter
+(defn- next-iter
   [routes env-vars]
   (let [runtime (get env-vars "AWS_LAMBDA_RUNTIME_API")
         handler-name (get env-vars "_HANDLER")

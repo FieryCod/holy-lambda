@@ -13,24 +13,16 @@ Tiny native AWS Custom Lambda Runtime which fulfills your needs!
 It allows you to write one code which might run either on Official Java AWS Runtime (if you don't care about speed or you want to test your lambdas)
 or on Native Custom AWS Runtime built into your codebase.
 
-[Jump here](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/1-01-installation) to learn more and start the journey with the Holy Lambda.
+[Jump here](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
 
 ## Quickstart
-Copy one of the examples. Library still in development
+
+Generate a template via
+
+``` 
+lein new holy-lambda <your-project-name>
+```
   
-## Developer documentation
-## Install library locally
-
-```
-lein install
-```
-
-## Test
-
-``` clojure
-lein with-profile +eftest eftest 
-```
-
 
 ## Thanks to
 - Daria - Thank you that you were always beside me, fighting for me when I had no faith and energy.

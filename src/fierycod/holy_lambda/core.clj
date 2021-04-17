@@ -6,7 +6,6 @@
 
   *Includes:*
   - Friendly macro for generating Lambda functions
-  - Macro for generating main function for native runtime
   - Function for calling the lambda via the var "
   (:require
    [fierycod.holy-lambda.java-runtime :as jruntime]
@@ -20,8 +19,7 @@
                    [afn-sym request])}
   call
   "Resolves the lambda function and calls it with request map.
-   Returns the callable lambda function if only one argument is passed.
-   See `fierycod.holy-lambda.util/call`"
+  Returns the callable lambda function if only one argument is passed."
   #'fierycod.holy-lambda.util/call)
 
 (defn- wrap-lambda
