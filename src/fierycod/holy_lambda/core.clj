@@ -45,9 +45,9 @@
           (finally
             (.close out#)))))))
 
-(defn- fn-body? [form]
-  (when (and (seq? form)
-             (vector? (first form)))
+(defn- fn-body?
+  [form]
+  (when (vector? (first form))
     (if (= '< (second form))
       (throw (IllegalArgumentException. "Mixin must be given before argument list"))
       true)))
@@ -66,7 +66,6 @@
       (cond
         (and (empty? res) (symbol? x)) (recur {:lname x} anext nil)
         (fn-body? xs)        (assoc res :bodies (list xs))
-        (every? fn-body? xs) (assoc res :bodies xs)
         (string? x)          (recur (assoc res :doc x) anext nil)
         (= '< x)             (recur res anext :mixin)
         (= mode :mixin) (recur (assoc res :mixin x) anext nil)

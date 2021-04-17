@@ -9,15 +9,38 @@
 
 Tiny native AWS Custom Lambda Runtime which fulfills your needs!
 
+``` clojure
+[fierycod/holy-lambda "1.9.0"]
+```
+
 ## What it does?
-It allows you to write one code which might run either on Official Java AWS Runtime (if you don't care about speed or you want to test your lambdas)
-or on Native Custom AWS Runtime built into your codebase.
+It allows you to write one code which might run either on Official Java AWS Runtime or on Native Custom AWS Runtime built into your codebase.
 
 [Jump here](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
 
+## Example
+
+``` clojure
+(ns some.ns
+  (:require 
+    [fierycod.holy-lambda.core :as h]
+    [fierycod.holy-lambda.native :as native]
+    [fierycod.holy-lambda.response :as hr]))
+    
+(h/deflambda ExampleLambda
+  "I can run on both Java and Native..."
+  <
+  [{:keys [event ctx]}]
+  (hr/text "Hello world"))
+  
+(native/entrypoint [#'ExampleLambda])
+```
+
+## 
+
 ## Quickstart
 
-Generate a template via
+Generate a new project from template via
 
 ``` 
 lein new holy-lambda <your-project-name>

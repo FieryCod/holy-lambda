@@ -58,6 +58,15 @@
    :headers {"Content-Type" "application/json; charset=utf-8"}
    :body    body})
 
+(defn text
+  "Returns a skeletal response with the given msg, status of 200, and `Content-Type` set to `text/plain`."
+  [?msg]
+  {:statusCode  200
+   :headers {"Content-Type" "text/plain; charset=utf-8"}
+   :body    ?msg})
+
+;; (defn )
+
 (defn status
   "Returns an updated response with the given status."
   ([?status]
@@ -112,9 +121,11 @@
 
 (defn- cookie
   [k v {:keys [domain expires]}]
-  (cond-> (str k "=" v)
-    domain (str "; domain=" domain ";")
-    expires (str "; expires=" expires ";")))
+  (s/replace
+   (cond-> (str k "=" v)
+      domain (str "; domain=" domain ";")
+      expires (str "; expires=" expires ";"))
+   ";;" ";"))
 
 (defn set-cookie
   "Sets a cookie on the response."
@@ -122,3 +133,11 @@
   (update-in resp [:multiValueHeaders "Set-Cookie"]
              (fn [xv]
                (vec (conj xv (cookie k v (dissoc opts :k :v)))))))
+
+(defn origin
+  [resp ?origin]
+  (header resp "Access-Control-Allow-Origin" ?origin))
+
+(defn credentials
+  [resp ?creds]
+  (header resp "Access-Control-Allow-Credentials" ?creds))
