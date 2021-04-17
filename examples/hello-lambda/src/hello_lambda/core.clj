@@ -2,6 +2,8 @@
   (:gen-class)
   (:require
    [clojure.core.async :as async]
+   [fierycod.holy-lambda.agent :as agent]
+   [fierycod.holy-lambda.native-runtime :as native]
    [fierycod.holy-lambda.response :as hr]
    [fierycod.holy-lambda.core :as h]))
 
@@ -41,10 +43,13 @@
   [_request]
   (async/go "Yay. Channel"))
 
-(h/gen-main
+(native/entrypoint
  [#'HelloLambda
   #'RedirectLambda
   #'ByeLambda
   #'AsyncLambdaFuture
   #'AsyncLambdaPromise
   #'AsyncLambdaChannel])
+
+(agent/in-context
+ (println "In agent context"))

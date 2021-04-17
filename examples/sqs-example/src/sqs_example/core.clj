@@ -4,12 +4,20 @@
    [sqs-example.static-load]
    [cognitect.aws.http.cognitect :as http]
    [cognitect.aws.client.api :as aws]
+   [fierycod.holy-lambda.agent :as agent]
+   [fierycod.holy-lambda.native-runtime :as native]
    [fierycod.holy-lambda.response :as hr]
    [fierycod.holy-lambda.core :as h]))
 
 (def http-client (delay (http/create)))
 (def sqs (delay (aws/client {:api :sqs
                              :http-client @http-client})))
+
+(defn send-sqs-message!
+  [{:keys [queue-url msg]}]
+  (aws/invoke @sqs {:op :SendMessage
+                    :request {:QueueUrl queue-url
+                              :MessageBody msg}}))
 
 (h/deflambda SubscribeLambda
   [{:keys [event]}]
@@ -20,9 +28,12 @@
 (h/deflambda ApiProxyMessage
   [{:keys [event ctx] :as _request}]
   (let [message (or (:message (:pathParameters event)) "Hello")]
-    (println (aws/invoke @sqs {:op :SendMessage
-                               :request {:QueueUrl (-> ctx :envs :SQS_URL)
-                                         :MessageBody message}}))
+    (println (send-sqs-message! {:queue-url (get-in ctx [:envs "SQS_URL"])
+                                 :msg message}))
     (hr/response (str "Received message: " message))))
 
-(h/gen-main [#'SubscribeLambda #'ApiProxyMessage])
+(native/entrypoint [#'SubscribeLambda #'ApiProxyMessage])
+
+;; For gen-native-conf
+(agent/in-context
+ (send-sqs-message! {:msg ""}))

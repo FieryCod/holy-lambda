@@ -1,5 +1,7 @@
 {:cljdoc.doc/tree [["Readme" {:file "README.md"}
                     ["Changelog" {:file "CHANGELOG.md"}]]
-                   ["Tutorial" {:file "doc/1-00-tutorial.md"}
-                    ["Installation" {:file "doc/1-01-installation.md"}]
-                    ["First project" {:file "doc/1-02-first-project.md"}]]]}
+                   ["Tutorial" {:file "doc/0-00-toc.md"}
+                    ["What it is?" {:file "doc/1-01-whatits.md"}]
+                    ["Getting started" {:file "doc/1-02-getting-started.md"}]
+                    ["Makefile recipes" {:file "doc/1-03-makefile-recipes.md"}]
+                    ["Native agent" {:file "doc/1-04-native-agent.md"}]]]}

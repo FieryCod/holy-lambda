@@ -28,3 +28,4 @@ dist
 .clj-kondo/.cache
 .aws
 output
+docker/ee

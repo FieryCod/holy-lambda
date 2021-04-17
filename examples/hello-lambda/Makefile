@@ -9,6 +9,14 @@ APP_REGION=eu-central-1
 PWD=$$(pwd)
 USER_GID=$$(id -u):$$(id -g)
 LAMBDA_NAME=HelloLambdaFunction
+USE_EE:=false
+IMAGE_CORD_PART:=fierycod/graalvm-native-image
+
+ifeq ($(USE_EE), false)
+	IMAGE_CORD=$(IMAGE_CORD_PART):latest
+else
+	IMAGE_CORD=$(IMAGE_CORD_PART)-ee:latest
+endif
 
 all: deploy-native
 
@@ -31,12 +39,13 @@ dry-api: target/output.jar
 	sam local start-api --template template.yml
 
 native-gen-conf:
+	@USE_AGENT_CONTEXT=true lein uberjar
 	@docker run --user $(USER_GID) \
 		-e "AWS_CREDENTIAL_PROFILES_FILE=/project/.aws/credentials" \
 		-e "AWS_CONFIG_FILE=/project/.aws/config" \
 		-v $(PWD):/project \
 		-v ~/.aws:/project/.aws:ro \
-		-it fierycod/graalvm-native-image:latest \
+		-it $(IMAGE_CORD) \
 		bash -c "cd /project && \
 	          java -agentlib:native-image-agent=config-output-dir=resources/native-configuration \
 			           -Dexecutor=native-agent \
@@ -59,7 +68,7 @@ latest.zip: output
 	@chmod +x output && cp resources/bootstrap-native bootstrap && chmod +x bootstrap && cp -r resources/native-deps . && zip -r -j latest bootstrap output native-deps/* && rm -Rf bootstrap native-deps
 
 output: target/output.jar
-	docker run --user $(USER_GID) -v ${PWD}:/project -it fierycod/graalvm-native-image:latest bash -c "cd /project && \
+	docker run --user $(USER_GID) -v ${PWD}:/project -it $(IMAGE_CORD) bash -c "cd /project && \
 		native-image -jar target/output.jar \
 		  -H:ConfigurationFileDirectories=resources/native-configuration \
 		  -H:+AllowIncompleteClasspath \

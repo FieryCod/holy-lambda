@@ -1,7 +1,6 @@
 {
   "resources":{
   "includes":[
-    {"pattern":"\\QMETA-INF/services/org.eclipse.jetty.http.HttpFieldPreEncoder\\E"}, 
     {"pattern":"\\Qclojure/core.clj\\E"}, 
     {"pattern":"\\Qclojure/core/async.clj\\E"}, 
     {"pattern":"\\Qclojure/core/async/impl/buffers.clj\\E"}, 
@@ -218,7 +217,6 @@
     {"pattern":"\\Qcognitect/aws/ec2_metadata_utils__init.class\\E"}, 
     {"pattern":"\\Qcognitect/aws/endpoint.clj\\E"}, 
     {"pattern":"\\Qcognitect/aws/endpoint__init.class\\E"}, 
-    {"pattern":"\\Qcognitect/aws/endpoints.edn\\E"}, 
     {"pattern":"\\Qcognitect/aws/http.clj\\E"}, 
     {"pattern":"\\Qcognitect/aws/http/cognitect.clj\\E"}, 
     {"pattern":"\\Qcognitect/aws/http/cognitect__init.class\\E"}, 
@@ -245,12 +243,10 @@
     {"pattern":"\\Qcognitect/aws/shape__init.class\\E"}, 
     {"pattern":"\\Qcognitect/aws/signers.clj\\E"}, 
     {"pattern":"\\Qcognitect/aws/signers__init.class\\E"}, 
-    {"pattern":"\\Qcognitect/aws/sqs/service.edn\\E"}, 
     {"pattern":"\\Qcognitect/aws/util.clj\\E"}, 
     {"pattern":"\\Qcognitect/aws/util__init.class\\E"}, 
     {"pattern":"\\Qcognitect/http_client.clj\\E"}, 
     {"pattern":"\\Qcognitect/http_client__init.class\\E"}, 
-    {"pattern":"\\Qcognitect_aws_http.edn\\E"}, 
     {"pattern":"\\Qdata_readers.cljc\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/agent.clj\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/agent__init.class\\E"}, 
@@ -266,16 +262,12 @@
     {"pattern":"\\Qfierycod/holy_lambda/retriever__init.class\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/util.clj\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/util__init.class\\E"}, 
-    {"pattern":"\\Qjavax/crypto/Cipher.class\\E"}, 
     {"pattern":"\\Qjsonista/core.clj\\E"}, 
     {"pattern":"\\Qjsonista/core__init.class\\E"}, 
-    {"pattern":"\\Qorg/eclipse/jetty/version/build.properties\\E"}, 
     {"pattern":"\\Qsqs_example/core.clj\\E"}, 
     {"pattern":"\\Qsqs_example/core__init.class\\E"}, 
     {"pattern":"\\Qsqs_example/static_load.clj\\E"}, 
-    {"pattern":"\\Qsqs_example/static_load__init.class\\E"}, 
-    {"pattern":"\\Qsun/net/idn/uidna.spp\\E"}, 
-    {"pattern":"\\Qsun/text/resources/unorm.icu\\E"}
+    {"pattern":"\\Qsqs_example/static_load__init.class\\E"}
   ]},
   "bundles":[]
 }

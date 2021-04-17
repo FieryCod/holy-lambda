@@ -24,9 +24,3 @@
     (t/is (= {:ok "OK"}
              (h/call #'call-lambda-01-valid-internal {:event {:ok "OK"}})))))
 
-(t/deftest gen-main-test
-  (t/testing "should properly generate main fn"
-    (h/gen-main [#'call-lambda-01-valid-internal])
-    (t/is (= {"fierycod.holy-lambda.core-test.call-lambda-01-valid-internal"
-              #'fierycod.holy-lambda.core-test/call-lambda-01-valid-internal}
-             PRVL_ROUTES))))
