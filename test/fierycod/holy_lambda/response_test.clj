@@ -15,7 +15,7 @@
              (r/response {}))))
 
   (t/testing "status basic template"
-    (t/is (= {:statusCode 200, :headers {}, :body {}}
+    (t/is (= {:statusCode 200, :headers {} :body {}}
              (r/status 200)))
     (t/is (= {:statusCode 200, :body "hello"}
              (r/status {:body "hello"} 200))))
@@ -65,7 +65,7 @@
     (t/is
      (= "application/json"
         (r/get-header {:headers {"Content-Type" "application/json"}} "Content-Type")))
-    (t/is (thrown? Exception (r/get-header {:headers {"Content-Type" "something"}} nil)))
+    (t/is (= "ex" (try (r/get-header {:headers {"Content-Type" "something"}} nil) (catch Exception _ "ex"))))
     (t/is
      (= "something"
         (r/get-header {:headers {"Content-Type" "something"}} "Content-Type"))))
