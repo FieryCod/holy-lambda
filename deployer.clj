@@ -42,9 +42,10 @@
 
     ;; Release new version
     (sh "git" "add" ".")
-    (sh "git" "tag")
     (sh "git" "commit" "-m" (str "[deployer] Release v" new-version))
-    (sh "git" "push" "--atomic" "origin" "master" new-version)
+    (sh "git" "tag" new-version)
+    (sh "git" "push" "--follow-tags")
+    (sh "lein" "install")
     (sh "lein" "deploy" "clojars")
 
     ;; Prepare for new development iteration
@@ -52,8 +53,7 @@
 
     (sh "git" "add" ".")
     (sh "git" "commit" "-m" (str "[deployer] Prepare for next development iteration v" (bump :snapshot new-version)))
-    (sh "git" "push")
-    (sh "lein" "install"))
+    (sh "git" "push"))
   (shutdown-agents))
 
 (deploy {:type (first *command-line-args*)})
