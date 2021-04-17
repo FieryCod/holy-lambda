@@ -32,9 +32,12 @@
       (= (get-in response [:headers "Content-Type"]) "application/json; charset=utf-8")
       (json/write-value-as-bytes (assoc response :body (json/write-value-as-string (:body response))))
 
+      ;; On text
+      (= (get-in response [:headers "Content-Type"]) "text/plain; charset=utf-8")
+      (json/write-value-as-bytes response)
+
       ;; Ack event
-      (or (nil? response)
-          (string? response))
+      (nil? response)
       (json/write-value-as-bytes {:body (or response "")
                                   :statusCode 200
                                   :headers {"Content-Type" "text/plain; charset=utf-8"}})

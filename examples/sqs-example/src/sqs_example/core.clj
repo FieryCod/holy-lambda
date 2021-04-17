@@ -30,7 +30,7 @@
   (let [message (or (:message (:pathParameters event)) "Hello")]
     (println (send-sqs-message! {:queue-url (get-in ctx [:envs "SQS_URL"])
                                  :msg message}))
-    (hr/response (str "Received message: " message))))
+    (hr/text (str "Received message: " message))))
 
 (native/entrypoint [#'SubscribeLambda #'ApiProxyMessage])
 

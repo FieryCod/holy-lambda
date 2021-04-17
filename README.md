@@ -36,8 +36,6 @@ It allows you to write one code which might run either on Official Java AWS Runt
 (native/entrypoint [#'ExampleLambda])
 ```
 
-## 
-
 ## Quickstart
 
 Generate a new project from template via

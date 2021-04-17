@@ -17,7 +17,7 @@
 
 (h/deflambda ByeLambda
   [_request]
-  "Bye bye")
+  (hr/text "Bye bye"))
 
 (h/deflambda RedirectLambda
   [_request]
@@ -28,7 +28,7 @@
   (future
     (println "I'm sleeping like a baby")
     (Thread/sleep 3000)
-    "Was sleeping good"))
+    (hr/text "Was sleeping good")))
 
 (h/deflambda AsyncLambdaPromise
   [_request]
@@ -36,12 +36,12 @@
     (future
       (println "I'm sleeping like a baby")
       (Thread/sleep 3000)
-      (deliver p "Was sleeping good"))
+      (deliver p (hr/text "Was sleeping good")))
     p))
 
 (h/deflambda AsyncLambdaChannel
   [_request]
-  (async/go "Yay. Channel"))
+  (async/go (hr/text "Yay. Channel")))
 
 (native/entrypoint
  [#'HelloLambda

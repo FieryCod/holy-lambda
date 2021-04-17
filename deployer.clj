@@ -56,6 +56,7 @@
 
     ;; Prepare for new development iteration
     (spit "VERSION" (bump :snapshot new-version))
+    (spit "project.clj" (s/replace (slurp "project.clj") PROJECT_VERSION (str "fierycod/holy-lambda   \"" (bump :snapshot new-version) "\"")))
 
     (sh "git" "add" ".")
     (sh "git" "commit" "-m" (str "[deployer] Prepare for next development iteration v" (bump :snapshot new-version)))
