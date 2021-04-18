@@ -1,5 +1,5 @@
 # Holy Lambda
-[![Clojars Project](https://img.shields.io/clojars/v/fierycod/holy-lambda.svg?logo=clojure&logoColor=white)](https://clojars.org/fierycod/holy-lambda)
+[![Clojars Project](https://img.shields.io/clojars/v/io.github.FieryCod/holy-lambda.svg?logo=clojure&logoColor=white)](https://clojars.org/fierycod/io.github.FieryCod/holy-lambda)
 [![CircleCI](https://circleci.com/gh/FieryCod/holy-lambda/tree/master.svg?style=svg)](https://circleci.com/gh/FieryCod/holy-lambda/tree/master)
 [![codecov](https://codecov.io/gh/FieryCod/holy-lambda/branch/master/graph/badge.svg)](https://codecov.io/gh/FieryCod/holy-lambda)
 [![cljdoc badge](https://cljdoc.org/badge/fierycod/holy-lambda)](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT)
@@ -10,7 +10,7 @@
 Tiny native AWS Custom Lambda Runtime which fulfills your needs!
 
 ``` clojure
-[fierycod/holy-lambda "0.1.10"]
+[io.github.FieryCod/holy-lambda "0.1.10"]
 ```
 
 ## What it does?
