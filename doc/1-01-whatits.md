@@ -1,6 +1,6 @@
 # What it is?
 
-Holy lambda is a micro framework which adds support for running Clojure on the [AWS Lambda](https://aws.amazon.com/lambda/) and might be used with arbitrary AWS Lambda deployment tool. Holy lambda provides very convinient environment compared to other tools such as [uswitch/lambada](https://github.com/uswitch/lambada) or [babashka-lambda](https://github.com/dainiusjocas/babashka-lambda) via simple, but powerful `Makefile` recipes eg. deployment is as easy as running `make make-bucket deploy` (for native lambda `make make-bucket native-deploy`).
+Holy lambda is a micro framework which adds support for running Clojure on the [AWS Lambda](https://aws.amazon.com/lambda/) and might be used with arbitrary AWS Lambda deployment tool. Holy lambda provides very convenient environment compared to other tools such as [uswitch/lambada](https://github.com/uswitch/lambada) or [babashka-lambda](https://github.com/dainiusjocas/babashka-lambda) via simple, but powerful `Makefile` recipes eg. deployment is as easy as running `make make-bucket deploy` (for native lambda `make make-bucket native-deploy`).
 
 *Holy lambda supports*
 - interceptors
@@ -8,7 +8,7 @@ Holy lambda is a micro framework which adds support for running Clojure on the [
 - async handlers
 
 ## Java runtime
-Prior work towards targeting Java runtime was done by [uswitch/lambada](https://github.com/uswitch/lambada), but lacked being convienient. Holy lambda in the other hand is very convinient and does things which lambada lacked:
+Prior work towards targeting Java runtime was done by [uswitch/lambada](https://github.com/uswitch/lambada), but lacked being convienient. Holy lambda in the other hand is very convenient and does things which lambada lacked:
 
 - full class identifier is created during macroexpansion of `deflambda` 
 - request is automatically slurped and converted to a map
