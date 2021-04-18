@@ -24,12 +24,16 @@ It allows you to write one code which might run either on Official Java AWS Runt
 (ns some.ns
   (:require 
     [fierycod.holy-lambda.core :as h]
+    [fierycod.holy-lambda.interceptor :as i]
     [fierycod.holy-lambda.native :as native]
     [fierycod.holy-lambda.response :as hr]))
-    
+
+(i/definterceptor LogIncomingRequest
+ {:enter (fn [request] request)})
+ 
 (h/deflambda ExampleLambda
   "I can run on both Java and Native..."
-  <
+  < {:interceptors [LogIncomingRequest]}
   [{:keys [event ctx]}]
   (hr/text "Hello world"))
   

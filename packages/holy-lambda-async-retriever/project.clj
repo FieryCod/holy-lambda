@@ -1,7 +1,8 @@
-(defproject fierycod/holy-lambda-async-retriever "0.0.2"
+(defproject io.github.FieryCod/holy-lambda-async-retriever "0.0.2"
   :description "Support for async handlers which returns channel as a response."
 
-  :url "https://github.com/FieryCod/holy-lambda/packages/holy-lambda-async-retriever"
+  :url "https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-async-retriever"
+
   :license {:name "MIT"
             :url "https://opensource.org/licenses/MIT"}
 
@@ -20,6 +21,8 @@
                                      :creds :gpg}
                          "snapshots" {:url "https://clojars.org/repo"
                                       :creds :gpg}]]
+  :scm {:name "git"
+        :url "https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-async-retriever"}
 
   :profiles {:eftest {:global-vars {*warn-on-reflection* false}
                       :plugins [[lein-eftest "0.5.9"]]}

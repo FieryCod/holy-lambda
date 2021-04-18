@@ -11,12 +11,12 @@
 
 (def VERSION (s/trim (slurp (io/file "VERSION"))))
 
-(def examples
+(def EXAMPLES
   ["hello-lambda"
    "sqs-example"])
 
 (def VERSION_GROUPS #"([0-9]+)\.([0-9]+)\.([0-9]+)(?:-SNAPSHOT)?")
-(def PROJECT_VERSION #"fierycod\/holy-lambda\s*\"([0-9]+\.[0-9]+\.[0-9]+(?:-SNAPSHOT)?)\"")
+(def PROJECT_VERSION #"io\.github\.FieryCod\/holy-lambda\s*\"([0-9]+\.[0-9]+\.[0-9]+(?:-SNAPSHOT)?)\"")
 
 (defn bump
   [?type ?version]
@@ -36,14 +36,14 @@
         new-version (bump type VERSION)]
 
     ;; Update all examples
-    (doseq [example-path examples
-            :let [file (io/file "examples" example-path "project.clj")]]
-      (spit (str (.getAbsolutePath file)) (s/replace (slurp file) PROJECT_VERSION (str "fierycod/holy-lambda   \"" new-version "\""))))
+    (doseq [example-path EXAMPLES
+            :let [file (io/file "examples" example-path "packages/holy-lambda/project.clj")]]
+      (spit (str (.getAbsolutePath file)) (s/replace (slurp file) PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" new-version "\""))))
 
 
     ;; Update project, README and VERSION
-    (spit "project.clj" (s/replace (slurp "project.clj") PROJECT_VERSION (str "fierycod/holy-lambda   \"" new-version "\"")))
-    (spit "README.md" (s/replace (slurp "README.md") PROJECT_VERSION (str "fierycod/holy-lambda \"" new-version "\"")))
+    (spit "packages/holy-lambda/project.clj" (s/replace (slurp "packages/holy-lambda/project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" new-version "\"")))
+    (spit "README.md" (s/replace (slurp "README.md") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda \"" new-version "\"")))
     (spit "VERSION" new-version)
 
     ;; Release new version
@@ -56,7 +56,7 @@
 
     ;; Prepare for new development iteration
     (spit "VERSION" (bump :snapshot new-version))
-    (spit "project.clj" (s/replace (slurp "project.clj") PROJECT_VERSION (str "fierycod/holy-lambda   \"" (bump :snapshot new-version) "\"")))
+    (spit "packages/holy-lambda/project.clj" (s/replace (slurp "packages/holy-lambda/project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" (bump :snapshot new-version) "\"")))
 
     (sh "git" "add" ".")
     (sh "git" "commit" "-m" (str "[deployer] Prepare for next development iteration v" (bump :snapshot new-version)))
