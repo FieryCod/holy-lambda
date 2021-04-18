@@ -15,8 +15,8 @@
   ["hello-lambda"
    "sqs-example"])
 
-(def VERSION_GROUPS #"([0-9]+)\.([0-9]+)\.([0-9]+)(?:SNAPSHOT)?")
-(def PROJECT_VERSION #"fierycod\/holy-lambda\s*\"([0-9]+\.[0-9]+\.[0-9]+(?:SNAPSHOT)?)\"")
+(def VERSION_GROUPS #"([0-9]+)\.([0-9]+)\.([0-9]+)(?:-SNAPSHOT)?")
+(def PROJECT_VERSION #"fierycod\/holy-lambda\s*\"([0-9]+\.[0-9]+\.[0-9]+(?:-SNAPSHOT)?)\"")
 
 (defn bump
   [?type ?version]

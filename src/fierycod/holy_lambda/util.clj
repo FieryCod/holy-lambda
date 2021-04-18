@@ -26,7 +26,9 @@
 
 (defn response->bytes
   [?response]
-  (let [response (retriever/<-wait-for-response ?response)]
+  (let [response (retriever/<-wait-for-response ?response)
+        ;; remove internals
+        response (dissoc response :fierycod.holy-lambda.interceptor/interceptors)]
     (cond
       ;; Optimize the common case
       (= (get-in response [:headers "Content-Type"]) "application/json; charset=utf-8")
@@ -38,7 +40,7 @@
 
       ;; Ack event
       (nil? response)
-      (json/write-value-as-bytes {:body (or response "")
+      (json/write-value-as-bytes {:body ""
                                   :statusCode 200
                                   :headers {"Content-Type" "text/plain; charset=utf-8"}})
 

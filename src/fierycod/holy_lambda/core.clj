@@ -1,26 +1,16 @@
 (ns fierycod.holy-lambda.core
   "Integrates the Clojure code with two different runtimes: Java Lambda Runtime, Native Provided Runtime.
-  The former is the Official Java Runtime for AWS Lambda which is well tested and works perfectly fine, but it's rather slow due to cold starts.
-  The latter is a custom [runtime](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html) integrated within the framework.
-  It's a significantly faster than the Java runtime due to the use of GraalVM.
-
-  *Includes:*
-  - Friendly macro for generating Lambda functions
-  - Function for calling the lambda via the var "
+  The former is the Official Java Runtime for AWS Lambda which is well tested and works perfectly fine, but it's rather slow due to cold starts whereas,
+  the latter is a custom [runtime](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html) integrated within the framework.
+  It's a significantly faster than the Java runtime due to the use of GraalVM."
   (:require
+   [fierycod.holy-lambda.interceptor :as i]
    [fierycod.holy-lambda.java-runtime :as jruntime]
    [fierycod.holy-lambda.util :as u])
   (:import
+   [clojure.lang IPersistentMap]
    [com.amazonaws.services.lambda.runtime Context]
    [java.io InputStream OutputStream]))
-
-(def ^{:added "0.0.1"
-       :arglists '([afn-sym]
-                   [afn-sym request])}
-  call
-  "Resolves the lambda function and calls it with request map.
-  Returns the callable lambda function if only one argument is passed."
-  #'fierycod.holy-lambda.util/call)
 
 (defn- wrap-lambda
   [gmethod-sym mixin lambda gclass]
@@ -29,7 +19,14 @@
      (defn ~gmethod-sym
        ;; Arity used for testing and native runtime invocation
        ([request#]
-        (~lambda request#))
+        (#'fierycod.holy-lambda.interceptor/process-interceptors
+         ~mixin
+         (~lambda
+          (#'fierycod.holy-lambda.interceptor/process-interceptors ~mixin
+                                                                   request#
+                                                                   :enter))
+         :leave))
+
        ;; Arity used for Java runtime
        ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
         ;; TODO: Move me to java runtime
@@ -37,8 +34,13 @@
           (let [event# (#'fierycod.holy-lambda.util/in->edn-event in#)
                 context# (#'fierycod.holy-lambda.java-runtime/java-ctx-object->ctx-edn ctx# (#'fierycod.holy-lambda.util/envs))
                 response# (#'fierycod.holy-lambda.util/response->bytes
-                           (~lambda {:event event#
-                                     :ctx context#}))]
+                           (#'fierycod.holy-lambda.interceptor/process-interceptors
+                            ~mixin
+                            (~lambda (#'fierycod.holy-lambda.interceptor/process-interceptors ~mixin
+                                                                                              {:event event#
+                                                                                               :ctx context#}
+                                                                                              :enter))
+                            :leave))]
             (.write out# ^"[B" response#))
           (catch Exception error#
             (println "[Holy Lambda] Exception during request handling" error#))
@@ -87,4 +89,13 @@
         lambda `(fn ~@bodies)]
 
     `(do ~(wrap-lambda gmethod-sym mixin lambda gclass)
-         (def ~lname ~gmethod-sym))))
+          (def ~lname ~gmethod-sym))))
+
+(defn merge-mixins
+  "Merges multiple mixins properties"
+  [& mixins]
+  (reduce (fn [mixin1 mixin2]
+            (-> mixin1
+                (update :interceptors (comp vec (fnil concat [])) (or (:interceptors mixin2) []))))
+          mixins))
+

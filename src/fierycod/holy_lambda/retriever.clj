@@ -48,5 +48,5 @@
 
     :else
     (do
-      (println "[Holy Lambda] Supposedly not supported response.\n\n If you looking for channel support then use: https://github.com/FieryCod/holy-lambda-async-retriever")
+      (println "\n\n---------------------\n[Holy Lambda] Supposedly not supported response.\nIf you looking for channel support then use: https://github.com/FieryCod/holy-lambda-async-retriever\n---------------------\n\n")
       response)))

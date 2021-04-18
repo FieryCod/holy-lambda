@@ -33,8 +33,12 @@
                             `(println (symbol "request"))])
                           [:lname :doc :mixin])))))
 
-(t/deftest call-lambda-fn-test
-  (t/testing "should take the lambda and invoke it passing correct result"
-    (t/is (= {:ok "OK"}
-             (h/call #'call-lambda-01-valid-internal {:event {:ok "OK"}})))))
-
+(t/deftest merge-mixins-test
+  (t/testing "merging mixins should work"
+    (t/is (= {:interceptors []} (h/merge-mixins {} {})))
+    (t/is (= {:interceptors []} (h/merge-mixins {:interceptors []} {:interceptors []})))
+    (t/is (= {:interceptors []} (h/merge-mixins {:interceptors nil} {:interceptors []})))
+    (t/is (= {:interceptors []} (h/merge-mixins {:interceptors []} {:interceptors nil})))
+    (t/is (= {:interceptors [1 2]} (h/merge-mixins {:interceptors [1 2]} {:interceptors nil})))
+    (t/is (= {:interceptors [1 2]} (h/merge-mixins {:interceptors nil} {:interceptors [1 2]})))
+    (t/is (= {:interceptors [1 1 2]} (h/merge-mixins {:interceptors [1]} {:interceptors [1 2]})))))
