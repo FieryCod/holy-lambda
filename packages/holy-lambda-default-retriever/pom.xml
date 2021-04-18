@@ -2,21 +2,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>fierycod</groupId>
-  <artifactId>holy-lambda</artifactId>
+  <artifactId>holy-lambda-default-retriever</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.11-SNAPSHOT</version>
-  <name>holy-lambda</name>
-  <description>Micro framework which turns your code into AWS Lambda functions</description>
-  <url>https://github.com/FieryCod/holy-lambda</url>
+  <version>0.0.1</version>
+  <name>holy-lambda-default-retriever</name>
+  <description>Default retriever for payloads</description>
+  <url>https://github.com/FieryCod/holy-lambda/packages/holy-lambda-default-retriever</url>
   <licenses>
     <license>
       <name>MIT</name>
       <url>https://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
-  <scm>
-    <url>https://github.com/FieryCod/holy-lambda</url>
-  </scm>
+  <scm/>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <testSourceDirectory>test</testSourceDirectory>
@@ -65,21 +63,6 @@
       <artifactId>clojure</artifactId>
       <version>1.10.0</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>metosin</groupId>
-      <artifactId>jsonista</artifactId>
-      <version>0.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-lambda-java-core</artifactId>
-      <version>1.2.1</version>
-    </dependency>
-    <dependency>
-      <groupId>fierycod</groupId>
-      <artifactId>holy-lambda-default-retriever</artifactId>
-      <version>0.0.1</version>
     </dependency>
   </dependencies>
 </project>

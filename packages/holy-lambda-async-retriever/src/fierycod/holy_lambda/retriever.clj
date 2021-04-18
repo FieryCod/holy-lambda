@@ -5,9 +5,15 @@
   - Future<IPersistentMap>
   - IPersistentMap
   - Promise<IPersistentMap>
+  - Channel<IPersistentMap> "
+  (:require
+   [clojure.core.async :as async])
+  (:import
+   [clojure.core.async.impl.channels ManyToManyChannel]))
 
-  If you looking for channel support then use:
-  https://github.com/FieryCod/holy-lambda-async-retriever")
+(defn- chan?
+  [?c]
+  (instance? ManyToManyChannel ?c))
 
 (def ^:private ^:const MAX_TIMEOUT_TIME
   "850 seconds. Max timeout is 900 for AWS Lambda"
@@ -24,6 +30,9 @@
         (nil? response)
         (string? response))
     response
+
+    (chan? response)
+    (<-wait-for-response (future (async/<!! response)))
 
     ;; Potentially a promise or future
     (pending? response)
@@ -48,5 +57,5 @@
 
     :else
     (do
-      (println "\n\n---------------------\n[Holy Lambda] Supposedly not supported response.\nIf you looking for channel support then use: https://github.com/FieryCod/holy-lambda-async-retriever\n---------------------\n\n")
+      (println "\n\n---------------------\n[Holy Lambda] Supposedly not supported response.\n---------------------\n\n")
       response)))

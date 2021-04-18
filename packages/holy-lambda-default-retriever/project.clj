@@ -1,7 +1,7 @@
-(defproject fierycod/holy-lambda   "0.1.11-SNAPSHOT"
-  :description "Micro framework which turns your code into AWS Lambda functions"
+(defproject fierycod/holy-lambda-default-retriever "0.0.1"
+  :description "Default retriever for payloads"
 
-  :url "https://github.com/FieryCod/holy-lambda"
+  :url "https://github.com/FieryCod/holy-lambda/packages/holy-lambda-default-retriever"
 
   :license {:name "MIT"
             :url "https://opensource.org/licenses/MIT"}
@@ -10,10 +10,7 @@
 
   :global-vars {*warn-on-reflection* true}
 
-  :dependencies [[org.clojure/clojure "1.10.0" :scope "provided"]
-                 [metosin/jsonista "0.3.1"]
-                 [com.amazonaws/aws-lambda-java-core "1.2.1"]
-                 [fierycod/holy-lambda-default-retriever "0.0.1"]]
+  :dependencies [[org.clojure/clojure "1.10.0" :scope "provided"]]
 
   :eftest {:thread-count 4}
 
@@ -23,8 +20,6 @@
                                      :creds :gpg}
                          "snapshots" {:url "https://clojars.org/repo"
                                       :creds :gpg}]]
-  :scm {:name "git"
-        :url "https://github.com/FieryCod/holy-lambda"}
 
   :profiles {:eftest {:global-vars {*warn-on-reflection* false}
                       :plugins [[lein-eftest "0.5.9"]]}
