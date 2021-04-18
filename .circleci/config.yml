@@ -4,59 +4,63 @@ references:
   polyglot-defaults: &polyglot-defaults
     working_directory: ~/holy-lambda
     docker:
-      - image: circleci/clojure:openjdk-8-lein-2.9.1-node
+      - image: circleci/clojure:openjdk-8-lein-2.9.1
     environment:
       JVM_OPTS: -Xmx3200m
       LEIN_ROOT: nbd
 
-  restore-lein-deps: &restore-lein-deps
+  restore-lein-deps-root: &restore-lein-deps-root
     restore_cache:
       keys:
         - deps-lein-{{ checksum "project.clj" }}
         - deps-lein-
 
 jobs:
-  install-clojure-deps:
+  install-clojure-deps-root:
     <<: *polyglot-defaults
+
     environment:
       LEIN_ROOT: "true"
       JVM_OPTS: -Xmx3200m
 
     steps:
       - checkout
-      - *restore-lein-deps
+      - *restore-lein-deps-root
       - run: lein deps
       - save_cache:
           paths:
             - ~/.m2
           key: deps-lein-{{ checksum "project.clj" }}
 
-  upload-code-coverage:
+
+  upload-code-coverage-root:
      <<: *polyglot-defaults
      steps:
        - checkout
-       - *restore-lein-deps
+       - *restore-lein-deps-root
        - run: lein cloverage --codecov
        - run: bash <(curl -s https://codecov.io/bash)
 
-  run-test:
+
+  run-test-root:
     <<: *polyglot-defaults
     steps:
       - checkout
-      - *restore-lein-deps
+      - *restore-lein-deps-root
       - run: lein with-profile eftest eftest
+
 
 workflows:
   version: 2
 
-  test:
-    jobs:
-      - install-clojure-deps
+  holy-lambda-test:
+     jobs:
+      - install-clojure-deps-root
 
-      - run-test:
+      - run-test-root:
           requires:
-            - install-clojure-deps
+            - install-clojure-deps-root
 
-      - upload-code-coverage:
+      - upload-code-coverage-root:
           requires:
-            - run-test
+            - run-test-root

@@ -1,7 +1,7 @@
-(defproject io.github.FieryCod/holy-lambda-async-retriever "0.0.2"
-  :description "Support for async handlers which returns channel as a response."
+(defproject io.github.FieryCod/holy-lambda-default-retriever "0.0.2"
+  :description "Default retriever for payloads"
 
-  :url "https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-async-retriever"
+  :url "https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-default-retriever"
 
   :license {:name "MIT"
             :url "https://opensource.org/licenses/MIT"}
@@ -10,8 +10,7 @@
 
   :global-vars {*warn-on-reflection* true}
 
-  :dependencies [[org.clojure/clojure "1.10.0" :scope "provided"]
-                 [org.clojure/core.async "1.3.610" :scope "provided"]]
+  :dependencies [[org.clojure/clojure "1.10.0" :scope "provided"]]
 
   :eftest {:thread-count 4}
 
@@ -21,8 +20,10 @@
                                      :creds :gpg}
                          "snapshots" {:url "https://clojars.org/repo"
                                       :creds :gpg}]]
+
   :scm {:name "git"
-        :url "https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-async-retriever"}
+        :url "https://github.com/metosin/reitit"
+        :dir "../.."}
 
   :profiles {:eftest {:global-vars {*warn-on-reflection* false}
                       :plugins [[lein-eftest "0.5.9"]]}
