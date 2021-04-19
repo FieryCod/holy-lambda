@@ -164,6 +164,8 @@
     {"pattern":"\\Qfierycod/holy_lambda/agent__init.class\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/core.clj\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/core__init.class\\E"}, 
+    {"pattern":"\\Qfierycod/holy_lambda/interceptor.clj\\E"}, 
+    {"pattern":"\\Qfierycod/holy_lambda/interceptor__init.class\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/java_runtime.clj\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/java_runtime__init.class\\E"}, 
     {"pattern":"\\Qfierycod/holy_lambda/native_runtime.clj\\E"}, 

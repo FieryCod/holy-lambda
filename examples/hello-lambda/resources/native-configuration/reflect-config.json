@@ -773,6 +773,9 @@
   "name":"fierycod.holy_lambda.core__init"
 },
 {
+  "name":"fierycod.holy_lambda.interceptor__init"
+},
+{
   "name":"fierycod.holy_lambda.java_runtime__init"
 },
 {
