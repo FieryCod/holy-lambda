@@ -1,5 +1,5 @@
 # Changelog
-## 0.1.14 (19-04-2021)
+## 0.1.15 (19-04-2021)
 *Changes*
 - Add partial support for GraalVMEE (PGO optimizations in progress)
 - Move code to separate packages

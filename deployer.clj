@@ -27,7 +27,7 @@
         patch (if-not (= ?type :patch) patch (inc (Integer/parseInt patch)))
         snapshot (if-not (= ?type :snapshot) "" "-SNAPSHOT")]
     (str major "." minor "." (if (= ?type :snapshot)
-                               (inc (Integer/parseInt patch))
+                               (Integer/parseInt patch)
                                patch)
          snapshot)))
 
