@@ -59,7 +59,8 @@
     (sh "git" "add" ".")
     (sh "git" "commit" "-m" (str "[deployer] Release v" new-version))
     (sh "git" "tag" new-version)
-    (sh "git" "push" "--follow-tags")
+    (sh "git" "push")
+    (sh "git" "push" "origin" "--tags")
     (sh "lein" "install")
     (sh "lein" "deploy" "clojars")
 
