@@ -1,4 +1,4 @@
-(ns ^:no-doc ^:private fierycod.holy-lambda.agent
+(ns fierycod.holy-lambda.agent
   "Provides utils for generating native-configurations via GraalVM agent.
   GraalVM agent is convenient tool for complex project, so that
   user does not have to put each entry of reflective call to configuration by hand."
