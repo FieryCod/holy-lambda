@@ -16,7 +16,7 @@ else
 endif
 
 build-docker:
-	@docker build docker/$(IMAGE_BUILD) -f docker/Dockerfile.$(IMAGE_BUILD) -t $(IMAGE_CORD)
+	@docker build docker/$(IMAGE_BUILD) -f docker/$(IMAGE_BUILD)/Dockerfile -t $(IMAGE_CORD)
 
 push-docker:
 ifeq ($(USE_EE), true)
