@@ -1,5 +1,5 @@
 # Holy Lambda
-[![Clojars Project](https://img.shields.io/clojars/v/io.github.FieryCod/holy-lambda.svg?logo=clojure&logoColor=white)](https://clojars.org/fierycod/io.github.FieryCod/holy-lambda)
+[![Clojars Project](https://img.shields.io/clojars/v/io.github.FieryCod/holy-lambda.svg?logo=clojure&logoColor=white)](https://clojars.org/io.github.FieryCod/holy-lambda)
 [![CircleCI](https://circleci.com/gh/FieryCod/holy-lambda/tree/master.svg?style=svg)](https://circleci.com/gh/FieryCod/holy-lambda/tree/master)
 [![codecov](https://codecov.io/gh/FieryCod/holy-lambda/branch/master/graph/badge.svg)](https://codecov.io/gh/FieryCod/holy-lambda)
 [![cljdoc badge](https://cljdoc.org/badge/fierycod/holy-lambda)](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT)
@@ -29,7 +29,7 @@ It allows you to write one code which might run either on Official Java AWS Runt
     [fierycod.holy-lambda.response :as hr]))
 
 (i/definterceptor LogIncomingRequest
- {:enter (fn [request] request)})
+  {:enter (fn [request] request)})
  
 (h/deflambda ExampleLambda
   "I can run on both Java and Native..."
