@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>fierycod</groupId>
+  <groupId>io.github.FieryCod</groupId>
   <artifactId>holy-lambda</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.11-SNAPSHOT</version>
+  <version>0.1.13</version>
   <name>holy-lambda</name>
   <description>Micro framework which turns your code into AWS Lambda functions</description>
   <url>https://github.com/FieryCod/holy-lambda</url>
@@ -16,6 +16,9 @@
   </licenses>
   <scm>
     <url>https://github.com/FieryCod/holy-lambda</url>
+    <connection>scm:git:git://github.com/FieryCod/holy-lambda.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/FieryCod/holy-lambda.git</developerConnection>
+    <tag>28f0978b1810059eb126a864d985a34a1aa95bb5</tag>
   </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -77,9 +80,9 @@
       <version>1.2.1</version>
     </dependency>
     <dependency>
-      <groupId>fierycod</groupId>
+      <groupId>io.github.FieryCod</groupId>
       <artifactId>holy-lambda-default-retriever</artifactId>
-      <version>0.0.1</version>
+      <version>0.0.2</version>
     </dependency>
   </dependencies>
 </project>
