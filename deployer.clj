@@ -17,6 +17,7 @@
 
 (def VERSION_GROUPS #"([0-9]+)\.([0-9]+)\.([0-9]+)(?:-SNAPSHOT)?")
 (def PROJECT_VERSION #"io\.github\.FieryCod\/holy-lambda\s*\"([0-9]+\.[0-9]+\.[0-9]+(?:-SNAPSHOT)?)\"")
+(def TEMPLATE_PROJECT_VERSION #"holy-lambda\/lein-template\s*\"([0-9]+\.[0-9]+\.[0-9]+(?:-SNAPSHOT)?)\"")
 
 (defn bump
   [?type ?version]
@@ -37,16 +38,24 @@
 
     ;; Update all examples
     (doseq [example-path EXAMPLES
-            :let [file (io/file "examples" example-path "packages/holy-lambda/project.clj")]]
+            :let [file (io/file "examples" example-path "project.clj")]]
       (spit (str (.getAbsolutePath file)) (s/replace (slurp file) PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" new-version "\""))))
 
 
     ;; Update project, README and VERSION
-    (spit "packages/holy-lambda/project.clj" (s/replace (slurp "packages/holy-lambda/project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" new-version "\"")))
+    (spit "project.clj" (s/replace (slurp "project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" new-version "\"")))
     (spit "README.md" (s/replace (slurp "README.md") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda \"" new-version "\"")))
     (spit "VERSION" new-version)
 
-    ;; Release new version
+    ;; Update dependant template
+    (spit "modules/holy-lambda-template/project.clj" (s/replace (slurp "modules/holy-lambda-template/project.clj") TEMPLATE_PROJECT_VERSION (str "holy-lambda/lein-template   \"" new-version "\"")))
+    (spit "modules/holy-lambda-template/resources/leiningen/new/holy_lambda/project.clj" (s/replace (slurp "modules/holy-lambda-template/project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" new-version "\"")))
+
+    ;; Deploy dependant template
+    (sh "bash" "-c" "cd modules/holy-lambda-template/ && lein install")
+    (sh "bash" "-c" "cd modules/holy-lambda-template/ && lein deploy clojars")
+
+    ;; Release new version of holy-lambda
     (sh "git" "add" ".")
     (sh "git" "commit" "-m" (str "[deployer] Release v" new-version))
     (sh "git" "tag" new-version)
@@ -56,7 +65,7 @@
 
     ;; Prepare for new development iteration
     (spit "VERSION" (bump :snapshot new-version))
-    (spit "packages/holy-lambda/project.clj" (s/replace (slurp "packages/holy-lambda/project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" (bump :snapshot new-version) "\"")))
+    (spit "project.clj" (s/replace (slurp "project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" (bump :snapshot new-version) "\"")))
 
     (sh "git" "add" ".")
     (sh "git" "commit" "-m" (str "[deployer] Prepare for next development iteration v" (bump :snapshot new-version)))
