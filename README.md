@@ -22,6 +22,7 @@ It allows you to write one code which might run either on Official Java AWS Runt
 
 ``` clojure
 (ns some.ns
+  (:gen-class)
   (:require 
     [fierycod.holy-lambda.core :as h]
     [fierycod.holy-lambda.interceptor :as i]
