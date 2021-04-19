@@ -24,10 +24,10 @@
   (let [[_ major minor patch] (re-find VERSION_GROUPS ?version)
         major (if-not (= ?type :major) major (inc (Integer/parseInt major)))
         minor (if-not (= ?type :minor) minor (inc (Integer/parseInt minor)))
-        patch (if-not (= ?type :patch) patch (inc (Integer/parseInt patch)))
+        patch (if-not (= ?type :patch) patch (Integer/parseInt patch))
         snapshot (if-not (= ?type :snapshot) "" "-SNAPSHOT")]
     (str major "." minor "." (if (= ?type :snapshot)
-                               (Integer/parseInt patch)
+                               (inc (Integer/parseInt patch))
                                patch)
          snapshot)))
 
