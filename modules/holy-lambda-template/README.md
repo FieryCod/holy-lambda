@@ -4,7 +4,7 @@
 ---
 
 Glorious template for Holy Lambda micro framework.
-Visit the docs [here](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/tutorial))
+Visit the docs [here](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURRENT))
 
 ## How to generate a project
 

@@ -1,4 +1,15 @@
 # Changelog
+## 0.1.14 (19-04-2021)
+*Changes*
+- Add partial support for GraalVMEE (PGO optimizations in progress)
+- Move code to separate packages
+- Add interceptors support
+- Make call to lambda a private function
+- Rename fierycod.holy-lambda.core/gen-main to fierycod.holy-lambda.native-runtime/entrypoint (one targeting java runtime should not depend on native-runtime namespace)
+- Provide agent/in-context to ease generation of native-configurations
+- Unify responses. Response should be a valid map or nil for event ACK. Text/plain should be send via response/text.
+- Add some docs
+- Fixup tests
 
 ## 0.1.2 (05-04-2021)
 *Changes*
