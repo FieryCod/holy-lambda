@@ -1,10 +1,17 @@
-(defproject {{name}} "0.0.1-SNAPSHOT"
-  :description "Huh. In the beginning was darkness :)"
-  :global-vars {*warn-on-reflection* true}
-  :dependencies [[org.clojure/clojure "1.10.0"]
-                 [org.clojure/core.async "1.3.610"]
-                 [io.github.FieryCod/holy-lambda   "0.1.12" :exclusions [io.github.FieryCod/holy-lambda-default-retriever]]
-                 [io.github.FieryCod/holy-lambda-async-retriever "0.0.2"]]
-  :main ^:skip-aot {{sanitized}}.core
-  :profiles {:uberjar {:aot :all}}
-  :uberjar-name "output.jar")
+(defproject holy-lambda/lein-template   "0.1.12"
+  :description "Template for holy lambda micro framework"
+
+  :url "https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-template"
+
+  :license {:name "MIT"
+            :url "https://opensource.org/licenses/MIT"}
+
+  :deploy-repositories [["releases" {:url "https://clojars.org/repo"
+                                     :creds :gpg}
+                         "snapshots" {:url "https://clojars.org/repo"
+                                      :creds :gpg}]]
+
+  :scm {:name "git"
+        :url "https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-default-retriever"}
+
+  :eval-in-leiningen true)
