@@ -27,7 +27,6 @@
   *Usage:*
 
   ```
-
   (in-context
     (some-body-which-has-to-be-inspected-via-graalvm))
   ```

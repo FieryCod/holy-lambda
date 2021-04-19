@@ -106,7 +106,12 @@
 
      According to the comment of the @cstancu with the help of the agent we can find the majority
      of the reflective calls and generate the configuration. Generated configuration might then be used
-     by `native-image` tool."
+     by `native-image` tool.
+
+  Usage:
+  ```
+   (entrypoint [#'ExampleLambda1 #'ExampleLambda2 #'ExampleLambda3])
+  ```"
   {:added "0.0.1"}
   [lambdas]
   `(do

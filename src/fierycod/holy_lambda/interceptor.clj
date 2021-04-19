@@ -39,7 +39,15 @@
                       :type ~?type}))))))
 
 (defmacro definterceptor
-  "Defines an interceptor which might be passed to a lambda definition or bind to global interceptors"
+  "Defines an interceptor out of map {:leave (fn [response] response)? :enter (fn [request] request)?}. Interceptors should be passed to lambda as a mixin.
+
+  Usage:
+
+  ```
+  (definterceptor ExampleInterceptor
+    {:leave (fn [response] (hr/origin response \"*\"))
+     :enter (fn [request] (println \"I will log a request\" request) request)})
+  ```"
   [?sym & ?attrs]
   (let [[?sym ?docstring ?body] (apply forms->def ?sym ?attrs)]
     (if (or (nil? ?body)

@@ -74,7 +74,19 @@
         :else (throw (IllegalArgumentException. (str "Syntax error at " xs)))))))
 
 (defmacro deflambda
-  "Convenience macro for generating defn alike lambdas."
+  "Convenience macro for generating defn alike lambdas.
+
+  Usage:
+  ```
+  (i/definterceptor LogIncomingRequest
+    {:enter (fn [request] request)})
+
+  (h/deflambda ExampleLambda
+    \"I can run on both Java and Native...\"
+    < {:interceptors [LogIncomingRequest]}
+    [{:keys [event ctx]}]
+    (hr/text \"Hello world\"))
+  ```"
   {:arglists '([name doc-string? <mixin-sign? mixin? [request] fn-body])
    :added "0.0.1"}
   [& attrs]
@@ -92,7 +104,23 @@
           (def ~lname ~gmethod-sym))))
 
 (defn merge-mixins
-  "Merges multiple mixins properties"
+  "Merges multiple mixins all together.
+
+  Usage:
+
+  ```
+  (definterceptor ExampleInterceptor1
+    {:leave (fn [response] (hr/origin response \"*\"))
+     :enter (fn [request] (println \"I will log a request\" request) request)})
+
+  (definterceptor ExampleInterceptor2
+    {:leave (fn [response] (hr/origin response \"*\"))
+     :enter (fn [request] (println \"I will log a request\" request) request)})
+
+  (def mixin1 {:interceptors [ExampleInterceptor1]})
+  (def mixin2 {:interceptors [ExampleInterceptor2]})
+  (def mixin3 (merge-mixins mixin1 mixin2)) ;; =>  {:interceptors [ExampleInterceptor1 ExampleInterceptor2]}
+  ```"
   [& mixins]
   (reduce (fn [mixin1 mixin2]
             (-> mixin1
