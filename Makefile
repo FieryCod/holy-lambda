@@ -4,7 +4,7 @@ IMAGE_BUILD:=ce
 VERSION_BUMP=patch
 
 ifeq ($(USE_EE), false)
-	IMAGE_CORD=$(IMAGE_CORD_PART):latest
+	IMAGE_CORD=$(IMAGE_CORD_PART)-ce:latest
 else
 	IMAGE_CORD=$(IMAGE_CORD_PART)-ee:latest
 endif
