@@ -12,12 +12,8 @@
       [fierycod.holy-lambda.interceptor :as i]
       [fierycod.holy-lambda.java-runtime :as jruntime]
       [fierycod.holy-lambda.util :as u]))
-  #?(:bb
+  #?(:clj
      (:import
-      [clojure.lang IPersistentMap])
-     :clj
-     (:import
-      [clojure.lang IPersistentMap]
       [com.amazonaws.services.lambda.runtime Context]
       [java.io InputStream OutputStream])))
 
@@ -72,7 +68,7 @@
   ":name  :doc?  <? :mixin* :body+
    symbol string <  expr   fn-body"
   [attrs]
-  (when-not (instance? clojure.lang.Symbol (first attrs))
+  (when-not (symbol? (first attrs))
     (throw (IllegalArgumentException. "First argument to deflambda must be a symbol")))
   (loop [res  {}
          xs   attrs

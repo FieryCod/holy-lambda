@@ -1,8 +1,6 @@
 (ns fierycod.holy-lambda.interceptor
   (:require
-   [fierycod.holy-lambda.retriever :as retriever])
-  (:import
-   [clojure.lang IPersistentMap]))
+   [fierycod.holy-lambda.retriever :as retriever]))
 
 (defn- forms->def
   ([asym form]
@@ -51,7 +49,7 @@
   [?sym & ?attrs]
   (let [[?sym ?docstring ?body] (apply forms->def ?sym ?attrs)]
     (if (or (nil? ?body)
-            (not (instance? IPersistentMap ?body))
+            (not (map? ?body))
             (and (nil? (:enter ?body))
                  (nil? (:leave ?body))))
       (throw (IllegalArgumentException. "Interceptor should be an map of: [:enter (fn [request] request)]? and [:leave (fn [response] response)]?"))
