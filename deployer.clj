@@ -65,6 +65,10 @@
     (sh "lein" "install")
     (sh "lein" "deploy" "clojars")
 
+    ;; Release new version of babashka minimal .jar
+    (sh "lein" "install")
+    (sh "lein" "deploy" "clojars" :dir "modules/holy-lambda-babashka-release")
+
     ;; Prepare for new development iteration
     (spit "VERSION" (bump :snapshot new-version))
     (spit "project.clj" (s/replace (slurp "project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" (bump :snapshot new-version) "\"")))
