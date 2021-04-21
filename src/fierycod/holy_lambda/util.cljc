@@ -49,7 +49,8 @@
       #?(:bb
          (.getBytes ^String (json/generate-string response))
          :clj
-         (json/write-value-as-bytes response))
+         (json/write-value-as-bytes response)
+         :cljs nil)
 
       ;; Ack event
       (nil? response)
