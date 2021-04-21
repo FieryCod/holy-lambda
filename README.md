@@ -11,7 +11,7 @@
 Tiny native AWS Custom Lambda Runtime which fulfills your needs!
 
 ``` clojure
-[io.github.FieryCod/holy-lambda "0.1.18"]
+[io.github.FieryCod/holy-lambda "0.1.19"]
 ```
 
 ## What it does?
