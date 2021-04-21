@@ -3,7 +3,7 @@
   :global-vars {*warn-on-reflection* true}
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/core.async "1.3.610"]
-                 [io.github.FieryCod/holy-lambda   "0.1.20"]]
+                 [io.github.FieryCod/holy-lambda   "0.1.21"]]
   :main ^:skip-aot {{sanitized}}.core
   :profiles {:uberjar {:aot :all}}
   :uberjar-name "output.jar")
