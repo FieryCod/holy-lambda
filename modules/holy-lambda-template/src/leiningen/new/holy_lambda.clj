@@ -1,5 +1,6 @@
 (ns leiningen.new.holy-lambda
   (:require
+   [clojure.java.shell :as sh]
    [leiningen.new.templates :refer [renderer name-to-path ->files]]
    [leiningen.core.main :as main]))
 
@@ -12,7 +13,7 @@
         render* #(render % data)]
     (main/info "Generating fresh 'lein new' holy-lambda project.")
     (->files data
-             ["src/{{sanitized}}/core.clj" (render* "core.clj")]
+             ["src/{{sanitized}}/core.cljc" (render* "core.cljc")]
              [".clj-kondo/config.edn" (render* "clj-kondo/config.edn")]
              [".clj-kondo/clj_kondo/holy_lambda.clj" (render* "clj-kondo/clj_kondo/holy_lambda.clj")]
              ["resources/native-deps/.gitkeep" (render* "gitkeep")]
@@ -23,5 +24,8 @@
              ["template.yml" (render* "template.yml")]
              ["template-native.yml" (render* "template-native.yml")]
              ["resources/bootstrap-native" (render* "bootstrap-native")]
+             ["resources/bootstrap-native-babashka" (render* "bootstrap-native-babashka")]
              [".editorconfig" (render* "editorconfig")]
-             [".gitignore" (render* "gitignore")])))
+             [".gitignore" (render* "gitignore")])
+    (main/info "Copying bb from /usr/bin/bb")
+    (sh "cp /usr/bin/bb bb" :dir (str (name-to-path name) "/resources/native-deps/"))))

@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Example basic lambda with support for babashka using `holy-lambda` micro library
+
+Parameters:
+  Runtime:
+    Type: String
+    Default: provided
+  Timeout:
+    Type: Number
+    Default: 40
+  MemorySize:
+    Type: Number
+    Default: 2000
+
+Globals:
+  Function:
+    Runtime: !Ref Runtime
+    Timeout: !Ref Timeout
+    MemorySize: !Ref MemorySize
+
+Resources:
+  HelloBabashkaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: babashka-example.core.HelloBabashka
+      CodeUri: ./latest.zip
+      FunctionName: HelloBabashkaFunction
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get

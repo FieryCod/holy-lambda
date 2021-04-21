@@ -11,6 +11,7 @@ USER_GID=$$(id -u):$$(id -g)
 LAMBDA_NAME=ExampleLambdaFunction
 USE_EE:=false
 IMAGE_CORD_PART:=fierycod/graalvm-native-image
+USE_BB=false
 
 ifeq ($(USE_EE), false)
 	IMAGE_CORD=$(IMAGE_CORD_PART):ce
@@ -39,6 +40,7 @@ dry-api: target/output.jar
 	sam local start-api --template template.yml
 
 native-gen-conf:
+ifeq ($(USE_BB), false)
 	@USE_AGENT_CONTEXT=true lein uberjar
 	@docker run --user $(USER_GID) \
 		-e "AWS_CREDENTIAL_PROFILES_FILE=/project/.aws/credentials" \
@@ -50,6 +52,9 @@ native-gen-conf:
 	          java -agentlib:native-image-agent=config-output-dir=resources/native-configuration \
 			           -Dexecutor=native-agent \
 			           -jar target/output.jar"
+else
+	@echo "Using babashka. Skipping generation of native configuration!"
+endif
 
 dry-api-native: latest.zip
 	sam local start-api --template template-native.yml --debug
@@ -64,9 +69,14 @@ make-bucket:
 	@aws s3 ls s3://$(BUCKET_NAME) || aws s3 mb s3://$(BUCKET_NAME)
 
 latest.zip: output
+ifeq ($(USE_BB), false)
 	@chmod +x output && cp resources/bootstrap-native bootstrap && chmod +x bootstrap && cp -r resources/native-deps . && zip -r -j latest bootstrap output native-deps/* && rm -Rf bootstrap native-deps
+else
+	cp resources/bootstrap-native-babashka bootstrap && chmod +x bootstrap && cp target/output.jar . && cp -r resources/native-deps . && zip -r -j latest bootstrap output.jar native-deps/* && rm -Rf bootstrap native-deps output.jar
+endif
 
 output: target/output.jar native-gen-conf
+ifeq ($(USE_BB), false)
 	docker run --user $(USER_GID) -v ${PWD}:/project -it $(IMAGE_CORD) bash -c "cd /project && \
 		native-image -jar target/output.jar \
 		  -H:ConfigurationFileDirectories=resources/native-configuration \
@@ -78,6 +88,9 @@ output: target/output.jar native-gen-conf
       --no-server \
       --initialize-at-build-time \
       --trace-object-instantiation=java.lang.Thread"
+else
+	@echo "Using babashka. Skipping native image compile"
+endif
 
 packaged.yml: target/output.jar make-bucket
 	sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket $(BUCKET_NAME) --s3-prefix $(S3_PREFIX)
@@ -85,7 +98,7 @@ packaged.yml: target/output.jar make-bucket
 packaged-native.yml: latest.zip make-bucket
 	sam package --template-file template-native.yml --output-template-file packaged-native.yml --s3-bucket $(BUCKET_NAME) --s3-prefix $(S3_PREFIX)
 
-target/output.jar: src/{{sanitized}}/*.clj
+target/output.jar: src/{{sanitized}}/*.cljc
 	@lein uberjar
 
 logs-tail:
