@@ -25,7 +25,7 @@
   [lname gmethod-sym mixin lambda gclass]
   `(do
      ~gclass
-     (defn #?(:bb ~lname :clj ~gmethod-sym)
+     (defn #?(:bb ~lname :clj ~gmethod-sym :cljs ~lname)
        ;; Arity used for testing and native runtime invocation
        ([request#]
         (#'fierycod.holy-lambda.interceptor/process-interceptors
@@ -112,11 +112,13 @@
         gmethod-sym (symbol (str prefix "handleRequest"))
         gfullname (symbol (str (ns-name *ns*) "." lname))
         gclass #?(:bb nil
-                  :clj (jruntime/gen-lambda-class-with-prefix prefix gfullname))
+                  :clj (jruntime/gen-lambda-class-with-prefix prefix gfullname)
+                  :cljs nil)
         lambda `(fn ~@bodies)]
 
     `(do ~(wrap-lambda lname gmethod-sym mixin lambda gclass)
           #?(:bb nil
+             :cljs nil
              :clj (def ~lname ~gmethod-sym)))))
 
 (defn merge-mixins

@@ -39,7 +39,8 @@
       #?(:bb
          (.getBytes ^String (json/generate-string (assoc response :body (json/generate-string (:body response)))))
          :clj
-         (json/write-value-as-bytes (assoc response :body (json/write-value-as-string (:body response)))))
+         (json/write-value-as-bytes (assoc response :body (json/write-value-as-string (:body response))))
+         :cljs nil)
 
       ;; On text
       (= (get-in response [:headers "Content-Type"]) "text/plain; charset=utf-8")
@@ -57,7 +58,8 @@
          :clj
          (json/write-value-as-bytes {:body ""
                                      :statusCode 200
-                                     :headers {"Content-Type" "text/plain; charset=utf-8"}}))
+                                     :headers {"Content-Type" "text/plain; charset=utf-8"}})
+         :cljs nil)
 
       ;; Handle redirect. Redirect should have nil? body
       (and (get-in response [:headers "Location"])
@@ -65,7 +67,8 @@
       #?(:bb
          (.getBytes ^String (json/generate-string response))
          :clj
-         (json/write-value-as-bytes response))
+         (json/write-value-as-bytes response)
+         :cljs nil)
 
       ;; Corner cases should be handled via interceptor chain
       :else

@@ -76,6 +76,16 @@
            result
            (recur (rest interceptors) (if-let [interceptor (type (first interceptors))] (interceptor result) result))))
        payload))
+   :cljs
+   (defn- process-interceptors
+     [mixin payload type]
+     (if-let [interceptors (seq (:interceptors mixin))]
+       (loop [interceptors interceptors
+              result payload]
+         (if-not (seq interceptors)
+           result
+           (recur (rest interceptors) (if-let [interceptor (type (first interceptors))] (interceptor result) result))))
+       payload))
    :clj
    (defn- process-interceptors
      [?mixin ?payload ?type]
