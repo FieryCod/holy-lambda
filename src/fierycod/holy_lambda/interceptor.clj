@@ -67,11 +67,13 @@
         `(def ~?sym ~?docstring ~interceptor)))))
 
 (defn- process-interceptors
-  [mixin payload type]
-  (if-let [interceptors (seq (:interceptors mixin))]
-    (loop [interceptors interceptors
-           result payload]
-      (if-not (seq interceptors)
-        result
-        (recur (rest interceptors) (if-let [interceptor (type (first interceptors))] (interceptor result) result))))
-    payload))
+  [?mixin ?payload ?type]
+  (if-let [it (some-> ?mixin :interceptors clojure.lang.RT/iter)]
+    (loop [result ?payload]
+      (if (.hasNext it)
+        (recur
+         (if-let [interceptor (some-> (.next it) ?type)]
+           (interceptor result)
+           result))
+        result))
+    ?payload))

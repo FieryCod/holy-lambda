@@ -1,0 +1,24 @@
+FROM fierycod/graalvm-native-image:ce
+
+MAINTAINER Karol Wójcik <Karol Wójcik>
+
+RUN microdnf install unzip curl make
+
+# Install aws command
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip -d aws \
+    && ./aws/aws/install \
+    && rm -Rf awscliv2.zip aws
+
+# Install aws-sam command
+RUN curl -L "https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip" -o "aws-sam.zip" \
+ && unzip aws-sam.zip -d aws-sam \
+ && ./aws-sam/install \
+ && rm -Rf aws-sam aws-sam.zip
+
+# Install leiningen
+RUN curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein -o lein \
+    && chmod +x lein \
+    && mv lein /usr/bin/lein
+
+RUN lein --version
