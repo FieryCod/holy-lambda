@@ -3,17 +3,19 @@
    [fierycod.holy-lambda.retriever :as retriever]
    #?(:bb [cheshire.core :as json]
       :clj [jsonista.core :as json]))
-  (:import
-   [java.net URL HttpURLConnection]
-   [java.io InputStream InputStreamReader]))
+  #?(:clj
+     (:import
+      [java.net URL HttpURLConnection]
+      [java.io InputStream InputStreamReader])))
 
 (def ^:private success-codes #{200 202 201})
 
-(defn- retrieve-body
-  [^HttpURLConnection http-conn status]
-  (if-not (success-codes status)
-    (.getErrorStream http-conn)
-    (.getInputStream http-conn)))
+#?(:clj
+   (defn- retrieve-body
+     [^HttpURLConnection http-conn status]
+     (if-not (success-codes status)
+       (.getErrorStream http-conn)
+       (.getInputStream http-conn))))
 
 (defn in->edn-event
   [^InputStream event]
@@ -74,24 +76,25 @@
       :else
       response)))
 
-(defn http
-  [method url-s & [response]]
-  (let [push? (= method "POST")
-       response-bytes (when push? (response->bytes response))
-       ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
-        _ (doto http-conn
-            (.setDoOutput push?)
-            (.setRequestProperty "Content-Type" "application/json")
-            (.setRequestMethod method))
-        _ (when push?
-            (doto (.getOutputStream http-conn)
-              (.write ^"[B" response-bytes)
-              (.close)))
-        headers (into {} (.getHeaderFields http-conn))
-        status (.getResponseCode http-conn)]
-    {:headers headers
-     :status status
-     :body (in->edn-event (retrieve-body http-conn status))}))
+#?(:clj
+   (defn http
+     [method url-s & [response]]
+     (let [push? (= method "POST")
+           response-bytes (when push? (response->bytes response))
+           ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
+           _ (doto http-conn
+               (.setDoOutput push?)
+               (.setRequestProperty "Content-Type" "application/json")
+               (.setRequestMethod method))
+           _ (when push?
+               (doto (.getOutputStream http-conn)
+                 (.write ^"[B" response-bytes)
+                 (.close)))
+           headers (into {} (.getHeaderFields http-conn))
+           status (.getResponseCode http-conn)]
+       {:headers headers
+        :status status
+        :body (in->edn-event (retrieve-body http-conn status))})))
 
 (defn call
   ([afn-sym]
@@ -99,9 +102,10 @@
   ([afn-sym request]
    (afn-sym request)))
 
-(defn envs
-  []
-  (into {} (System/getenv)))
+#?(:clj
+   (defn envs
+     []
+     (into {} (System/getenv))))
 
 (defn getf-header
   ([headers]
@@ -126,6 +130,7 @@
    :clientContext client-context
    :envs envs*})
 
-(defn exit!
-  []
-  (System/exit -1))
+#?(:clj
+   (defn exit!
+     []
+     (System/exit -1)))
