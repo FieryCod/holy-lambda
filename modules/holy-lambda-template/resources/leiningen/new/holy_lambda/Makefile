@@ -70,7 +70,7 @@ make-bucket:
 
 latest.zip: output
 ifeq ($(USE_BB), false)
-	@chmod +x output && cp resources/bootstrap-native bootstrap && chmod +x bootstrap && cp -r resources/native-deps . && zip -r -j latest bootstrap output native-deps/* && rm -Rf bootstrap native-deps
+	chmod +x output && cp resources/bootstrap-native bootstrap && chmod +x bootstrap && cp -r resources/native-deps . && zip -r -j latest bootstrap output native-deps/* && rm -Rf bootstrap native-deps
 else
 	cp resources/bootstrap-native-babashka bootstrap && chmod +x bootstrap && cp target/output.jar . && cp -r resources/native-deps . && zip -r -j latest bootstrap output.jar native-deps/* && rm -Rf bootstrap native-deps output.jar
 endif

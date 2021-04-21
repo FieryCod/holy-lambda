@@ -1,4 +1,15 @@
 # Changelog
+## 0.1.21 (21-04-2021)
+*Changes*
+- Add new docker tags: 
+  - ce - for community edition
+  - ce-ci - suitable for usage in docker to deploy with sam. Changes in Makefile are in progress
+  - ee - you have to provide artifacts and build it on your own using Dockerfile provided in docker/ee
+- Speedup interceptors on java/native runtime
+- Provide Babashka runtime. Semantics of holy-lambda stay the same. For now bb is included in a zip which is totally lame. If more people will like this runtime then I will provide: babashka as a layer, minimal holy-lambda jar without jsonista (I would rather babashka to use jsonista instead of cheshire)
+- Adapt template to allow babashka usage
+- Add slack badge
+
 ## 0.1.15 (19-04-2021)
 *Changes*
 - Add partial support for GraalVMEE (PGO optimizations in progress)
