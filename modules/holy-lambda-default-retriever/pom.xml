@@ -4,7 +4,7 @@
   <groupId>io.github.FieryCod</groupId>
   <artifactId>holy-lambda-default-retriever</artifactId>
   <packaging>jar</packaging>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
   <name>holy-lambda-default-retriever</name>
   <description>Default retriever for payloads</description>
   <url>https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-default-retriever</url>
@@ -15,7 +15,10 @@
     </license>
   </licenses>
   <scm>
-    <url>https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-default-retriever</url>
+    <url>https://github.com/metosin/reitit</url>
+    <connection>scm:git:git://github.com/FieryCod/holy-lambda.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/FieryCod/holy-lambda.git</developerConnection>
+    <tag>332fcc07cc4d772322d07b1e269f4eea9d25dde6</tag>
   </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>

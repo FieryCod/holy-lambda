@@ -1,4 +1,4 @@
-(defproject io.github.FieryCod/holy-lambda-async-retriever "0.0.2"
+(defproject io.github.FieryCod/holy-lambda-async-retriever "0.0.3"
   :description "Support for async handlers which returns channel as a response."
 
   :url "https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-async-retriever"
