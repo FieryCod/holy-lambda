@@ -1,4 +1,4 @@
-(defproject io.github.FieryCod/holy-lambda-babashka   "0.1.30"
+(defproject io.github.FieryCod/holy-lambda-babashka   "0.1.31-SNAPSHOT"
   :description "Micro framework which turns your code into AWS Lambda functions suites for babashka based Lambdas"
 
   :url "https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka"

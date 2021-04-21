@@ -4,7 +4,7 @@
   <groupId>io.github.FieryCod</groupId>
   <artifactId>holy-lambda</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.29</version>
+  <version>0.1.30</version>
   <name>holy-lambda</name>
   <description>Micro framework which turns your code into AWS Lambda functions</description>
   <url>https://github.com/FieryCod/holy-lambda</url>
@@ -18,7 +18,7 @@
     <url>https://github.com/FieryCod/holy-lambda</url>
     <connection>scm:git:git://github.com/FieryCod/holy-lambda.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/FieryCod/holy-lambda.git</developerConnection>
-    <tag>8b97b0b436eb9c6bc7c2e4119a557cb60fb255ab</tag>
+    <tag>5604a81e8ae4c1aa8af664b54fcef9d3df99deca</tag>
   </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>
