@@ -15,6 +15,8 @@
              ["src/{{sanitized}}/core.clj" (render* "core.clj")]
              [".clj-kondo/config.edn" (render* "clj-kondo/config.edn")]
              [".clj-kondo/clj_kondo/holy_lambda.clj" (render* "clj-kondo/clj_kondo/holy_lambda.clj")]
+             ["resources/native-deps/.gitkeep" (render* "gitkeep")]
+             ["resources/native-agents-payloads/1.edn" (render* "1.edn")]
              ["Makefile" (render* "Makefile")]
              ["README.md" (render* "README.md")]
              ["project.clj" (render* "project.clj")]

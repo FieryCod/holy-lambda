@@ -13,9 +13,9 @@ USE_EE:=false
 IMAGE_CORD_PART:=fierycod/graalvm-native-image
 
 ifeq ($(USE_EE), false)
-	IMAGE_CORD=$(IMAGE_CORD_PART)-ce:latest
+	IMAGE_CORD=$(IMAGE_CORD_PART):ce
 else
-	IMAGE_CORD=$(IMAGE_CORD_PART)-ee:latest
+	IMAGE_CORD=$(IMAGE_CORD_PART):ee
 endif
 
 all: deploy-native
@@ -59,7 +59,7 @@ local-test: check-service
 	curl "http://127.0.0.1:3000/bye"
 
 destroy-bucket:
-	@aws s3 rb s3://$(BUCKET_NAME) --force --region $(APP_REGION)
+	@aws s3 ls s3://$(BUCKET_NAME) && aws s3 rb s3://$(BUCKET_NAME) --force --region $(APP_REGION)
 
 make-bucket:
 	aws s3 ls s3://$(BUCKET_NAME) || aws s3 mb s3://$(BUCKET_NAME)
@@ -67,7 +67,7 @@ make-bucket:
 latest.zip: output
 	@chmod +x output && cp resources/bootstrap-native bootstrap && chmod +x bootstrap && cp -r resources/native-deps . && zip -r -j latest bootstrap output native-deps/* && rm -Rf bootstrap native-deps
 
-output: target/output.jar
+output: target/output.jar native-gen-conf
 	docker run --user $(USER_GID) -v ${PWD}:/project -it $(IMAGE_CORD) bash -c "cd /project && \
 		native-image -jar target/output.jar \
 		  -H:ConfigurationFileDirectories=resources/native-configuration \
