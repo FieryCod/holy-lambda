@@ -28,4 +28,4 @@
              [".editorconfig" (render* "editorconfig")]
              [".gitignore" (render* "gitignore")])
     (main/info "Copying bb from /usr/bin/bb")
-    (sh "cp /usr/bin/bb bb" :dir (str (name-to-path name) "/resources/native-deps/"))))
+    (sh/sh "cp" "/usr/bin/bb" "bb" :dir (str (name-to-path name) "/resources/native-deps/"))))

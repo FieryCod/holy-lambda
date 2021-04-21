@@ -89,7 +89,7 @@ ifeq ($(USE_BB), false)
       --initialize-at-build-time \
       --trace-object-instantiation=java.lang.Thread"
 else
-	@echo "Using babashka. Skipping native image compile"
+	@echo "Using babashka. Skipping native image compile!"
 endif
 
 packaged.yml: target/output.jar make-bucket
