@@ -44,6 +44,7 @@
 
     ;; Update project, README and VERSION
     (spit "project.clj" (s/replace (slurp "project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" new-version "\"")))
+    (spit "modules/holy-lambda-babashka-release/project.clj" (s/replace (slurp "modules/holy-lambda-babashka-release/project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" new-version "\"")))
     (spit "README.md" (s/replace (slurp "README.md") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda \"" new-version "\"")))
     (spit "VERSION" new-version)
 
@@ -67,6 +68,7 @@
     ;; Prepare for new development iteration
     (spit "VERSION" (bump :snapshot new-version))
     (spit "project.clj" (s/replace (slurp "project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" (bump :snapshot new-version) "\"")))
+    (spit "modules/holy-lambda-babashka-release/project.clj" (s/replace (slurp "modules/holy-lambda-babashka-release/project.clj") (bump :snapshot new-version) (str "io.github.FieryCod/holy-lambda   \"" new-version "\"")))
     (spit "modules/holy-lambda-template/project.clj" (s/replace (slurp "modules/holy-lambda-template/project.clj") TEMPLATE_PROJECT_VERSION (str "holy-lambda/lein-template   \"" (bump :snapshot new-version) "\"")))
 
     (sh "git" "add" ".")

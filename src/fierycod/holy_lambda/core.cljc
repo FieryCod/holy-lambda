@@ -12,7 +12,10 @@
       [fierycod.holy-lambda.interceptor :as i]
       [fierycod.holy-lambda.java-runtime :as jruntime]
       [fierycod.holy-lambda.util :as u]))
-  #?(:clj
+  #?(:bb
+     (:import
+      [clojure.lang IPersistentMap])
+     :clj
      (:import
       [com.amazonaws.services.lambda.runtime Context]
       [java.io InputStream OutputStream])))

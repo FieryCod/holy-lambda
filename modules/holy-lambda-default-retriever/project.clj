@@ -1,7 +1,7 @@
-(defproject io.github.FieryCod/holy-lambda-default-retriever "0.0.3"
+(defproject io.github.FieryCod/holy-lambda-default-retriever "0.0.4"
   :description "Default retriever for payloads"
 
-  :url "https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-default-retriever"
+  :url "https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-default-retriever"
 
   :license {:name "MIT"
             :url "https://opensource.org/licenses/MIT"}
@@ -22,7 +22,7 @@
                                       :creds :gpg}]]
 
   :scm {:name "git"
-        :url "https://github.com/metosin/reitit"
+        :url "https://github.com/FieryCod/holy-lambda"
         :dir "../.."}
 
   :profiles {:eftest {:global-vars {*warn-on-reflection* false}
