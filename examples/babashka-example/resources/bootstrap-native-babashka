@@ -2,4 +2,6 @@
 
 set -e
 
+export BABASHKA_DISABLE_SIGNAL_HANDLERS=true
+
 ./bb -cp output.jar -m babashka-example.core
