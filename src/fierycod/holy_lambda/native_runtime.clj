@@ -5,7 +5,7 @@
 
 (defn- ->ex
   [msg]
-  (Exception. (str "[Holy Lambda]: " msg)))
+  (throw (ex-info (str "[Holy Lambda]: " msg) {})))
 
 (defn- url
   [{:keys [runtime iid path]}]

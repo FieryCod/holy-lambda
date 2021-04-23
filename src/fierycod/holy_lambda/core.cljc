@@ -38,7 +38,7 @@
        ;; Arity used for Java runtime
        #?(:bb
           ([in out ctx]
-           (throw (Exception. "Babashka should not rely on java based wrapper")))
+           (throw (ex-info "Babashka should not rely on java based wrapper" {})))
 
           :clj
           ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]
@@ -64,7 +64,7 @@
   [form]
   (when (vector? (first form))
     (if (= '< (second form))
-      (throw (IllegalArgumentException. "Mixin must be given before argument list"))
+      (throw (ex-info "Mixin must be given before argument list" {}))
       true)))
 
 (defn- >parse-deflambda
@@ -72,7 +72,7 @@
    symbol string <  expr   fn-body"
   [attrs]
   (when-not (symbol? (first attrs))
-    (throw (IllegalArgumentException. "First argument to deflambda must be a symbol")))
+    (throw (ex-info "First argument to deflambda must be a symbol" {})))
   (loop [res  {}
          xs   attrs
          mode nil]
@@ -84,7 +84,7 @@
         (string? x)          (recur (assoc res :doc x) anext nil)
         (= '< x)             (recur res anext :mixin)
         (= mode :mixin) (recur (assoc res :mixin x) anext nil)
-        :else (throw (IllegalArgumentException. (str "Syntax error at " xs)))))))
+        :else (throw (ex-info (str "Syntax error at " xs) {}))))))
 
 (defmacro deflambda
   "Convenience macro for generating defn alike lambdas.

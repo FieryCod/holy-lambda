@@ -13,7 +13,7 @@ For small artifacts mark following dependencies in you build as provided:
 ## Updating to newest babashka version
 Provide a PR with changed babashka version in Dockerfile and template.yml. Don't change layer semanticVersion.
 
-# Additional pods or pods update
+## Additional pods or pods update
 Provide a PR with changed versions in deps.edn of `:pods`. Add/update entries in template.yml. Don't change layer semanticVersion
 
 

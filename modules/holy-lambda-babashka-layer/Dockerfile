@@ -15,10 +15,11 @@ COPY download_base_pods.clj .
 
 # Setup path
 RUN clojure -Sdeps '{:mvn/local-repo ".m2/repository"}' -Spath > classpath
+RUN echo ":output.jar" > classpath
 
 RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-amd64.tar.gz -O - | tar -xz
 
 RUN chmod +x bb
 RUN ./bb download_base_pods.clj
 
-RUN zip -q -r holy-lambda-babashka-runtime.zip bb bootstrap .m2 .babashka
+RUN zip -q -r holy-lambda-babashka-runtime.zip bb bootstrap .m2 .babashka classpath

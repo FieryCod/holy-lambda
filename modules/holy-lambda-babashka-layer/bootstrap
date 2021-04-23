@@ -2,8 +2,8 @@
 
 set -e
 
-export _JAVA_OPTIONS=-Duser.home=.
+export _JAVA_OPTIONS=-Duser.home=/opt/
 export BABASHKA_DISABLE_SIGNAL_HANDLERS=true
-export XDG_CACHE_HOME=.
+export XDG_CACHE_HOME=/opt/
 
-./bb -cp "$(cat classpath)" -m "$(cat ENTRYPOINT)"
+/opt/bb -cp "$(cat /opt/classpath)" -m "$(cat BABASHKA_ENTRYPOINT)"
