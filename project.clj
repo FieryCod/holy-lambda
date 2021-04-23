@@ -28,5 +28,6 @@
 
   :profiles {:eftest {:global-vars {*warn-on-reflection* false}
                       :plugins [[lein-eftest "0.5.9"]]}
+             :test {:resource-paths ["resources-test"]}
              :uberjar {:jvm-opts ["-Dclojure.compiler.direct-linking=true"
                                   "-Dclojure.spec.skip-macros=true"]}})

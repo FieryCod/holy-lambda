@@ -17,22 +17,23 @@
     (t/is (= '({:request {:context {},
                           :event {}}
                 :name "fierycod.holy-lambda.impl.agent-test.HolyLambda",
-                :path "resources/native-agents-payloads/1.edn",
+                :path "1.edn",
                 :propagate false}
                {:request {:context {},
                           :event {:lambda2 2}}
                 :name "fierycod.holy-lambda.impl.agent-test.HolyLambda",
-                :path "resources/native-agents-payloads/2.edn",
+                :path "2.edn",
                 :propagate false}
                {:request {:context {:ctx "CTX"},
                           :event {:msg "new-lambda"}}
                 :name "fierycod.holy-lambda.impl.agent-test.NewLambda",
-                :path "resources/native-agents-payloads/3.edn",
+                :path "3.edn",
                 :propagate false})
-             (#'fierycod.holy-lambda.agent/agents-payloads->invoke-map)))))
+             (map (fn [m] (update m :path #(re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" %)))
+                  (#'fierycod.holy-lambda.agent/agents-payloads->invoke-map))))))
 
 (t/deftest routes->reflective-call!-test
   (t/testing "should call all lambdas with corresponding payloads and report on each step"
-    (t/is (= "[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/1.edn\n{:event {}, :context {}}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/1.edn\n[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/2.edn\n{:event {:lambda2 2}, :context {}}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from resources/native-agents-payloads/2.edn\n[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.NewLambda with payloads from resources/native-agents-payloads/3.edn\n{:event {:msg new-lambda}, :context {:ctx CTX}}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.NewLambda with payloads from resources/native-agents-payloads/3.edn\n[Holy Lambda] Succesfully called all the lambdas\n"
+    (t/is (= "[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from 1.edn\n{:event {}, :context {}}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from 1.edn\n[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from 2.edn\n{:event {:lambda2 2}, :context {}}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.HolyLambda with payloads from 2.edn\n[Holy Lambda] Calling lambda fierycod.holy-lambda.impl.agent-test.NewLambda with payloads from 3.edn\n{:event {:msg new-lambda}, :context {:ctx CTX}}\n[Holy Lambda] Succesfully called fierycod.holy-lambda.impl.agent-test.NewLambda with payloads from 3.edn\n[Holy Lambda] Succesfully called all the lambdas\n"
              (with-out-str (#'fierycod.holy-lambda.agent/routes->reflective-call! {"fierycod.holy-lambda.impl.agent-test.HolyLambda" #'HolyLambda,
                                                                                    "fierycod.holy-lambda.impl.agent-test.NewLambda" #'NewLambda}))))))

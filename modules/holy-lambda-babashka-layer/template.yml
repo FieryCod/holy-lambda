@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Holy-lambda micro framework babashka compatible runtime layer
+
+Resources:
+  BabashkaLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: holy-lambda-babashka-runtime
+      Description: holy-lambda micro framework babashka compatible runtime layer
+      ContentUri: ./holy-lambda-babashka-runtime.zip
+      CompatibleRuntimes:
+        - provided
+      LicenseInfo: https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-layer/LICENSE
+      RetentionPolicy: Retain
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: babashka-runtime-lambda-layer
+    Description: >
+      Holy-lambda micro framework babashka compatible runtime layer:
+
+      Includes following dependencies:
+      - holy-lambda-babashka-release=0.1.32
+        - holy-lambda-default-retriever=0.0.4
+      - clojure=1.10.0
+      - babashka=0.3.5
+      - org.babashka/aws "0.0.5"
+
+    Author: Karol Wójcik
+    SpdxLicenseId: MIT
+    LicenseUrl: LICENSE
+    ReadmeUrl: README.md
+    Labels: ['holy-lambda', 'layer', 'babashka', 'lambda', 'clojure']
+    HomePageUrl: https://github.com/FieryCod/holy-lambda
+    SemanticVersion: 0.0.1
+    SourceCodeUrl: https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-layer

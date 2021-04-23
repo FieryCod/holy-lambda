@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+export _JAVA_OPTIONS=-Duser.home=.
+export BABASHKA_DISABLE_SIGNAL_HANDLERS=true
+export XDG_CACHE_HOME=.
+
+./bb -cp "$(cat classpath)" -m "$(cat ENTRYPOINT)"

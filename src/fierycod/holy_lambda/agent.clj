@@ -11,7 +11,7 @@
    [java.nio.file Files LinkOption]
    [java.io File]))
 
-(def ^:private PAYLOADS_PATH "resources/native-agents-payloads/")
+(def ^:private PAYLOADS (io/resource "native-agents-payloads"))
 (def ^:private AGENT_EXECUTOR "native-agent")
 
 (defmacro in-context
@@ -43,7 +43,7 @@
 
 (defn- agents-payloads->invoke-map
   []
-  (->> (file-seq (io/file PAYLOADS_PATH))
+  (->> (file-seq (io/file PAYLOADS))
        (filterv #(Files/isRegularFile (.toPath ^File %1) (into-array LinkOption [])))
        (filterv #(s/includes? (str %) ".edn"))
        (mapv #(-> % slurp edn/read-string (assoc :path (str %))))
@@ -52,11 +52,11 @@
 (defn- routes->reflective-call!
   [routes]
   (doseq [{:keys [request path propagate] :as invoke-map} (agents-payloads->invoke-map)]
-    (println "[Holy Lambda] Calling lambda" (:name invoke-map) "with payloads from" path)
+    (println "[Holy Lambda] Calling lambda" (:name invoke-map) "with payloads from" (re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" path))
     (if propagate
       (u/call (routes (:name invoke-map)) request)
       (try
         (u/call (routes (:name invoke-map)) request)
         (catch Exception _err nil)))
-    (println "[Holy Lambda] Succesfully called" (:name invoke-map) "with payloads from" path))
+    (println "[Holy Lambda] Succesfully called" (:name invoke-map) "with payloads from" (re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" path)))
   (println "[Holy Lambda] Succesfully called all the lambdas"))

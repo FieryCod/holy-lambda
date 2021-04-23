@@ -26,6 +26,4 @@
              ["resources/bootstrap-native" (render* "bootstrap-native")]
              ["resources/bootstrap-native-babashka" (render* "bootstrap-native-babashka")]
              [".editorconfig" (render* "editorconfig")]
-             [".gitignore" (render* "gitignore")])
-    (main/info "Copying bb from /usr/bin/bb")
-    (sh/sh "cp" "/usr/bin/bb" "bb" :dir (str (name-to-path name) "/resources/native-deps/"))))
+             [".gitignore" (render* "gitignore")])))

@@ -1,0 +1,3 @@
+{:deps {org.clojure/clojure {:mvn/version "1.10.0"}
+        io.github.FieryCod/holy-lambda-babashka {:mvn/version "0.1.32"}}
+ :pods {org.babashka/aws "0.0.5"}}

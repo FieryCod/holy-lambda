@@ -1,4 +1,4 @@
-(defproject io.github.FieryCod/holy-lambda-babashka   "0.1.31-SNAPSHOT"
+(defproject io.github.FieryCod/holy-lambda-babashka   "0.1.33-SNAPSHOT"
   :description "Micro framework which turns your code into AWS Lambda functions suites for babashka based Lambdas"
 
   :url "https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka"
@@ -6,18 +6,13 @@
   :license {:name "MIT"
             :url "https://opensource.org/licenses/MIT"}
 
-  :source-paths ["../../src"]
+  :source-paths ["../../src" "src/clj"]
+  :java-source-paths ["src/java"]
 
   :global-vars {*warn-on-reflection* true}
 
   :dependencies [[org.clojure/clojure "1.10.0" :scope "provided"]
-                 [metosin/jsonista "0.3.1" :scope "provided"]
-                 [com.amazonaws/aws-lambda-java-core "1.2.1" :scope "provided"]
                  [io.github.FieryCod/holy-lambda-default-retriever "0.0.4"]]
-
-  :eftest {:thread-count 4}
-
-  :plugins [[lein-cloverage "1.1.1"]]
 
   :deploy-repositories [["releases" {:url "https://clojars.org/repo"
                                      :creds :gpg}
@@ -25,8 +20,4 @@
                                       :creds :gpg}]]
   :scm {:name "git"
         :url "https://github.com/FieryCod/holy-lambda"}
-
-  :profiles {:eftest {:global-vars {*warn-on-reflection* false}
-                      :plugins [[lein-eftest "0.5.9"]]}
-             :uberjar {:jvm-opts ["-Dclojure.compiler.direct-linking=true"
-                                  "-Dclojure.spec.skip-macros=true"]}})
+)

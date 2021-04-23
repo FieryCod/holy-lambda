@@ -4,7 +4,7 @@
   <groupId>io.github.FieryCod</groupId>
   <artifactId>holy-lambda-babashka</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.30</version>
+  <version>0.1.32</version>
   <name>holy-lambda-babashka</name>
   <description>Micro framework which turns your code into AWS Lambda functions suites for babashka based Lambdas</description>
   <url>https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka</url>
@@ -32,7 +32,28 @@
     </testResources>
     <directory>target</directory>
     <outputDirectory>target/classes</outputDirectory>
-    <plugins/>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/clj</source>
+                <source>src/java</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
   <repositories>
     <repository>
@@ -64,18 +85,6 @@
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
       <version>1.10.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>metosin</groupId>
-      <artifactId>jsonista</artifactId>
-      <version>0.3.1</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-lambda-java-core</artifactId>
-      <version>1.2.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
