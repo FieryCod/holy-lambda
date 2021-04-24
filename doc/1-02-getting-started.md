@@ -22,11 +22,11 @@
 
 ## First project 
 
-### `dry-api`
+### A local, Java-runtime lambda
 
 This will run a AWS Lambda API server with the Java runtime.
 
-1. In your local clone of `holy-lambda` directory, run `lein new holy-lambda getting_started`.
+1. Run `lein new holy-lambda getting_started`.
 2. `cd getting_started`.
 3. Run `make dry-api`.
 
