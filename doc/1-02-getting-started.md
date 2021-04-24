@@ -60,3 +60,44 @@ REPORT RequestId: 0b1999de-1a62-4cde-ab8f-bc536da8db7a	Init Duration: 0.30 ms	Du
 
 You'll see these similar three lines every time a client accesses your API.
 
+Hit Control-C to quit the AWS Lambda server.
+
+### A local, native-runtime lambda
+
+1. `cd` again to the `getting_started` directory you made in your first step.
+2. Run `make dry-api-native`.
+
+After some compilation, you should see:
+
+```
+sam local start-api --template template-native.yml --debug
+...
+2021-04-24 12:35:00,936 | 1 APIs found in the template
+2021-04-24 12:35:00,949 | Mounting ExampleLambdaFunction at http://127.0.0.1:3000/ [GET]
+2021-04-24 12:35:00,949 | You can now browse to the above endpoints to invoke your functions. You do not need to restart/reload SAM CLI while working on your functions, changes will be reflected instantly/automatically. You only need to restart SAM CLI if you update your AWS SAM template
+2021-04-24 12:35:00,949 | Localhost server is starting up. Multi-threading = True
+2021-04-24 12:35:00  * Running on http://127.0.0.1:3000/ (Press CTRL+C to quit)
+```
+
+3. As with the Java runtime, in another terminal, `cd` to this directory and run `make local-test` to call the API you've created from the Lambda server:
+
+After a few seconds, in this second terminal, you should again see the following output:
+
+```
+Connection to localhost port 3000 [tcp/hbci] succeeded!
+curl "http://127.0.0.1:3000/"
+Hello world%
+```
+
+5. Look again at the first terminal that's running the AWS Lambda server, you should see evidence of this api activity with something like:
+
+```
+2021-04-24 12:38:29 127.0.0.1 - - [24/Apr/2021 12:38:29] "GET / HTTP/1.1" 200 -
+```
+
+The first time you call the API with `make local-test`, there will be
+a delay as the Lambda server decompresses your compiled code from the
+ZIP file. Subsequent calls will be faster, and should be noticeably
+faster than the Java-runtime Lambda server.
+
+
