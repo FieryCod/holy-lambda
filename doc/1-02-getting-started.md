@@ -62,6 +62,25 @@ You'll see these similar three lines every time a client accesses your API.
 
 Hit Control-C to quit the AWS Lambda server.
 
+
+### How did this work?
+
+Running `make dry-api` started the `sam local start-api` with the `template.yml` template file as the input. The key parts of the `template.yml` file are:
+
+- `CodeUri:` This specifies the relative path to the Uberjar `output.jar`.
+- `Handler:` This is the name of a class in the `CodeUri` 's specified
+class, contained in `output.jar`.
+
+The Clojure source code for this
+function is in `src/core/ExampleLambda.cljc`.
+
+`sam local start-api` listens on port 3000 and waits for a client
+connection. To handle the client connection, it starts a Docker
+container using the image `amazon/aws-sam-cli-emulation-image-java8`,
+running `/var/rapid/aws-lambda-rie` using your JAR and passing the
+client's request parameters, runs your function within a JVM, and returns the
+result to the client. It then terminates the Docker container after the client connection is closed.
+
 ### A local, native-runtime lambda
 
 1. `cd` again to the `getting_started` directory you made in your first step.
