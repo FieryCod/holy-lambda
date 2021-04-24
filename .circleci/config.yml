@@ -38,7 +38,7 @@ jobs:
      steps:
        - checkout
        - *restore-lein-deps-root
-       - run: lein cloverage --codecov
+       - run: lein with-profile eftest cloverage --codecov
        - run: bash <(curl -s https://codecov.io/bash)
 
 
