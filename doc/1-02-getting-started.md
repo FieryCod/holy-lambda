@@ -14,7 +14,7 @@
     brew tap aws/tap && brew install make leiningen awscli aws-sam-cli clojure/tools/clojure
     ```
 
-  2. Configure default AWS profile via `aws-cli`. This is necessary for making a bucket and deploying an application. If you just want to test holy-lambda on local then this step is not necessary, but you will be able to use limited set of commands.
+  2. Configure default AWS profile via `aws-cli`. This is necessary for making a bucket and deploying an application. If you just want to test holy-lambda on local then this step is not necessary, but you will be able to use only a limited set of commands.
 
    ```
    aws configure
