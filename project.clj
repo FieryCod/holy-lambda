@@ -26,8 +26,14 @@
   :scm {:name "git"
         :url "https://github.com/FieryCod/holy-lambda"}
 
+  :cloverage {:runner :eftest
+              :runner-opts {:test-warn-time 500
+                            :fail-fast? true
+                            :multithread? :namespaces}}
+
   :profiles {:eftest {:resource-paths ["resources-test"]
                       :global-vars {*warn-on-reflection* false}
+                      :dependencies [[eftest/eftest "0.5.9"]]
                       :plugins [[lein-eftest "0.5.9"]]}
              :uberjar {:jvm-opts ["-Dclojure.compiler.direct-linking=true"
                                   "-Dclojure.spec.skip-macros=true"]}})
