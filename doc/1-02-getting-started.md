@@ -62,14 +62,20 @@ You'll see these similar three lines every time a client accesses your API.
 
 Hit Control-C to quit the AWS Lambda server.
 
-
-### How did this work?
+#### How did this work?
 
 Running `make dry-api` started the `sam local start-api` with the `template.yml` template file as the input. The key parts of the `template.yml` file are:
 
 - `CodeUri:` This specifies the relative path to the Uberjar `output.jar`.
 - `Handler:` This is the name of a class in the `CodeUri` 's specified
-class, contained in `output.jar`.
+class, contained in `output.jar`. The handler,
+`getting_started.core.ExampleLambda`, is defined in the source code
+using the `fierycode.holy-lambda.core/deflambda` Clojure macro, which provides the necessary connections
+between the defined function's logic and the AWS Lambda server.
+- `FunctionName:` This is the name of the AWS Lambda function that is
+  registered with the Lambda service. When deployed on AWS's Lambda
+  service, the name must be unique among the set of the Lambda function for
+  your AWS account.
 
 The Clojure source code for this
 function is in `src/core/ExampleLambda.cljc`.
@@ -118,5 +124,23 @@ The first time you call the API with `make local-test`, there will be
 a delay as the Lambda server decompresses your compiled code from the
 ZIP file. Subsequent calls will be faster, and should be noticeably
 faster than the Java-runtime Lambda server.
+
+#### How did this work?
+
+Running `make dry-api-native` started the `sam local start-api` with
+the `template-native.yml` template file as the input. The key parts of
+the `template-native.yml` file are the same three YAML fields
+(`Handler:`,`FunctionName:` and `CodeUri:`), but `CodeUri:` is a .zip
+file rather than a .jar, and contains a Linux executable binary called `output` and a
+bootstrap script which simply calls that binary.
+
+
+The `output` file was created by ... (TODO describe)
+
+As with the Java runtime case, `sam local start-api` listens on port 3000 and waits for a client
+connection. To handle the client connection, it starts a Docker
+container using the image `TODO`
+running `TODO`, which TODO passing the client's request parameters, and returns the
+result to the client. Again as with the Java runtime case, `sam` then terminates the Docker container after the client connection is closed.
 
 
