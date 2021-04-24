@@ -3,7 +3,7 @@
 ## Dependencies
   You will need following things which you have to install on your own depending on your system.
 
-  - Homebrew/Linuxbrew
+  - Homebrew (for Mac OS) /Linuxbrew (for Linux)
   - Java 8
   - Docker, Docker Compose >= 1.13.1, 1.22.0
 
