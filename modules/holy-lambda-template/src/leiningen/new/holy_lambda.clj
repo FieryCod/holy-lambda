@@ -24,6 +24,6 @@
              ["template.yml" (render* "template.yml")]
              ["template-native.yml" (render* "template-native.yml")]
              ["resources/bootstrap-native" (render* "bootstrap-native")]
-             ["resources/bootstrap-native-babashka" (render* "bootstrap-native-babashka")]
+             ["resources/BABASHKA_ENTRYPOINT" (render* "BABASHKA_ENTRYPOINT")]
              [".editorconfig" (render* "editorconfig")]
              [".gitignore" (render* "gitignore")])))

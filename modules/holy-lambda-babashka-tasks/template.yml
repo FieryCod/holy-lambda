@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Example basic lambda using `holy-lambda` micro library
+
+Parameters:
+  Runtime:
+    Type: String
+    Default: java8
+  Timeout:
+    Type: Number
+    Default: 40
+  MemorySize:
+    Type: Number
+    Default: 2000
+
+Globals:
+  Function:
+    Runtime: !Ref Runtime
+    Timeout: !Ref Timeout
+    MemorySize: !Ref MemorySize
+
+Resources:
+  ExampleLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: example.core.ExampleLambda
+      CodeUri: target/output.jar
+      FunctionName: ExampleLambdaFunction
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get

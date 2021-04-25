@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y wget zip
 ENV GITLIBS=".gitlibs/"
 ENV _JAVA_OPTIONS=-Duser.home=.
 ENV XDG_CACHE_HOME=.
-ARG BABASHKA_VERSION=0.3.5
+ARG BABASHKA_VERSION=0.3.6
 
 COPY bootstrap .
 COPY deps.edn .

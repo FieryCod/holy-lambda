@@ -1,9 +1,0 @@
-#!/bin/sh
-
-set -e
-
-export _JAVA_OPTIONS=-Duser.home=/some/new/dir
-
-export BABASHKA_DISABLE_SIGNAL_HANDLERS=true
-
-./bb -cp output.jar -m {{name}}.core

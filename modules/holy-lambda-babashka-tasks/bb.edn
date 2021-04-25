@@ -1,19 +1,37 @@
-{:paths ["script"
-         ;; "https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-tasks/script"
-         ]
- :holy-lambda/options {:build-tool    :lein ;; or :deps
-                       :runtime       {:name :babashka} ;;
-                       }
+{:deps {fierycod/holy-lambda-babashka-tasks
+        {:local/root "."}
+        ;; {:git/url "https://github.com/borkdude/gh-release-artifact"
+        ;;  :sha "2f8898d84126a4e922c490f8614211a8b0cf67cd"}
+        }
 
- :infrastructure {:bucket-prefix  "prefix"
-                  :bucket-name    "bucket"
-                  :region         "region"}
+ :min-bb-version "0.3.6"
+
+ :holy-lambda/options {;; or :deps
+                       :build-tool              :deps
+                       :stack-version           "0.0.1"
+                       :default-lambda-fn-name  "ExampleLambdaFunction"
+                       :envs-file               "envs.json"
+                       ;; Deploy :regular or :guided
+                       :deploy                  :regular
+                       ;; Possible runtime :babashka, :native, :java
+                       :runtime                 {:name :babashka
+                                                 :pods {org.babashka/aws "0.0.5"}}
+                       :infra                   {:bucket-prefix  "holy-lambda"
+                                                 :bucket-name    "holy-lambda--example"
+                                                 :region         "eu-central-1"}}
+
 
  :tasks {:requires                ([holy-lambda.tasks])
+         :log-level               :info
 
          docker:build:ee          holy-lambda.tasks/docker-build-ee
-         sync:update              holy-lambda.tasks/sync:update
+         bucket:create            holy-lambda.tasks/create-bucket
+         bucket:remove            holy-lambda.tasks/remove-bucket
+         stack:destroy            holy-lambda.tasks/stack-destroy
+         stack:deploy             holy-lambda.tasks/stack-deploy
+         deps:sync                holy-lambda.tasks/deps-sync
+         fn:invoke                holy-lambda.tasks/invoke-fn
          version                  holy-lambda.tasks/version
          doctor                   holy-lambda.tasks/doctor
          purge                    holy-lambda.tasks/purge
-         }}
+         logs                     holy-lambda.tasks/logs}}

@@ -2,7 +2,7 @@ FROM ghcr.io/graalvm/graalvm-ce:ol8-java8-21.0.0.2
 MAINTAINER Karol Wójcik <Karol Wójcik>
 
 ARG RESULT_LIB="/staticlibs"
-ARG BABASHKA_VERSION=0.3.5
+ARG BABASHKA_VERSION=0.3.6
 
 RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-amd64.tar.gz -O - | tar -xz
 RUN chmod +x bb

@@ -4,7 +4,7 @@ MAINTAINER Karol Wójcik <Karol Wójcik>
 
 RUN microdnf install unzip curl make
 
-ARG BABASHKA_VERSION=0.3.5
+ARG BABASHKA_VERSION=0.3.6
 
 RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-amd64.tar.gz -O - | tar -xz
 RUN chmod +x bb
