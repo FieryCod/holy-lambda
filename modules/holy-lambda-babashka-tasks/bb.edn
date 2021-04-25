@@ -1,1 +1,19 @@
-{:paths ["script"]}
+{:paths ["script"
+         ;; "https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-tasks/script"
+         ]
+ :holy-lambda/options {:build-tool    :lein ;; or :deps
+                       :runtime       {:name :babashka} ;;
+                       }
+
+ :infrastructure {:bucket-prefix  "prefix"
+                  :bucket-name    "bucket"
+                  :region         "region"}
+
+ :tasks {:requires                ([holy-lambda.tasks])
+
+         docker:build:ee          holy-lambda.tasks/docker-build-ee
+         sync:update              holy-lambda.tasks/sync:update
+         version                  holy-lambda.tasks/version
+         doctor                   holy-lambda.tasks/doctor
+         purge                    holy-lambda.tasks/purge
+         }}

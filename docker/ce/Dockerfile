@@ -1,8 +1,14 @@
 FROM ghcr.io/graalvm/graalvm-ce:ol8-java8-21.0.0.2
 MAINTAINER Karol Wójcik <Karol Wójcik>
 
-RUN gu install native-image
 ARG RESULT_LIB="/staticlibs"
+ARG BABASHKA_VERSION=0.3.5
+
+RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-amd64.tar.gz -O - | tar -xz
+RUN chmod +x bb
+RUN mv bb /bin/bb
+
+RUN gu install native-image
 
 # BEGIN PRE-REQUISITES FOR STATIC NATIVE IMAGES FOR GRAAL 21.0.0.2
 # Based on https://github.com/oracle/graal/issues/2824

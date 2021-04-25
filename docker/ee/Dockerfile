@@ -8,6 +8,12 @@ RUN microdnf update -y oraclelinux-release-el8 \
     && microdnf clean all
 RUN fc-cache -f -v
 
+ARG BABASHKA_VERSION=0.3.5
+RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-amd64.tar.gz -O - | tar -xz
+
+RUN chmod +x bb
+RUN mv bb /bin/bb
+
 ARG GRAALVM_VERSION=21.0.0.2
 ARG GRAALVM_JAVA_CORD=graalvm-ee-java8-linux-amd64-$GRAALVM_VERSION.tar.gz
 ARG GRAALVM_NATIVE_IMAGE_CORD=native-image-installable-svm-svmee-java8-linux-amd64-$GRAALVM_VERSION.jar
