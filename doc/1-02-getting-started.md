@@ -127,19 +127,18 @@ faster than the Java-runtime Lambda server.
 
 #### How did this work?
 
-Running `make dry-api-native` started the `sam local start-api` with
+Running `make dry-api-native` starts the `sam local start-api` with
 the `template-native.yml` template file as the input. The key parts of
 the `template-native.yml` file are the same three YAML fields
 (`Handler:`,`FunctionName:` and `CodeUri:`), but `CodeUri:` is a .zip
 file rather than a .jar, and contains a Linux executable binary called `output` and a
 bootstrap script which simply calls that binary.
 
-
 The `output` file was created by ... (TODO describe)
 
 As with the Java runtime case, `sam local start-api` listens on port 3000 and waits for a client
 connection. To handle the client connection, it starts a Docker
-container using the image `TODO`
+container using the image `amazon/aws-sam-cli-emulation-image-provided`
 running `TODO`, which TODO passing the client's request parameters, and returns the
 result to the client. Again as with the Java runtime case, `sam` then terminates the Docker container after the client connection is closed.
 
