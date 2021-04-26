@@ -14,6 +14,7 @@
                        ;; Deploy :regular or :guided
                        :deploy                  :regular
                        ;; Possible runtime :babashka, :native, :java
+                       :image-tag               :ce
                        :runtime                 {:name :babashka
                                                  :pods {org.babashka/aws "0.0.5"}}
                        :infra                   {:bucket-prefix  "holy-lambda"
@@ -24,14 +25,19 @@
  :tasks {:requires                ([holy-lambda.tasks])
          :log-level               :info
 
-         docker:build:ee          holy-lambda.tasks/docker-build-ee
-         bucket:create            holy-lambda.tasks/create-bucket
-         bucket:remove            holy-lambda.tasks/remove-bucket
-         stack:destroy            holy-lambda.tasks/stack-destroy
-         stack:deploy             holy-lambda.tasks/stack-deploy
-         deps:sync                holy-lambda.tasks/deps-sync
-         fn:invoke                holy-lambda.tasks/invoke-fn
-         version                  holy-lambda.tasks/version
-         doctor                   holy-lambda.tasks/doctor
-         purge                    holy-lambda.tasks/purge
-         logs                     holy-lambda.tasks/logs}}
+         docker:run               holy-lambda.tasks/docker:run
+         docker:build:ee          holy-lambda.tasks/docker:build:ee
+
+         bucket:create            holy-lambda.tasks/bucket:create
+         bucket:remove            holy-lambda.tasks/bucket:remove
+
+         stack:destroy            holy-lambda.tasks/stack:destroy
+         stack:deploy             holy-lambda.tasks/stack:deploy
+         stack:purge              holy-lambda.tasks/stack:purge
+         stack:logs               holy-lambda.tasks/stack:logs
+         stack:sync               holy-lambda.tasks/stack:sync
+         stack:invoke             holy-lambda.tasks/stack:invoke
+
+         tasks:version            holy-lambda.tasks/tasks:version
+         tasks:doctor             holy-lambda.tasks/tasks:doctor
+         }}

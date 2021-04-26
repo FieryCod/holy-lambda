@@ -12,6 +12,8 @@
    [babashka.process :as p]
    [clojure.java.io :as io]))
 
+(def TASK_NAME (or (resolve 'babashka.tasks/*-task-name*)
+                   (resolve 'babashka.tasks/*task-name*)))
 
 ;; Taken from clojure-term-colors https://github.com/trhura/clojure-term-colors
 (defn- escape-code
@@ -147,18 +149,19 @@
   (try
     (options)
     (catch Exception err_
-      (hpr (pre "Either bb.edn not found or does not contain :holy-lambda/options")))))
+      (hpr (pre "Either bb.edn not found or does not contain :holy-lambda/options"))
+      (System/exit 1))))
 
 (defn stat-file
   [filename]
   (when-not (fs/exists? (io/file filename))
-    (hpr "File" (accent filename) "does not exists.. Exiting!")
+    (hpr "PATH" (accent filename) "does not exists.. Exiting!")
     (System/exit 1)))
 
 (alter-var-root #'babashka.tasks/-log-info
                 (fn [f]
                   (fn [& strs]
-                    (hpr (str "Command " (red "<") (accent tasks/*-task-name*) (red ">"))))))
+                    (hpr (str "Command " (red "<") (accent @TASK_NAME) (red ">"))))))
 
 (def BUILD_TOOL (:build-tool OPTIONS))
 (def ENVS_FILE
@@ -171,12 +174,44 @@
 Check https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-invoke.html#serverless-sam-cli-using-invoke-environment-file"))
       (System/exit 1))))
 
+(def IMAGE_NAME
+  (case (:image-tag OPTIONS)
+    :ce "fierycod/graalvm-native-image:ce"
+    :ee "fierycod/graalvm-native-image:ee"
+    (do (hpr (str (pre "Incorrect image tag choosen: ") (:image-tag OPTIONS)))
+        (System/exit 1))))
+
 (def INFRA (:infra OPTIONS))
 (def RUNTIME (:runtime OPTIONS))
 (def RUNTIME_NAME (:name RUNTIME))
 (def BUCKET_PREFIX (:bucket-prefix INFRA))
 (def BUCKET_NAME (:bucket-name INFRA))
 (def REGION (:region INFRA))
+
+(def USER_GID
+  (str (s/trim (shs "id -u"))
+       ":" (s/trim (shs "id -g"))))
+
+(def HOME_DIR
+  (.getAbsolutePath
+   (io/file (or
+             (System/getenv "XDG_CACHE_HOME")
+             (System/getProperty "user.home")))))
+
+(def AWS_DIR
+  (.getAbsolutePath (io/file HOME_DIR ".aws")))
+
+(defn docker:run
+  "     \033[0;31m>\033[0m Run command in \033[0;31mfierycod/graalvm-native-image\033[0m docker context"
+  [command]
+  (shell "docker run --rm"
+         "-e" "AWS_CREDENTIAL_PROFILES_FILE=/project/.aws/credentials"
+         "-e" "AWS_CONFIG_FILE=/project/.aws/config"
+         "-v" (str (.getAbsolutePath (io/file "")) ":/project")
+         "-v" (str AWS_DIR ":" "/project/.aws:ro")
+         "--user" USER_GID
+         "-it" IMAGE_NAME
+         "/bin/bash" "-c" command))
 
 (defn buckets
   []
@@ -195,9 +230,9 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
   []
   (when (= RUNTIME_NAME :babashka)
     (when-not (empty? (:pods (:runtime OPTIONS)))
-      (let [pods (:pods (:runtime OPTIONS))]
-        (println pods))
-      )
+      ;; (let [pods ]
+        (docker:run "download_pods" ))
+      ;; )
     )
   )
 
@@ -213,7 +248,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
   (shsp "lein" "deps")
   (deps-sync--babashka))
 
-(defn deps-sync
+(defn stack:sync
   "     \033[0;31m>\033[0m Syncs dependencies from either:
        \t\t        - \033[0;31m<Clojure>\033[0m  project.clj
        \t\t        - \033[0;31m<Clojure>\033[0m  deps.edn
@@ -226,7 +261,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
       (hpr (str (pre "Incorrect build tool used: ") (accent BUILD_TOOL)))
       (System/exit 1))))
 
-(defn invoke-fn
+(defn stack:invoke
   "     \033[0;31m>\033[0m Invokes lambda fn (check sam local invoke --help):
        \t\t        - \033[0;31m:name\033[0m   - either \033[0;31m:name\033[0m or \033[0;31m:default-lambda-fn-name\033[0m
        \t\t        - \033[0;31m:e\033[0m      - fetch logs up to this time
@@ -235,10 +270,14 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
   []
   (hpr "Checking health of holy-lambda stack"))
 
-(defn doctor
+(defn tasks:doctor
   "     \033[0;31m>\033[0m Diagnoses common issues of holy-lambda stack"
   []
   (hpr "Checking health of holy-lambda stack")
+  (hpr "Home directory is:" (accent HOME_DIR))
+  (hpr "AWS directory is:" (accent AWS_DIR))
+
+  (stat-file AWS_DIR)
 
   (if-not (contains? AVAILABLE_RUNTIMES RUNTIME_NAME)
     (do
@@ -268,7 +307,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
       (hpr (str "Choose one of supported build tools: " AVAILABLE_BUILD_TOOLS)))
     (hpr (prs ":build-tool looks good")))
 
-  (if-let [cmds-not-found (seq (filter (comp not command-exists?) ["aws" "sam" "bb" "docker" "clojure" "zip"]))]
+  (if-let [cmds-not-found (seq (filter (comp not command-exists?) ["aws" "sam" "bb" "docker" "clojure" "zip" "id"]))]
     (hpr (str (pre (str "Commands " cmds-not-found " not found. Install all then run: ")) (underline "bb doctor")))
     (do
       (hpr (prs "All necessary holy-lambda dependencies installed"))
@@ -286,7 +325,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
                  (or v true)])
             (partition-all 2 args))))
 
-(defn logs
+(defn stack:logs
   "     \033[0;31m>\033[0m Possible arguments (check sam logs --help):
        \t\t        - \033[0;31m:name\033[0m   - either \033[0;31m:name\033[0m or \033[0;31m:default-lambda-fn-name\033[0m
        \t\t        - \033[0;31m:e\033[0m      - fetch logs up to this time
@@ -311,18 +350,19 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
       "")
      TASKS_VERSION))
 
-(defn version
-  "     \033[0;31m>\033[0m  Outputs holy-lambda babashka tasks version"
+(defn tasks:version
+  "     \033[0;31m>\033[0m Outputs holy-lambda babashka tasks version"
   []
   (hpr (str (prs "Current tasks version is: ") (accent TASKS_VERSION)))
   (when-not (local-tasks-match-remote?)
     (hpr "There is newer version of tasks on remote. Please update tasks :sha")))
 
-(defn purge
-  "     \033[0;31m>\033[0m  Purges build artifacts"
+(defn stack:purge
+  "     \033[0;31m>\033[0m Purges build artifacts"
   []
   (let [artifacts ["packaged.yml"
                    "target"
+                   ".aws"
                    "packaged-native-yml"
                    "output"
                    "latest.zip"
@@ -338,7 +378,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 
     (hpr  (prs "Build artifacts purged"))))
 
-(defn docker-build-ee
+(defn docker:build:ee
   "     \033[0;31m>\033[0m Builds local image for GraalVM EE "
   []
   (hpr  (accent "Building GraalVM EE docker image"))
@@ -354,7 +394,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
   []
   (shsp "aws" "s3" "rb" (str "s3://" BUCKET_NAME)))
 
-(defn create-bucket
+(defn bucket:create
   "     \033[0;31m>\033[0m Creates a s3 bucket using \033[0;31m:bucket-name\033[0m"
   []
   (if (bucket-exists?)
@@ -362,7 +402,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
     (do (hpr (prs "Creating a bucket") (accent BUCKET_NAME))
         (-create-bucket))))
 
-(defn remove-bucket
+(defn bucket:remove
   "     \033[0;31m>\033[0m Removes a s3 bucket using \033[0;31m:bucket-name\033[0m"
   []
   (if-not (bucket-exists?)
@@ -430,13 +470,13 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
       (jar)
       (clojure "-X:deploy :installer :remote :artifact" jar-file))))
 
-(defn docker []
-  (shell "docker build -t uochan/antq ."))
+;; (defn docker []
+;;   (shell "docker build -t uochan/antq ."))
 
-(defn docker-test []
-  (shell "docker run --rm -v"
-         (str (fs/absolutize "") ":/src")
-         "-w" "/src" "uochan/antq:latest"))
+;; (defn docker-test []
+;;   (shell "docker run --rm -v"
+;;          (str (fs/absolutize "") ":/src")
+;;          "-w" "/src" "uochan/antq:latest"))
 
 (defn coverage
   "Run test coverage."
