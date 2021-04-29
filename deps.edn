@@ -1,3 +1,4 @@
-{:deps {org.clojure/clojure {:mvn/version "1.10.0"}
-        metosin/jsonista {:mvn/version "0.3.2"}
-        com.amazonaws/aws-lambda-java-core {:mvn/version "1.2.1"}}}
+{:deps {org.clojure/clojure                              {:mvn/version "1.10.3"}
+        metosin/jsonista                                 {:mvn/version "0.3.2"}
+        com.amazonaws/aws-lambda-java-core               {:mvn/version "1.2.1"}}
+ :paths ["src"]}

@@ -15,6 +15,11 @@ Resources:
       LicenseInfo: https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-layer/LICENSE
       RetentionPolicy: Retain
 
+Outputs:
+  LayerVersion:
+    Description: Layer ARN Reference
+    Value: !Ref BabashkaLayer
+
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: holy-lambda-babashka-runtime

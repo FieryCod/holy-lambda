@@ -2,8 +2,14 @@
 
 set -e
 
-export _JAVA_OPTIONS=-Duser.home=/opt/
-export BABASHKA_DISABLE_SIGNAL_HANDLERS=true
+export BABASHKA_DISABLE_SIGNAL_HANDLERS="true"
 export XDG_CACHE_HOME=/opt/
+export XDG_CONFIG_HOME=/opt/
+export XDG_DATA_HOME=/opt/
+export HOME=/var/task
 
-/opt/bb -cp "$(cat /opt/classpath)" -m "$(cat BABASHKA_ENTRYPOINT)"
+if [ -z "$Entrypoint" ]; then
+  echo "Environment variable \"Entrypoint\" is not set. Holy Lambda babashka runtime will fail!"
+fi;
+
+/opt/bb -Duser.home=/var/task -cp "$(cat /opt/classpath)" -m "$Entrypoint"

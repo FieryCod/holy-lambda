@@ -3,8 +3,7 @@
 (require '[clojure.edn :as edn])
 (require '[clojure.java.shell :refer [sh]])
 
-(def DEPS (edn/read-string (slurp (io/file "./deps.edn"))))
+(def OPTIONS (edn/read-string (slurp (io/file "./bb.edn"))))
 
-(doseq [[s v] (:pods DEPS)]
+(doseq [[s v] (:pods (:runtime (:holy-lambda/options OPTIONS)))]
   (pods/load-pod s v))
-

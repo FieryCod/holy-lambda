@@ -10,7 +10,7 @@
 
   :global-vars {*warn-on-reflection* true}
 
-  :dependencies [[org.clojure/clojure "1.10.0" :scope "provided"]
+  :dependencies [[org.clojure/clojure "1.10.3" :scope "provided"]
                  [org.clojure/core.async "1.3.610" :scope "provided"]]
 
   :eftest {:thread-count 4}

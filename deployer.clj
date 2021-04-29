@@ -17,7 +17,6 @@
 
 (def VERSION_GROUPS #"([0-9]+)\.([0-9]+)\.([0-9]+)(?:-SNAPSHOT)?")
 (def PROJECT_VERSION #"io\.github\.FieryCod\/holy-lambda\s*\"([0-9]+\.[0-9]+\.[0-9]+(?:-SNAPSHOT)?)\"")
-(def PROJECT_BABASHKA_VERSION #"io\.github\.FieryCod\/holy-lambda-babashka\s*\"([0-9]+\.[0-9]+\.[0-9]+(?:-SNAPSHOT)?)\"")
 (def TEMPLATE_PROJECT_VERSION #"holy-lambda\/lein-template\s*\"([0-9]+\.[0-9]+\.[0-9]+(?:-SNAPSHOT)?)\"")
 
 (defn bump
@@ -45,9 +44,7 @@
 
     ;; Update project, README and VERSION
     (spit "project.clj" (s/replace (slurp "project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" new-version "\"")))
-    (spit "modules/holy-lambda-babashka-release/project.clj" (s/replace (slurp "modules/holy-lambda-babashka-release/project.clj")
-                                                                        PROJECT_BABASHKA_VERSION
-                                                                        (str "io.github.FieryCod/holy-lambda-babashka   \"" new-version "\"")))
+
     (spit "README.md" (s/replace (slurp "README.md") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda \"" new-version "\"")))
     (spit "VERSION" new-version)
 
@@ -70,14 +67,10 @@
 
     ;; Release new version of babashka minimal .jar
     (sh "lein" "install")
-    (sh "lein" "deploy" "clojars" :dir "modules/holy-lambda-babashka-release")
 
     ;; Prepare for new development iteration
     (spit "VERSION" (bump :snapshot new-version))
     (spit "project.clj" (s/replace (slurp "project.clj") PROJECT_VERSION (str "io.github.FieryCod/holy-lambda   \"" (bump :snapshot new-version) "\"")))
-    (spit "modules/holy-lambda-babashka-release/project.clj" (s/replace (slurp "modules/holy-lambda-babashka-release/project.clj")
-                                                                        PROJECT_BABASHKA_VERSION
-                                                                        (str "io.github.FieryCod/holy-lambda-babashka   \"" (bump :snapshot new-version) "\"")))
     (spit "modules/holy-lambda-template/project.clj" (s/replace
                                                       (slurp "modules/holy-lambda-template/project.clj")
                                                       TEMPLATE_PROJECT_VERSION

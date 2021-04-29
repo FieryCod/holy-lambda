@@ -1,25 +1,23 @@
 FROM clojure:tools-deps as BUILDER
 
-WORKDIR /var/task
+WORKDIR /opt
 
 RUN apt-get update && apt-get install -y wget zip
 
 ENV GITLIBS=".gitlibs/"
-ENV _JAVA_OPTIONS=-Duser.home=.
-ENV XDG_CACHE_HOME=.
 ARG BABASHKA_VERSION=0.3.6
 
 COPY bootstrap .
 COPY deps.edn .
-COPY download_base_pods.clj .
 
 # Setup path
-RUN clojure -Sdeps '{:mvn/local-repo ".m2/repository"}' -Spath > classpath
-RUN echo ":output.jar" > classpath
+RUN clojure -Sdeps '{:mvn/local-repo "/opt/.m2"}' -Spath > classpath
 
-RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-amd64.tar.gz -O - | tar -xz
+# Add user paths to classpath
+RUN echo "/var/task/src:/var/task/.m2:/var/task:/var/task/src/clj:/var/task/src/cljc:src/cljc:src/clj" >> classpath
 
-RUN chmod +x bb
-RUN ./bb download_base_pods.clj
+# Setup babashka
+RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-amd64.tar.gz -O - | tar -xz && chmod +x bb
 
-RUN zip -q -r holy-lambda-babashka-runtime.zip bb bootstrap .m2 .babashka classpath
+# Zip all deps together. Resources should be distributed as layers
+RUN zip -q -r holy-lambda-babashka-runtime.zip bb bootstrap .m2 classpath

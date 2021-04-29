@@ -1,43 +1,48 @@
-{:deps {fierycod/holy-lambda-babashka-tasks
-        {:local/root "."}
-        ;; {:git/url "https://github.com/borkdude/gh-release-artifact"
-        ;;  :sha "2f8898d84126a4e922c490f8614211a8b0cf67cd"}
-        }
-
+{:deps {fierycod/holy-lambda-babashka-tasks {:local/root "."}}
+ :mvn/local-repo ".holy-lambda/.m2"
  :min-bb-version "0.3.6"
 
- :holy-lambda/options {;; or :deps
-                       :build-tool              :deps
-                       :stack-version           "0.0.1"
-                       :default-lambda-fn-name  "ExampleLambdaFunction"
-                       :envs-file               "envs.json"
-                       ;; Deploy :regular or :guided
-                       :deploy                  :regular
-                       ;; Possible runtime :babashka, :native, :java
-                       :image-tag               :ce
-                       :runtime                 {:name :babashka
-                                                 :pods {org.babashka/aws "0.0.5"}}
-                       :infra                   {:bucket-prefix  "holy-lambda"
-                                                 :bucket-name    "holy-lambda--example"
-                                                 :region         "eu-central-1"}}
+ :holy-lambda/options {:auto-deploy-dependants? true
+                       :build-variant :ce
+                       :stack {:name "holy-lambda-babashka-v2"
+                               :default-lambda "ExampleLambdaFunction"
+                               :envs "envs.json"
+                               :template "template.yml"
+                               :capabilities ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"]}
 
+                       :runtime
+                       {:name :babashka
+                        ;; Pods should be packaged to a layer with CodeUri: .holy-lambda/pods
+                        :pods {org.babashka/aws "0.0.5"}
+                        :entrypoint example.core
+                        :version "0.0.21"}
+                       :infra
+                       {:bucket-prefix "holy-lambda"
+                        :bucket-name "holy-lambda1-example"
+                        :region "eu-central-1"}}
 
- :tasks {:requires                ([holy-lambda.tasks])
-         :log-level               :info
+ :tasks {:requires ([holy-lambda.tasks])
+         :log-level :info
 
-         docker:run               holy-lambda.tasks/docker:run
-         docker:build:ee          holy-lambda.tasks/docker:build:ee
+         bucket:remove      holy-lambda.tasks/bucket:remove
+         bucket:create      holy-lambda.tasks/bucket:create
 
-         bucket:create            holy-lambda.tasks/bucket:create
-         bucket:remove            holy-lambda.tasks/bucket:remove
+         docker:build:ee    holy-lambda.tasks/docker:build:ee
+         docker:run         holy-lambda.tasks/docker:run
 
-         stack:destroy            holy-lambda.tasks/stack:destroy
-         stack:deploy             holy-lambda.tasks/stack:deploy
-         stack:purge              holy-lambda.tasks/stack:purge
-         stack:logs               holy-lambda.tasks/stack:logs
-         stack:sync               holy-lambda.tasks/stack:sync
-         stack:invoke             holy-lambda.tasks/stack:invoke
+         native:compile     holy-lambda.tasks/native:compile
 
-         tasks:version            holy-lambda.tasks/tasks:version
-         tasks:doctor             holy-lambda.tasks/tasks:doctor
-         }}
+         stack:lint         holy-lambda.tasks/stack:lint
+         stack:doctor       holy-lambda.tasks/stack:doctor
+         stack:version      holy-lambda.tasks/stack:version
+         stack:invoke       holy-lambda.tasks/stack:invoke
+         stack:deploy       holy-lambda.tasks/stack:deploy
+         stack:deploy:full  holy-lambda.tasks/stack:deploy:full
+         stack:pack         holy-lambda.tasks/stack:pack
+         stack:destroy      holy-lambda.tasks/stack:destroy
+         stack:describe     holy-lambda.tasks/stack:describe
+         stack:compile      holy-lambda.tasks/stack:compile
+         stack:api          holy-lambda.tasks/stack:api
+         stack:logs         holy-lambda.tasks/stack:logs
+         stack:purge        holy-lambda.tasks/stack:purge
+         stack:sync         holy-lambda.tasks/stack:sync}}

@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.FieryCod</groupId>
-  <artifactId>holy-lambda-babashka</artifactId>
+  <artifactId>holy-lambda-babashka-shim</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.32</version>
-  <name>holy-lambda-babashka</name>
+  <version>0.1.33</version>
+  <name>holy-lambda-babashka-shim</name>
   <description>Micro framework which turns your code into AWS Lambda functions suites for babashka based Lambdas</description>
   <url>https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka</url>
   <licenses>
@@ -84,7 +84,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.10.0</version>
+      <version>1.10.3</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
