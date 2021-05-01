@@ -1,5 +1,6 @@
 (ns fierycod.holy-lambda.native-runtime
   (:require
+   [fierycod.holy-lambda.response :as hr]
    [fierycod.holy-lambda.agent]
    [fierycod.holy-lambda.util :as u]))
 
@@ -34,13 +35,12 @@
 
 (defn- send-runtime-error
   [runtime iid ^Exception err]
-  (let [message (.getMessage err)
-        response (u/http "POST" (url {:runtime runtime
+  (println "[holy-lambda] Runtime error:" err)
+  (let [response (u/http "POST" (url {:runtime runtime
                                       :iid iid
                                       :path "/error"})
-                         {:errorMessage message
-                          :errorType (-> err (.getClass) (.getCanonicalName))})]
-    (println "[holy-lambda] Runtime error:" message)
+                         (hr/json {:runtime-error true
+                                   :err (Throwable->map err)}))]
     (when-not (u/success-code? (:status response))
       (println "[holy-lambda] Runtime error failed sent to AWS." (:body response))
       (u/exit!))))

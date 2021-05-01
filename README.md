@@ -12,7 +12,7 @@
 Tiny native AWS Custom Lambda Runtime which fulfills your needs!
 
 ``` clojure
-io.github.FieryCod/holy-lambda {:mvn/version "0.1.38"}
+io.github.FieryCod/holy-lambda {:mvn/version "0.1.42"}
 ```
 
 ## What it does?

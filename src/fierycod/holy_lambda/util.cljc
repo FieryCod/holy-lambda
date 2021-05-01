@@ -35,6 +35,7 @@
   (let [response (retriever/<-wait-for-response ?response)
         ;; remove internals
         response (dissoc response :fierycod.holy-lambda.interceptor/interceptors)]
+
     (cond
       ;; Optimize the common case
       (= (get-in response [:headers "Content-Type"]) "application/json; charset=utf-8")
@@ -88,9 +89,12 @@
                (.setRequestProperty "Content-Type" "application/json")
                (.setRequestMethod method))
            _ (when push?
-               (doto (.getOutputStream http-conn)
-                 (.write ^"[B" response-bytes)
-                 (.close)))
+               (let [output-stream (.getOutputStream http-conn)]
+                 (if-not (bytes? response-bytes)
+                   (do (println "[holy-lambda] Response has not beed parsed to bytes array:" response-bytes)
+                       (throw (ex-info (str "[holy-lambda] Failed to parse response to byte array. Response type:" (type response-bytes)) {})))
+                   (.write output-stream ^"[B" response-bytes))
+                 (.close output-stream)))
            headers (into {} (.getHeaderFields http-conn))
            status (.getResponseCode http-conn)]
        {:headers headers
