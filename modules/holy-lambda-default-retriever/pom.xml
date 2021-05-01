@@ -4,7 +4,7 @@
   <groupId>io.github.FieryCod</groupId>
   <artifactId>holy-lambda-default-retriever</artifactId>
   <packaging>jar</packaging>
-  <version>0.0.4</version>
+  <version>0.0.5</version>
   <name>holy-lambda-default-retriever</name>
   <description>Default retriever for payloads</description>
   <url>https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-default-retriever</url>
@@ -18,7 +18,7 @@
     <url>https://github.com/FieryCod/holy-lambda</url>
     <connection>scm:git:git://github.com/FieryCod/holy-lambda.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/FieryCod/holy-lambda.git</developerConnection>
-    <tag>945b59050bdf37ab1f513449821f5a07a7b73425</tag>
+    <tag>2cea0ffd06812cb69277888c1f3542da6f97b347</tag>
   </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -66,7 +66,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.10.0</version>
+      <version>1.10.3</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

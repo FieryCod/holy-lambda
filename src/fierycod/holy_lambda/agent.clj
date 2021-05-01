@@ -52,11 +52,11 @@
 (defn- routes->reflective-call!
   [routes]
   (doseq [{:keys [request path propagate] :as invoke-map} (agents-payloads->invoke-map)]
-    (println "[Holy Lambda] Calling lambda" (:name invoke-map) "with payloads from" (re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" path))
+    (println "[holy-lambda] Calling lambda" (:name invoke-map) "with payloads from" (re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" path))
     (if propagate
       (u/call (routes (:name invoke-map)) request)
       (try
         (u/call (routes (:name invoke-map)) request)
         (catch Exception _err nil)))
-    (println "[Holy Lambda] Succesfully called" (:name invoke-map) "with payloads from" (re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" path)))
-  (println "[Holy Lambda] Succesfully called all the lambdas"))
+    (println "[holy-lambda] Succesfully called" (:name invoke-map) "with payloads from" (re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" path)))
+  (println "[holy-lambda] Succesfully called all the lambdas"))

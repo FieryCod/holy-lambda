@@ -54,13 +54,13 @@
                   (do
                     (when (future? response) (future-cancel response))
                     (future-cancel timeout-f!)
-                    (println "[Holy Lambda] IPending response timeouted. Shutting down the runtime!")
+                    (println "[holy-lambda] IPending response timeouted. Shutting down the runtime!")
                     (System/exit -1))
                   (recur response))))))
 
        :else
        (do
-         (println "\n\n---------------------\n[Holy Lambda] Supposedly not supported response.\n---------------------\n\n")
+         (println "\n\n---------------------\n[holy-lambda] Supposedly not supported response.\n---------------------\n\n")
          response)))
    :cljs
    (defn <-wait-for-response

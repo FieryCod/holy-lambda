@@ -5,7 +5,7 @@
 
 (defn- ->ex
   [msg]
-  (throw (ex-info (str "[Holy Lambda]: " msg) {})))
+  (throw (ex-info (str "[holy-lambda]: " msg) {})))
 
 (defn- url
   [{:keys [runtime iid path]}]
@@ -40,9 +40,9 @@
                                       :path "/error"})
                          {:errorMessage message
                           :errorType (-> err (.getClass) (.getCanonicalName))})]
-    (println "[Holy Lambda] Runtime error:" message)
+    (println "[holy-lambda] Runtime error:" message)
     (when-not (u/success-code? (:status response))
-      (println "[Holy Lambda] Runtime error failed sent to AWS." (:body response))
+      (println "[holy-lambda] Runtime error failed sent to AWS." (:body response))
       (u/exit!))))
 
 (defn- fetch-aws-event

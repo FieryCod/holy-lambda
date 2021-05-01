@@ -13,7 +13,7 @@ ENV XDG_DATA_HOME=/project/.holy-lambda
 
 # --------------- UPDATE ------------------
 # -----------------------------------------
-ARG BABASHKA_VERSION=0.3.6
+ARG BABASHKA_VERSION=0.3.7
 ARG CLOJURE_VERSION=1.10.3.822
 # -----------------------------------------
 

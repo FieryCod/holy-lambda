@@ -1,5 +1,5 @@
 {:deps {org.clojure/clojure {:mvn/version "1.10.3"}
-        io.github.FieryCod/holy-lambda {:mvn/version "0.1.33-SNAPSHOT"}
+        io.github.FieryCod/holy-lambda {:mvn/version "0.1.34"}
 
         ;; for babashka use to make smaller scripts
         ;; io.github.FieryCod/holy-lambda-babashka-shim   {:mvn/version "SAME_VERSION_AS_REGULAR_HOLY_LAMBDA_DEPENDENCY"}

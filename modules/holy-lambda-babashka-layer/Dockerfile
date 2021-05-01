@@ -5,7 +5,7 @@ WORKDIR /opt
 RUN apt-get update && apt-get install -y wget zip
 
 ENV GITLIBS=".gitlibs/"
-ARG BABASHKA_VERSION=0.3.6
+ARG BABASHKA_VERSION=0.3.7
 
 COPY bootstrap .
 COPY deps.edn .

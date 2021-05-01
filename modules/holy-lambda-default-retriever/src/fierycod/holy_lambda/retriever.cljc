@@ -44,15 +44,15 @@
                   (do
                     (when (future? response) (future-cancel response))
                     (future-cancel timeout-f!)
-                    (println "[Holy Lambda] IPending response timeouted. Shutting down the runtime!")
+                    (println "[holy-lambda] IPending response timeouted. Shutting down the runtime!")
                     (System/exit -1))
                   (recur response))))))
 
        :else
        (do
-         (println "\n\n---------------------\n[Holy Lambda] Supposedly not supported response.
-If you looking for channel support then exclude fierycod/holy-lambda-default-retriever in dependencies [fierycod/holy-lambda \"VERSION\" :exclusions [fierycod/holy-lambda-default-retriever]]
-and add an extra dependency [fierycod/holy-lambda-async-retriever \"VERSION\"]\n---------------------\n\n")
+         (println "\n\n---------------------\n[holy-lambda] Supposedly not supported response.
+If you looking for channel support then exclude fierycod/holy-lambda-default-retriever in dependencies [io.github.FieryCod/holy-lambda \"VERSION\" :exclusions [io.github.FieryCod/holy-lambda-default-retriever]]
+and add an extra dependency [io.github.FieryCod/holy-lambda-async-retriever \"VERSION\"]\n---------------------\n\n")
          response)))
    :cljs
    (defn <-wait-for-response

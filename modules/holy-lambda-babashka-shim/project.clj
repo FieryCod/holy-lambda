@@ -1,4 +1,4 @@
-(defproject io.github.FieryCod/holy-lambda-babashka-shim "0.1.33-SNAPSHOT"
+(defproject io.github.FieryCod/holy-lambda-babashka-shim "0.1.35-SNAPSHOT"
   :description "Micro framework which turns your code into AWS Lambda functions suites for babashka based Lambdas"
 
   :url "https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka"
@@ -12,7 +12,7 @@
   :global-vars {*warn-on-reflection* true}
 
   :dependencies [[org.clojure/clojure "1.10.3" :scope "provided"]
-                 [io.github.FieryCod/holy-lambda-default-retriever "0.0.4"]]
+                 [io.github.FieryCod/holy-lambda-default-retriever "0.0.5"]]
 
   :deploy-repositories [["releases" {:url "https://clojars.org/repo"
                                      :creds :gpg}
