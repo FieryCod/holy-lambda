@@ -12,7 +12,7 @@
 Tiny native AWS Custom Lambda Runtime which fulfills your needs!
 
 ``` clojure
-[io.github.FieryCod/holy-lambda "0.1.30"]
+io.github.FieryCod/holy-lambda {:mvn/version "0.1.34"}
 ```
 
 ## What it does?
@@ -50,7 +50,13 @@ Generate a new project from template via
 ``` 
 lein new holy-lambda <your-project-name>
 ```
-  
+
+or 
+
+``` clojure
+clojure -M:new -m clj-new.create holy-lambda basic.example
+```
+
 ## Thanks to
 - Daria - Thank you that you were always beside me, fighting for me when I had no faith and energy.
 - @KrzysztofTucholski - Thank you for boosting my ego

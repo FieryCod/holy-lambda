@@ -16,12 +16,11 @@
              ["src/{{sanitized}}/core.cljc" (render* "core.cljc")]
              [".clj-kondo/config.edn" (render* "clj-kondo/config.edn")]
              [".clj-kondo/clj_kondo/holy_lambda.clj" (render* "clj-kondo/clj_kondo/holy_lambda.clj")]
-             ["resources/native-deps/.gitkeep" (render* "gitkeep")]
              ["resources/native-agents-payloads/1.edn" (render* "1.edn")]
              ["README.md" (render* "README.md")]
+             ["bb.edn" (render* "bb.edn")]
              ["deps.edn" (render* "deps.edn")]
              ["envs.json" (render* "envs.json")]
              ["template.yml" (render* "template.yml")]
-             ["resources/bootstrap-native" (render* "bootstrap-native")]
              [".editorconfig" (render* "editorconfig")]
              [".gitignore" (render* "gitignore")])))
