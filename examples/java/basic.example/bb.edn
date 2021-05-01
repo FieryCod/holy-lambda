@@ -1,4 +1,7 @@
-{:deps {fierycod/holy-lambda-babashka-tasks {:local/root "."}}
+{:deps {fierycod/holy-lambda-babashka-tasks
+        {:git/url "https://github.com/FieryCod/holy-lambda"
+         :deps/root "./modules/holy-lambda-babashka-tasks"
+         :sha     "e056552d14cb30cdb017c23d60cccd9917041726"}}
 
  :mvn/local-repo ".holy-lambda/.m2"
 
@@ -7,7 +10,7 @@
  :holy-lambda/options {
                        :build-variant :ce
 
-                       :stack {:name "holy-lambda-babashka-v2"
+                       :stack {:name "holy-lambda-template-stack"
 
                                :default-lambda "ExampleLambdaFunction"
 
@@ -21,7 +24,7 @@
                        :runtime
                        {
                         ;; Choose one of the supported runtime `:babashka`, `:native`, `:java`
-                        :name                :native
+                        :name                :java
 
                         ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
                         ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers
@@ -35,7 +38,7 @@
 
                         ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
                         ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
-                        :entrypoint          example.core
+                        :entrypoint          basic.example.core
 
                         ;; Flag which indicates that holy-lambda should auto deploy the applications and layers for the corresponding :runtime
                         ;; If set to false holy-lambda will guide you through the steps of dependants deployment.
@@ -68,7 +71,7 @@
                        :infra
                        {:bucket-prefix       "holy-lambda"
 
-                        :bucket-name         "holy-lambda1-example"
+                        :bucket-name         "holy-lambda-template-bucket"
 
                         :region              "eu-central-1"}}
 
@@ -98,4 +101,5 @@
          stack:logs             holy-lambda.tasks/stack:logs
          stack:version          holy-lambda.tasks/stack:version
          stack:lint             holy-lambda.tasks/stack:lint
-         }}
+         }
+ }

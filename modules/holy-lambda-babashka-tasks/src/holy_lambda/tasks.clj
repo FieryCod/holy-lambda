@@ -459,6 +459,9 @@ Resources:
   (when-not (fs/exists? (io/file ".holy-lambda"))
     (hpr (pre "Unable to sync docker image content with") (accent ".holy-lambda") (pre "project directory!")))
 
+  (when-not (fs/exists? (io/file ".holy-lambda/clojure"))
+    (hpr (pre "Project did not sync properly. Remove .holy-lambda directory and run") (accent "stack:sync")))
+
   ;; Correct holy-lambda deps.edn
   (spit HOLY_LAMBDA_DEPS_PATH (edn->pp-sedn tasks-deps-edn))
 
@@ -863,16 +866,6 @@ set -e
   []
   (print-task "stack:lint")
   (shell "clj-kondo --lint src:test"))
-
-(defn stack:deploy:full
-  "     \033[0;31m>\033[0m Shortcut for running [stack:sync, stack:compile, :stack:pack, :stack:deploy]"
-  []
-  (print-task "stack:deploy:full")
-  (stack:sync)
-  (when-not (= :babashka RUNTIME_NAME)
-    (stack:compile))
-  (stack:pack)
-  (stack:deploy))
 
 (defn stack:destroy
   "     \033[0;31m>\033[0m Destroys \033[0;31mCloudformation\033[0m stack & removes bucket"

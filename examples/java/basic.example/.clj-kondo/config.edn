@@ -1,0 +1,3 @@
+{:hooks   {:analyze-call {fierycod.holy-lambda.core/deflambda  clj-kondo.holy-lambda/deflambda}}
+ :lint-as {}
+ :linters {:shadowed-var {:level :warning}}}

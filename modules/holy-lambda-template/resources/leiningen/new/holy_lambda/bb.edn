@@ -10,7 +10,7 @@
  :holy-lambda/options {
                        :build-variant :ce
 
-                       :stack {:name "holy-lambda-babashka-v2"
+                       :stack {:name "holy-lambda-template-stack"
 
                                :default-lambda "ExampleLambdaFunction"
 
@@ -71,7 +71,7 @@
                        :infra
                        {:bucket-prefix       "holy-lambda"
 
-                        :bucket-name         "holy-lambda1-example"
+                        :bucket-name         "holy-lambda-template-bucket"
 
                         :region              "eu-central-1"}}
 
@@ -94,7 +94,6 @@
          stack:api              holy-lambda.tasks/stack:api
          stack:pack             holy-lambda.tasks/stack:pack
          stack:deploy           holy-lambda.tasks/stack:deploy
-         stack:deploy:full      holy-lambda.tasks/stack:deploy:full
          stack:describe         holy-lambda.tasks/stack:describe
          stack:doctor           holy-lambda.tasks/stack:doctor
          stack:purge            holy-lambda.tasks/stack:purge
