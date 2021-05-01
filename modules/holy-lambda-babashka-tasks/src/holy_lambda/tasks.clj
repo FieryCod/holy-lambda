@@ -563,11 +563,7 @@ set -e
   (when-not (fs/exists? (io/file NATIVE_CONFIGURATIONS_PATH))
     (hpr (prw "No native configurations has been generated. Native image build may fail. Run") (accent "native:conf") (prw "to generate native configurations.")))
 
-  (docker:run (str "cd .holy-lambda/build && native-image -jar output.jar "
-                   (when NATIVE_CONFIGURATIONS_PATH "-H:ConfigurationFileDirectories=")
-                   (when NATIVE_CONFIGURATIONS_PATH (str "../" NATIVE_CONFIGURATIONS_PATH))
-                   (when NATIVE_CONFIGURATIONS_PATH " ")
-
+  (docker:run (str "[ -d .holy-lambda/native/configuration ] && cp -rf .holy-lambda/native/configuration .holy-lambda/build/ && cd .holy-lambda/build/ && native-image -jar output.jar -H:ConfigurationFileDirectories=configuration "
                    "-H:+AllowIncompleteClasspath"
                    (when NATIVE_IMAGE_ARGS
                      (str " " NATIVE_IMAGE_ARGS))))
