@@ -565,7 +565,7 @@ set -e
 
   (docker:run (str "cd .holy-lambda/build && native-image -jar output.jar "
                    (when NATIVE_CONFIGURATIONS_PATH "-H:ConfigurationFileDirectories=")
-                   (when NATIVE_CONFIGURATIONS_PATH (str "../../" NATIVE_CONFIGURATIONS_PATH))
+                   (when NATIVE_CONFIGURATIONS_PATH (str "../" NATIVE_CONFIGURATIONS_PATH))
                    (when NATIVE_CONFIGURATIONS_PATH " ")
 
                    "-H:+AllowIncompleteClasspath"

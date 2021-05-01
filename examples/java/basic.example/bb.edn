@@ -1,7 +1,7 @@
 {:deps {fierycod/holy-lambda-babashka-tasks
         {:git/url "https://github.com/FieryCod/holy-lambda"
          :deps/root "./modules/holy-lambda-babashka-tasks"
-         :sha     "e056552d14cb30cdb017c23d60cccd9917041726"}}
+         :sha     "776dcdfb906654f570b1441b454005fb0854c97b"}}
 
  :mvn/local-repo ".holy-lambda/.m2"
 
@@ -10,7 +10,7 @@
  :holy-lambda/options {
                        :build-variant :ce
 
-                       :stack {:name "holy-lambda-template-stack"
+                       :stack {:name "holy-lambda-template-stack-java-basic"
 
                                :default-lambda "ExampleLambdaFunction"
 
@@ -18,7 +18,7 @@
 
                                :template "template.yml"
 
-                               :capabilities ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"]}
+                               :capabilities ["CAPABILITY_IAM"]}
 
 
                        :runtime
@@ -71,7 +71,7 @@
                        :infra
                        {:bucket-prefix       "holy-lambda"
 
-                        :bucket-name         "holy-lambda-template-bucket"
+                        :bucket-name         "holy-lambda-template-bucket-basic-java"
 
                         :region              "eu-central-1"}}
 

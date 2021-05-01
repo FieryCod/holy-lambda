@@ -1,4 +1,4 @@
 {:deps {org.clojure/clojure {:mvn/version "1.10.3"}
-        io.github.FieryCod/holy-lambda {:mvn/version "0.1.34"}}
+        io.github.FieryCod/holy-lambda {:mvn/version "0.1.38"}}
  :mvn/local-repo ".holy-lambda/.m2"
- :paths ["src"]}
+ :paths ["src" "resources"]}

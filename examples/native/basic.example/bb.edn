@@ -10,7 +10,7 @@
  :holy-lambda/options {
                        :build-variant :ce
 
-                       :stack {:name "holy-lambda-template-stack"
+                       :stack {:name "holy-lambda-template-stack-native-basic"
 
                                :default-lambda "ExampleLambdaFunction"
 
@@ -38,7 +38,7 @@
 
                         ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
                         ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
-                        :entrypoint          {{name}}.core
+                        :entrypoint          basic.example.core
 
                         ;; Flag which indicates that holy-lambda should auto deploy the applications and layers for the corresponding :runtime
                         ;; If set to false holy-lambda will guide you through the steps of dependants deployment.
@@ -71,7 +71,7 @@
                        :infra
                        {:bucket-prefix       "holy-lambda"
 
-                        :bucket-name         "holy-lambda-template-bucket"
+                        :bucket-name         "holy-lambda-template-bucket-basic-java"
 
                         :region              "eu-central-1"}}
 

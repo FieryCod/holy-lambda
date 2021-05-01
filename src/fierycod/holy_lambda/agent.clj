@@ -11,7 +11,11 @@
    [java.nio.file Files LinkOption]
    [java.io File]))
 
-(def ^:private PAYLOADS (io/resource "native-agents-payloads"))
+(def ^:private PAYLOADS (try (or (io/file (io/resource "native-agents-payloads"))
+                                 (io/file "resources/native-agents-payloads"))
+                             (catch Exception _
+                               (io/file "resources/native-agents-payloads"))))
+
 (def ^:private AGENT_EXECUTOR "native-agent")
 
 (defmacro in-context
@@ -43,7 +47,7 @@
 
 (defn- agents-payloads->invoke-map
   []
-  (->> (file-seq (io/file PAYLOADS))
+  (->> (file-seq PAYLOADS)
        (filterv #(Files/isRegularFile (.toPath ^File %1) (into-array LinkOption [])))
        (filterv #(s/includes? (str %) ".edn"))
        (mapv #(-> % slurp edn/read-string (assoc :path (str %))))
