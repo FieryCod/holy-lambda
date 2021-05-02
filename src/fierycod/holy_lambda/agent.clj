@@ -55,12 +55,15 @@
 
 (defn- routes->reflective-call!
   [routes]
-  (doseq [{:keys [request path propagate] :as invoke-map} (agents-payloads->invoke-map)]
+  (doseq [{:keys [request path propagate] :as invoke-map} (agents-payloads->invoke-map)
+          :let [callable-var (routes (:name invoke-map))]]
+    (when-not callable-var
+      (println "[holy-lambda] Lambda" (:name invoke-map) "does not exists in classpath. Incorrect name?"))
     (println "[holy-lambda] Calling lambda" (:name invoke-map) "with payloads from" (re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" path))
     (if propagate
-      (u/call (routes (:name invoke-map)) request)
+      (u/call callable-var request)
       (try
-        (u/call (routes (:name invoke-map)) request)
+        (u/call callable-var request)
         (catch Exception _err nil)))
     (println "[holy-lambda] Succesfully called" (:name invoke-map) "with payloads from" (re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" path)))
   (println "[holy-lambda] Succesfully called all the lambdas"))
