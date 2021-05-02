@@ -529,7 +529,7 @@ Resources:
   (stack-files-check :java)
 
   (hpr "Compiling with agent support")
-  (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aot true :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
+  (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aot true :jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
 
   (hpr "Generating native-configurations")
   (docker:run (str "java -agentlib:native-image-agent=config-output-dir=" NATIVE_CONFIGURATIONS_PATH
@@ -672,7 +672,7 @@ set -e
       (hpr "Nothing to compile. Sources did not change!")
       (System/exit 0))
 
-  (docker:run (str "clojure -X:uberjar :aot true :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
+  (docker:run (str "clojure -X:uberjar :aot true :jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
 
 (defn stack:invoke
   "     \033[0;31m>\033[0m Invokes lambda fn (check sam local invoke --help):
