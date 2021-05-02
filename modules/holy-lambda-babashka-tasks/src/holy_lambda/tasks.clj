@@ -6,7 +6,6 @@
    [clojure.java.shell :as csh]
    [clojure.edn :as edn]
    [cheshire.core :as json]
-   [babashka.tasks :as tasks]
    [babashka.deps :as deps]
    [babashka.fs :as fs]
    [babashka.curl :as curl]
@@ -206,7 +205,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def RUNTIME_VERSION (:version RUNTIME))
 (def ENTRYPOINT (:entrypoint (:runtime OPTIONS)))
 (def OUTPUT_JAR_PATH ".holy-lambda/build/output.jar")
-(def OUTPUT_JAR_PATH_WITH_AGENT ".holy-lambda/build/output-agent.jar")
+(def OUTPUT_JAR_PATH_WITH_AGENT ".holy-lambda/build/output.jar")
 (def OUTPUT_JAR_PATH_RELATIVE "build/output.jar")
 (def HOLY_LAMBDA_DEPS_PATH ".holy-lambda/clojure/deps.edn")
 (def STACK_NAME (:name STACK))
@@ -528,9 +527,9 @@ Resources:
 
   (stack-files-check :java)
 
+  (shell "rm -Rf .holy-lambda/build/output.jar")
   (hpr "Compiling with agent support")
   (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aot true :jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
-
   (hpr "Generating native-configurations")
   (docker:run (str "java -agentlib:native-image-agent=config-output-dir=" NATIVE_CONFIGURATIONS_PATH
                    " -Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT)))
