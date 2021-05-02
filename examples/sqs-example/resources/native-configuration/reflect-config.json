@@ -1156,8 +1156,7 @@
   "name":"com.fasterxml.jackson.databind.JsonSerializer"
 },
 {
-  "name":"com.fasterxml.jackson.databind.ObjectMapper",
-  "allPublicMethods":true
+  "name":"com.fasterxml.jackson.databind.ObjectMapper"
 },
 {
   "name":"com.fasterxml.jackson.databind.SerializationFeature"

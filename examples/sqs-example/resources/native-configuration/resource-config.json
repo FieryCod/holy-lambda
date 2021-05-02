@@ -271,6 +271,7 @@
     {"pattern":"\\Qjavax/crypto/Cipher.class\\E"}, 
     {"pattern":"\\Qjsonista/core.clj\\E"}, 
     {"pattern":"\\Qjsonista/core__init.class\\E"}, 
+    {"pattern":"\\Qnative-agents-payloads\\E"}, 
     {"pattern":"\\Qorg/eclipse/jetty/version/build.properties\\E"}, 
     {"pattern":"\\Qsqs_example/core.clj\\E"}, 
     {"pattern":"\\Qsqs_example/core__init.class\\E"}, 
