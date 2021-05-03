@@ -48,13 +48,13 @@ It allows you to write one code which might run either on Official Java AWS Runt
 Generate a new project from template via
 
 ``` 
-lein new holy-lambda <your-project-name>
+lein new holy-lambda example && cd example && bb stack:sync
 ```
 
 or 
 
 ``` clojure
-clojure -M:new -m clj-new.create holy-lambda basic.example
+clojure -M:new -m clj-new.create holy-lambda basic.example && cd basic.example && bb stack:sync
 ```
 
 ## Thanks to
