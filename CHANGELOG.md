@@ -1,4 +1,14 @@
 # Changelog
+## 0.1.45 (21-04-2021)
+*Changes*
+- [docker] ce tag is used internally by bb tasks. Projects which use Makefiles should either switch to bb tasks or use image without tag
+- [bb tasks] introduce bb tasks to manage stack, infrastracture and runtimes
+- [bb layer] don't require uberjar. Provide sources as is.
+- [holy-lambda] Fixup runtime error handling
+- [holy-lambda] Fixup native-configuration gen
+- [holy-lambda-template] Drop support for Makefile and Leiningen 
+- [holy-lambda-babashka-shim] Provide a shim for jsonista and AWS interfaces so that babashka runtime works flawlessly
+
 ## 0.1.21 (21-04-2021)
 *Changes*
 - Add new docker tags: 

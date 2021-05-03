@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Example basic lambda using `holy-lambda` micro library
+
+Parameters:
+  Runtime:
+    Type: String
+    Default: <HOLY_LAMBDA_RUNTIME>
+  Timeout:
+    Type: Number
+    Default: 40
+  MemorySize:
+    Type: Number
+    Default: 2000
+  CodeUri:
+    Type: String
+    Default: <HOLY_LAMBDA_CODE_URI>
+  Entrypoint:
+    Type: String
+    Default: <HOLY_LAMBDA_ENTRYPOINT>
+
+Globals:
+  Function:
+    Runtime: !Ref Runtime
+    Timeout: !Ref Timeout
+    MemorySize: !Ref MemorySize
+    CodeUri: !Ref CodeUri
+    Environment:
+      Variables:
+        Entrypoint: !Ref Entrypoint
+
+Resources:
+  ExampleLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ExampleLambdaFunction
+      Handler: component.example.core.ExampleLambda
+      Layers:
+        - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:20 # Use your own deployed layer ARN
+        - !Ref SharedClojureBabashkaDepsLayer
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+
+  SharedClojureBabashkaDepsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: SharedClojureBabashkaDepsLayer
+      Description: Shared dependencies for stack.
+      ContentUri: ./.holy-lambda/bb-clj-deps
+      CompatibleRuntimes:
+        - provided

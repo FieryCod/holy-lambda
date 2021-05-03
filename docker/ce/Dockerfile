@@ -1,7 +1,7 @@
 FROM ghcr.io/graalvm/graalvm-ce:ol8-java8-21.1.0
 MAINTAINER Karol Wójcik <Karol Wójcik>
 
-RUN microdnf install unzip curl make wget
+RUN microdnf install unzip curl make wget git
 
 ENV CLJ_CACHE=/project/.holy-lambda/clojure
 ENV CLJ_COFIG=/project/.holy-lambda/clojure
@@ -10,6 +10,7 @@ ENV HOME=/project/.holy-lambda
 ENV XDG_CACHE_HOME=/project/.holy-lambda
 ENV XDG_CONFIG_HOME=/project/.holy-lambda
 ENV XDG_DATA_HOME=/project/.holy-lambda
+ENV GITLIBS=/project/.holy-lambda/.gitlibs/
 
 # --------------- UPDATE ------------------
 # -----------------------------------------

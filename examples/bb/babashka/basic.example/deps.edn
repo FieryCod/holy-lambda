@@ -1,0 +1,4 @@
+{:deps {}
+ :mvn/local-repo ".holy-lambda/.m2"
+ :paths ["src" "resources"]
+ :aliases {}}

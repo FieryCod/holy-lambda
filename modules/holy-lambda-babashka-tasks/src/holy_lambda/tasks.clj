@@ -6,7 +6,6 @@
    [clojure.java.shell :as csh]
    [clojure.edn :as edn]
    [cheshire.core :as json]
-   [babashka.tasks :as tasks]
    [babashka.deps :as deps]
    [babashka.fs :as fs]
    [babashka.curl :as curl]
@@ -410,6 +409,9 @@ Resources:
 
 (defn runtime-sync-hook--babashka
   []
+  (hpr (str "Cloning Clojure deps for" (accent "babashka") ".") "If you're using some extra dependencies provide a layer with CodeUri:" (accent ".holy-lambda/bb-clj-deps"))
+  (shell "bash -c \"mkdir -p .holy-lambda/bb-clj-deps && cp -R .holy-lambda/.m2 .holy-lambda/bb-clj-deps/\"")
+
   (when-not SELF_MANAGE_LAYERS?
     (if-let [ARN (babashka-runtime-layer-ARN)]
       (hpr "Babashka runtime layer exists. Your layer ARN is:" (accent ARN) "(deployment skipped)")
@@ -645,7 +647,7 @@ set -e
   []
   (print-task "bucket:remove")
   (if-not (bucket-exists?)
-    (hpr (pre "Bucket") (accent BUCKET_NAME) " does not exists! Not removing")
+    (hpr (pre "Bucket") (accent BUCKET_NAME) "does not exists! Nothing to remove!")
     (do (hpr (prs "Removing a bucket") (accent BUCKET_NAME))
         (-remove-bucket))))
 

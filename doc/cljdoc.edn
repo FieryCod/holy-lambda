@@ -3,5 +3,5 @@
                    ["Tutorial" {:file "doc/0-00-toc.md"}
                     ["What it is?" {:file "doc/1-01-whatits.md"}]
                     ["Getting started" {:file "doc/1-02-getting-started.md"}]
-                    ["Makefile recipes" {:file "doc/1-03-makefile-recipes.md"}]
+                    ["Babashka tasks recipes" {:file "doc/1-03-babashka-recipes.md"}]
                     ["Native agent" {:file "doc/1-04-native-agent.md"}]]]}

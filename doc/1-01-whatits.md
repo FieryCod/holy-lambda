@@ -1,6 +1,6 @@
 # What it is?
 
-Holy lambda is a micro framework which adds support for running Clojure on the [AWS Lambda](https://aws.amazon.com/lambda/) and might be used with arbitrary AWS Lambda deployment tool. Holy lambda provides very convinient environment compared to other tools such as [uswitch/lambada](https://github.com/uswitch/lambada) or [babashka-lambda](https://github.com/dainiusjocas/babashka-lambda) via simple, but powerful `Makefile` recipes eg. deployment is as easy as running `make make-bucket deploy` (for native lambda `make make-bucket native-deploy`).
+Holy lambda is a micro framework which adds support for running Clojure on the [AWS Lambda](https://aws.amazon.com/lambda/) and might be used with arbitrary AWS Lambda deployment tool. Holy lambda provides very convinient environment compared to other tools such as [uswitch/lambada](https://github.com/uswitch/lambada) or [babashka-lambda](https://github.com/dainiusjocas/babashka-lambda) via simple, but powerful `bb tasks` recipes eg. deployment is as easy as running `bb stack:sync && bb stack:compile && bb stack:pack && bb stack:deploy`).
 
 *Holy lambda supports*
 - interceptors
@@ -27,8 +27,18 @@ I've started experimenting with native runtime around May 2019 inspired by @hjha
 - use Profile-Guided Optimizations on GraalVM EE [PGO](https://www.graalvm.org/reference-manual/native-image/PGO/)
 
 *Tradeoffs*
-- you have to generate native-configurations for GraalVM (automated by running `make native-gen-conf`)
-- GraalVM compilation is long - for development use Java runtime with `sam invoke` or `make dry-api`
+- you have to generate native-configurations for GraalVM (automated by running `bb native:conf`)
+- GraalVM compilation is long - for development use Java runtime with `sam invoke` or `bb stack:invoke`
 - adding and using new libary is not always easy when compiling to native, some extra know-how about GraalVM is needed
 
-If you're not interested in trying holy-lambda out then you can check babashka runtime :) [babashka-lambda](https://github.com/dainiusjocas/babashka-lambda).
+## Babashka runtime
+Babashka runtime provides interactive development environment. There is no need for compiling the sources since those are provided as is to `AWS SAM`.
+
+| Runtime   | Cold start | Performance | Artifacts size   | Memory Consumption | Interactive | Compile time |
+|-----------|------------|-------------|------------------|--------------------|-------------|--------------|
+| :native   | low        | high        | high     >= 16mb | low                | No          | very long    |
+| :babashka | low        | moderate    | low      >= 50kb | low                | Yes         | no compile   |
+| :java     | high       | high        | moderate >= 12mb | high               | No          | long         |
+
+
+If you're not interested in trying holy-lambda out then you can check very minimal babashka runtime :) [babashka-lambda](https://github.com/dainiusjocas/babashka-lambda).

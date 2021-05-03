@@ -1,7 +1,7 @@
 {:deps {fierycod/holy-lambda-babashka-tasks
         {:git/url "https://github.com/FieryCod/holy-lambda"
          :deps/root "./modules/holy-lambda-babashka-tasks"
-         :sha     "24343dd9224a3509d758a9311388824ffca9daf1"}}
+         :sha     "477dd30b491b991eaa0842c49043eecfbc4ef74d"}}
 
  :mvn/local-repo ".holy-lambda/.m2"
 
@@ -10,9 +10,9 @@
  :holy-lambda/options {
                        :build-variant :ce
 
-                       :stack {:name "holy-lambda-template-stack-sqs-java"
+                       :stack {:name "holy-lambda-template-stack"
 
-                               :default-lambda "SubscribeLambdaFunction"
+                               :default-lambda "ExampleLambdaFunction"
 
                                :envs "envs.json"
 
@@ -20,10 +20,11 @@
 
                                :capabilities ["CAPABILITY_IAM"]}
 
+
                        :runtime
                        {
                         ;; Choose one of the supported runtime `:babashka`, `:native`, `:java`
-                        :name                :java
+                        :name                :babashka
 
                         ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
                         ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers
@@ -37,7 +38,7 @@
 
                         ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
                         ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
-                        :entrypoint          sqs.example.core
+                        :entrypoint          component.example.core
 
                         ;; Flag which indicates that holy-lambda should auto deploy the applications and layers for the corresponding :runtime
                         ;; If set to false holy-lambda will guide you through the steps of dependants deployment.
@@ -70,7 +71,7 @@
                        :infra
                        {:bucket-prefix       "holy-lambda"
 
-                        :bucket-name         "holy-lambda-template-bucket-sqs-java"
+                        :bucket-name         "holy-lambda-template-bucket"
 
                         :region              "eu-central-1"}}
 
