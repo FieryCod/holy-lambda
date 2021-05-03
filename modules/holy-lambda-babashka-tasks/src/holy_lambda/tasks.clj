@@ -95,6 +95,10 @@
   [cmd & args]
   (exit-non-zero (p/process (into (p/tokenize cmd) (remove nil? args)) {:inherit true})))
 
+(defn- shell-no-exit
+  [cmd & args]
+  (p/process (into (p/tokenize cmd) (remove nil? args)) {:inherit true}))
+
 (defn- clojure [cmd & args]
   (exit-non-zero (deps/clojure (into (p/tokenize cmd) args))))
 
@@ -496,7 +500,8 @@ Resources:
     :native (do
               (stack-files-check--java)
               (stack-files-check--native))
-    :babashka nil))
+    :babashka nil
+    nil))
 
 (defn build-stale?
   []
@@ -526,7 +531,7 @@ Resources:
   (when-not (= RUNTIME_NAME :native)
     (hpr (pre "Command") (accent "native:conf") (pre "supports only") (accent ":native") (pre "runtime!")))
 
-  (stack-files-check :java)
+  (stack-files-check :default)
 
   (hpr "Compiling with agent support")
   (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aot true :jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
@@ -563,7 +568,10 @@ set -e
   (when-not (fs/exists? (io/file NATIVE_CONFIGURATIONS_PATH))
     (hpr (prw "No native configurations has been generated. Native image build may fail. Run") (accent "native:conf") (prw "to generate native configurations.")))
 
-  (docker:run (str "[ -d .holy-lambda/native/configuration ] && cp -rf .holy-lambda/native/configuration .holy-lambda/build/ && cd .holy-lambda/build/ && native-image -jar output.jar -H:ConfigurationFileDirectories=configuration "
+  ;; Copy then build
+  (shell-no-exit "bash -c \"[ -d .holy-lambda/native/configuration ] && cp -rf .holy-lambda/native/configuration .holy-lambda/build/\"")
+
+  (docker:run (str "cd .holy-lambda/build/ && native-image -jar output.jar -H:ConfigurationFileDirectories=configuration "
                    "-H:+AllowIncompleteClasspath"
                    (when NATIVE_IMAGE_ARGS
                      (str " " NATIVE_IMAGE_ARGS))))

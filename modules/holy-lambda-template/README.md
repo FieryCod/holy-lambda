@@ -8,8 +8,14 @@ Visit the docs [here](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURREN
 
 ## How to generate a project
 
+``` 
+lein new holy-lambda example && cd example && bb stack:sync
 ```
-lein new holy-lambda <your-project-name>
+
+or 
+
+``` clojure
+clojure -M:new -m clj-new.create holy-lambda basic.example && cd basic.example && bb stack:sync
 ```
 
 ## License
