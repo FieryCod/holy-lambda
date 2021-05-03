@@ -585,7 +585,8 @@ set -e
         (shell (str "cp -R " NATIVE_DEPS_PATH " .holy-lambda/build/")))
       (hpr "Bundling artifacts...")
       (shell "bash -c \"cd .holy-lambda/build && chmod +x bootstrap\"" )
-      (shell "bash -c \"cd .holy-lambda/build && zip -r latest.zip . -x 'output.jar' -x 'output-agent.jar' -x 'configuration/' -x 'configuration/**' -x 'output.build_artifacts.txt'\""))))
+      (shell "bash -c \"cd .holy-lambda/build && rm -Rf output-agent.jar configuration output.build_artifacts.txt\"")
+      (shell "bash -c \"cd .holy-lambda/build && zip -r latest.zip . -x 'output.jar'\""))))
 
 (defn modify-template
   []
