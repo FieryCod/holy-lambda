@@ -409,7 +409,7 @@ Resources:
 
 (defn runtime-sync-hook--babashka
   []
-  (hpr (str "Cloning Clojure deps for" (accent "babashka") ".") "If you're using some extra dependencies provide a layer with CodeUri:" (accent ".holy-lambda/bb-clj-deps"))
+  (hpr (str "Cloning Clojure deps for " (accent "babashka") ".") "If you're using some extra dependencies provide a layer with CodeUri:" (accent ".holy-lambda/bb-clj-deps"))
   (shell "bash -c \"mkdir -p .holy-lambda/bb-clj-deps && cp -R .holy-lambda/.m2 .holy-lambda/bb-clj-deps/\"")
 
   (when-not SELF_MANAGE_LAYERS?

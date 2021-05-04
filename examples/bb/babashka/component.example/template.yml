@@ -37,8 +37,8 @@ Resources:
       FunctionName: ExampleLambdaFunction
       Handler: component.example.core.ExampleLambda
       Layers:
-        - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:20 # Use your own deployed layer ARN
         - !Ref SharedClojureBabashkaDepsLayer
+        - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:21
       Events:
         HelloEvent:
           Type: Api

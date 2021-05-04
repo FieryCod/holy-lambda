@@ -3,13 +3,24 @@
 set -e
 
 export BABASHKA_DISABLE_SIGNAL_HANDLERS="true"
-export XDG_CACHE_HOME=/opt/
-export XDG_CONFIG_HOME=/opt/
-export XDG_DATA_HOME=/opt/
+
+export XDG_CACHE_HOME=/opt
+export XDG_CONFIG_HOME=/opt
+export XDG_DATA_HOME=/opt
 export HOME=/var/task
+export GITLIBS=/opt
+export CLOJURE_TOOLS_DIR=/opt
+export CLJ_CACHE=/opt
+export CLJ_COFIG=/opt
+
+JARS_CLASSPATH=$(find /opt/.m2 -name '*.jar' -printf "%p:")
+FULL_CLASSPATH="$JARS_CLASSPATH/var/task/src:/var/task/.m2:/var/task:/var/task/src/clj:/var/task/src/cljc:src/cljc:src/clj:/var/task/resources"
+
+export BABASHKA_CLASSPATH=$FULL_CLASSPATH
+export BABASHKA_PRELOADS='(load-file "/opt/hacks.clj")'
 
 if [ -z "$Entrypoint" ]; then
   echo "Environment variable \"Entrypoint\" is not set. Holy Lambda babashka runtime will fail!"
 fi;
 
-/opt/bb -Duser.home=/var/task -cp "$(cat /opt/classpath)" -m "$Entrypoint"
+/opt/bb -Duser.home=/var/task -m "$Entrypoint"

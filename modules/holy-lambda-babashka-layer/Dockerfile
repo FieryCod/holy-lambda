@@ -5,19 +5,21 @@ WORKDIR /opt
 RUN apt-get update && apt-get install -y wget zip
 
 ENV GITLIBS=".gitlibs/"
+ENV CLOJURE_TOOLS_DIR=/opt
 ARG BABASHKA_VERSION=0.3.7
 
 COPY bootstrap .
 COPY deps.edn .
+COPY hacks.clj .
 
 # Setup path
-RUN clojure -Sdeps '{:mvn/local-repo "/opt/.m2"}' -Spath > classpath
-
-# Add user paths to classpath
-RUN echo "/var/task/src:/var/task/.m2:/var/task:/var/task/src/clj:/var/task/src/cljc:src/cljc:src/clj:/var/task/resources" >> classpath
+RUN clojure -Sdeps '{:mvn/local-repo "/opt/.m2"}' -Spath
 
 # Setup babashka
 RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-amd64.tar.gz -O - | tar -xz && chmod +x bb
 
+# Setup deps.tools
+RUN curl https://raw.githubusercontent.com/borkdude/deps.clj/master/install | bash && deps -P
+
 # Zip all deps together. Resources should be distributed as layers
-RUN zip -q -r holy-lambda-babashka-runtime.zip bb bootstrap .m2 classpath
+RUN zip -q -r holy-lambda-babashka-runtime.zip bb bootstrap .m2 clojure-tools-1.10.3.822.jar hacks.clj
