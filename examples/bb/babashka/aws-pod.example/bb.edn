@@ -24,7 +24,7 @@
                        :runtime
                        {
                         ;; Choose one of the supported runtime `:babashka`, `:native`, `:java`
-                        :name                :native
+                        :name                :babashka
 
                         ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
                         ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers
@@ -38,7 +38,7 @@
 
                         ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
                         ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
-                        :entrypoint          jsonista.test.core
+                        :entrypoint          aws-pod.example.core
 
                         ;; Flag which indicates that holy-lambda should auto deploy the applications and layers for the corresponding :runtime
                         ;; If set to false holy-lambda will guide you through the steps of dependants deployment.

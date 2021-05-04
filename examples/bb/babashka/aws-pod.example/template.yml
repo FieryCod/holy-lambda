@@ -35,9 +35,10 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: ExampleLambdaFunction
-      Handler: component.example.core.ExampleLambda
+      Handler: aws-pod.example.core.ExampleLambda
       Layers:
         - !Ref SharedClojureBabashkaDepsLayer
+        - !Ref SharedBabashkaDepsLayer
         - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:21 # Use your own layer ARN
       Events:
         HelloEvent:
@@ -52,5 +53,14 @@ Resources:
       LayerName: SharedClojureBabashkaDepsLayer
       Description: Shared dependencies for stack.
       ContentUri: ./.holy-lambda/bb-clj-deps
+      CompatibleRuntimes:
+        - provided
+
+  SharedBabashkaDepsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: SharedBabashkaDepsLayer
+      Description: Shared pods for stack.
+      ContentUri: ./.holy-lambda/pods
       CompatibleRuntimes:
         - provided
