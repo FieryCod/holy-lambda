@@ -1,7 +1,7 @@
 {:deps {fierycod/holy-lambda-babashka-tasks
         {:git/url "https://github.com/FieryCod/holy-lambda"
          :deps/root "./modules/holy-lambda-babashka-tasks"
-         :sha     "2990ecac02632e29319e8cc4a6965aedc35e20f2"}}
+         :sha     "6fa85c52e04969dcb6d9b8287f1765b913f55c00"}}
 
  :mvn/local-repo ".holy-lambda/.m2"
 

@@ -1,5 +1,5 @@
 {:deps {org.clojure/clojure {:mvn/version "1.10.3"}
-        io.github.FieryCod/holy-lambda {:mvn/version "0.1.45"}
+        io.github.FieryCod/holy-lambda {:mvn/version "0.1.46"}
         com.cognitect.aws/api          {:mvn/version "0.8.484"}
         com.cognitect.aws/endpoints    {:mvn/version "1.1.11.926"}
         com.cognitect.aws/sqs          {:mvn/version "810.2.817.0"}}
