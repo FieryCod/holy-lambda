@@ -76,8 +76,6 @@
 
  :tasks {:requires              ([holy-lambda.tasks])
 
-         :log-level             :info
-
          bucket:create          holy-lambda.tasks/bucket:create
          bucket:remove          holy-lambda.tasks/bucket:remove
 

@@ -94,6 +94,7 @@
                    (do (println "[holy-lambda] Response has not beed parsed to bytes array:" response-bytes)
                        (throw (ex-info (str "[holy-lambda] Failed to parse response to byte array. Response type:" (type response-bytes)) {})))
                    (.write output-stream ^"[B" response-bytes))
+                 (.flush output-stream)
                  (.close output-stream)))
            headers (into {} (.getHeaderFields http-conn))
            status (.getResponseCode http-conn)]

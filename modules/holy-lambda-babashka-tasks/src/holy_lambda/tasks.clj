@@ -154,6 +154,7 @@
 (def TASKS_VERSION "0.0.1")
 (def TASKS_VERSION_MATCH #"(?:TASKS_VERSION) (\"[0-9]*\.[0-9]*\.[0-9]*\")")
 (def BUCKET_IN_LS_REGEX #"(?:[0-9- :]+)(.*)")
+(def LAYER_CACHE_DIRECTORY ".holy-lambda/.cache/layers")
 
 (defn options
   []
@@ -455,11 +456,11 @@ Resources:
        \t\t        - \033[0;31m<Babashka>\033[0m bb.edn:runtime:pods"
   []
   (print-task "stack:sync")
-  (when-not (fs/exists? (io/file ".holy-lambda"))
-    (hpr "Directory" (accent ".holy-lambda") "does not exists. Syncing with docker image!")
+  (when-not (fs/exists? (io/file ".holy-lambda/clojure/deps.edn"))
+    (hpr "Project not synced yet. Syncing with docker image!")
     (let [cid (gensym "holy-lambda")]
       (shs "docker" "create" "--user" USER_GID "-ti" "--name" (str cid)  IMAGE_CORDS "bash")
-      (shs "docker" "cp" (str cid ":/project/.holy-lambda") ".holy-lambda")
+      (shs "docker" "cp" (str cid ":/project/.holy-lambda") ".")
       (shs "docker" "rm" "-f" (str cid))))
 
   (when-not (fs/exists? (io/file ".holy-lambda"))
@@ -513,10 +514,13 @@ Resources:
 
 (defn stack:api
   "     \033[0;31m>\033[0m Runs local api (check sam local start-api):
-       \t\t        - \033[0;31m:debug\033[0m  - run api in \033[0;31mdebug mode\033[0m"
+       \t\t        - \033[0;31m:debug\033[0m       - run api in \033[0;31mdebug mode\033[0m
+       \t\t        - \033[0;31m:port\033[0m        - local port number to listen to
+       \t\t        - \033[0;31m:static-dir\033[0m  - assets which should be presented at \033[0;31m/\033[0m
+       \t\t        - \033[0;31m:envs-file\033[0m   - path to \033[0;31menvs file\033[0m"
   [& args]
   (print-task "stack:api")
-  (let [{:keys [debug]} (norm-args args)]
+  (let [{:keys [static-dir debug envs-file port]} (norm-args args)]
     (stack-files-check)
     (when (build-stale?)
       (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
@@ -524,6 +528,12 @@ Resources:
     (shell (str "sam local start-api"
                 " --parameter-overrides " (parameters)
                 " --template " TEMPLATE_FILE
+                " -p " (or port 3000)
+                (when static-dir " -s ") static-dir
+                " --warm-containers LAZY"
+                " -n " (or envs-file DEFAULT_ENVS_FILE)
+                " --layer-cache-basedir " LAYER_CACHE_DIRECTORY
+
                 (when debug " --debug")) )))
 
 (defn native:conf
@@ -653,8 +663,8 @@ set -e
 
 (defn stack:deploy
   "     \033[0;31m>\033[0m Deploys \033[0;31mCloudformation\033[0m stack
-  \t\t        - \033[0;31m:guided\033[0m - guide the deployment
-  \t\t        - \033[0;31m:dry\033[0m    - execute changeset?"
+  \t\t        - \033[0;31m:guided\033[0m      - guide the deployment
+  \t\t        - \033[0;31m:dry\033[0m         - execute changeset?"
   [& args]
   (print-task "stack:deploy")
   (let [{:keys [guided dry]} (norm-args args)]
@@ -687,10 +697,10 @@ set -e
 
 (defn stack:invoke
   "     \033[0;31m>\033[0m Invokes lambda fn (check sam local invoke --help):
-       \t\t        - \033[0;31m:name\033[0m   - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
-       \t\t        - \033[0;31m:event\033[0m  - path to \033[0;31mevent file\033[0m
-       \t\t        - \033[0;31m:envs\033[0m   - path to \033[0;31menvs file\033[0m
-       \t\t        - \033[0;31m:logs\033[0m   - logfile to runtime logs to"
+       \t\t        - \033[0;31m:name\033[0m        - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
+       \t\t        - \033[0;31m:event-file\033[0m  - path to \033[0;31mevent file\033[0m
+       \t\t        - \033[0;31m:envs-file\033[0m   - path to \033[0;31menvs file\033[0m
+       \t\t        - \033[0;31m:logs\033[0m        - logfile to runtime logs to"
   [& args]
   (print-task "stack:invoke")
   (stack-files-check)
@@ -701,7 +711,7 @@ set -e
            "--parameter-overrides" (parameters)
            (when logs "-l") logs
            (when event-file "-e") event-file
-           (when envs-file "-n") envs-file)))
+           "-n" (or envs-file DEFAULT_ENVS_FILE))))
 
 (defn mvn-local-test
   [file]
@@ -811,10 +821,10 @@ set -e
 
 (defn stack:logs
   "     \033[0;31m>\033[0m Possible arguments (check sam logs --help):
-       \t\t        - \033[0;31m:name\033[0m   - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
-       \t\t        - \033[0;31m:e\033[0m      - fetch logs up to this time
-       \t\t        - \033[0;31m:s\033[0m      - fetch logs starting at this time
-       \t\t        - \033[0;31m:filter\033[0m - find logs that match terms "
+       \t\t        - \033[0;31m:name\033[0m        - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
+       \t\t        - \033[0;31m:e\033[0m           - fetch logs up to this time
+       \t\t        - \033[0;31m:s\033[0m           - fetch logs starting at this time
+       \t\t        - \033[0;31m:filter\033[0m      - find logs that match terms "
   [& args]
   (print-task "stack:logs")
   (let [{:keys [name tail s e filter]} (norm-args args)]
@@ -849,6 +859,7 @@ set -e
   (print-task "stack:purge")
   (let [artifacts [".aws"
                    ".holy-lambda"
+                   ".cpcache"
                    "Dockerfile.ee"
                    "node_modules"]]
 

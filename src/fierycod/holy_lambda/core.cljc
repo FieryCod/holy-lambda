@@ -54,7 +54,8 @@
                                                                                                    :ctx context#}
                                                                                                   :enter))
                                 :leave))]
-                (.write out# ^"[B" response#))
+                (.write out# ^"[B" response#)
+                (.flush out#))
               (catch Exception error#
                 (println "[Holy Lambda] Exception during request handling" error#))
               (finally

@@ -1,4 +1,4 @@
-(defproject io.github.FieryCod/holy-lambda-default-retriever "0.0.5"
+(defproject io.github.FieryCod/holy-lambda-default-retriever "0.0.6"
   :description "Default retriever for payloads"
 
   :url "https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-default-retriever"

@@ -9,18 +9,21 @@
 
 ---
 
-Tiny native AWS Custom Lambda Runtime which fulfills your needs!
+The micro framework that integrates Clojure with AWS Lambda on either Java, Clojure Native, or Babashka runtime. 
 
 ``` clojure
 io.github.FieryCod/holy-lambda {:mvn/version "0.1.45"}
 ```
 
-## What it does?
-It allows you to write one code which might run either on Official Java AWS Runtime or on Native Custom AWS Runtime built into your codebase.
+**Supported runtimes**
+  - Babashka
+  - Native Clojure runtime
+  - Java based Clojure runtime
+  - (incoming) Node.js runtime for Clojurescript
 
 [Jump here](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
 
-## Example
+### Minimal code example
 
 ``` clojure
 (ns some.ns
@@ -35,7 +38,7 @@ It allows you to write one code which might run either on Official Java AWS Runt
   {:enter (fn [request] request)})
  
 (h/deflambda ExampleLambda
-  "I can run on both Java and Native..."
+  "I can run on Java, Babashka or Native runtime..."
   < {:interceptors [LogIncomingRequest]}
   [{:keys [event ctx]}]
   (hr/text "Hello world"))
@@ -47,14 +50,64 @@ It allows you to write one code which might run either on Official Java AWS Runt
 
 Generate a new project from template via
 
-``` 
-lein new holy-lambda example && cd example && bb stack:sync
-```
-
-or 
-
 ``` clojure
 clojure -M:new -m clj-new.create holy-lambda basic.example && cd basic.example && bb stack:sync
+```
+
+## What it does?
+It allows you to write one code which might run on Official Java AWS Runtime, Native Custom AWS Runtime built into your codebase or Babashka runtime. Holy Lambda ships with `Babashka tasks` to ease development and deployment of an application. 
+
+Available tasks:
+
+``` clojure
+❯ bb tasks
+The following tasks are available:
+
+bucket:create          > Creates a s3 bucket using :bucket-name
+bucket:remove          > Removes a s3 bucket using :bucket-name
+
+----------------------------------------------------------------
+
+docker:build:ee        > Builds local image for GraalVM EE 
+docker:run             > Run command in fierycod/graalvm-native-image docker context
+
+----------------------------------------------------------------
+
+native:conf            > Provides native configurations for the application
+native:executable      > Provides native executable of the application
+
+----------------------------------------------------------------
+
+stack:sync             > Syncs project & dependencies from either:
+                        - <Clojure>  project.clj
+                        - <Clojure>  deps.edn
+                        - <Babashka> bb.edn:runtime:pods
+stack:compile          > Compiles sources if necessary
+stack:invoke           > Invokes lambda fn (check sam local invoke --help):
+                        - :name        - either :name or :stack:default-lambda
+                        - :event-file  - path to event file
+                        - :envs-file   - path to envs file
+                        - :logs        - logfile to runtime logs to
+stack:api              > Runs local api (check sam local start-api):
+                        - :debug       - run api in debug mode
+                        - :port        - local port number to listen to
+                        - :static-dir  - assets which should be presented at /
+                        - :envs-file   - path to envs file
+stack:pack             > Packs Cloudformation stack
+stack:deploy           > Deploys Cloudformation stack
+                        - :guided      - guide the deployment
+                        - :dry         - execute changeset?
+stack:describe         > Describes Cloudformation stack
+stack:doctor           > Diagnoses common issues of holy-lambda stack
+stack:purge            > Purges build artifacts
+stack:destroy          > Destroys Cloudformation stack & removes bucket
+stack:logs             > Possible arguments (check sam logs --help):
+                        - :name        - either :name or :stack:default-lambda
+                        - :e           - fetch logs up to this time
+                        - :s           - fetch logs starting at this time
+                        - :filter      - find logs that match terms 
+stack:version          > Outputs holy-lambda babashka tasks version
+stack:lint             > Lints the project
 ```
 
 ## Thanks to
