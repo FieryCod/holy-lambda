@@ -422,9 +422,6 @@ Resources:
         (hpr "Trying to deploy layer:\n" (babashka-runtime-layer-template))
 
         (let [stack-name "holy-lambda-bbrl-instance"]
-          (when-not (contains? (set CAPABILITIES) "CAPABILITY_AUTO_EXPAND")
-            (hpr (pre "Unable to deploy babashka runtime layer. Add") (accent "CAPABILITY_AUTO_EXPAND") "to capabilities to deploy a layer."))
-
           (io/make-parents BABASHKA_RUNTIME_LAYER_FILE)
           (spit BABASHKA_RUNTIME_LAYER_FILE (babashka-runtime-layer-template))
 
