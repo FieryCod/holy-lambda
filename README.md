@@ -48,10 +48,16 @@ io.github.FieryCod/holy-lambda {:mvn/version "0.1.46"}
 
 ## Quickstart
 
-Generate a new project from template via
+Generate a new project from template via:
 
 ``` clojure
 clojure -M:new -m clj-new.create holy-lambda basic.example && cd basic.example && bb stack:sync
+```
+
+Alternatively you can use `lein new`:
+
+``` clojure
+lein new holy-lambda example ;; <-- Replace `example` with the name of the project
 ```
 
 ## What it does?

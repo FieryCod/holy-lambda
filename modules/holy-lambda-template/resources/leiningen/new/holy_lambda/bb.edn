@@ -10,7 +10,7 @@
  :holy-lambda/options {
                        :build-variant :ce
 
-                       :stack {:name "holy-lambda-template-stack"
+                       :stack {:name "{{stack-name}}"
 
                                :default-lambda "ExampleLambdaFunction"
 
@@ -53,7 +53,7 @@
 
                         ;; Some of the runtimes are versioned. For instance `:babashka` runtime is a versioned layer which ships it's own version of
                         ;; clojure, holy-lambda, default-retriever
-                        :version             "0.0.29"
+                        :version             "0.0.30"
 
                         ;; Specify custom arguments for native image generation
                         ;; Works only on `:native` runtime.
@@ -69,9 +69,9 @@
 
                        ;; Infrastructure properties
                        :infra
-                       {:bucket-prefix       "holy-lambda"
+                       {:bucket-prefix       "{{bucket-prefix}}"
 
-                        :bucket-name         "holy-lambda-template-bucket"
+                        :bucket-name         "{{bucket-name}}"
 
                         :region              "eu-central-1"}}
 
