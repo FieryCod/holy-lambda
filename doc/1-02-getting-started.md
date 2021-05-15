@@ -9,20 +9,30 @@
 
   After having all mentioned above dependencies just use the following commands:
 
-  1. Install aws, aws-sam clojure and babashka>=0.3.7
+  1. Install aws, aws-sam, make, clojure, babashka (>= 0.3.7), and clj-kondo
      ```
-     brew tap aws/tap && brew install awscli aws-sam-cli clojure/tools/clojure  borkdude/brew/babashka
+     brew tap aws/tap && \
+        brew install awscli \
+                     aws-sam-cli \
+                     make \
+                     clojure/tools/clojure \
+                     borkdude/brew/babashka \
+                     borkdude/brew/clj-kondo
      ```
+     
+  2. Install [clj-new](https://github.com/seancorfield/clj-new) 
 
-  2. Configure default AWS profile via `aws-cli`. This is necessary for making a bucket and deploying an application. If you just want to test holy-lambda on local then this step is not necessary, but you will be able to use only a limited set of commands.
+    Please see [here](https://github.com/seancorfield/clj-new#getting-started)
+
+  3. Configure default AWS profile via `aws-cli`. This is necessary for making a bucket and deploying an application. If you just want to test holy-lambda on local then this step is not necessary, but you will be able to use only a limited set of commands.
 
      ```
      aws configure
      ```
 
 ## First project 
-1. With [clj-new](https://github.com/seancorfield/clj-new#getting-started) set up, scaffold a new project
-  
+1. With clj-new set up, generate a new project
+
    ```
    clojure -M:new -m clj-new.create holy-lambda basic.example 
    ```
@@ -43,17 +53,23 @@
     │       └── example
     │           └── core.cljc
     └── template.yml
-
+    
     5 directories, 7 files
    ```
    
 2. Try to sync dependencies in project:
+
+   > :warning:  Ensure docker is running at this point
+
    ```
-   cd basic.example && bb stack:sync
+   cd holy-lambda-example && bb stack:sync
    ```
    
-   The first sync is not always successful. If you see a message of not successful sync, then remove the `.holy-lambda` folder and run `bb stack:sync` once again.
-   The purpose of the `sync` command is to gather all dependencies from `bb.edn`, `deps.edn` for both Clojure, Native and Babashka runtime. Syncs checks as well whether any additional layers for runtime should be published. If `:self-manage-layers` flag is set to `false`, then `holy-lambda` will automatically publish all necessary layers and output `ARN` of each.
+   The first sync is not always successful. If you see a message of not successful sync, then run `bb stack:purge` and run `bb stack:sync` once again.
+   If this still fails, run `bb stack:doctor` for diagnostic information.
+   The purpose of the `sync` command is to gather all dependencies from `bb.edn`, `deps.edn` for both Clojure, Native and Babashka, runtimes. By default, sync also checks whether any additional layers for runtime should be published (see `:self-manage-layers?` elsewhere**). 
+   
+**This behaviour may be overridden by changing `:self-manage-layers?` flag is set to `false`, then `holy-lambda` will automatically publish all necessary layers and output `ARN` of each.
   
 3. At this point you should have `.holy-lambda` directory in your project. If not then go to troubleshooting. Now you can choose one of three runtimes:
 
