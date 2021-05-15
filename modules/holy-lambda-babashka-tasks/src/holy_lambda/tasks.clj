@@ -151,7 +151,7 @@
 (def AVAILABLE_RUNTIMES #{:babashka :native :java})
 (def AVAILABLE_REGIONS #{"us-east-2", "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "cn-north-1", "cn-northwest-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-north-1", "me-south-1", "sa-east-1"})
 (def REMOTE_TASKS "https://raw.githubusercontent.com/FieryCod/holy-lambda/master/modules/holy-lambda-babashka-tasks/src/holy_lambda/tasks.clj")
-(def TASKS_VERSION "0.0.1")
+(def TASKS_VERSION "0.0.3")
 (def TASKS_VERSION_MATCH #"(?:TASKS_VERSION) (\"[0-9]*\.[0-9]*\.[0-9]*\")")
 (def BUCKET_IN_LS_REGEX #"(?:[0-9- :]+)(.*)")
 (def LAYER_CACHE_DIRECTORY ".holy-lambda/.cache/layers")
@@ -199,6 +199,13 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
   (hpr (pre (str "OS: " OS " is not supported by holy-lambda. Please make an issue on Github!")))
   (System/exit 1))
 
+(when (or (and (= OS :unix)
+               (not= (:exit (csh/sh "pgrep" "-f" "docker")) 0))
+          (and (= OS :mac)
+               (not= (:exit (csh/sh "pgrep" "-f" "Docker.app")) 0)))
+  (hpr (pre "Docker is not running! Enable and run docker first before using holy-lambda!"))
+  (System/exit 1))
+
 (def IMAGE_CORDS
   (case (:build-variant OPTIONS)
     :ce "fierycod/graalvm-native-image:ce"
@@ -207,13 +214,6 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
              (str (accent (:build-variant OPTIONS)) (pre "."))
              (pre "Choose either") (accent ":ce") (pre "or") (accent ":ee") (pre "build variant!"))
         (System/exit 1))))
-
-(when (or (and (= OS :unix)
-               (not= (:exit (csh/sh "pgrep" "-f" "docker")) 0))
-          (and (= OS :mac)
-               (not= (:exit (csh/sh "pgrep" "-f" "Docker.app")) 0)))
-  (hpr (pre "Docker is not running! Enable and run docker first before using holy-lambda!"))
-  (System/exit 1))
 
 (def INFRA (:infra OPTIONS))
 (def RUNTIME (:runtime OPTIONS))
@@ -244,6 +244,9 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def NATIVE_CONFIGURATIONS_PATH ".holy-lambda/native/configuration")
 (def BOOTSTRAP_FILE (:bootstrap-file RUNTIME))
 (def NATIVE_DEPS_PATH (:native-deps RUNTIME))
+(def BABASHKA_LAYER_INSTANCE (str BUCKET_NAME
+                                  "-"
+                                  "holy-lambda-babashka-runtime"))
 
 (defn aws-command-output->str
   [output]
@@ -280,6 +283,9 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 
 (def AWS_DIR
   (.getAbsolutePath (io/file HOME_DIR ".aws")))
+
+(def AWS_DIR_EXISTS?
+  (fs/exists? (io/file AWS_DIR)))
 
 (defn edn->pp-sedn
   [edn]
@@ -429,7 +435,8 @@ Resources:
 
 (defn babashka-runtime-layer-ARN
   []
-  (when-let [mstacks (seq (filterv (fn [stack] (s/includes? (:StackName stack) "holy-lambda-bbrl-instance-HolyLambdaBabashkaRuntime")) (:Stacks (cloudformation-description))))]
+  (when-let [mstacks (seq (filterv (fn [stack] (s/includes? (:StackName stack) BABASHKA_LAYER_INSTANCE))
+                                   (:Stacks (cloudformation-description))))]
     (let [ARN (some-> mstacks
                       first
                       :Outputs
@@ -446,29 +453,51 @@ Resources:
   (when-not SELF_MANAGE_LAYERS?
     (if-let [ARN (babashka-runtime-layer-ARN)]
       (hpr "Babashka runtime layer exists. Your layer ARN is:" (accent ARN) "(deployment skipped)")
-
       (do
-        (hpr (prw "Babashka runtime needs a special layer for both local invocations and deployments published here: https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime."))
-        (hpr "Trying to deploy layer:\n" (babashka-runtime-layer-template))
+        (hpr "Babashka runtime needs a special layer for both local invocations and deployments.")
+        (hpr "Layer is published here:" "https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime")
+        (println "")
+        (hpr (str "Layer is not published! Trying to deploy layer:\n\n" (babashka-runtime-layer-template) "\n"))
 
-        (let [stack-name "holy-lambda-bbrl-instance"]
+        (let [stack-name BABASHKA_LAYER_INSTANCE]
           (io/make-parents BABASHKA_RUNTIME_LAYER_FILE)
           (spit BABASHKA_RUNTIME_LAYER_FILE (babashka-runtime-layer-template))
 
-          (-create-bucket (str stack-name (hash BUCKET_NAME)))
+          ;; Create bucket if it's possible
+          (-create-bucket stack-name)
 
           (apply shell
                  "sam deploy"
                  "--template-file"  BABASHKA_RUNTIME_LAYER_FILE
-                 "--stack-name"     (str stack-name "-" (hash BUCKET_NAME))
-                 "--s3-bucket"      (str stack-name "-" (hash BUCKET_NAME))
+                 "--stack-name"     stack-name
+                 "--s3-bucket"      stack-name
                  "--no-confirm-changeset"
                  "--capabilities"   ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"])
 
           (hpr "Waiting 5 seconds for deployment to propagate...")
           (Thread/sleep 5000)
           (hpr "Checking the ARN of published layer. This might take a while..")
-          (hpr (prs "Your ARN for babashka runtime layer is:") (accent (babashka-runtime-layer-ARN))))))))
+          (hpr (prs "Your ARN for babashka runtime layer is:") (accent (babashka-runtime-layer-ARN)))
+          (hpr "You should add the provided ARN as a property of a Function in template.yml!\n
+---------------" (accent "template.yml") "------------------\n
+      Resources:
+        ExampleLambdaFunction:
+          Type: AWS::Serverless::Function
+          Properties:
+            Handler: example.core.ExampleLambda"
+                    (prs "
+            Layers:
+              - ADD_HERE_BABASHKA_RUNTIME_ARN")
+                    "
+            Events:
+              HelloEvent:
+                Type: Api
+                Properties:
+                  Path: /
+                  Method: get\n
+---------------------------------------------"))))))
+
+
 
 (defn runtime-sync-hook
   []
@@ -757,6 +786,7 @@ set -e
   (hpr " Checking health of holy-lambda stack")
   (hpr " Home directory is:       " (accent HOME_DIR))
   (hpr " AWS directory is:        " (accent AWS_DIR))
+  (hpr " AWS directory exists?:   " (accent AWS_DIR_EXISTS?))
   (hpr " Babashka tasks version:  " (accent TASKS_VERSION))
   (hpr " Babashka version:        " (accent (s/trim (shs "bb" "version"))))
   (hpr " Runtime:                 " (accent RUNTIME_NAME))
@@ -764,6 +794,7 @@ set -e
   (hpr " Stack name:              " (accent STACK_NAME))
   (hpr " S3 Bucket name:          " (accent BUCKET_NAME))
   (hpr " S3 Bucket prefix:        " (accent BUCKET_PREFIX))
+  (hpr " S3 Bucket exists?:       " (accent (bucket-exists?)))
   (hpr "---------------------------------------\n")
 
   (when-not (fs/exists? (io/file AWS_DIR))
