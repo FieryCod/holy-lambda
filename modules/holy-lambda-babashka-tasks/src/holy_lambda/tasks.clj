@@ -188,6 +188,17 @@
 Check https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-invoke.html#serverless-sam-cli-using-invoke-environment-file"))
       (System/exit 1))))
 
+(def OS (let [os (System/getProperty "os.name")]
+          (cond
+            (s/includes? os "nux") :unix
+            (s/includes? os "mac") :mac
+            (s/includes? os "win") :windows
+            :else :unknown)))
+
+(when (contains? #{:unknown :windows} OS)
+  (hpr (pre (str "OS: " OS " is not supported by holy-lambda. Please make an issue on Github!")))
+  (System/exit 1))
+
 (def IMAGE_CORDS
   (case (:build-variant OPTIONS)
     :ce "fierycod/graalvm-native-image:ce"
@@ -196,6 +207,13 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
              (str (accent (:build-variant OPTIONS)) (pre "."))
              (pre "Choose either") (accent ":ce") (pre "or") (accent ":ee") (pre "build variant!"))
         (System/exit 1))))
+
+(when (or (and (= OS :unix)
+               (not= (:exit (csh/sh "pgrep" "-f" "docker")) 0))
+          (and (= OS :mac)
+               (not= (:exit (csh/sh "pgrep" "-f" "Docker.app")) 0)))
+  (hpr (pre "Docker is not running! Enable and run docker first before using holy-lambda!"))
+  (System/exit 1))
 
 (def INFRA (:infra OPTIONS))
 (def RUNTIME (:runtime OPTIONS))
