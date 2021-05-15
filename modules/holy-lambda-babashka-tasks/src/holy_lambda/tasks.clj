@@ -430,8 +430,8 @@ Resources:
           (apply shell
                  "sam deploy"
                  "--template-file"  BABASHKA_RUNTIME_LAYER_FILE
-                 "--stack-name"     stack-name
-                 "--s3-bucket"      (str stack-name (hash BUCKET_NAME))
+                 "--stack-name"     (str stack-name "-" (hash BUCKET_NAME))
+                 "--s3-bucket"      (str stack-name "-" (hash BUCKET_NAME))
                  "--no-confirm-changeset"
                  "--capabilities"   ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"])
 

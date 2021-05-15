@@ -10,6 +10,7 @@ all:
 	@docker rm build || true
 	@docker create --name build holy-lambda-babashka-lambda-archiver
 	@docker cp build:/opt/holy-lambda-babashka-runtime.zip holy-lambda-babashka-runtime.zip
+	@docker rm build || true
 
 	@echo "Publishing a new version of the layer"
 	@sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket $(BUCKET_NAME) --s3-prefix $(S3_PREFIX)
