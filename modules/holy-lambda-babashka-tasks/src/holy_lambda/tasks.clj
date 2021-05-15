@@ -227,9 +227,22 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def BOOTSTRAP_FILE (:bootstrap-file RUNTIME))
 (def NATIVE_DEPS_PATH (:native-deps RUNTIME))
 
+(defn aws-command-output->str
+  [output]
+  (str (pre "AWS command output:") "\n------------------------------------------\n" (s/trim output)
+       "\n------------------------------------------"))
+
 (defn -create-bucket
   [& [bucket]]
-  (shsp "aws" "s3" "mb" (str "s3://" (or bucket BUCKET_NAME))))
+  (let [bucket (or bucket BUCKET_NAME)
+        result (csh/sh "aws" "s3" "mb" (str "s3://" bucket))]
+    (if (not= (:exit result) 0)
+      (do (hpr (pre "Unable to create a bucket")
+               (str (accent bucket) "."))
+          (hpr (aws-command-output->str (:err result)))
+          (hpr (pre "Resolve the error then run the command once again if you have to."))
+          (System/exit 1))
+      (hpr (prs "Bucket") (accent bucket) (prs "has been succesfully created!")))))
 
 (defn -remove-bucket
   [& [bucket]]
@@ -622,8 +635,10 @@ set -e
   (print-task "bucket:create")
   (if (bucket-exists?)
     (do
-      (hpr (prs "Bucket") (accent BUCKET_NAME) "already exists!")
-      (hpr (prw "Sometimes bucket is not immediately appear to be removed and is still listed. In such case change") (str (accent ":infra:bucket-name") "!")))
+      (hpr (prs "Bucket") (accent BUCKET_NAME) (prs "already exists!"))
+      (hpr (prw "If you removed the bucket then note that sometimes bucket is not immediately appear to be removed and is still listed in AWS resources."))
+      (hpr (prw "In such case change:")
+           (str (accent ":infra:bucket-name") "!")))
     (do (hpr (prs "Creating a bucket") (accent BUCKET_NAME))
         (-create-bucket))))
 
@@ -654,7 +669,7 @@ set -e
   []
   (print-task "bucket:remove")
   (if-not (bucket-exists?)
-    (hpr (pre "Bucket") (accent BUCKET_NAME) "does not exists! Nothing to remove!")
+    (hpr (pre "Bucket") (accent BUCKET_NAME) (pre "does not exists! Nothing to remove!"))
     (do (hpr (prs "Removing a bucket") (accent BUCKET_NAME))
         (-remove-bucket))))
 
