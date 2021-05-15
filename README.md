@@ -48,6 +48,13 @@ io.github.FieryCod/holy-lambda {:mvn/version "0.1.46"}
 
 ## Quickstart
 
+Make sure you have
+[installed the Clojure CLI tools](https://clojure.org/guides/getting_started#_clojure_installer_and_cli_tools)
+and are running the latest version.
+
+Also, ensure you have installed [clj-new](https://github.com/seancorfield/clj-new) as detailed [here](https://github.com/seancorfield/clj-new#getting-started)
+
+
 Generate a new project from template via
 
 ``` clojure
