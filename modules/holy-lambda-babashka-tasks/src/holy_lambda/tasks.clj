@@ -392,12 +392,11 @@ Resources:
 
 (defn cloudformation-description
   [& [silent?]]
-  (let [cloudformation-string (shs "aws" "cloudformation" "describe-stacks")
+  (let [cloudformation-string (shs "aws" "cloudformation" "describe-stacks" "--region" REGION)
         cloudformation (if (s/blank? cloudformation-string)
                          (if silent?
                            nil
                            (do (hpr (pre "Unable to get information about stacks. Use AWS UI to get proper ARN for layer"))
-                               (hpr "Choose one ARN and put it at template.yml Fn:Layers")
                                (System/exit 1)))
                          (try
                            (json/parse-string cloudformation-string true)
@@ -902,8 +901,8 @@ set -e
   []
   (print-task "stack:destroy")
   (shell "aws" "cloudformation" "delete-stack"
-         "--stack-name" STACK_NAME
-         "--region" REGION)
+         "--region"     REGION
+         "--stack-name" STACK_NAME)
   (bucket:remove))
 
 (defn stack:describe
@@ -911,4 +910,5 @@ set -e
   []
   (print-task "stack:describe")
   (shell "aws" "cloudformation" "describe-stacks"
+         "--region"     REGION
          "--stack-name" STACK_NAME))
