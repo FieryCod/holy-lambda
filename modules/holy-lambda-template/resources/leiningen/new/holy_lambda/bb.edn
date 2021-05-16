@@ -1,7 +1,7 @@
 {:deps {fierycod/holy-lambda-babashka-tasks
         {:git/url "https://github.com/FieryCod/holy-lambda"
          :deps/root "./modules/holy-lambda-babashka-tasks"
-         :sha     "6fa85c52e04969dcb6d9b8287f1765b913f55c00"}}
+         :sha     "1606291c7b2ed6a0006de2d68e8de52aedbbd636"}}
 
  :mvn/local-repo ".holy-lambda/.m2"
 
@@ -38,7 +38,7 @@
 
                         ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
                         ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
-                        :entrypoint          {{name}}.core
+                        :entrypoint          {{main-ns}}.core
 
                         ;; Flag which indicates that holy-lambda should auto deploy the applications and layers for the corresponding :runtime
                         ;; If set to false holy-lambda will guide you through the steps of dependants deployment.

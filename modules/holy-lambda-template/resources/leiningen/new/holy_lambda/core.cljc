@@ -1,4 +1,4 @@
-(ns {{name}}.core
+(ns {{main-ns}}.core
   (:gen-class)
   (:require
    [fierycod.holy-lambda.response :as hr]
