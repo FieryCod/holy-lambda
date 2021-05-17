@@ -30,3 +30,5 @@ output
 docker/ee/**
 !docker/ee/.gitkeep
 target
+.idea/
+*.iml
