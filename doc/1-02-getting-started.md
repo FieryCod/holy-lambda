@@ -1,9 +1,14 @@
 # Getting started
 
-## Dependencies
-  You will need following things which you have to install on your own depending on your system.
+Purpose - generate, test and deploy our first lambda targeting the interactive (Babashka) runtime
 
-  - Homebrew (for Mac OS) /Linuxbrew (for Linux)
+![alt text](https://static.swimlanes.io/717653ba1f693067e413ec5406c893f9.png "Overview")
+
+
+## Dependencies
+  You will need following components which you have to install on your own depending on your system.
+
+  - [Homebrew](https://brew.sh) (for Mac OS) / [Linuxbrew](https://docs.brew.sh/Homebrew-on-Linux) (for Linux)
   - Java 8
   - Docker, Docker Compose >= 1.13.1, 1.22.0
 
@@ -22,25 +27,25 @@
      
   2. Install [clj-new](https://github.com/seancorfield/clj-new) using these [instructions](https://github.com/seancorfield/clj-new#getting-started)
 
-  3. Configure default AWS profile via `aws-cli`. This is necessary for making a bucket, deploying an application and locally testing the babashka runtime.
+  3. Configure a default AWS profile via `aws-cli`. This is necessary for making a bucket, deploying an application and locally testing the babashka runtime.
 
      ```
      aws configure
      ```
 
-## First project 
-1. With clj-new set up, generate a new project
+## First project
+
+1. With clj-new installed and configured, generate a scaffold project:
 
    ```
-   clojure -M:new -m clj-new.create holy-lambda basic.example
-   
-   # clj-new creates a project folder based on the 
-   mv basic.example holy-lambda-example
+   clojure -X:new :template holy-lambda :name com.company/holy-lambda-example
    ```
    
    You should see following project structure when `cd` to the project directory:
    
    ```
+   cd holy-lambda-example
+   tree
     .
     ├── README.md
     ├── bb.edn
@@ -50,17 +55,25 @@
     │   └── native-agents-payloads
     │       └── 1.edn
     ├── src
-    │   └── basic
-    │       └── example
-    │           └── core.cljc
+    │   └── com
+    │       └── company
+    │           └── holy_lambda_example
+    │               └── core.cljc
     └── template.yml
     
-    5 directories, 7 files
+    6 directories, 7 files
    ```
    
-2. Try to sync the project dependencies:
+2. verify AWS config
 
-The purpose of the `sync` command is to gather all dependencies from `bb.edn`, `deps.edn` for both Clojure, Native and Babashka, runtimes. By default, sync also checks whether any additional Docker layers for runtime should be published (see `:self-manage-layers?` elsewhere**).
+```bash
+bb bucket:create
+bb bucket:delete
+```
+    
+3. sync the project dependencies:
+
+The purpose of the `sync` command is to gather all dependencies from `bb.edn`, `deps.edn` for both Clojure, Native and Babashka runtimes. By default, sync also checks whether any additional Docker layers for runtime should be published (see `:self-manage-layers?` elsewhere**).
 
    > :warning:  Ensure docker is running at this point
 
@@ -68,7 +81,7 @@ The purpose of the `sync` command is to gather all dependencies from `bb.edn`, `
    cd holy-lambda-example && bb stack:sync
    ```
    
-   The first sync is not always successful. If this is the case check the following:
+   The first sync is not always successful. If this is the case check the following:  ** link to troubleshooting
 - Is Docker running?
 - Run `bb stack:purge` and run `bb stack:sync` once again
 - If this still fails, run `bb stack:doctor` for diagnostic information
@@ -126,5 +139,5 @@ The purpose of the `sync` command is to gather all dependencies from `bb.edn`, `
    3. GraalVM native-image compilation fails due to not enough RAM memory on MacOS
    
       *Solution**:
-      Increate the RAM limit in Docker UI [preferences](https://docs.docker.com/docker-for-mac/#resources).
+      Increase the RAM limit in Docker UI [preferences](https://docs.docker.com/docker-for-mac/#resources).
    
