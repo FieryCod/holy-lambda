@@ -12,66 +12,12 @@
    [babashka.process :as p]
    [clojure.java.io :as io]))
 
-;; Taken from clojure-term-colors https://github.com/trhura/clojure-term-colors
-(defn- escape-code
-  [i]
-  (str "\033[" i "m"))
+(deps/add-deps {:deps {'clojure-term-colors/clojure-term-colors {:mvn/version "0.1.0"}}})
 
-(def ^:dynamic *colors*
-  "foreground color map"
-  (zipmap [:grey :red :green :yellow
-           :blue :magenta :cyan :white]
-          (map escape-code
-               (range 30 38))))
-
-(def ^:dynamic *highlights*
-  "background color map"
-  (zipmap [:on-grey :on-red :on-green :on-yellow
-           :on-blue :on-magenta :on-cyan :on-white]
-          (map escape-code
-               (range 40 48))))
-
-(def ^:dynamic *attributes*
-  "attributes color map"
-  (into {}
-        (filter (comp not nil? key)
-                (zipmap [:bold, :dark, nil, :underline,
-                         :blink, nil, :reverse-color, :concealed]
-                        (map escape-code (range 1 9))))))
-
-(def ^:dynamic *reset* (escape-code 0))
-
-;; Bind to true to have the colorize functions not apply coloring to
-;; their arguments.
-(def ^:dynamic *disable-colors* nil)
-
-(defmacro define-color-function
-  "define a function `fname' which wraps its arguments with
-        corresponding `color' codes"
-  [fname color]
-  (let [fname (symbol (name fname))
-        args (symbol 'args)]
-    `(defn ~fname [& ~args]
-       (if-not *disable-colors*
-         (str (clojure.string/join (map #(str ~color %) ~args)) ~*reset*)
-         (apply str ~args)))))
-
-(defn define-color-functions-from-map
-  "define functions from color maps."
-  [colormap]
-  (eval `(do ~@(map (fn [[color escape-code]]
-                      `(println ~color ~escape-code)
-                      `(define-color-function ~color ~escape-code))
-                    colormap))))
-
-(define-color-functions-from-map *colors*)
-(define-color-functions-from-map *highlights*)
-(define-color-functions-from-map *attributes*)
-
-;; Taken from clojure-term-colors https://github.com/trhura/clojure-term-colors
+(require
+ '[clojure.term.colors :refer [underline blue yellow red green]])
 
 ;;;; [START] HELPERS
-
 (defn norm-args
   [args]
   (into {} (mapv
@@ -80,7 +26,8 @@
                  (s/includes? k ":")
                  (subs 1)
 
-                 true keyword)
+                 true
+                 keyword)
                (or v true)])
             (partition-all 2 args))))
 
@@ -244,9 +191,8 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def NATIVE_CONFIGURATIONS_PATH ".holy-lambda/native/configuration")
 (def BOOTSTRAP_FILE (:bootstrap-file RUNTIME))
 (def NATIVE_DEPS_PATH (:native-deps RUNTIME))
-(def BABASHKA_LAYER_INSTANCE (str BUCKET_NAME
-                                  "-"
-                                  "holy-lambda-babashka-runtime"))
+(def BABASHKA_LAYER_INSTANCE (str BUCKET_NAME "-hlbbri-" (s/replace RUNTIME_VERSION #"\." "-")))
+(def OFFICIAL_BABASHKA_LAYER_ARN "arn:aws:serverlessrepo:eu-central-1:443526418261:applications/holy-lambda-babashka-runtime")
 
 (defn aws-command-output->str
   [output]
@@ -254,7 +200,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
        "\n------------------------------------------"))
 
 (defn -create-bucket
-  [& [bucket]]
+  [& [bucket throw?]]
   (let [bucket (or bucket BUCKET_NAME)
         result (csh/sh "aws" "s3" "mb" (str "s3://" bucket))]
     (if (not= (:exit result) 0)
@@ -262,7 +208,9 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
                (str (accent bucket) "."))
           (hpr (aws-command-output->str (:err result)))
           (hpr (pre "Resolve the error then run the command once again if you have to."))
-          (System/exit 1))
+          (if throw?
+            (throw (Exception. ""))
+            (System/exit 1)))
       (hpr (prs "Bucket") (accent bucket) (prs "has been succesfully created!")))))
 
 (defn -remove-bucket
@@ -303,8 +251,8 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
              (s/split (shs "aws" "s3" "ls") #"\n"))))
 
 (defn bucket-exists?
-  []
-  (contains? (buckets) BUCKET_NAME))
+  [& [bucket-name]]
+  (contains? (buckets) (or bucket-name BUCKET_NAME)))
 
 (defn parameters--java
   [opt]
@@ -433,17 +381,89 @@ Resources:
                                  (System/exit 1))))))]
     cloudformation))
 
-(defn babashka-runtime-layer-ARN
+(defn stack->info
+  [stack]
+  (let [tags (group-by :Key (:Tags stack))
+        get-val-by (fn [sel] (:Value (first (get tags sel))))]
+    {:version       (get-val-by "serverlessrepo:semanticVersion")
+     :arn           (:OutputValue (first (:Outputs stack)))
+     :app-id        (get-val-by "serverlessrepo:applicationId")
+     :status        (:StackStatus stack)
+     :stack-id      (:StackId stack)
+     :stack-name    (:StackName stack)
+     :capabilities  (:Capabilities stack)
+     :description   (:Description stack)
+     :last-updated  (or (:LastUpdatedTime stack) :not-updated)
+     :created-at    (:CreationTime stack)
+     :parent-id     (:ParentId stack)}))
+
+(defn app-id->app-layers
+  [app-id]
+  (if-let [stacks (seq (:Stacks (cloudformation-description)))]
+    (let [layers (->> stacks
+                      (keep
+                       (fn [stack]
+                         (let [info (stack->info stack)]
+                           (when (= app-id (:app-id info))
+                             info))))
+                      vec)
+          layers-id-set (set (mapv :stack-id layers))
+          groupped-stacks  (->> stacks
+                                (filter (complement (fn [s] (contains? layers-id-set (:StackId s)))))
+                                (mapv stack->info)
+                                (group-by :stack-id))
+          layers-by-parents (group-by :parent-id layers)
+          app<->layers (mapv (fn [[parent-stack-id stack]]
+                               (let [parent-of-stack (first (get groupped-stacks parent-stack-id))]
+                                 (assoc parent-of-stack :child stack)))
+                             layers-by-parents)]
+      app<->layers)
+    (hpr "No stacks found in cloudformation definitions.")))
+
+(defn babashka-layer
   []
-  (when-let [mstacks (seq (filterv (fn [stack] (s/includes? (:StackName stack) BABASHKA_LAYER_INSTANCE))
-                                   (:Stacks (cloudformation-description))))]
-    (let [ARN (some-> mstacks
-                      first
-                      :Outputs
-                      first
-                      :OutputValue)]
-      (when-not (s/blank? ARN)
-        (s/trim ARN)))))
+  (let [app<->layers (app-id->app-layers OFFICIAL_BABASHKA_LAYER_ARN)]
+    (first (:child (first app<->layers)))))
+
+(defn publish-babashka-layer
+  []
+  (io/make-parents BABASHKA_RUNTIME_LAYER_FILE)
+  (spit BABASHKA_RUNTIME_LAYER_FILE (babashka-runtime-layer-template))
+
+  (if (bucket-exists? BABASHKA_LAYER_INSTANCE)
+    (hpr (pre "Unable to publish the stack twice to the same bucket!"))
+    (-create-bucket BABASHKA_LAYER_INSTANCE))
+
+  (apply shell
+         "sam deploy"
+         "--template-file"  BABASHKA_RUNTIME_LAYER_FILE
+         "--stack-name"     BABASHKA_LAYER_INSTANCE
+         "--s3-bucket"      BABASHKA_LAYER_INSTANCE
+         "--no-confirm-changeset"
+         "--capabilities"   ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"])
+
+  (hpr "Waiting 5 seconds for deployment to propagate...")
+  (Thread/sleep 5000)
+  (hpr "Checking the ARN of published layer. This might take a while..")
+  (hpr (prs "Your ARN for babashka runtime layer is:") (accent (:arn (babashka-layer))))
+  (hpr "You should add the provided ARN as a property of a Function in template.yml!\n
+---------------" (accent "template.yml") "------------------\n
+      Resources:
+        ExampleLambdaFunction:
+          Type: AWS::Serverless::Function
+          Properties:
+            Handler: example.core.ExampleLambda"
+       (prs "
+            Layers:
+              - PLEASE_ADD_THE_ARN_OF_LAYER_HERE")
+       "
+            Events:
+              HelloEvent:
+                Type: Api
+                Properties:
+                  Path: /
+                  Method: get\n
+---------------------------------------------"))
 
 (defn runtime-sync-hook--babashka
   []
@@ -451,53 +471,18 @@ Resources:
   (shell "bash -c \"mkdir -p .holy-lambda/bb-clj-deps && cp -R .holy-lambda/.m2 .holy-lambda/bb-clj-deps/\"")
 
   (when-not SELF_MANAGE_LAYERS?
-    (if-let [ARN (babashka-runtime-layer-ARN)]
-      (hpr "Babashka runtime layer exists. Your layer ARN is:" (accent ARN) "(deployment skipped)")
+    (if-let [bb-layer (babashka-layer)]
+      (if (= (:version bb-layer) RUNTIME_VERSION)
+        (hpr "Babashka runtime layer exists. Your layer ARN is:" (accent (:arn bb-layer)) "(deployment skipped)")
+        (do (hpr "Version from bb.edn does not match deployed version of the runtime")
+            (hpr "Updating deployed version from" (accent (:version bb-layer)) "to" (accent RUNTIME_VERSION))
+            (publish-babashka-layer)))
       (do
         (hpr "Babashka runtime needs a special layer for both local invocations and deployments.")
         (hpr "Layer is published here:" "https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime")
         (println "")
         (hpr (str "Layer is not published! Trying to deploy layer:\n\n" (babashka-runtime-layer-template) "\n"))
-
-        (let [stack-name BABASHKA_LAYER_INSTANCE]
-          (io/make-parents BABASHKA_RUNTIME_LAYER_FILE)
-          (spit BABASHKA_RUNTIME_LAYER_FILE (babashka-runtime-layer-template))
-
-          ;; Create bucket if it's possible
-          (-create-bucket stack-name)
-
-          (apply shell
-                 "sam deploy"
-                 "--template-file"  BABASHKA_RUNTIME_LAYER_FILE
-                 "--stack-name"     stack-name
-                 "--s3-bucket"      stack-name
-                 "--no-confirm-changeset"
-                 "--capabilities"   ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"])
-
-          (hpr "Waiting 5 seconds for deployment to propagate...")
-          (Thread/sleep 5000)
-          (hpr "Checking the ARN of published layer. This might take a while..")
-          (hpr (prs "Your ARN for babashka runtime layer is:") (accent (babashka-runtime-layer-ARN)))
-          (hpr "You should add the provided ARN as a property of a Function in template.yml!\n
----------------" (accent "template.yml") "------------------\n
-      Resources:
-        ExampleLambdaFunction:
-          Type: AWS::Serverless::Function
-          Properties:
-            Handler: example.core.ExampleLambda"
-                    (prs "
-            Layers:
-              - ADD_HERE_BABASHKA_RUNTIME_ARN")
-                    "
-            Events:
-              HelloEvent:
-                Type: Api
-                Properties:
-                  Path: /
-                  Method: get\n
----------------------------------------------"))))))
-
-
+        (publish-babashka-layer)))))
 
 (defn runtime-sync-hook
   []
