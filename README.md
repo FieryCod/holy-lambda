@@ -95,16 +95,20 @@ stack:invoke           > Invokes lambda fn (check sam local invoke --help):
                         - :name        - either :name or :stack:default-lambda
                         - :event-file  - path to event file
                         - :envs-file   - path to envs file
+                        - :params      - map of parameters to override in AWS SAM
+                        - :debug       - run invoke in debug mode
                         - :logs        - logfile to runtime logs to
 stack:api              > Runs local api (check sam local start-api):
                         - :debug       - run api in debug mode
                         - :port        - local port number to listen to
                         - :static-dir  - assets which should be presented at /
                         - :envs-file   - path to envs file
+                        - :params      - map of parameters to override in AWS SAM
 stack:pack             > Packs Cloudformation stack
 stack:deploy           > Deploys Cloudformation stack
                         - :guided      - guide the deployment
                         - :dry         - execute changeset?
+                        - :params      - map of parameters to override in AWS SAM
 stack:describe         > Describes Cloudformation stack
 stack:doctor           > Diagnoses common issues of holy-lambda stack
 stack:purge            > Purges build artifacts
