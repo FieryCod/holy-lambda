@@ -95,6 +95,24 @@
                    xs)))
 ;;;; [END] HELPERS
 
+(def OS (let [os (s/lower-case (System/getProperty "os.name"))]
+          (cond
+            (s/includes? os "nux") :unix
+            (s/includes? os "mac") :mac
+            (s/includes? os "win") :windows
+            :else :unknown)))
+
+(when (contains? #{:unknown :windows} OS)
+  (hpr (pre (str "OS: " OS " is not supported by holy-lambda. Please make an issue on Github!")))
+  (System/exit 1))
+
+(when-not (or (and (= OS :unix)
+                   (= (:exit (csh/sh "pgrep" "-f" "docker")) 0))
+              (and (= OS :mac)
+                   (= (:exit (csh/sh "pgrep" "-f" "Docker.app")) 0)))
+  (hpr (pre "Docker is not running! Enable and run docker first before using holy-lambda!"))
+  (System/exit 1))
+
 (def AVAILABLE_RUNTIMES #{:babashka :native :java})
 (def AVAILABLE_REGIONS #{"us-east-2", "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "cn-north-1", "cn-northwest-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-north-1", "me-south-1", "sa-east-1"})
 (def REMOTE_TASKS "https://raw.githubusercontent.com/FieryCod/holy-lambda/master/modules/holy-lambda-babashka-tasks/src/holy_lambda/tasks.clj")
@@ -134,24 +152,6 @@
       (hpr (pre "File envs.json for aws sam not found.. Exiting!\n
 Check https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-invoke.html#serverless-sam-cli-using-invoke-environment-file"))
       (System/exit 1))))
-
-(def OS (let [os (s/lower-case (System/getProperty "os.name"))]
-          (cond
-            (s/includes? os "nux") :unix
-            (s/includes? os "mac") :mac
-            (s/includes? os "win") :windows
-            :else :unknown)))
-
-(when (contains? #{:unknown :windows} OS)
-  (hpr (pre (str "OS: " OS " is not supported by holy-lambda. Please make an issue on Github!")))
-  (System/exit 1))
-
-(when (or (and (= OS :unix)
-               (not= (:exit (csh/sh "pgrep" "-f" "docker")) 0))
-          (and (= OS :mac)
-               (not= (:exit (csh/sh "pgrep" "-f" "Docker.app")) 0)))
-  (hpr (pre "Docker is not running! Enable and run docker first before using holy-lambda!"))
-  (System/exit 1))
 
 (def IMAGE_CORDS
   (case (:build-variant OPTIONS)
