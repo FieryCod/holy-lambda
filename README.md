@@ -15,6 +15,8 @@ The micro framework that integrates Clojure with AWS Lambda on either Java, Cloj
 io.github.FieryCod/holy-lambda {:mvn/version "0.1.46"}
 ```
 
+**Interceptors namespace is work in progress and subject to change. Consider it as an alpha.**
+
 **Supported runtimes**
   - Babashka
   - Native Clojure runtime

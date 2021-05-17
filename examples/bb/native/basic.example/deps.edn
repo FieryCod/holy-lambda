@@ -1,5 +1,5 @@
 {:deps {org.clojure/clojure {:mvn/version "1.10.3"}
-        io.github.FieryCod/holy-lambda {:mvn/version "0.1.46"}}
+        io.github.FieryCod/holy-lambda {:mvn/version "0.1.48"}}
  :mvn/local-repo ".holy-lambda/.m2"
  :paths ["src"]
  :aliases {}
