@@ -1,18 +1,27 @@
 # Getting started
 
-Purpose - generate, test and deploy our first lambda targeting the interactive (Babashka) runtime
+This guide will quickly take you through the basics of using holy-lambda:
+
+- Development environment setup
+- Generate a scaffold project for your code
+- Locally test the code in Docker 
+- Deploy to AWS
+- Invoke from API Gateway (optional)
 
 ![alt text](https://static.swimlanes.io/717653ba1f693067e413ec5406c893f9.png "Overview")
 
 
-## Dependencies
-  You will need following components which you have to install on your own depending on your system.
+## Prerequisites
+  You will need nn AWS account with [sufficient privileges](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-permissions.html)
+
+  The following components installed on your system:
 
   - [Homebrew](https://brew.sh) (for Mac OS) / [Linuxbrew](https://docs.brew.sh/Homebrew-on-Linux) (for Linux)
   - Java 8
   - Docker, Docker Compose >= 1.13.1, 1.22.0
 
-  After having all mentioned above dependencies just use the following commands:
+
+## Dependencies
 
   1. Install aws, aws-sam, make, clojure, babashka (>= 0.4.1), and clj-kondo
      ```
@@ -38,7 +47,7 @@ Purpose - generate, test and deploy our first lambda targeting the interactive (
 1. With clj-new installed and configured, generate a scaffold project:
 
    ```
-   clojure -X:new :template holy-lambda :name com.company/holy-lambda-example
+   clojure -X:new :template holy-lambda :name com.company/example-lambda :output holy-lambda-example
    ```
    
    You should see following project structure when `cd` to the project directory:
@@ -57,18 +66,31 @@ Purpose - generate, test and deploy our first lambda targeting the interactive (
     ├── src
     │   └── com
     │       └── company
-    │           └── holy_lambda_example
+    │           └── example_lambda
     │               └── core.cljc
     └── template.yml
     
     6 directories, 7 files
    ```
    
-2. verify AWS config
+2. Before we begin, let's run some quick checks:
+
+Some resource names in AWS, such as S3 buckets, are global and need to be unique. The scaffold generate you a unique bucket name, so your output will differ slightly to that below.
+
+We can check that your AWS profile is working by simply creating and immediately removing the bucket:
 
 ```bash
 bb bucket:create
-bb bucket:delete
+[holy-lambda] Command <bucket:create>
+[holy-lambda] Creating a bucket holy-lambda-example-5f3d731137724176b606beb6623b6f04
+[holy-lambda] Bucket holy-lambda-example-5f3d731137724176b606beb6623b6f04 has been succesfully created!
+```
+```bash
+bb bucket:remove
+[holy-lambda] Command <bucket:remove>
+[holy-lambda] Removing a bucket holy-lambda-example-5f3d731137724176b606beb6623b6f04
+remove_bucket: holy-lambda-example-5f3d731137724176b606beb6623b6f04
+
 ```
     
 3. sync the project dependencies:
