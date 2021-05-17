@@ -194,6 +194,12 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def BABASHKA_LAYER_INSTANCE (str BUCKET_NAME "-hlbbri-" (s/replace RUNTIME_VERSION #"\." "-")))
 (def OFFICIAL_BABASHKA_LAYER_ARN "arn:aws:serverlessrepo:eu-central-1:443526418261:applications/holy-lambda-babashka-runtime")
 
+(defn exit-if-not-synced!
+  []
+  (when-not (fs/exists? (io/file ".holy-lambda/clojure"))
+    (hpr (pre "Project has not been synced yet. Run") (accent "stack:sync") (pre "before running this command!"))
+    (System/exit 1)))
+
 (defn aws-command-output->str
   [output]
   (str (pre "AWS command output:") "\n------------------------------------------\n" (s/trim output)
@@ -562,6 +568,7 @@ Resources:
        \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM"
   [& args]
   (print-task "stack:api")
+  (exit-if-not-synced!)
   (let [{:keys [static-dir debug envs-file port params]} (norm-args args)]
     (stack-files-check)
     (when (build-stale?)
@@ -685,6 +692,7 @@ set -e
   "     \033[0;31m>\033[0m Packs \033[0;31mCloudformation\033[0m stack"
   []
   (print-task "stack:pack")
+  (exit-if-not-synced!)
   (stack-files-check)
   ;; Check https://github.com/aws/aws-sam-cli/issues/2835
   ;; https://github.com/aws/aws-sam-cli/issues/2836
@@ -713,6 +721,7 @@ set -e
   \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM"
   [& args]
   (print-task "stack:deploy")
+  (exit-if-not-synced!)
   (let [{:keys [guided dry params]} (norm-args args)]
     (if-not (fs/exists? (io/file PACKAGED_TEMPLATE_FILE))
       (hpr (pre "No") (accent PACKAGED_TEMPLATE_FILE) (pre "found. Run") (accent "stack:pack"))
@@ -733,6 +742,7 @@ set -e
   "     \033[0;31m>\033[0m Compiles sources if necessary"
   []
   (print-task "stack:compile")
+  (exit-if-not-synced!)
   (when (= RUNTIME_NAME :babashka)
     (hpr "Nothing to compile. Sources are provided as is to" (accent "babashka") "runtime")
     (System/exit 0))
@@ -753,6 +763,7 @@ set -e
        \t\t        - \033[0;31m:logs\033[0m        - logfile to runtime logs to"
   [& args]
   (print-task "stack:invoke")
+  (exit-if-not-synced!)
   (stack-files-check)
   (when (build-stale?)
     (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
