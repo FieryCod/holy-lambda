@@ -242,7 +242,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (defn map->parameters-inline
   [m]
   (s/join " " (mapv (fn [[k v]]
-                      (str "ParameterKey=" k ",ParameterValue=" v))
+                      (str "ParameterKey=" (if (keyword? k) (name k) k) ",ParameterValue=" v))
                     m)))
 
 (defn buckets
@@ -558,23 +558,25 @@ Resources:
        \t\t        - \033[0;31m:debug\033[0m       - run api in \033[0;31mdebug mode\033[0m
        \t\t        - \033[0;31m:port\033[0m        - local port number to listen to
        \t\t        - \033[0;31m:static-dir\033[0m  - assets which should be presented at \033[0;31m/\033[0m
-       \t\t        - \033[0;31m:envs-file\033[0m   - path to \033[0;31menvs file\033[0m"
+       \t\t        - \033[0;31m:envs-file\033[0m   - path to \033[0;31menvs file\033[0m
+       \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM"
   [& args]
   (print-task "stack:api")
-  (let [{:keys [static-dir debug envs-file port]} (norm-args args)]
+  (let [{:keys [static-dir debug envs-file port params]} (norm-args args)]
     (stack-files-check)
     (when (build-stale?)
       (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
 
     (shell (str "sam local start-api"
-                " --parameter-overrides " (parameters)
+                " --parameter-overrides " (if-not params
+                                            (parameters)
+                                            (str (parameters) " " (map->parameters-inline (edn/read-string params))))
                 " --template " TEMPLATE_FILE
                 " -p " (or port 3000)
                 (when static-dir " -s ") static-dir
                 " --warm-containers LAZY"
                 " -n " (or envs-file DEFAULT_ENVS_FILE)
                 " --layer-cache-basedir " LAYER_CACHE_DIRECTORY
-
                 (when debug " --debug")) )))
 
 (defn native:conf
@@ -707,10 +709,11 @@ set -e
 (defn stack:deploy
   "     \033[0;31m>\033[0m Deploys \033[0;31mCloudformation\033[0m stack
   \t\t        - \033[0;31m:guided\033[0m      - guide the deployment
-  \t\t        - \033[0;31m:dry\033[0m         - execute changeset?"
+  \t\t        - \033[0;31m:dry\033[0m         - execute changeset?
+  \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM"
   [& args]
   (print-task "stack:deploy")
-  (let [{:keys [guided dry]} (norm-args args)]
+  (let [{:keys [guided dry params]} (norm-args args)]
     (if-not (fs/exists? (io/file PACKAGED_TEMPLATE_FILE))
       (hpr (pre "No") (accent PACKAGED_TEMPLATE_FILE) (pre "found. Run") (accent "stack:pack"))
       (do
@@ -721,7 +724,9 @@ set -e
                "--region" REGION
                (when dry "--no-execute-changeset")
                (when guided "--guided")
-               "--parameter-overrides" (parameters)
+               "--parameter-overrides" (if-not params
+                                         (parameters)
+                                         (str (parameters) " " (map->parameters-inline (edn/read-string params))))
                (when CAPABILITIES "--capabilities") CAPABILITIES)))))
 
 (defn stack:compile
@@ -743,15 +748,20 @@ set -e
        \t\t        - \033[0;31m:name\033[0m        - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
        \t\t        - \033[0;31m:event-file\033[0m  - path to \033[0;31mevent file\033[0m
        \t\t        - \033[0;31m:envs-file\033[0m   - path to \033[0;31menvs file\033[0m
+       \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM
+       \t\t        - \033[0;31m:debug\033[0m       - run invoke in \033[0;31mdebug mode\033[0m
        \t\t        - \033[0;31m:logs\033[0m        - logfile to runtime logs to"
   [& args]
   (print-task "stack:invoke")
   (stack-files-check)
   (when (build-stale?)
     (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
-  (let [{:keys [name event-file envs-file logs]} (norm-args args)]
+  (let [{:keys [name event-file envs-file logs params debug]} (norm-args args)]
     (shell "sam" "local" "invoke" (or name DEFAULT_LAMBDA_NAME)
-           "--parameter-overrides" (parameters)
+           "--parameter-overrides" (if-not params
+                                     (parameters)
+                                     (str (parameters) " " (map->parameters-inline (edn/read-string params))))
+           (when debug "--debug")
            (when logs "-l") logs
            (when event-file "-e") event-file
            "-n" (or envs-file DEFAULT_ENVS_FILE))))

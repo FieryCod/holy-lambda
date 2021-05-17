@@ -17,7 +17,6 @@
 
                                :capabilities ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"]}
 
-
                        :runtime
                        {
                         ;; Choose one of the supported runtime `:babashka`, `:native`, `:java`
