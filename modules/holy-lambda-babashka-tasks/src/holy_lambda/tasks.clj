@@ -135,7 +135,7 @@
 Check https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-invoke.html#serverless-sam-cli-using-invoke-environment-file"))
       (System/exit 1))))
 
-(def OS (let [os (System/getProperty "os.name")]
+(def OS (let [os (s/lower-case (System/getProperty "os.name"))]
           (cond
             (s/includes? os "nux") :unix
             (s/includes? os "mac") :mac
