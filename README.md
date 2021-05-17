@@ -12,7 +12,7 @@
 The micro framework that integrates Clojure with AWS Lambda on either Java, Clojure Native, or Babashka runtime. 
 
 ``` clojure
-io.github.FieryCod/holy-lambda {:mvn/version "0.1.46"}
+io.github.FieryCod/holy-lambda {:mvn/version "0.1.48"}
 ```
 
 **Interceptors namespace is work in progress and subject to change. Consider it as an alpha.**
