@@ -8,17 +8,19 @@ This guide will quickly take you through the basics of using holy-lambda:
 - Deploy to AWS
 - Invoke from API Gateway (optional)
 
+Here's an overview ([version with working links](https://swimlanes.io/d/F_CZgZSY3)):
+
 ![alt text](https://static.swimlanes.io/717653ba1f693067e413ec5406c893f9.png "Overview")
 
 
 ## Prerequisites
-  You will need nn AWS account with [sufficient privileges](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-permissions.html)
+  1. You will need an AWS account with [sufficient privileges](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-permissions.html)
 
-  The following components installed on your system:
+  2. The following components installed on your system:
 
-  - [Homebrew](https://brew.sh) (for Mac OS) / [Linuxbrew](https://docs.brew.sh/Homebrew-on-Linux) (for Linux)
-  - Java 8
-  - Docker, Docker Compose >= 1.13.1, 1.22.0
+      - [Homebrew](https://brew.sh) (for Mac OS) / [Linuxbrew](https://docs.brew.sh/Homebrew-on-Linux) (for Linux)
+      - Java 8
+      - Docker, Docker Compose >= 1.13.1, 1.22.0
 
 
 ## Dependencies
@@ -36,7 +38,8 @@ This guide will quickly take you through the basics of using holy-lambda:
      
   2. Install [clj-new](https://github.com/seancorfield/clj-new) using these [instructions](https://github.com/seancorfield/clj-new#getting-started)
 
-  3. Configure a default AWS profile via `aws-cli`. This is necessary for making a bucket, deploying an application and locally testing the babashka runtime.
+  3. Configure a **default** AWS profile via `aws-cli`. 
+     This is necessary for interacting with AWS from holy-lambda.
 
      ```
      aws configure
@@ -44,7 +47,7 @@ This guide will quickly take you through the basics of using holy-lambda:
 
 ## First project
 
-1. With clj-new installed and configured, generate a scaffold project:
+1. Generate a scaffold project using the following:
 
    ```
    clojure -X:new :template holy-lambda :name com.company/example-lambda :output holy-lambda-example
