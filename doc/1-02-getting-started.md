@@ -49,86 +49,98 @@ Here's an overview of what we'll create ([version with working links](https://sw
 
 1. Generate a scaffold project using the following:
 
-   ```
-   clojure -X:new :template holy-lambda :name com.company/example-lambda :output holy-lambda-example
-   ```
+    ```
+    clojure -X:new :template holy-lambda :name com.company/example-lambda :output holy-lambda-example
+    ```
+
+    `cd` to the project directory
+  
+     ```
+        cd holy-lambda-example
+     ```
+  
+     You should see following project structure:
+     
+     ```
+      tree
+      .
+      ├── README.md
+      ├── bb.edn
+      ├── deps.edn
+      ├── envs.json
+      ├── resources
+      │   └── native-agents-payloads
+      │       └── 1.edn
+      ├── src
+      │   └── com
+      │       └── company
+      │           └── example_lambda
+      │               └── core.cljc
+      └── template.yml
+      
+      6 directories, 7 files
+     ```
    
-   You should see following project structure when `cd` to the project directory:
+2. Configure the `bb` (babashka) task runner
+
+   `holy-lambda` uses babashka tasks to perform its duties. Configuration for the tasks are located in `bb.edn` and we need to make a couple of config changes in there for your environment.
+
+      - Open `bb.edn` in the root of your project directory
+      
+      - Locate `:runtime` and set to `:babashka`:
+      
+      ```
+                             :runtime
+                             {
+                              ;; Choose one of the supported runtime `:babashka`, `:native`, `:java`
+                              :name                :babashka
+      ```
+      
+      - Locate `:infra` and set the `:region` to one of your choosing:
+      
+      ```
+                             :infra
+                             {...
+      
+                              :region              "us-east-1"}}
+      ```
+
+3. Before we continue, let's run a couple of quick checks:
+
+      - Verify your AWS profile is working by creating our working bucket:
+     
+    ```bash
+    bb bucket:create
+    [holy-lambda] Command <bucket:create>
+    [holy-lambda] Creating a bucket holy-lambda-example-5f3d731137724176b606beb6623b6f04
+    [holy-lambda] Bucket holy-lambda-example-5f3d731137724176b606beb6623b6f04 has been succesfully created!
+    ```
    
-   ```
-   cd holy-lambda-example
-   tree
-    .
-    ├── README.md
-    ├── bb.edn
-    ├── deps.edn
-    ├── envs.json
-    ├── resources
-    │   └── native-agents-payloads
-    │       └── 1.edn
-    ├── src
-    │   └── com
-    │       └── company
-    │           └── example_lambda
-    │               └── core.cljc
-    └── template.yml
-    
-    6 directories, 7 files
-   ```
-   
-2. We need to configure the runtime, AWS region
+     > :information_source: It's not strictly necessary to create a bucket upfront (it's done automatically when required), but it serves as an isolated AWS test for this guide.
+  
+      - Check that docker is running:
+      
+      ```bash
+      docker ps
+      CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+      ```
+      
+      It shouldn't matter if there is anything else is running - we just care that docker is available.
+      
 
-Open `bb.edn`:
+## Initialise the Project
 
-Locate `:runtime` and set to `:babashka`:
+We will use the task `bb stack:sync` to gather all dependencies from `bb.edn`, `deps.edn` for Clojure, Native and Babashka runtimes. 
+
+By default, sync also checks whether any additional [Lambda layers](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html) necessary for runtime should be published and will report them. This may be overridden (see `:self-manage-layers?` in `bb.edn`)
+
+> :warning:  Ensure docker is running at this point
 
 ```
-                       :runtime
-                       {
-                        ;; Choose one of the supported runtime `:babashka`, `:native`, `:java`
-                        :name                :babashka
+cd holy-lambda-example && bb stack:sync
 ```
 
-Locate `:infra` and set the `:region` to one of your choosing:
-
-```
-                       :infra
-                       {...
-
-                        :region              "us-east-1"}}
-```
-
-3. Before we begin, let's run a couple of quick checks:
-
-  - We can check that your AWS profile is working by simply creating our working bucket:
-
-```bash
-bb bucket:create
-[holy-lambda] Command <bucket:create>
-[holy-lambda] Creating a bucket holy-lambda-example-5f3d731137724176b606beb6623b6f04
-[holy-lambda] Bucket holy-lambda-example-5f3d731137724176b606beb6623b6f04 has been succesfully created!
-```
-- Check that docker is running:
-
-```bash
-docker ps
-CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
-```
-
-It shouldn't matter if there is anything else is running - just that docker is available.
-
-
-3. sync the project dependencies:
-
-The purpose of the `sync` command is to gather all dependencies from `bb.edn`, `deps.edn` for both Clojure, Native and Babashka runtimes. By default, sync also checks whether any additional Docker layers for runtime should be published.
-
-   > :warning:  Ensure docker is running at this point
-
-   ```
-   cd holy-lambda-example && bb stack:sync
-   ```
-
-On the first run, some activities such as downloading dependencies and docker images can take some time. Subsequent runs will be much faster.
+> :information_source: On the first run, some activities such as downloading dependencies and docker images can take some time. Subsequent runs will be much faster.
 
 See the troubleshooting section if anything fails at this point.
 
@@ -163,43 +175,51 @@ Successfully created/updated stack - holy-lambda-template-bucket-123456789-hlbbr
 [holy-lambda] Sync completed!
 ```
 
-As directed by the output, copy the ARN...
+- Locate the following line from your output and copy the ARN...
+  
+  ```
+  [holy-lambda] Your ARN for babashka runtime layer is: arn:aws:lambda:us-east-1:123456789:layer:holy-lambda-babashka-runtime:1
+  ```
+  
+  The ARN is:
+  
+  ```
+  arn:aws:lambda:us-east-1:123456789:layer:holy-lambda-babashka-runtime:1
+  ```
 
-```
-arn:aws:lambda:us-east-1:123456789:layer:holy-lambda-babashka-runtime:1
-```
+- ... and amend the `template.yml` file:
+  
+  1. Add your `Layers` config just below the `Handler`
+  
+  ```
+  Resources:
+    ExampleLambdaFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        FunctionName: ExampleLambdaFunction
+        Handler: com.company.example-lambda.core.ExampleLambda
+        Layers:
+          -  arn:aws:lambda:us-east-1:123456789:layer:holy-lambda-babashka-runtime:1
+  ```
+  
+  2. Adjust the Lambda memory (reduce from 2000):
+  ```
+  Parameters:
+    MemorySize:
+      Type: Number
+      Default: 256   
+  ```
 
-... and amend the `template.yml` file:
+We're now ready to start executing the code. First, we'll test the code locally, and then we'll deploy the code to your AWS environment.
 
-1. Add your `Layers` config just below the `Handler`
+## Run Local Test
 
-```
-Resources:
-  ExampleLambdaFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: ExampleLambdaFunction
-      Handler: com.company.example-lambda.core.ExampleLambda
-      Layers:
-        -  arn:aws:lambda:us-east-1:123456789:layer:holy-lambda-babashka-runtime:1
-```
+`holy-lambda` uses AWS SAM and Docker to emulate a lambda environment locally. 
 
-2. Adjust the Lambda memory (reduce from 2000):
-```
-Parameters:
-  MemorySize:
-    Type: Number
-    Default: 256   
-```
-
-## Run local test
-
-You are now ready to execute the local test:
-
- Run `bb stack:invoke`:
+ Execute your lambda code using the babashka task `bb stack:invoke`:
 
  ```
- bb stack:invoke
+bb stack:invoke
 [holy-lambda] Command <stack:invoke>
 Invoking com.company.example-lambda.core.ExampleLambda (provided)
 arn:aws:lambda:us-east-1:123456789:layer:holy-lambda-babashka-runtime:1 is already cached. Skipping download
@@ -214,11 +234,15 @@ REPORT RequestId: 241e4ecb-605b-4ce1-a484-be75f91e520a	Init Duration: 0.22 ms	Du
 {"statusCode":200,"headers":{"Content-Type":"text/plain; charset=utf-8"},"body":"Hello world. Babashka is sweet friend of mine! Babashka version: 0.4.1"}
  ```
 
- After some time you should see above output. First invocation is rather slow locally since `AWS SAM` has to download runtime image for babashka.
+After some time you should see above output.
+
+> :information_source: The first invocation is rather slow locally since [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) has to download runtime image for babashka. Subsequent invocations are much faster.
 
 ## Deploy to AWS
 
-Having successfully run the Lambda locally, we will now deploy to AWS:
+Having successfully run the Lambda locally, we will now deploy to AWS.
+
+Deployment to AWS is a two-step process: pack and deploy
 
 ```
 bb stack:pack
