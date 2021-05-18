@@ -304,8 +304,8 @@ After some time you should see above output.
 Having successfully run the Lambda locally, we can now deploy to AWS.
 
 Deployment to AWS is a two-step process: 
-- `pack` to prepare the deployment package; and
-- `deploy` to apply it to your AWS environment.
+- `pack` to prepare the deployment package and stage it in an S3 bucket; and
+- `deploy` to apply the deployment package to your AWS environment.
 
 ```
 bb stack:pack
@@ -363,7 +363,7 @@ Select the region that was previously specified in `bb.edn` for your lambda depl
 
 ![aws-console-region-selection](images/aws-console-region-selection.png "Select Region")
 
-### A Quick Tour
+## A Quick Tour
 
 So what do we have now?
 
@@ -372,15 +372,21 @@ At this point we have an AWS serverless application stack comprising:
   * the necessary execution permissions, and
   * an API Gateway `GET` request using the lambda as a handler
 
+### CloudFormation Stack
+
 You can look at the application stack by navigating to the CloudFormation service:
 
 ![aws-console-services-cloudformation](images/aws-console-services-cloudformation.png "Select CloudFormation service")
+
+Filter the existing stacks (if any) by using `example-lambda` filter and select the link for `example-lambda-xxx-stack` to see its composition: 
 
 ![aws-console-cloudformation-stacks](images/aws-console-cloudformation-stacks.png "Stacks overview")
 
 We can see the resources that have been created in our application stack:
 
 ![aws-console-cloudformation-stack-resources](images/aws-console-cloudformation-stack-resources.png "View the new stack resources")
+
+### Lambda Function
 
 Let's take a closer look at the Clojure Lambda function by navigating to the Lambda service:
 
@@ -428,9 +434,9 @@ Some details to note in the above output:
 
 > :information_source: In this example, the time reported by the lambda will be larger on the first execution (code start), something like 600ms or more. Subsequent invocations will be "warm" as long as the code isn't redeployed and AWS keeps the lambda alive. In this example, a "warm" execution will typically be <3ms.
 
-### Edit code in AWS
+### Edit Code in AWS Lambda
 
-From the Lambda code editor, select `code.cljc` and replace the existing say-hello and ExampleLambda functions with the following:
+From the Lambda code editor, select `code.cljc` and replace the existing `say-hello` and `ExampleLambda` functions with the following:
 
 ```clojure
 (defn say-hello
@@ -452,11 +458,11 @@ When you make edits, you need to deploy the changes:
 
 ![aws-console-lambda-code-not-deployed](images/aws-console-lambda-code-not-deployed.png "Lambda code editor: undeployed changes")
 
-Selec the `Deploy` button.
+Select the `Deploy` button.
 
 ![aws-console-lambda-code-deployed](images/aws-console-lambda-code-deployed.png "Lambda code editor: deployed changes")
 
-Now when you run the `MyFirstLambda` test event, you'll see the new output:
+Now when you run the `MyFirstLambda` test event, you'll see the new output response:
 
 ![aws-console-lambda-function-result-02](images/aws-console-lambda-function-result-02.png "Updated output reflects code changes")
 
@@ -464,7 +470,7 @@ That's interactive code editing, for Clojure, in AWS Lambda!
 
 ## End to End: Calling the Lambda from API Gateway
 
-
+TODO
 
 # Troubleshooting
   1. Running `bb stack:sync` results in:
