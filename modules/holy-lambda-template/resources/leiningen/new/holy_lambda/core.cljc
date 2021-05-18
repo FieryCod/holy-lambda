@@ -17,10 +17,13 @@
 ;; responses, allowing code to inspect or amend requests/responses between AWS and your Lambda function.
 ;; See here https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/features/interceptors
 
-(i/definterceptor LogIncomingRequest
+(i/definterceptor LambdaLogger
                   {:enter (fn [request]
-                            (println request)
-                            request)})
+                            (println "REQUEST:" request)
+                            request)
+                   :leave (fn [response]
+                            (println "RESPONSE:" response)
+                            response)})
 
 (i/definterceptor AddHeaderToResponse
                   {:leave (fn [response]
@@ -28,7 +31,7 @@
 
 (h/deflambda ExampleLambda
              "I can run on Java, Babashka or Native runtime..."
-             < {:interceptors [LogIncomingRequest AddHeaderToResponse]}
+             < {:interceptors [LambdaLogger AddHeaderToResponse]}
              [{:keys [event ctx] :as request}]
 
              ;; return a successful plain text response. See also, hr/json
