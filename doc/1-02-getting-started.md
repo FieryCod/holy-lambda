@@ -367,16 +367,19 @@ Select the region that was previously specified in `bb.edn` for your lambda depl
 So what do we have now?
 
 At this point we have:
-  * A Clojure based lambda function,
-  * Configured with the necessary execution permissions, and
+  * A Clojure based lambda function...
+  * ...configured with the necessary execution permissions, and
   * An API Gateway `GET` request using the lambda as a handler
 
 ![aws-console-services-cloudformation](images/aws-console-services-cloudformation.png "Select CloudFormation service")
 
-![aws-console-cloudformation-stacks](images/aws-console-cloudformation-stacks.png "View the new stack")
+![aws-console-cloudformation-stacks](images/aws-console-cloudformation-stacks.png "Stacks overview")
 
 ![aws-console-cloudformation-stack-resources](images/aws-console-cloudformation-stack-resources.png "View the new stack resources")
 
+![aws-console-services-lambda](images/aws-console-services-lambda.png "Select Lambda service")
+
+![aws-console-lambda-functions](images/aws-console-lambda-functions.png "Functions overview")
 
 
 # Troubleshooting
