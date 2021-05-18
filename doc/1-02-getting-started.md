@@ -47,7 +47,7 @@ Here's an overview of what we'll create ([version with working links](https://sw
 
 ## First Project
 
-1. Generate a scaffold project using the following:
+1. We'll generate our first project using the `holy-lambda`' project template. This will create a project tree with all the necessary resources to get us started.
 
     ```
     clojure -X:new :template holy-lambda :name com.company/example-lambda :output holy-lambda-example
@@ -83,7 +83,7 @@ Here's an overview of what we'll create ([version with working links](https://sw
    
 2. Configure the `bb` (babashka) task runner
 
-   `holy-lambda` uses babashka tasks to perform its duties. Configuration for the tasks are located in `bb.edn` and we need to make a couple of config changes in there for your environment.
+   `holy-lambda` uses babashka tasks to perform its duties. Configuration for the tasks are located in `bb.edn`. The defaults are mostly sufficient, however we need to make a couple of config changes to change the target runtime to babashka and set your AWS region.
 
       - Open `bb.edn` in the root of your project directory
       
@@ -105,25 +105,25 @@ Here's an overview of what we'll create ([version with working links](https://sw
                               :region              "us-east-1"}}
       ```
 
-3. Before we continue, let's run a couple of quick checks:
+3. Before we continue, let's run a couple of checks
 
       - Verify your AWS profile is working by creating our working bucket:
      
-    ```bash
-    bb bucket:create
-    [holy-lambda] Command <bucket:create>
-    [holy-lambda] Creating a bucket holy-lambda-example-5f3d731137724176b606beb6623b6f04
-    [holy-lambda] Bucket holy-lambda-example-5f3d731137724176b606beb6623b6f04 has been succesfully created!
-    ```
+        ```bash
+        bb bucket:create
+        [holy-lambda] Command <bucket:create>
+        [holy-lambda] Creating a bucket holy-lambda-example-5f3d731137724176b606beb6623b6f04
+        [holy-lambda] Bucket holy-lambda-example-5f3d731137724176b606beb6623b6f04 has been succesfully created!
+        ```
    
      > :information_source: It's not strictly necessary to create a bucket upfront (it's done automatically when required), but it serves as an isolated AWS test for this guide.
   
       - Check that docker is running:
       
-      ```bash
-      docker ps
-      CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
-      ```
+        ```bash
+        docker ps
+        CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+        ```
       
       It shouldn't matter if there is anything else is running - we just care that docker is available.
       
@@ -210,11 +210,13 @@ Successfully created/updated stack - holy-lambda-template-bucket-123456789-hlbbr
       Default: 256   
   ```
 
-We're now ready to start executing the code. First, we'll test the code locally, and then we'll deploy the code to your AWS environment.
+That's it! We're now ready to start executing the code.
+
+First, we'll test the code locally, and then we'll deploy the code to your AWS environment.
 
 ## Run Local Test
 
-`holy-lambda` uses AWS SAM and Docker to emulate a lambda environment locally. 
+`holy-lambda` uses [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) and Docker to emulate a lambda environment locally. 
 
  Execute your lambda code using the babashka task `bb stack:invoke`:
 
@@ -236,13 +238,13 @@ REPORT RequestId: 241e4ecb-605b-4ce1-a484-be75f91e520a	Init Duration: 0.22 ms	Du
 
 After some time you should see above output.
 
-> :information_source: The first invocation is rather slow locally since [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) has to download runtime image for babashka. Subsequent invocations are much faster.
+> :information_source: The first invocation is rather slow locally since AWS SAM has to download runtime image for babashka. Subsequent invocations are much faster.
 
 ## Deploy to AWS
 
 Having successfully run the Lambda locally, we will now deploy to AWS.
 
-Deployment to AWS is a two-step process: pack and deploy
+Deployment to AWS is a two-step process: `pack` and `deploy`
 
 ```
 bb stack:pack
@@ -253,7 +255,7 @@ Execute the following command to deploy the packaged template
 sam deploy --template-file /path-to-source/holy-lambda-example/.holy-lambda/packaged.yml --stack-name <YOUR STACK NAME>
 ```
 
-Now deploy the application to AWS. `holy-lambda` will run AWS SAM to deploy the changes, so you will see cloudformation style output: 
+Now deploy the application to AWS. `holy-lambda` will run AWS SAM to deploy the changes, so you will see cloudformation style output like this:
 
 ```
 bb stack:deploy
@@ -290,10 +292,10 @@ CREATE_COMPLETE                                   AWS::CloudFormation::Stack    
 Successfully created/updated stack - example-lambda-18dc55c0dc4d4fccb28209f3a4e01352-stack in us-east-1
 ```
 
-Now we're ready to use the AWS console.
+Your stack is now deployed to AWS and we're now ready to use the AWS console.
+
 
 ## Use the Lambda in AWS Console
-
 
 ...
 
