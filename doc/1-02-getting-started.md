@@ -475,17 +475,17 @@ TODO
 # Troubleshooting
   1. Running `bb stack:sync` results in:
      ```
-     Project did not sync properly. Remove .holy-lambda directory and run
+     [holy-lambda] Project did not sync properly. Remove .holy-lambda directory and run stack:sync
      ```
      
      *Solution*:
-     ```
+     ```bash
      bb stack:purge && bb stack:sync
      ```
    2. Commands are failing:
    
       *Solution*:
-      ```
+      ```bash
       bb stack:purge && bb stack:doctor
       ```
       
@@ -494,38 +494,39 @@ TODO
    
       *Solution**:
       Increase the RAM limit in Docker UI [preferences](https://docs.docker.com/docker-for-mac/#resources).
-      
-4. stack:invoke fails with the following message"
-```
-Mounting /path-to-source/holy-lambda-example/src as /var/task:ro,delegated inside runtime container
-START RequestId: 4dc6fcf5-7db2-4854-bba7-abae8038ef8f Version: $LATEST
-time="2021-05-17T16:52:48.278" level=error msg="Init failed" InvokeID= error="Couldn't find valid bootstrap(s): [/var/task/bootstrap /opt/bootstrap /var/runtime/bootstrap]"
-time="2021-05-17T16:52:48.279" level=error msg="INIT DONE failed: Runtime.InvalidEntrypoint"
-```
 
-The layers of your template have not been configured correctly. Ensure that stack:sync reports and ARN and it has been added to the `template.myl`
+  4. stack:invoke fails with the following message"
+      ```
+      Mounting /path-to-source/holy-lambda-example/src as /var/task:ro,delegated inside runtime container
+      START RequestId: 4dc6fcf5-7db2-4854-bba7-abae8038ef8f Version: $LATEST
+      time="2021-05-17T16:52:48.278" level=error msg="Init failed" InvokeID= error="Couldn't find valid bootstrap(s): [/var/task/bootstrap /opt/bootstrap /var/runtime/bootstrap]"
+      time="2021-05-17T16:52:48.279" level=error msg="INIT DONE failed: Runtime.InvalidEntrypoint"
+      ```
+  
+      The layers of your template have not been configured correctly. Ensure that stack:sync reports and ARN and it has been added to the `template.myl`
+  
+  
 
-
-
-
-The first sync is not always successful. If this is the case check the following:  ** link to troubleshooting
-- Is Docker running?
-- Run `bb stack:purge` and run `bb stack:sync` once again
-- If this still fails, run `bb stack:doctor` for diagnostic information
-
-**This behaviour may be overridden by changing `:self-manage-layers?` flag is set to `false`, then `holy-lambda` will automatically publish all necessary layers and output `ARN` of each.
-
-3. At this point you should have `.holy-lambda` directory in your project. If not then go to troubleshooting. Now you can choose one of three runtimes:
-
-  - `:babashka`
-  - `:native`
-  - `:java`
-
-   The template is adjusted in the way that all of the runtimes should work flawlessly and all you need to change is a `:runtime` value in `bb.edn`.
-
-
-
-
-1. `:babashka` runtime
-   Babashka runtime is probably the best one to start the journey with `holy-lambda`. 
-       
+From original getting started text - probably has a place in Troubleshooting:  
+  
+  The first sync is not always successful. If this is the case check the following:  ** link to troubleshooting
+  - Is Docker running?
+  - Run `bb stack:purge` and run `bb stack:sync` once again
+  - If this still fails, run `bb stack:doctor` for diagnostic information
+  
+  **This behaviour may be overridden by changing `:self-manage-layers?` flag is set to `false`, then `holy-lambda` will automatically publish all necessary layers and output `ARN` of each.
+  
+  3. At this point you should have `.holy-lambda` directory in your project. If not then go to troubleshooting. Now you can choose one of three runtimes:
+  
+    - `:babashka`
+    - `:native`
+    - `:java`
+  
+     The template is adjusted in the way that all of the runtimes should work flawlessly and all you need to change is a `:runtime` value in `bb.edn`.
+  
+  
+  
+  
+  1. `:babashka` runtime
+     Babashka runtime is probably the best one to start the journey with `holy-lambda`. 
+         
