@@ -13,21 +13,9 @@
   #?(:bb  (str "Hello world. Babashka is a sweet friend of mine! Babashka version: " (System/getProperty "babashka.version"))
      :clj "Hello world"))
 
-;; An interceptor is a pair of unary functions representing inbound requests and outbound responses.
-;;
-;; holy-lambda calls the :enter function on the way "in" to handling a request. It calls the :leave function on the way back "out".
-;;
-;; The :enter function is called with the request map and must return either a request map or a channel that will deliver a request map.
-;; Similarly, the :leave function is called with the response map and must return either a response map or a channel that will deliver a response map.
-;;
-;; Interceptors may be chained together:
-;;     < {:interceptors [Interceptor1 Interceptor2]}
-;;
-;; Execution order is as left to right in both inbound AND outbound flows, on the way in:
-;;   Interceptor1 :enter, Interceptor2 :enter
-;;
-;; On the way out:
-;;   Interceptor1 :leave, Interceptor2 :leave
+;; (alpha feature) An interceptor is a single or pair of unary functions representing inbound requests and/or outbound
+;; responses, allowing code to inspect or amend requests/responses between AWS and your Lambda function.
+;; See here https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/features/interceptors
 
 (i/definterceptor LogIncomingRequest
                   {:enter (fn [request]
