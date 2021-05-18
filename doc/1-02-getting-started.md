@@ -26,7 +26,7 @@ Here's an overview of what we'll create ([version with working links](https://sw
 ## Dependencies
 
   1. Install aws, aws-sam, make, clojure, babashka (>= 0.4.1), and clj-kondo
-     ```
+     ```bash
      brew tap aws/tap && \
         brew install awscli \
                      aws-sam-cli \
@@ -41,45 +41,45 @@ Here's an overview of what we'll create ([version with working links](https://sw
   3. Configure a **default** AWS profile via `aws-cli`. 
      This is necessary for interacting with AWS from holy-lambda.
 
-     ```
+     ```bash
      aws configure
      ```
 
 ## First Project
 
-1. We'll generate our first project using the `holy-lambda`' project template. This will create a project tree with all the necessary resources to get us started.
+1. We'll generate our first project using the `holy-lambda` project template. This will create a project tree with all the necessary resources to get us started.
 
-    ```
+    ```bash
     clojure -X:new :template holy-lambda :name com.company/example-lambda :output holy-lambda-example
     ```
 
     `cd` to the project directory
   
-     ```
-        cd holy-lambda-example
-     ```
+    ```bash
+    cd holy-lambda-example
+    ```
   
-     You should see following project structure:
-     
-     ```
-      tree
-      .
-      ├── README.md
-      ├── bb.edn
-      ├── deps.edn
-      ├── envs.json
-      ├── resources
-      │   └── native-agents-payloads
-      │       └── 1.edn
-      ├── src
-      │   └── com
-      │       └── company
-      │           └── example_lambda
-      │               └── core.cljc
-      └── template.yml
-      
-      6 directories, 7 files
-     ```
+    You should see following project structure:
+    
+    ```bash
+    tree
+    .
+    ├── README.md
+    ├── bb.edn
+    ├── deps.edn
+    ├── envs.json
+    ├── resources
+    │   └── native-agents-payloads
+    │       └── 1.edn
+    ├── src
+    │   └── com
+    │       └── company
+    │           └── example_lambda
+    │               └── core.cljc
+    └── template.yml
+    
+    6 directories, 7 files
+    ```
    
 2. Configure the `bb` (babashka) task runner
 
@@ -89,20 +89,21 @@ Here's an overview of what we'll create ([version with working links](https://sw
       
       - Locate `:runtime` and set to `:babashka`:
       
-      ```
+      ```clojure
                              :runtime
                              {
                               ;; Choose one of the supported runtime `:babashka`, `:native`, `:java`
                               :name                :babashka
+                             ... }
       ```
       
-      - Locate `:infra` and set the `:region` to one of your choosing:
+      - Locate `:infra` and set the `:region` to one of your choosing. This is where we'll create some intermediate assets and will ultimately deploy the lambda to in AWS.
       
-      ```
+      ```clojure
                              :infra
                              {...
       
-                              :region              "us-east-1"}}
+                              :region              "us-east-1"}
       ```
 
 3. Before we continue, let's run a couple of checks
@@ -136,7 +137,7 @@ By default, sync also checks whether any additional [Lambda layers](https://docs
 
 > :warning:  Ensure docker is running at this point
 
-```
+```bash
 cd holy-lambda-example && bb stack:sync
 ```
 
@@ -147,7 +148,6 @@ See the troubleshooting section if anything fails at this point.
 All being well, at the end of the output should be something like this:
 
 ```
-
 Successfully created/updated stack - holy-lambda-template-bucket-123456789-hlbbri-0-0-29 in us-east-1
 
 [holy-lambda] Waiting 5 seconds for deployment to propagate...
@@ -191,7 +191,7 @@ Successfully created/updated stack - holy-lambda-template-bucket-123456789-hlbbr
   
   1. Add your `Layers` config just below the `Handler`
   
-  ```
+  ```yaml
   Resources:
     ExampleLambdaFunction:
       Type: AWS::Serverless::Function
@@ -203,18 +203,18 @@ Successfully created/updated stack - holy-lambda-template-bucket-123456789-hlbbr
   ```
   
   2. Adjust the Lambda memory (reduce from 2000):
-  ```
+  ```yaml
   Parameters:
     MemorySize:
       Type: Number
       Default: 256   
   ```
 
-That's it! We're now ready to start executing the code.
+Setup is now complete! We're now ready to start executing the code.
 
 First, we'll test the code locally, and then we'll deploy the code to your AWS environment.
 
-## Run Local Test
+## Running the Lambda Locally
 
 `holy-lambda` uses [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) and Docker to emulate a lambda environment locally. 
 
@@ -244,7 +244,9 @@ After some time you should see above output.
 
 Having successfully run the Lambda locally, we will now deploy to AWS.
 
-Deployment to AWS is a two-step process: `pack` and `deploy`
+Deployment to AWS is a two-step process: 
+- `pack` to prepare the deployment package; and
+- `deploy` to apply it to your AWS environment.
 
 ```
 bb stack:pack
@@ -292,12 +294,21 @@ CREATE_COMPLETE                                   AWS::CloudFormation::Stack    
 Successfully created/updated stack - example-lambda-18dc55c0dc4d4fccb28209f3a4e01352-stack in us-east-1
 ```
 
-Your stack is now deployed to AWS and we're now ready to use the AWS console.
+Your stack is now deployed to AWS, and we're now ready to access it via the AWS console.
+
+## Running the Lambda in AWS
+
+Sign in to the [AWS Console](https://console.aws.amazon.com)
+
+Select the region that was specified in the `bb.edn` for your lambda deployments:
+
+![aws-console-region-selection](images/aws-console-region-selection.png "Select Region")
+
+### A Quick Tour
+
+So what do we have now?
 
 
-## Use the Lambda in AWS Console
-
-...
 
 
 # Troubleshooting
@@ -317,7 +328,7 @@ Your stack is now deployed to AWS and we're now ready to use the AWS console.
       bb stack:purge && bb stack:doctor
       ```
       
-      Fix all errors reported by the tool. If you still experience any issue please report it at Github.
+      Fix all errors reported by the tool. If you still experience any issue please report it at [Github](https://github.com/FieryCod/holy-lambda/issues).
    3. GraalVM native-image compilation fails due to not enough RAM memory on MacOS
    
       *Solution**:
