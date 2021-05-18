@@ -27,17 +27,6 @@ Logically speaking, interceptors form a _stack_. All the `:enter` functions are 
 
 ![interceptor-call-chain](images/interceptor-call-chain.png "Execution call chain with interceptors")
 
-For example, in the above chain, the interceptors are called in the following sequence:
-
-```
-Interceptor1 :enter -> Interceptor2 :enter
-```
-
-The outbound sequence is:
-```
-Interceptor2 :leave -> Interceptor1 :leave
-```
-
 Interceptors may be chained together:
 ```clojure
 (h/deflambda ExampleLambda
@@ -54,4 +43,15 @@ Interceptor chains may also be composed using a mixin approach:
 (def mixin2 {:interceptors [interceptor2]})
 
 (def mixin3 (h/merge-mixins mixin1 mixin2)) ;; => {:interceptors [interceptor1 interceptor2]}
+```
+
+For example, in the above chain, the interceptors are called in the following inbound sequence:
+
+```
+Interceptor1 :enter -> Interceptor2 :enter
+```
+
+The outbound sequence is:
+```
+Interceptor2 :leave -> Interceptor1 :leave
 ```
