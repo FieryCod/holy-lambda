@@ -1,4 +1,5 @@
 (ns fierycod.holy-lambda.interceptor
+  "This is very naive implementation of interceptors and it's a subject to change. Consider this namespace as an alfa."
   (:require
    [fierycod.holy-lambda.retriever :as retriever]))
 
@@ -68,7 +69,9 @@
    (defn- process-interceptors
      [mixin payload type]
      (if-let [interceptors (seq (:interceptors mixin))]
-       (loop [interceptors interceptors
+       (loop [interceptors (if (= type :leave)
+                             (reverse interceptors)
+                             interceptors)
               result payload]
          (if-not (seq interceptors)
            result
@@ -78,7 +81,9 @@
    (defn- process-interceptors
      [mixin payload type]
      (if-let [interceptors (seq (:interceptors mixin))]
-       (loop [interceptors interceptors
+       (loop [interceptors (if (= type :leave)
+                             (reverse interceptors)
+                             interceptors)
               result payload]
          (if-not (seq interceptors)
            result
@@ -86,13 +91,17 @@
        payload))
    :clj
    (defn- process-interceptors
-     [?mixin ?payload ?type]
-     (if-let [it (some-> ?mixin :interceptors clojure.lang.RT/iter)]
-       (loop [result ?payload]
-         (if (.hasNext it)
-           (recur
-            (if-let [interceptor (some-> (.next it) ?type)]
-              (interceptor result)
-              result))
-           result))
-       ?payload)))
+     [mixin payload type]
+     (if-let [interceptors (seq (:interceptors mixin))]
+       (let [it (some-> (if (= type :leave)
+                          (reverse interceptors)
+                          interceptors)
+                        clojure.lang.RT/iter)]
+         (loop [result payload]
+           (if (.hasNext it)
+             (recur
+              (if-let [interceptor (some-> (.next it) type)]
+                (interceptor result)
+                result))
+             result)))
+       payload)))
