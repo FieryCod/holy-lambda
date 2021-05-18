@@ -128,6 +128,64 @@ Here's an overview of what we'll create ([version with working links](https://sw
       
       It shouldn't matter if there is anything else is running - we just care that docker is available.
       
+4. Check the help
+      
+      Information on all the holy-lambda tasks are available by running `bb tasks` 
+      
+      ```
+      bb tasks
+      The following tasks are available:
+      
+      bucket:create          > Creates a s3 bucket using :bucket-name
+      bucket:remove          > Removes a s3 bucket using :bucket-name
+      
+      ----------------------------------------------------------------
+      
+      docker:build:ee        > Builds local image for GraalVM EE
+      docker:run             > Run command in fierycod/graalvm-native-image docker context
+      
+      ----------------------------------------------------------------
+      
+      native:conf            > Provides native configurations for the application
+      native:executable      > Provides native executable of the application
+      
+      ----------------------------------------------------------------
+      
+      stack:sync             > Syncs project & dependencies from either:
+                        - <Clojure>  project.clj
+                        - <Clojure>  deps.edn
+                        - <Babashka> bb.edn:runtime:pods
+      stack:compile          > Compiles sources if necessary
+      stack:invoke           > Invokes lambda fn (check sam local invoke --help):
+                        - :name        - either :name or :stack:default-lambda
+                        - :event-file  - path to event file
+                        - :envs-file   - path to envs file
+                        - :params      - map of parameters to override in AWS SAM
+                        - :debug       - run invoke in debug mode
+                        - :logs        - logfile to runtime logs to
+      stack:api              > Runs local api (check sam local start-api):
+                        - :debug       - run api in debug mode
+                        - :port        - local port number to listen to
+                        - :static-dir  - assets which should be presented at /
+                        - :envs-file   - path to envs file
+                        - :params      - map of parameters to override in AWS SAM
+      stack:pack             > Packs Cloudformation stack
+      stack:deploy           > Deploys Cloudformation stack
+                    - :guided      - guide the deployment
+                    - :dry         - execute changeset?
+                    - :params      - map of parameters to override in AWS SAM
+      stack:describe         > Describes Cloudformation stack
+      stack:doctor           > Diagnoses common issues of holy-lambda stack
+      stack:purge            > Purges build artifacts
+      stack:destroy          > Destroys Cloudformation stack & removes bucket
+      stack:logs             > Possible arguments (check sam logs --help):
+                        - :name        - either :name or :stack:default-lambda
+                        - :e           - fetch logs up to this time
+                        - :s           - fetch logs starting at this time
+                        - :filter      - find logs that match terms
+      stack:version          > Outputs holy-lambda babashka tasks version
+      stack:lint             > Lints the project
+      ```
 
 ## Initialise the Project
 
@@ -242,7 +300,7 @@ After some time you should see above output.
 
 ## Deploy to AWS
 
-Having successfully run the Lambda locally, we will now deploy to AWS.
+Having successfully run the Lambda locally, we can now deploy to AWS.
 
 Deployment to AWS is a two-step process: 
 - `pack` to prepare the deployment package; and
@@ -294,13 +352,13 @@ CREATE_COMPLETE                                   AWS::CloudFormation::Stack    
 Successfully created/updated stack - example-lambda-18dc55c0dc4d4fccb28209f3a4e01352-stack in us-east-1
 ```
 
-Your stack is now deployed to AWS, and we're now ready to access it via the AWS console.
+Your stack is now deployed to AWS, and we're ready to access it via the AWS console.
 
 ## Running the Lambda in AWS
 
 Sign in to the [AWS Console](https://console.aws.amazon.com)
 
-Select the region that was specified in the `bb.edn` for your lambda deployments:
+Select the region that was previously specified in `bb.edn` for your lambda deployments:
 
 ![aws-console-region-selection](images/aws-console-region-selection.png "Select Region")
 
@@ -308,6 +366,16 @@ Select the region that was specified in the `bb.edn` for your lambda deployments
 
 So what do we have now?
 
+At this point we have:
+  * A Clojure based lambda function,
+  * Configured with the necessary execution permissions, and
+  * An API Gateway `GET` request using the lambda as a handler
+
+![aws-console-services-cloudformation](images/aws-console-services-cloudformation.png "Select CloudFormation service")
+
+![aws-console-cloudformation-stacks](images/aws-console-cloudformation-stacks.png "View the new stack")
+
+![aws-console-cloudformation-stack-resources](images/aws-console-cloudformation-stack-resources.png "View the new stack resources")
 
 
 
