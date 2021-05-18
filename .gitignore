@@ -7,7 +7,6 @@ native-packaged.yaml
 invoke-envs.json
 fnative-envs.list
 envs.example.json
-*.zip
 /classes
 /checkouts
 profiles.clj

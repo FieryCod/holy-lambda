@@ -12,66 +12,12 @@
    [babashka.process :as p]
    [clojure.java.io :as io]))
 
-;; Taken from clojure-term-colors https://github.com/trhura/clojure-term-colors
-(defn- escape-code
-  [i]
-  (str "\033[" i "m"))
+(deps/add-deps {:deps {'clojure-term-colors/clojure-term-colors {:mvn/version "0.1.0"}}})
 
-(def ^:dynamic *colors*
-  "foreground color map"
-  (zipmap [:grey :red :green :yellow
-           :blue :magenta :cyan :white]
-          (map escape-code
-               (range 30 38))))
-
-(def ^:dynamic *highlights*
-  "background color map"
-  (zipmap [:on-grey :on-red :on-green :on-yellow
-           :on-blue :on-magenta :on-cyan :on-white]
-          (map escape-code
-               (range 40 48))))
-
-(def ^:dynamic *attributes*
-  "attributes color map"
-  (into {}
-        (filter (comp not nil? key)
-                (zipmap [:bold, :dark, nil, :underline,
-                         :blink, nil, :reverse-color, :concealed]
-                        (map escape-code (range 1 9))))))
-
-(def ^:dynamic *reset* (escape-code 0))
-
-;; Bind to true to have the colorize functions not apply coloring to
-;; their arguments.
-(def ^:dynamic *disable-colors* nil)
-
-(defmacro define-color-function
-  "define a function `fname' which wraps its arguments with
-        corresponding `color' codes"
-  [fname color]
-  (let [fname (symbol (name fname))
-        args (symbol 'args)]
-    `(defn ~fname [& ~args]
-       (if-not *disable-colors*
-         (str (clojure.string/join (map #(str ~color %) ~args)) ~*reset*)
-         (apply str ~args)))))
-
-(defn define-color-functions-from-map
-  "define functions from color maps."
-  [colormap]
-  (eval `(do ~@(map (fn [[color escape-code]]
-                      `(println ~color ~escape-code)
-                      `(define-color-function ~color ~escape-code))
-                    colormap))))
-
-(define-color-functions-from-map *colors*)
-(define-color-functions-from-map *highlights*)
-(define-color-functions-from-map *attributes*)
-
-;; Taken from clojure-term-colors https://github.com/trhura/clojure-term-colors
+(require
+ '[clojure.term.colors :refer [underline blue yellow red green]])
 
 ;;;; [START] HELPERS
-
 (defn norm-args
   [args]
   (into {} (mapv
@@ -80,7 +26,8 @@
                  (s/includes? k ":")
                  (subs 1)
 
-                 true keyword)
+                 true
+                 keyword)
                (or v true)])
             (partition-all 2 args))))
 
@@ -148,10 +95,28 @@
                    xs)))
 ;;;; [END] HELPERS
 
+(def OS (let [os (s/lower-case (System/getProperty "os.name"))]
+          (cond
+            (s/includes? os "nux") :unix
+            (s/includes? os "mac") :mac
+            (s/includes? os "win") :windows
+            :else :unknown)))
+
+(when (contains? #{:unknown :windows} OS)
+  (hpr (pre (str "OS: " OS " is not supported by holy-lambda. Please make an issue on Github!")))
+  (System/exit 1))
+
+(when-not (or (and (= OS :unix)
+                   (= (:exit (csh/sh "pgrep" "-f" "docker")) 0))
+              (and (= OS :mac)
+                   (= (:exit (csh/sh "pgrep" "-f" "Docker.app")) 0)))
+  (hpr (pre "Docker is not running! Enable and run docker first before using holy-lambda!"))
+  (System/exit 1))
+
 (def AVAILABLE_RUNTIMES #{:babashka :native :java})
 (def AVAILABLE_REGIONS #{"us-east-2", "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "cn-north-1", "cn-northwest-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-north-1", "me-south-1", "sa-east-1"})
 (def REMOTE_TASKS "https://raw.githubusercontent.com/FieryCod/holy-lambda/master/modules/holy-lambda-babashka-tasks/src/holy_lambda/tasks.clj")
-(def TASKS_VERSION "0.0.1")
+(def TASKS_VERSION "0.0.3")
 (def TASKS_VERSION_MATCH #"(?:TASKS_VERSION) (\"[0-9]*\.[0-9]*\.[0-9]*\")")
 (def BUCKET_IN_LS_REGEX #"(?:[0-9- :]+)(.*)")
 (def LAYER_CACHE_DIRECTORY ".holy-lambda/.cache/layers")
@@ -226,10 +191,27 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def NATIVE_CONFIGURATIONS_PATH ".holy-lambda/native/configuration")
 (def BOOTSTRAP_FILE (:bootstrap-file RUNTIME))
 (def NATIVE_DEPS_PATH (:native-deps RUNTIME))
+(def BABASHKA_LAYER_INSTANCE (str BUCKET_NAME "-hlbbri-" (s/replace RUNTIME_VERSION #"\." "-")))
+(def OFFICIAL_BABASHKA_LAYER_ARN "arn:aws:serverlessrepo:eu-central-1:443526418261:applications/holy-lambda-babashka-runtime")
+
+(defn aws-command-output->str
+  [output]
+  (str (pre "AWS command output:") "\n------------------------------------------\n" (s/trim output)
+       "\n------------------------------------------"))
 
 (defn -create-bucket
-  [& [bucket]]
-  (shsp "aws" "s3" "mb" (str "s3://" (or bucket BUCKET_NAME))))
+  [& [bucket throw?]]
+  (let [bucket (or bucket BUCKET_NAME)
+        result (csh/sh "aws" "s3" "mb" (str "s3://" bucket))]
+    (if (not= (:exit result) 0)
+      (do (hpr (pre "Unable to create a bucket")
+               (str (accent bucket) "."))
+          (hpr (aws-command-output->str (:err result)))
+          (hpr (pre "Resolve the error then run the command once again if you have to."))
+          (if throw?
+            (throw (Exception. ""))
+            (System/exit 1)))
+      (hpr (prs "Bucket") (accent bucket) (prs "has been succesfully created!")))))
 
 (defn -remove-bucket
   [& [bucket]]
@@ -250,6 +232,9 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def AWS_DIR
   (.getAbsolutePath (io/file HOME_DIR ".aws")))
 
+(def AWS_DIR_EXISTS?
+  (fs/exists? (io/file AWS_DIR)))
+
 (defn edn->pp-sedn
   [edn]
   (with-out-str (pprint/pprint edn)))
@@ -257,7 +242,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (defn map->parameters-inline
   [m]
   (s/join " " (mapv (fn [[k v]]
-                      (str "ParameterKey=" k ",ParameterValue=" v))
+                      (str "ParameterKey=" (if (keyword? k) (name k) k) ",ParameterValue=" v))
                     m)))
 
 (defn buckets
@@ -266,8 +251,8 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
              (s/split (shs "aws" "s3" "ls") #"\n"))))
 
 (defn bucket-exists?
-  []
-  (contains? (buckets) BUCKET_NAME))
+  [& [bucket-name]]
+  (contains? (buckets) (or bucket-name BUCKET_NAME)))
 
 (defn parameters--java
   [opt]
@@ -379,12 +364,11 @@ Resources:
 
 (defn cloudformation-description
   [& [silent?]]
-  (let [cloudformation-string (shs "aws" "cloudformation" "describe-stacks")
+  (let [cloudformation-string (shs "aws" "cloudformation" "describe-stacks" "--region" REGION)
         cloudformation (if (s/blank? cloudformation-string)
                          (if silent?
                            nil
                            (do (hpr (pre "Unable to get information about stacks. Use AWS UI to get proper ARN for layer"))
-                               (hpr "Choose one ARN and put it at template.yml Fn:Layers")
                                (System/exit 1)))
                          (try
                            (json/parse-string cloudformation-string true)
@@ -397,16 +381,89 @@ Resources:
                                  (System/exit 1))))))]
     cloudformation))
 
-(defn babashka-runtime-layer-ARN
+(defn stack->info
+  [stack]
+  (let [tags (group-by :Key (:Tags stack))
+        get-val-by (fn [sel] (:Value (first (get tags sel))))]
+    {:version       (get-val-by "serverlessrepo:semanticVersion")
+     :arn           (:OutputValue (first (:Outputs stack)))
+     :app-id        (get-val-by "serverlessrepo:applicationId")
+     :status        (:StackStatus stack)
+     :stack-id      (:StackId stack)
+     :stack-name    (:StackName stack)
+     :capabilities  (:Capabilities stack)
+     :description   (:Description stack)
+     :last-updated  (or (:LastUpdatedTime stack) :not-updated)
+     :created-at    (:CreationTime stack)
+     :parent-id     (:ParentId stack)}))
+
+(defn app-id->app-layers
+  [app-id]
+  (if-let [stacks (seq (:Stacks (cloudformation-description)))]
+    (let [layers (->> stacks
+                      (keep
+                       (fn [stack]
+                         (let [info (stack->info stack)]
+                           (when (= app-id (:app-id info))
+                             info))))
+                      vec)
+          layers-id-set (set (mapv :stack-id layers))
+          groupped-stacks  (->> stacks
+                                (filter (complement (fn [s] (contains? layers-id-set (:StackId s)))))
+                                (mapv stack->info)
+                                (group-by :stack-id))
+          layers-by-parents (group-by :parent-id layers)
+          app<->layers (mapv (fn [[parent-stack-id stack]]
+                               (let [parent-of-stack (first (get groupped-stacks parent-stack-id))]
+                                 (assoc parent-of-stack :child stack)))
+                             layers-by-parents)]
+      app<->layers)
+    (hpr "No stacks found in cloudformation definitions.")))
+
+(defn babashka-layer
   []
-  (when-let [mstacks (seq (filterv (fn [stack] (s/includes? (:StackName stack) "holy-lambda-bbrl-instance-HolyLambdaBabashkaRuntime")) (:Stacks (cloudformation-description))))]
-    (let [ARN (some-> mstacks
-                      first
-                      :Outputs
-                      first
-                      :OutputValue)]
-      (when-not (s/blank? ARN)
-        (s/trim ARN)))))
+  (let [app<->layers (app-id->app-layers OFFICIAL_BABASHKA_LAYER_ARN)]
+    (first (:child (first app<->layers)))))
+
+(defn publish-babashka-layer
+  []
+  (io/make-parents BABASHKA_RUNTIME_LAYER_FILE)
+  (spit BABASHKA_RUNTIME_LAYER_FILE (babashka-runtime-layer-template))
+
+  (if (bucket-exists? BABASHKA_LAYER_INSTANCE)
+    (hpr (pre "Unable to publish the stack twice to the same bucket!"))
+    (-create-bucket BABASHKA_LAYER_INSTANCE))
+
+  (apply shell
+         "sam deploy"
+         "--template-file"  BABASHKA_RUNTIME_LAYER_FILE
+         "--stack-name"     BABASHKA_LAYER_INSTANCE
+         "--s3-bucket"      BABASHKA_LAYER_INSTANCE
+         "--no-confirm-changeset"
+         "--capabilities"   ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"])
+
+  (hpr "Waiting 5 seconds for deployment to propagate...")
+  (Thread/sleep 5000)
+  (hpr "Checking the ARN of published layer. This might take a while..")
+  (hpr (prs "Your ARN for babashka runtime layer is:") (accent (:arn (babashka-layer))))
+  (hpr "You should add the provided ARN as a property of a Function in template.yml!\n
+---------------" (accent "template.yml") "------------------\n
+      Resources:
+        ExampleLambdaFunction:
+          Type: AWS::Serverless::Function
+          Properties:
+            Handler: example.core.ExampleLambda"
+       (prs "
+            Layers:
+              - PLEASE_ADD_THE_ARN_OF_LAYER_HERE")
+       "
+            Events:
+              HelloEvent:
+                Type: Api
+                Properties:
+                  Path: /
+                  Method: get\n
+---------------------------------------------"))
 
 (defn runtime-sync-hook--babashka
   []
@@ -414,31 +471,18 @@ Resources:
   (shell "bash -c \"mkdir -p .holy-lambda/bb-clj-deps && cp -R .holy-lambda/.m2 .holy-lambda/bb-clj-deps/\"")
 
   (when-not SELF_MANAGE_LAYERS?
-    (if-let [ARN (babashka-runtime-layer-ARN)]
-      (hpr "Babashka runtime layer exists. Your layer ARN is:" (accent ARN) "(deployment skipped)")
-
+    (if-let [bb-layer (babashka-layer)]
+      (if (= (:version bb-layer) RUNTIME_VERSION)
+        (hpr "Babashka runtime layer exists. Your layer ARN is:" (accent (:arn bb-layer)) "(deployment skipped)")
+        (do (hpr "Version from bb.edn does not match deployed version of the runtime")
+            (hpr "Updating deployed version from" (accent (:version bb-layer)) "to" (accent RUNTIME_VERSION))
+            (publish-babashka-layer)))
       (do
-        (hpr (prw "Babashka runtime needs a special layer for both local invocations and deployments published here: https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime."))
-        (hpr "Trying to deploy layer:\n" (babashka-runtime-layer-template))
-
-        (let [stack-name "holy-lambda-bbrl-instance"]
-          (io/make-parents BABASHKA_RUNTIME_LAYER_FILE)
-          (spit BABASHKA_RUNTIME_LAYER_FILE (babashka-runtime-layer-template))
-
-          (-create-bucket (str stack-name (hash BUCKET_NAME)))
-
-          (apply shell
-                 "sam deploy"
-                 "--template-file"  BABASHKA_RUNTIME_LAYER_FILE
-                 "--stack-name"     stack-name
-                 "--s3-bucket"      (str stack-name (hash BUCKET_NAME))
-                 "--no-confirm-changeset"
-                 "--capabilities"   ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"])
-
-          (hpr "Waiting 5 seconds for deployment to propagate...")
-          (Thread/sleep 5000)
-          (hpr "Checking the ARN of published layer. This might take a while..")
-          (hpr (prs "Your ARN for babashka runtime layer is:") (accent (babashka-runtime-layer-ARN))))))))
+        (hpr "Babashka runtime needs a special layer for both local invocations and deployments.")
+        (hpr "Layer is published here:" "https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime")
+        (println "")
+        (hpr (str "Layer is not published! Trying to deploy layer:\n\n" (babashka-runtime-layer-template) "\n"))
+        (publish-babashka-layer)))))
 
 (defn runtime-sync-hook
   []
@@ -514,23 +558,25 @@ Resources:
        \t\t        - \033[0;31m:debug\033[0m       - run api in \033[0;31mdebug mode\033[0m
        \t\t        - \033[0;31m:port\033[0m        - local port number to listen to
        \t\t        - \033[0;31m:static-dir\033[0m  - assets which should be presented at \033[0;31m/\033[0m
-       \t\t        - \033[0;31m:envs-file\033[0m   - path to \033[0;31menvs file\033[0m"
+       \t\t        - \033[0;31m:envs-file\033[0m   - path to \033[0;31menvs file\033[0m
+       \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM"
   [& args]
   (print-task "stack:api")
-  (let [{:keys [static-dir debug envs-file port]} (norm-args args)]
+  (let [{:keys [static-dir debug envs-file port params]} (norm-args args)]
     (stack-files-check)
     (when (build-stale?)
       (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
 
     (shell (str "sam local start-api"
-                " --parameter-overrides " (parameters)
+                " --parameter-overrides " (if-not params
+                                            (parameters)
+                                            (str (parameters) " " (map->parameters-inline (edn/read-string params))))
                 " --template " TEMPLATE_FILE
                 " -p " (or port 3000)
                 (when static-dir " -s ") static-dir
                 " --warm-containers LAZY"
                 " -n " (or envs-file DEFAULT_ENVS_FILE)
                 " --layer-cache-basedir " LAYER_CACHE_DIRECTORY
-
                 (when debug " --debug")) )))
 
 (defn native:conf
@@ -622,8 +668,10 @@ set -e
   (print-task "bucket:create")
   (if (bucket-exists?)
     (do
-      (hpr (prs "Bucket") (accent BUCKET_NAME) "already exists!")
-      (hpr (prw "Sometimes bucket is not immediately appear to be removed and is still listed. In such case change") (str (accent ":infra:bucket-name") "!")))
+      (hpr (prs "Bucket") (accent BUCKET_NAME) (prs "already exists!"))
+      (hpr (prw "If you removed the bucket then note that sometimes bucket is not immediately appear to be removed and is still listed in AWS resources."))
+      (hpr (prw "In such case change:")
+           (str (accent ":infra:bucket-name") "!")))
     (do (hpr (prs "Creating a bucket") (accent BUCKET_NAME))
         (-create-bucket))))
 
@@ -654,17 +702,18 @@ set -e
   []
   (print-task "bucket:remove")
   (if-not (bucket-exists?)
-    (hpr (pre "Bucket") (accent BUCKET_NAME) "does not exists! Nothing to remove!")
+    (hpr (pre "Bucket") (accent BUCKET_NAME) (pre "does not exists! Nothing to remove!"))
     (do (hpr (prs "Removing a bucket") (accent BUCKET_NAME))
         (-remove-bucket))))
 
 (defn stack:deploy
   "     \033[0;31m>\033[0m Deploys \033[0;31mCloudformation\033[0m stack
   \t\t        - \033[0;31m:guided\033[0m      - guide the deployment
-  \t\t        - \033[0;31m:dry\033[0m         - execute changeset?"
+  \t\t        - \033[0;31m:dry\033[0m         - execute changeset?
+  \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM"
   [& args]
   (print-task "stack:deploy")
-  (let [{:keys [guided dry]} (norm-args args)]
+  (let [{:keys [guided dry params]} (norm-args args)]
     (if-not (fs/exists? (io/file PACKAGED_TEMPLATE_FILE))
       (hpr (pre "No") (accent PACKAGED_TEMPLATE_FILE) (pre "found. Run") (accent "stack:pack"))
       (do
@@ -675,7 +724,9 @@ set -e
                "--region" REGION
                (when dry "--no-execute-changeset")
                (when guided "--guided")
-               "--parameter-overrides" (parameters)
+               "--parameter-overrides" (if-not params
+                                         (parameters)
+                                         (str (parameters) " " (map->parameters-inline (edn/read-string params))))
                (when CAPABILITIES "--capabilities") CAPABILITIES)))))
 
 (defn stack:compile
@@ -697,15 +748,20 @@ set -e
        \t\t        - \033[0;31m:name\033[0m        - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
        \t\t        - \033[0;31m:event-file\033[0m  - path to \033[0;31mevent file\033[0m
        \t\t        - \033[0;31m:envs-file\033[0m   - path to \033[0;31menvs file\033[0m
+       \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM
+       \t\t        - \033[0;31m:debug\033[0m       - run invoke in \033[0;31mdebug mode\033[0m
        \t\t        - \033[0;31m:logs\033[0m        - logfile to runtime logs to"
   [& args]
   (print-task "stack:invoke")
   (stack-files-check)
   (when (build-stale?)
     (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
-  (let [{:keys [name event-file envs-file logs]} (norm-args args)]
+  (let [{:keys [name event-file envs-file logs params debug]} (norm-args args)]
     (shell "sam" "local" "invoke" (or name DEFAULT_LAMBDA_NAME)
-           "--parameter-overrides" (parameters)
+           "--parameter-overrides" (if-not params
+                                     (parameters)
+                                     (str (parameters) " " (map->parameters-inline (edn/read-string params))))
+           (when debug "--debug")
            (when logs "-l") logs
            (when event-file "-e") event-file
            "-n" (or envs-file DEFAULT_ENVS_FILE))))
@@ -725,6 +781,7 @@ set -e
   (hpr " Checking health of holy-lambda stack")
   (hpr " Home directory is:       " (accent HOME_DIR))
   (hpr " AWS directory is:        " (accent AWS_DIR))
+  (hpr " AWS directory exists?:   " (accent AWS_DIR_EXISTS?))
   (hpr " Babashka tasks version:  " (accent TASKS_VERSION))
   (hpr " Babashka version:        " (accent (s/trim (shs "bb" "version"))))
   (hpr " Runtime:                 " (accent RUNTIME_NAME))
@@ -732,6 +789,7 @@ set -e
   (hpr " Stack name:              " (accent STACK_NAME))
   (hpr " S3 Bucket name:          " (accent BUCKET_NAME))
   (hpr " S3 Bucket prefix:        " (accent BUCKET_PREFIX))
+  (hpr " S3 Bucket exists?:       " (accent (bucket-exists?)))
   (hpr "---------------------------------------\n")
 
   (when-not (fs/exists? (io/file AWS_DIR))
@@ -887,8 +945,8 @@ set -e
   []
   (print-task "stack:destroy")
   (shell "aws" "cloudformation" "delete-stack"
-         "--stack-name" STACK_NAME
-         "--region" REGION)
+         "--region"     REGION
+         "--stack-name" STACK_NAME)
   (bucket:remove))
 
 (defn stack:describe
@@ -896,4 +954,5 @@ set -e
   []
   (print-task "stack:describe")
   (shell "aws" "cloudformation" "describe-stacks"
+         "--region"     REGION
          "--stack-name" STACK_NAME))
