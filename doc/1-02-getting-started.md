@@ -504,21 +504,21 @@ Filter the APIs using `example-lambda`, and choose the name starting with `examp
 
 ![aws-console-api-gateway-apis](images/aws-console-api-gateway-apis.png "View the available APIs")
 
-From the left-hand menus, select `Resources` and the `GET` method. Here you can see that the GET request calls our Lambda function (highlighted on the far right):
+From the left-hand menus, select `Resources` and the `GET` method. Here you can see that the `GET` method calls our Lambda function (highlighted on the far right):
 
 ![aws-console-api-gateway-api-resources](images/aws-console-api-gateway-api-resources.png "GET request to Lambda")
 
 ### Amend the API
 
-Select the `Method Request` link highlighted above to access the `Method Request editor`.
+Select `Method Request` (highlighted above) to access the `Method Request editor`.
 
-We need to configure API gateway to allow the URL parameter `name` through to our Lambda function:
+We need to configure the API Gateway to pass the URL parameter `name` through to our Lambda function:
 
 - Edit the `Request Validator` option and set to `Validate query string parameters and headers`
 - Expand the section `URL Query String Parameters`
 - Select `Add query string`
 - An edit box will appear, enter `name`
-- Ok the change using the tick icon on the right of the row
+- Use the tick icon on the right of the row to apply the change
 - Select the `Required` checkbox
 
 ![aws-console-api-gateway-get-method-request](images/aws-console-api-gateway-get-method-request.png "Edit Method Request to add a URL parameter")
