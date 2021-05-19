@@ -1,6 +1,6 @@
 # Getting started
 
-This guide will quickly take you through the basics of using `holy-lambda`:
+This guide will take you through the basics of using `holy-lambda`:
 
 - Development environment setup
 - Generate a scaffold project for your code
@@ -11,7 +11,7 @@ This guide will quickly take you through the basics of using `holy-lambda`:
 
 Here's an overview of what we'll create ([version with working links](https://swimlanes.io/d/F_CZgZSY3)):
 
-![alt text](https://static.swimlanes.io/717653ba1f693067e413ec5406c893f9.png "Overview")
+![swimlanes-overview](images/swimlanes-overview.png "Overview")
 
 
 ## Before We Begin
@@ -40,7 +40,7 @@ Here's an overview of what we'll create ([version with working links](https://sw
   2. Install [clj-new](https://github.com/seancorfield/clj-new) using these [instructions](https://github.com/seancorfield/clj-new#getting-started)
 
   3. Configure a **default** AWS profile via `aws-cli`. 
-     This is necessary for interacting with AWS from holy-lambda.
+     This is necessary for interacting with AWS from `holy-lambda`.
 
      ```bash
      aws configure
@@ -84,7 +84,7 @@ Here's an overview of what we'll create ([version with working links](https://sw
    
 2. Configure the `bb` (babashka) task runner
 
-   `holy-lambda` uses babashka tasks to perform its duties. Configuration for the tasks are located in `bb.edn`. The defaults are mostly sufficient, however we need to make a couple of config changes to change the target runtime to babashka and set your AWS region.
+   `holy-lambda` uses babashka tasks to perform its duties. Configuration for the tasks are located in `bb.edn`. The defaults are mostly sufficient, however we need to make a couple of config changes to set the target runtime to babashka and set your AWS region.
 
       - Open `bb.edn` in the root of your project directory
       
@@ -98,7 +98,7 @@ Here's an overview of what we'll create ([version with working links](https://sw
                              ... }
       ```
       
-      - Locate `:infra` and set the `:region` to one of your choosing. This is where we'll create some intermediate assets and will ultimately deploy the lambda to in AWS.
+      - Locate `:infra` and set the `:region` to one of your choosing. This is where `holy-lambda` will create some intermediate assets in S3, and will ultimately deploy the Lambda function to in AWS.
       
       ```clojure
                              :infra
@@ -127,13 +127,14 @@ Here's an overview of what we'll create ([version with working links](https://sw
         CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
         ```
       
-      It shouldn't matter if there is anything else is running - we just care that docker is available.
+      It shouldn't matter if there is anything else is running - we just care that docker is available at this point.
       
 4. Check the help
       
-      Information on all the holy-lambda tasks are available by running `bb tasks` 
+      Information on all the `holy-lambda` tasks are available by running `bb tasks` 
       
 ```
+bb tasks
 The following tasks are available:
 
 bucket:create          > Creates a s3 bucket using :bucket-name
@@ -191,7 +192,7 @@ stack:lint             > Lints the project
 
 We will use the task `bb stack:sync` to gather all dependencies from `bb.edn`, `deps.edn` for Clojure, Native and Babashka runtimes. 
 
-By default, sync also checks whether any additional [Lambda layers](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html) necessary for runtime should be published and will report them. This may be overridden (see `:self-manage-layers?` in `bb.edn`)
+By default, sync also checks whether any additional [Lambda layers](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html) are necessary for runtime should be published and will report them. This may be overridden (see `:self-manage-layers?` in `bb.edn`)
 
 > :warning:  Ensure docker is running at this point
 
@@ -199,7 +200,7 @@ By default, sync also checks whether any additional [Lambda layers](https://docs
 cd holy-lambda-example && bb stack:sync
 ```
 
-> :information_source: On the first run, some activities such as downloading dependencies and docker images can take some time. Subsequent runs will be much faster.
+> :information_source: On the first run, some activities such as downloading dependencies and docker images can take some time. Subsequent runs will be much shorter.
 
 See the troubleshooting section if anything fails at this point.
 
@@ -245,9 +246,9 @@ Successfully created/updated stack - holy-lambda-template-bucket-123456789-hlbbr
   arn:aws:lambda:us-east-1:123456789:layer:holy-lambda-babashka-runtime:1
   ```
 
-- ... and amend the `template.yml` file:
+- ... and amend the `template.yml` file to include your ARN:
   
-  1. Add your `Layers` config just below the `Handler`
+  1. Add a `Layers` config section just below the `Handler` like this:
   
   ```yaml
   Resources:
@@ -276,7 +277,7 @@ First, we'll test the code locally, and then we'll deploy the code to your AWS e
 
 `holy-lambda` uses [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) and Docker to emulate a lambda environment locally. 
 
- Execute your lambda code using the babashka task `bb stack:invoke`:
+ Execute your Lambda code using the babashka task `bb stack:invoke`:
 
  ```
 bb stack:invoke
@@ -303,8 +304,8 @@ After some time you should see above output.
 Having successfully run the Lambda locally, we can now deploy to AWS.
 
 Deployment to AWS is a two-step process: 
-- `pack` to prepare the deployment package and stage it in an S3 bucket; and
-- `deploy` to apply the deployment package to your AWS environment.
+- `pack` to prepare the deployment package and stage a deployment descriptor in an S3 bucket
+- `deploy` to apply the deployment package to your AWS environment
 
 ```
 bb stack:pack
@@ -354,6 +355,15 @@ Successfully created/updated stack - example-lambda-18dc55c0dc4d4fccb28209f3a4e0
 
 Your stack is now deployed to AWS, and we're ready to access it via the AWS console.
 
+### Subsequent Edit-Deploy Cycles
+
+As you develop your Lambda code locally, you will repeat the following steps to run the changes locally and, if successful, push the changed to AWS: 
+```
+bb stack:invoke
+bb stack:pack
+bb stack:deploy
+```
+
 ## Running the Lambda in AWS
 
 Sign in to the [AWS Console](https://console.aws.amazon.com)
@@ -367,9 +377,9 @@ Select the region that was previously specified in `bb.edn` for your lambda depl
 So what do we have now?
 
 At this point we have an AWS serverless application stack comprising:
-  * a Clojure based lambda function...
+  * a Clojure based Lambda function
   * the necessary execution permissions, and
-  * an API Gateway `GET` request using the lambda as a handler
+  * an API Gateway `GET` request using the Lambda as a handler
 
 ### CloudFormation Stack
 
@@ -391,11 +401,11 @@ Let's take a closer look at the Clojure Lambda function by navigating to the Lam
 
 ![aws-console-services-lambda](images/aws-console-services-lambda.png "Select Lambda service")
 
-If you have several lambda function already, enter `ExampleLambdaFunction` into the filter.
+If you have several Lambda functions already, enter `ExampleLambdaFunction` into the filter.
 
 ![aws-console-lambda-functions](images/aws-console-lambda-functions.png "Functions overview")
 
-Select the `ExampleLambdaFunction` link to view the Lambda in detail, including the Clojure code.
+Select the `ExampleLambdaFunction` link to view the Lambda in detail, including access to the Clojure code.
 
 ### Lambda Code
 
@@ -476,6 +486,8 @@ That's interactive code editing, in Clojure, in AWS Lambda!
 
 > :warning: Any changes that are made directly in the editor will be overwritten when the `bb stack:deploy` task is next run. Remember to copy any necessary changes to the made code base. 
 
+> :information_source: Interactive editing is only available with the Babashka runtime. Other runtime options package compiled Clojure code or produce native images.
+
 ## End to End: Calling the Lambda from API Gateway
 
 The template project also creates a REST endpoint in API Gateway that is linked to our Lambda function.
@@ -484,9 +496,11 @@ This section will give a tour of this aspect of the stack, and will guide you th
 
 ### API Gateway
 
-You can look at the application stack by navigating to the API Gateway service:
+You can look at the application API by navigating to the API Gateway service:
 
 ![aws-console-services-api-gateway](images/aws-console-services-api-gateway.png "Select API Gateway service")
+
+Filter the APIs using `example-lambda`, and choose the name starting with `example-lambda-xxx.stack`:
 
 ![aws-console-api-gateway-apis](images/aws-console-api-gateway-apis.png "View the available APIs")
 
@@ -498,7 +512,7 @@ From the left-hand menus, select `Resources` and the `GET` method. Here you can 
 
 Select the `Method Request` link highlighted above to access the `Method Request editor`.
 
-We need to configure API gateway to allow the URL parameter `name` through to our lambda function:
+We need to configure API gateway to allow the URL parameter `name` through to our Lambda function:
 
 - Edit the `Request Validator` option and set to `Validate query string parameters and headers`
 - Expand the section `URL Query String Parameters`
@@ -544,26 +558,17 @@ Hello api-caller. Babashka is a sweet friend of mine! Babashka version: 0.4.1
 
 Finally, we'll go and check the log output from the API invocation.
 
-In Lambda, go back to your Lambda function and select the `Monitor` tab, followed by `View logs in CloudWatch`:
+In the Lambda service AWS console, go back to your Lambda function and select the `Monitor` tab, followed by `View logs in CloudWatch`:
 
 ![aws-console-lambda-function-monitor](images/aws-console-lambda-function-monitor.png "View the logs from your Lambda")
 
+Select a stream:
+
 ![aws-console-cloudwatch-streams](images/aws-console-cloudwatch-streams.png "A list of output from Lambda invocations")
 
+Output from one or more of your Lambda invocations are available to inspect:
+
 ![aws-console-cloudwatch-stream](images/aws-console-cloudwatch-stream.png "Output from Lambda invocations")
-
-## Clean up
-
-We can clear down our AWS resources using the following command:
-
-```bash
-bb stack:destroy
-[holy-lambda] Command <stack:destroy>
-[holy-lambda] Command <bucket:remove>
-[holy-lambda] Removing a bucket example-lambda-18dc55c0dc4d4fccb28209f3a4e01352
-delete: s3://example-lambda-18dc55c0dc4d4fccb28209f3a4e01352/holy-lambda/c522c95bb1b6466deca9e7f465994aa3
-remove_bucket: example-lambda-18dc55c0dc4d4fccb28209f3a4e01352
-```
 
 ## Conclusion
 
@@ -576,6 +581,21 @@ We demonstrated the power of interactive editing by enhancing our code in the AW
 Finally, we extended the API Gateway configuration to pass URL parameters to our Lambda function and conducted an end-to-end test from our terminal.
 
 We hope you enjoy using Clojure in AWS Lambdas using `holy-lambda`
+
+## Clean up
+
+The resources created in this guide incur minimal AWS costs when they're not being executed.
+
+If you prefer to completely remove the resources using the following command:
+
+```bash
+bb stack:destroy
+[holy-lambda] Command <stack:destroy>
+[holy-lambda] Command <bucket:remove>
+[holy-lambda] Removing a bucket example-lambda-18dc55c0dc4d4fccb28209f3a4e01352
+delete: s3://example-lambda-18dc55c0dc4d4fccb28209f3a4e01352/holy-lambda/c522c95bb1b6466deca9e7f465994aa3
+remove_bucket: example-lambda-18dc55c0dc4d4fccb28209f3a4e01352
+```
 
 
 # Troubleshooting
