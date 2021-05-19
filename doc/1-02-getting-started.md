@@ -492,7 +492,7 @@ That's interactive code editing, in Clojure, in AWS Lambda!
 
 The template project also creates a REST endpoint in API Gateway that is linked to our Lambda function.
 
-This section will give a tour of this aspect of the stack, and will guide you through some amendments and the API deployment. Finally, we'll make a call to the API using `curl` to see our stack working end-to-end.
+This section will give a tour of this aspect of the stack, and will guide you through some amendments that are necessary to pass URL parameters to the Lambda, and the deployment of the API. Finally, we'll make a call to the API using `curl` to see our stack working end-to-end.
 
 ### API Gateway
 
