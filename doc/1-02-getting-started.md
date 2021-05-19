@@ -357,7 +357,7 @@ Your stack is now deployed to AWS, and we're ready to access it via the AWS cons
 
 ### Subsequent Edit-Deploy Cycles
 
-As you develop your Lambda code locally, you will repeat the following steps to run the changes locally and, if successful, push the changed to AWS: 
+`holy-lambda` supports rapid development cycles. As you develop your Lambda code locally, you will repeat the following steps to test the changes locally and, if successful, push the changes to AWS: 
 ```
 bb stack:invoke
 bb stack:pack
