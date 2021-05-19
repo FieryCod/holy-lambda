@@ -409,20 +409,25 @@ We invoke Lambda code from the AWS editor by creating a test event.
 
 Select the orange `Test` button to create a test event:
 
-Name the event as `MyFirstLambda` and change the payload to:
+Name the event as `ExampleTestEvent` and change the payload to:
 
 ```json
 {
-  "name": "holy-lambda",
+  "queryStringParameters": {
+    "name": "test-caller"
+  },
   "key2": "value2",
   "key3": "value3"
 }
 ```
+
+> :information_source: The API gateway integration with our Lambda is configured with an option to "Use Lambda Proxy integration", this will allow the API to pass named URL parameters through to Lambda (which we'll cover later). The URL parameters are presented to the Lambda via the as the nested `event` map `queryStringParameters`.
+
 Finally, select `Create` button.
 
 ![aws-console-lambda-test-event](images/aws-console-lambda-test-event.png "Create a Lambda test event")
 
-Click the orange `Test` button once more to execute the lambda function using the `MyFirstLambda` test event, which results in an "Execution result" window like this: 
+Click the orange `Test` button once more to execute the lambda function using the `ExampleTestEvent` test event, which results in an "Execution result" window like this: 
 
 ![aws-console-lambda-function-result-01](images/aws-console-lambda-function-result-01.png "First execution event")
 
@@ -435,7 +440,9 @@ Some details to note in the above output:
 
 ### Edit Code in AWS Lambda
 
-From the Lambda code editor, select `code.cljc` and replace the existing `say-hello` and `ExampleLambda` functions with the following:
+Now we're going to try out interactive Clojure editing from the AWS Lambda code editor. We're going to update the code to use the `name` URL parameter from the test event in our hello function.
+
+Select `code.cljc` and replace the existing `say-hello` and `ExampleLambda` functions with the following:
 
 ```clojure
 (defn say-hello
@@ -450,7 +457,7 @@ From the Lambda code editor, select `code.cljc` and replace the existing `say-he
              [{:keys [event ctx] :as request}]
 
              ;; access the name from the input event and say hello! 
-             (hr/text (say-hello (:name event))))
+             (hr/text (say-hello (:name (:queryStringParameters event)))))
 ```
 
 When you make edits, you need to deploy the changes:
@@ -461,15 +468,115 @@ Select the `Deploy` button.
 
 ![aws-console-lambda-code-deployed](images/aws-console-lambda-code-deployed.png "Lambda code editor: deployed changes")
 
-Now when you run the `MyFirstLambda` test event, you'll see the new output response:
+Now when you run the `ExampleTestEvent` test event, you'll see the new output response:
 
 ![aws-console-lambda-function-result-02](images/aws-console-lambda-function-result-02.png "Updated output reflects code changes")
 
-That's interactive code editing, for Clojure, in AWS Lambda!
+That's interactive code editing, in Clojure, in AWS Lambda!
+
+> :warning: Any changes that are made directly in the editor will be overwritten when the `bb stack:deploy` task is next run. Remember to copy any necessary changes to the made code base. 
 
 ## End to End: Calling the Lambda from API Gateway
 
-TODO
+The template project also creates a REST endpoint in API Gateway that is linked to our Lambda function.
+
+This section will give a tour of this aspect of the stack, and will guide you through some amendments and the API deployment. Finally, we'll make a call to the API using `curl` to see our stack working end-to-end.
+
+### API Gateway
+
+You can look at the application stack by navigating to the API Gateway service:
+
+![aws-console-services-api-gateway](images/aws-console-services-api-gateway.png "Select API Gateway service")
+
+![aws-console-api-gateway-apis](images/aws-console-api-gateway-apis.png "View the available APIs")
+
+From the left-hand menus, select `Resources` and the `GET` method. Here you can see that the GET request calls our Lambda function (highlighted on the far right):
+
+![aws-console-api-gateway-api-resources](images/aws-console-api-gateway-api-resources.png "GET request to Lambda")
+
+### Amend the API
+
+Select the `Method Request` link highlighted above to access the `Method Request editor`.
+
+We need to configure API gateway to allow the URL parameter `name` through to our lambda function:
+
+- Edit the `Request Validator` option and set to `Validate query string parameters and headers`
+- Expand the section `URL Query String Parameters`
+- Select `Add query string`
+- An edit box will appear, enter `name`
+- Ok the change using the tick icon on the right of the row
+- Select the `Required` checkbox
+
+![aws-console-api-gateway-get-method-request](images/aws-console-api-gateway-get-method-request.png "Edit Method Request to add a URL parameter")
+
+### Deploy the API
+
+Now we have our API changes in place, now we need to deploy the API before it is available to call.
+
+From the `Actions` menu, select `Deploy API`:
+
+![aws-console-api-gateway-deploy-action](images/aws-console-api-gateway-deploy-action.png "API deploy action")
+
+Select `Prod` from the `Deployment stage` dropdown. Select `Deploy`:
+
+![aws-console-api-gateway-deploy](images/aws-console-api-gateway-deploy.png "API deploy")
+
+Your API is now available to call and the URL is shown on the following screen. Copy *your* URL:
+
+![aws-console-api-gateway-stage-editor](images/aws-console-api-gateway-stage-editor.png "API stage editor")
+
+From your terminal, replace `YOUR_URL` with the output from the previous step:
+
+```bash
+curl YOUR_URL?name="api-caller"
+```
+
+```bash
+# Your command should look something like this (note: this is a non-working URL)
+curl https://a1bbbzzz99.execute-api.us-east-1.amazonaws.com/Prod?name="api-caller"
+```
+
+The API call will say hello to the name we provided as a URL parameter:
+
+```
+Hello api-caller. Babashka is a sweet friend of mine! Babashka version: 0.4.1
+```
+
+Finally, we'll go and check the log output from the API invocation.
+
+In Lambda, go back to your Lambda function and select the `Monitor` tab, followed by `View logs in CloudWatch`:
+
+![aws-console-lambda-function-monitor](images/aws-console-lambda-function-monitor.png "View the logs from your Lambda")
+
+![aws-console-cloudwatch-streams](images/aws-console-cloudwatch-streams.png "A list of output from Lambda invocations")
+
+![aws-console-cloudwatch-stream](images/aws-console-cloudwatch-stream.png "Output from Lambda invocations")
+
+## Clean up
+
+We can clear down our AWS resources using the following command:
+
+```bash
+bb stack:destroy
+[holy-lambda] Command <stack:destroy>
+[holy-lambda] Command <bucket:remove>
+[holy-lambda] Removing a bucket example-lambda-18dc55c0dc4d4fccb28209f3a4e01352
+delete: s3://example-lambda-18dc55c0dc4d4fccb28209f3a4e01352/holy-lambda/c522c95bb1b6466deca9e7f465994aa3
+remove_bucket: example-lambda-18dc55c0dc4d4fccb28209f3a4e01352
+```
+
+## Conclusion
+
+In this guide, we've covered many of the basics with `holy-lambda`. We've covered quite a lot actually, so well done for getting this far!
+
+We created a `holy-lambda` project based on the babashka runtime to allow interactive code editing in AWS. We ran local tests and deployed our stack to AWS.
+
+We demonstrated the power of interactive editing by enhancing our code in the AWS editor and using the Lambda test feature.
+
+Finally, we extended the API Gateway configuration to pass URL parameters to our Lambda function and conducted an end-to-end test from our terminal.
+
+We hope you enjoy using Clojure in AWS Lambdas using `holy-lambda`
+
 
 # Troubleshooting
   1. Running `bb stack:sync` results in:
@@ -489,6 +596,7 @@ TODO
       ```
       
       Fix all errors reported by the tool. If you still experience any issue please report it at [Github](https://github.com/FieryCod/holy-lambda/issues).
+      
    3. GraalVM native-image compilation fails due to not enough RAM memory on MacOS
    
       *Solution**:
@@ -503,29 +611,3 @@ TODO
       ```
   
       The layers of your template have not been configured correctly. Ensure that stack:sync reports and ARN and it has been added to the `template.myl`
-  
-  
-
-From original getting started text - probably has a place in Troubleshooting:  
-  
-  The first sync is not always successful. If this is the case check the following:  ** link to troubleshooting
-  - Is Docker running?
-  - Run `bb stack:purge` and run `bb stack:sync` once again
-  - If this still fails, run `bb stack:doctor` for diagnostic information
-  
-  **This behaviour may be overridden by changing `:self-manage-layers?` flag is set to `false`, then `holy-lambda` will automatically publish all necessary layers and output `ARN` of each.
-  
-  3. At this point you should have `.holy-lambda` directory in your project. If not then go to troubleshooting. Now you can choose one of three runtimes:
-  
-    - `:babashka`
-    - `:native`
-    - `:java`
-  
-     The template is adjusted in the way that all of the runtimes should work flawlessly and all you need to change is a `:runtime` value in `bb.edn`.
-  
-  
-  
-  
-  1. `:babashka` runtime
-     Babashka runtime is probably the best one to start the journey with `holy-lambda`. 
-         
