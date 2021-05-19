@@ -525,7 +525,7 @@ We need to configure the API Gateway to pass the URL parameter `name` through to
 
 ### Deploy the API
 
-Now we have our API changes in place, now we need to deploy the API before it is available to call.
+Now we have our API changes in place, now we need to deploy the API to make it available to call.
 
 From the `Actions` menu, select `Deploy API`:
 
@@ -535,7 +535,7 @@ Select `Prod` from the `Deployment stage` dropdown. Select `Deploy`:
 
 ![aws-console-api-gateway-deploy](images/aws-console-api-gateway-deploy.png "API deploy")
 
-Your API is now available to call and the URL is shown on the following screen. Copy *your* URL:
+Your API is now deployed and available to call. The API URL is shown at the top of the following screen. Copy *your* URL:
 
 ![aws-console-api-gateway-stage-editor](images/aws-console-api-gateway-stage-editor.png "API stage editor")
 
@@ -544,7 +544,7 @@ From your terminal, replace `YOUR_URL` with the output from the previous step:
 ```bash
 curl YOUR_URL?name="api-caller"
 ```
-
+For example:
 ```bash
 # Your command should look something like this (note: this is a non-working URL)
 curl https://a1bbbzzz99.execute-api.us-east-1.amazonaws.com/Prod?name="api-caller"
@@ -574,7 +574,7 @@ Output from one or more of your Lambda invocations are available to inspect:
 
 In this guide, we've covered many of the basics with `holy-lambda`. We've covered quite a lot actually, so well done for getting this far!
 
-We created a `holy-lambda` project based on the babashka runtime to allow interactive code editing in AWS. We ran local tests and deployed our stack to AWS.
+We created a `holy-lambda` project based on the Babashka runtime to allow interactive code editing in AWS. We ran local tests and deployed our stack to AWS.
 
 We demonstrated the power of interactive editing by enhancing our code in the AWS editor and using the Lambda test feature.
 
@@ -586,7 +586,7 @@ We hope you enjoy using Clojure in AWS Lambdas using `holy-lambda`
 
 The resources created in this guide incur minimal AWS costs when they're not being executed.
 
-If you prefer to completely remove the resources using the following command:
+If you prefer to completely remove the resources using the following command to tear down and delete the `example-lambda` application stack:
 
 ```bash
 bb stack:destroy
