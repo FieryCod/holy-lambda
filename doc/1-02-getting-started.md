@@ -484,7 +484,7 @@ Now when you run the `ExampleTestEvent` test event, you'll see the new output re
 
 That's interactive code editing, in Clojure, in AWS Lambda!
 
-> :warning: Any changes that are made directly in the editor will be overwritten when the `bb stack:deploy` task is next run. Remember to copy any necessary changes to the made code base. 
+> :warning: Any changes that are made directly in the editor will be overwritten when the `bb stack:deploy` task is next run. Remember to copy any necessary changes made back to the code base. 
 
 > :information_source: Interactive editing is only available with the Babashka runtime. Other runtime options package compiled Clojure code or produce native images.
 
