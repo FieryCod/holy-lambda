@@ -8,9 +8,9 @@ Holy lambda is a micro framework which adds support for running Clojure on the [
 - async handlers
 
 ## Java runtime
-Prior work towards targeting Java runtime was done by [uswitch/lambada](https://github.com/uswitch/lambada), but lacked being convienient. Holy lambda in the other hand is very convenient and does things which lambada lacked:
+Prior work towards targeting Java runtime was done by [uswitch/lambada](https://github.com/uswitch/lambada), but lacked being convenient. Holy lambda in the other hand is very convenient and does things which lambada lacked:
 
-- full class identifier is created during macroexpansion of `deflambda` 
+- full class identifier is created during macro expansion of `deflambda` 
 - request is automatically slurped and converted to a map
 - response mimics Ring therefore you don't have to write to `OutputStream`. 
 - supports interceptors
@@ -21,7 +21,7 @@ I've started experimenting with native runtime around May 2019 inspired by @hjha
 
 *Benefits*
 - lambdas will be faster in general, because code is not interpreted (benchmarks in-progress)
-- use any GraalVM Clojure compatible library. Not only one from limited pool of babashkas pods
+- use any GraalVM Clojure compatible library. Not only one from limited pool of babashka's pods
 - target both Java & native runtime
 - mix GraalVM supported languages freely (polyglot)
 - use Profile-Guided Optimizations on GraalVM EE [PGO](https://www.graalvm.org/reference-manual/native-image/PGO/)
@@ -29,10 +29,10 @@ I've started experimenting with native runtime around May 2019 inspired by @hjha
 *Tradeoffs*
 - you have to generate native-configurations for GraalVM (automated by running `bb native:conf`)
 - GraalVM compilation is long - for development use Java runtime with `sam invoke` or `bb stack:invoke`
-- adding and using new libary is not always easy when compiling to native, some extra know-how about GraalVM is needed
+- adding and using new library is not always easy when compiling to native, some extra know-how about GraalVM is needed
 
 ## Babashka runtime
-Babashka runtime provides interactive development environment. There is no need for compiling the sources since those are provided as is to `AWS SAM`.
+[Babashka](https://github.com/babashka/babashka) runtime provides interactive development environment. There is no need for compiling the sources since those are provided as is to `AWS SAM`.
 
 | Runtime   | Cold start | Performance | Artifacts size   | Memory Consumption | Interactive | Compile time |
 |-----------|------------|-------------|------------------|--------------------|-------------|--------------|

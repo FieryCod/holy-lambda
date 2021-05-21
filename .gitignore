@@ -32,3 +32,4 @@ docker/ee/**
 target
 .idea/
 *.iml
+.DS_Store
