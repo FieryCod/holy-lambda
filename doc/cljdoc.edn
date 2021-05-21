@@ -4,4 +4,6 @@
                     ["What is it?" {:file "doc/1-01-whatisit.md"}]
                     ["Getting started" {:file "doc/1-02-getting-started.md"}]
                     ["Babashka tasks recipes" {:file "doc/1-03-babashka-recipes.md"}]
-                    ["Native agent" {:file "doc/1-04-native-agent.md"}]]]}
+                    ["Native agent" {:file "doc/1-04-native-agent.md"}]]
+                   ["Features" {:file "doc/2-00-toc.md"}
+                    ["Interceptors" {:file "doc/2-01-interceptors.md"}]]]}
