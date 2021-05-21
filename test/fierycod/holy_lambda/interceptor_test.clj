@@ -37,8 +37,8 @@
 
 (t/deftest simple-interceptor-1
   (t/testing ":enter should decorate request"
-    (= {:x "x", :fierycod.holy-lambda.interceptor/interceptors {:complete {:leave ["Interceptor2"]}}}
-       (u/call #'Test1 {})))
+    (t/is (= {:x "x", :fierycod.holy-lambda.interceptor/interceptors {:complete {:enter ["Interceptor1"]}}}
+             (u/call #'Test1 {}))))
 
   (t/testing ":leave should decorate response"
     (t/is (= {:y "y", :fierycod.holy-lambda.interceptor/interceptors {:complete {:leave ["Interceptor2"]}}}
@@ -51,7 +51,7 @@
               :z "z",
               :fierycod.holy-lambda.interceptor/interceptors {:complete {:enter ["Interceptor1"
                                                                                  "Interceptor3"],
-                                                                         :leave ["Interceptor2"
-                                                                                 "Interceptor3"]}}}
+                                                                         :leave ["Interceptor3"
+                                                                                 "Interceptor2"]}}}
              (u/call #'Test3 {}))))
   )

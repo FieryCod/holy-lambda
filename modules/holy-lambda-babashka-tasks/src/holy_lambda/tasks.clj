@@ -168,9 +168,32 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def NATIVE_IMAGE_ARGS (if-let [args (seq (:native-image-args RUNTIME))]
                          (s/join " " args)
                          nil))
+(def INFRA_AWS_PROFILE (:profile INFRA))
+(def AWS_PROFILE (or (:profile INFRA) "default"))
 (def BUCKET_PREFIX (:bucket-prefix INFRA))
 (def BUCKET_NAME (:bucket-name INFRA))
-(def REGION (:region INFRA))
+(def REGION_FROM_INFRA (:region INFRA))
+
+(defn can-obtain-from-aws-profile?!
+  [what]
+  (let [result (csh/sh "aws" "configure" "get" what "--profile" AWS_PROFILE)]
+    (if-not (= (:exit result) 0)
+      (throw (ex-info (str (pre "AWS configuration check failed. Unable to get value from the profile: ") (accent AWS_PROFILE)
+                           (when-not (s/blank? (:err result))
+                             (str "\n\n" (pre (:err result))))
+                           (pre "\nDid you run command: ") (accent "aws configure") (pre "?"))
+                      {}))
+      true)))
+
+(def REGION
+  (if REGION_FROM_INFRA
+    REGION_FROM_INFRA
+    (try
+      (can-obtain-from-aws-profile?! "region")
+      (s/trim (:out (csh/sh "aws" "configure" "get" "region" "--profile" AWS_PROFILE)))
+      (catch Exception e
+        (hpr (ex-message e))))))
+
 (def DEFAULT_LAMBDA_NAME (:default-lambda STACK))
 (def RUNTIME_VERSION (:version RUNTIME))
 (def ENTRYPOINT (:entrypoint (:runtime OPTIONS)))
@@ -194,6 +217,22 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def BABASHKA_LAYER_INSTANCE (str BUCKET_NAME "-hlbbri-" (s/replace RUNTIME_VERSION #"\." "-")))
 (def OFFICIAL_BABASHKA_LAYER_ARN "arn:aws:serverlessrepo:eu-central-1:443526418261:applications/holy-lambda-babashka-runtime")
 
+;; VALIDATE IF AWS is configured properly
+(if-not (command-exists? "aws")
+  (hpr (accent "aws") (pre "command does not exists. Did you install AWS command line application?"))
+  (try
+    (can-obtain-from-aws-profile?! "aws_access_key_id")
+    (can-obtain-from-aws-profile?! "aws_secret_access_key")
+    (catch Exception e
+      (hpr (ex-message e))
+      (System/exit 1))))
+
+(defn exit-if-not-synced!
+  []
+  (when-not (fs/exists? (io/file ".holy-lambda/clojure"))
+    (hpr (pre "Project has not been synced yet. Run") (accent "stack:sync") (pre "before running this command!"))
+    (System/exit 1)))
+
 (defn aws-command-output->str
   [output]
   (str (pre "AWS command output:") "\n------------------------------------------\n" (s/trim output)
@@ -202,7 +241,9 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (defn -create-bucket
   [& [bucket throw?]]
   (let [bucket (or bucket BUCKET_NAME)
-        result (csh/sh "aws" "s3" "mb" (str "s3://" bucket))]
+        result (csh/sh "aws" "s3" "mb" (str "s3://" bucket)
+                       "--profile" AWS_PROFILE
+                       "--region" REGION)]
     (if (not= (:exit result) 0)
       (do (hpr (pre "Unable to create a bucket")
                (str (accent bucket) "."))
@@ -217,6 +258,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
   [& [bucket]]
   (shsp "aws" "s3" "rb"
         "--force" (str "s3://" (or bucket BUCKET_NAME))
+        "--profile" AWS_PROFILE
         "--region" REGION))
 
 (def USER_GID
@@ -430,14 +472,14 @@ Resources:
   (io/make-parents BABASHKA_RUNTIME_LAYER_FILE)
   (spit BABASHKA_RUNTIME_LAYER_FILE (babashka-runtime-layer-template))
 
-  (if (bucket-exists? BABASHKA_LAYER_INSTANCE)
-    (hpr (pre "Unable to publish the stack twice to the same bucket!"))
+  (when-not (bucket-exists? BABASHKA_LAYER_INSTANCE)
     (-create-bucket BABASHKA_LAYER_INSTANCE))
 
   (apply shell
          "sam deploy"
          "--template-file"  BABASHKA_RUNTIME_LAYER_FILE
          "--stack-name"     BABASHKA_LAYER_INSTANCE
+         "--profile"        AWS_PROFILE
          "--s3-bucket"      BABASHKA_LAYER_INSTANCE
          "--no-confirm-changeset"
          "--capabilities"   ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"])
@@ -562,22 +604,24 @@ Resources:
        \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM"
   [& args]
   (print-task "stack:api")
+  (exit-if-not-synced!)
   (let [{:keys [static-dir debug envs-file port params]} (norm-args args)]
     (stack-files-check)
     (when (build-stale?)
       (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
 
     (shell (str "sam local start-api"
-                " --parameter-overrides " (if-not params
-                                            (parameters)
-                                            (str (parameters) " " (map->parameters-inline (edn/read-string params))))
-                " --template " TEMPLATE_FILE
-                " -p " (or port 3000)
-                (when static-dir " -s ") static-dir
+                " --parameter-overrides "    (if-not params
+                                               (parameters)
+                                               (str (parameters) " " (map->parameters-inline (edn/read-string params))))
+                " --template "               TEMPLATE_FILE
+                " --profile "                AWS_PROFILE
+                " -p "                       (or port 3000)
+                (when static-dir " -s ")     static-dir
                 " --warm-containers LAZY"
-                " -n " (or envs-file DEFAULT_ENVS_FILE)
-                " --layer-cache-basedir " LAYER_CACHE_DIRECTORY
-                (when debug " --debug")) )))
+                " -n "                       (or envs-file DEFAULT_ENVS_FILE)
+                " --layer-cache-basedir "    LAYER_CACHE_DIRECTORY
+                (when debug " --debug")))))
 
 (defn native:conf
   "     \033[0;31m>\033[0m Provides native configurations for the application"
@@ -685,17 +729,19 @@ set -e
   "     \033[0;31m>\033[0m Packs \033[0;31mCloudformation\033[0m stack"
   []
   (print-task "stack:pack")
+  (exit-if-not-synced!)
   (stack-files-check)
   ;; Check https://github.com/aws/aws-sam-cli/issues/2835
   ;; https://github.com/aws/aws-sam-cli/issues/2836
   (check-n-create-bucket)
   (modify-template)
   (shell "sam" "package"
-         "--template-file" MODIFIED_TEMPLATE_FILE
+         "--template-file"        MODIFIED_TEMPLATE_FILE
          "--output-template-file" PACKAGED_TEMPLATE_FILE
-         "--s3-bucket" BUCKET_NAME
-         "--s3-prefix" BUCKET_PREFIX
-         "--region" REGION))
+         "--profile"              AWS_PROFILE
+         "--s3-bucket"            BUCKET_NAME
+         "--s3-prefix"            BUCKET_PREFIX
+         "--region"               REGION))
 
 (defn bucket:remove
   "     \033[0;31m>\033[0m Removes a s3 bucket using \033[0;31m:bucket-name\033[0m\n\n----------------------------------------------------------------\n"
@@ -713,6 +759,7 @@ set -e
   \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM"
   [& args]
   (print-task "stack:deploy")
+  (exit-if-not-synced!)
   (let [{:keys [guided dry params]} (norm-args args)]
     (if-not (fs/exists? (io/file PACKAGED_TEMPLATE_FILE))
       (hpr (pre "No") (accent PACKAGED_TEMPLATE_FILE) (pre "found. Run") (accent "stack:pack"))
@@ -720,8 +767,9 @@ set -e
         (check-n-create-bucket)
         (apply shell "sam" "deploy"
                "--template-file" PACKAGED_TEMPLATE_FILE
-               "--stack-name" STACK_NAME
-               "--region" REGION
+               "--stack-name"    STACK_NAME
+               "--profile"       AWS_PROFILE
+               "--region"        REGION
                (when dry "--no-execute-changeset")
                (when guided "--guided")
                "--parameter-overrides" (if-not params
@@ -733,6 +781,7 @@ set -e
   "     \033[0;31m>\033[0m Compiles sources if necessary"
   []
   (print-task "stack:compile")
+  (exit-if-not-synced!)
   (when (= RUNTIME_NAME :babashka)
     (hpr "Nothing to compile. Sources are provided as is to" (accent "babashka") "runtime")
     (System/exit 0))
@@ -753,17 +802,19 @@ set -e
        \t\t        - \033[0;31m:logs\033[0m        - logfile to runtime logs to"
   [& args]
   (print-task "stack:invoke")
+  (exit-if-not-synced!)
   (stack-files-check)
   (when (build-stale?)
     (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
   (let [{:keys [name event-file envs-file logs params debug]} (norm-args args)]
-    (shell "sam" "local" "invoke" (or name DEFAULT_LAMBDA_NAME)
-           "--parameter-overrides" (if-not params
-                                     (parameters)
-                                     (str (parameters) " " (map->parameters-inline (edn/read-string params))))
+    (shell "sam" "local" "invoke"    (or name DEFAULT_LAMBDA_NAME)
+           "--parameter-overrides"   (if-not params
+                                       (parameters)
+                                       (str (parameters) " " (map->parameters-inline (edn/read-string params))))
+           "--profile"               AWS_PROFILE
            (when debug "--debug")
-           (when logs "-l") logs
-           (when event-file "-e") event-file
+           (when logs "-l")          logs
+           (when event-file "-e")    event-file
            "-n" (or envs-file DEFAULT_ENVS_FILE))))
 
 (defn mvn-local-test
@@ -810,6 +861,9 @@ set -e
   (if-not CAPABILITIES
     (hpr (pre ":stack:capabilities is required!"))
     (hpr (prs ":stack:capabilities looks good")))
+
+  (when-not INFRA_AWS_PROFILE
+    (hpr (prw ":infra:profile which should point to AWS Profile is not declared, therefore") (accent "default") (prw "profile will be used instead")))
 
   (when (and (not= RUNTIME_NAME :native) BOOTSTRAP_FILE)
     (hpr (prw ":runtime:bootstrap-file is supported only for") (accent ":native") (prw "runtime")))
@@ -884,6 +938,7 @@ set -e
   (print-task "stack:logs")
   (let [{:keys [name tail s e filter]} (norm-args args)]
     (shell "sam" "logs"
+           "--profile"  AWS_PROFILE
            "-n" (or name DEFAULT_LAMBDA_NAME)
            (when s "-s") (when s s)
            (when e "-e") (when e e)
@@ -945,6 +1000,7 @@ set -e
   []
   (print-task "stack:destroy")
   (shell "aws" "cloudformation" "delete-stack"
+         "--profile"    AWS_PROFILE
          "--region"     REGION
          "--stack-name" STACK_NAME)
   (bucket:remove))
@@ -954,5 +1010,6 @@ set -e
   []
   (print-task "stack:describe")
   (shell "aws" "cloudformation" "describe-stacks"
+         "--profile"    AWS_PROFILE
          "--region"     REGION
          "--stack-name" STACK_NAME))
