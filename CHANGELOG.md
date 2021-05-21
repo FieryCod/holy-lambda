@@ -1,5 +1,23 @@
 # Changelog
-## 0.1.45 (21-04-2021)
+## 0.1.49 (21-05-2021)
+*Changes*
+- [bb tasks] Fix bb stack:sync which was failing on the first run
+- [bb tasks] Add support for the custom profile in :infra
+- Update babashka layer to version 0.4.1
+- [bb tasks] Add an automated way of managing layer (update/downgrade). The new way is not compatible with the previous one. Please remove your old babashka layers stack and run `bb stack:sync`.
+- [docs] Add documentation for getting started guide, refine template (entirely done by @lowecg. Thank you so much!)
+- [holy-lambda] Change the order of execution for :leave interceptors. Order is the same as for Pedestal Interceptors now :)
+- [bb tasks] Add validation for docker, AWS setup. Now holy-lambda will fail early with the helpful message if either AWS or docker is not properly set up.
+- [bb tasks] Region is now derived from the profile if exists. A region in bb.edn overrides default region
+- [bb tasks] Commands which depend on stack:sync are now restricted if the project is not synced
+- [bb tasks] stack:invoke, stack:deploy, stack:api now support setting :params for AWS SAM parameters-overrides.
+
+  **Example**:
+  ```
+  bb stack:invoke :params "{:SomeParameter \"Hello World\"}"
+  ```
+
+## 0.1.45 (05-05-2021)
 *Changes*
 - [docker] ce tag is used internally by bb tasks. Projects which use Makefiles should either switch to bb tasks or use image without tag
 - [bb tasks] introduce bb tasks to manage stack, infrastracture and runtimes
