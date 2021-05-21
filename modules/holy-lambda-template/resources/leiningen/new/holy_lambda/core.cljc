@@ -18,24 +18,24 @@
 ;; See here https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/features/interceptors
 
 (i/definterceptor LambdaLogger
-                  {:enter (fn [request]
-                            (println "REQUEST:" request)
-                            request)
-                   :leave (fn [response]
-                            (println "RESPONSE:" response)
-                            response)})
+  {:enter (fn [request]
+            (println "REQUEST:" request)
+            request)
+   :leave (fn [response]
+            (println "RESPONSE:" response)
+            response)})
 
 (i/definterceptor AddHeaderToResponse
-                  {:leave (fn [response]
-                            (hr/header response "Custom-Header" "Some Value"))})
+  {:leave (fn [response]
+            (hr/header response "Custom-Header" "Some Value"))})
 
 (h/deflambda ExampleLambda
-             "I can run on Java, Babashka or Native runtime..."
-             < {:interceptors [LambdaLogger AddHeaderToResponse]}
-             [{:keys [event ctx] :as request}]
+  "I can run on Java, Babashka or Native runtime..."
+  < {:interceptors [LambdaLogger AddHeaderToResponse]}
+  [{:keys [event ctx] :as request}]
 
-             ;; return a successful plain text response. See also, hr/json
-             (hr/text (say-hello)))
+  ;; return a successful plain text response. See also, hr/json
+  (hr/text (say-hello)))
 
 ;; (native only) specify the Lambda's entry point as a static main function when generating a class file
 (native/entrypoint [#'ExampleLambda])

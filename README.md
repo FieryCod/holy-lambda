@@ -36,12 +36,17 @@ io.github.FieryCod/holy-lambda {:mvn/version "0.1.48"}
     [fierycod.holy-lambda.native :as native]
     [fierycod.holy-lambda.response :as hr]))
 
-(i/definterceptor LogIncomingRequest
-  {:enter (fn [request] request)})
+(i/definterceptor LambdaLogger
+  {:enter (fn [request]
+            (println "REQUEST:" request)
+            request)
+   :leave (fn [response]
+            (println "RESPONSE:" response)
+            response)})
  
 (h/deflambda ExampleLambda
   "I can run on Java, Babashka or Native runtime..."
-  < {:interceptors [LogIncomingRequest]}
+  < {:interceptors [LambdaLogger]}
   [{:keys [event ctx]}]
   (hr/text "Hello world"))
   
