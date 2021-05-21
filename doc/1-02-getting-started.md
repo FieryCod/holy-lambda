@@ -462,12 +462,12 @@ Select `code.cljc` and replace the existing `say-hello` and `ExampleLambda` func
 
 ```clojure
 (h/deflambda ExampleLambda
-             "I can run on Java, Babashka or Native runtime..."
-             < {:interceptors [LambdaLogger AddHeaderToResponse]}
-             [{:keys [event ctx] :as request}]
+  "I can run on Java, Babashka or Native runtime..."
+  < {:interceptors [LambdaLogger AddHeaderToResponse]}
+  [{:keys [event ctx] :as request}]
 
-             ;; access the name from the input event and say hello! 
-             (hr/text (say-hello (:name (:queryStringParameters event)))))
+  ;; access the name from the input event and say hello! 
+  (hr/text (say-hello (:name (:queryStringParameters event)))))
 ```
 
 When you make edits, you need to deploy the changes:
