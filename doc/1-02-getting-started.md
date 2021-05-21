@@ -597,20 +597,19 @@ delete: s3://example-lambda-18dc55c0dc4d4fccb28209f3a4e01352/holy-lambda/c522c95
 remove_bucket: example-lambda-18dc55c0dc4d4fccb28209f3a4e01352
 ```
 
-
 # Troubleshooting
   1. Running `bb stack:sync` results in:
      ```
      [holy-lambda] Project did not sync properly. Remove .holy-lambda directory and run stack:sync
      ```
      
-     *Solution*:
+     **Solution**:
      ```bash
      bb stack:purge && bb stack:sync
      ```
    2. Commands are failing:
    
-      *Solution*:
+      **Solution**:
       ```bash
       bb stack:purge && bb stack:doctor
       ```
@@ -619,7 +618,7 @@ remove_bucket: example-lambda-18dc55c0dc4d4fccb28209f3a4e01352
       
    3. GraalVM native-image compilation fails due to not enough RAM memory on MacOS
    
-      *Solution**:
+      **Solution**:
       Increase the RAM limit in Docker UI [preferences](https://docs.docker.com/docker-for-mac/#resources).
 
   4. stack:invoke fails with the following message"
