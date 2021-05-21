@@ -71,7 +71,7 @@
                        :infra
                        {:bucket-prefix       "holy-lambda"
 
-                        :bucket-name         "holy-lambda-template-bucket"
+                        :bucket-name         "holy-lambda-basic-example"
 
                         :region              "eu-central-1"}}
 
