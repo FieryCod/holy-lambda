@@ -73,6 +73,8 @@
 
                         :bucket-name         "holy-lambda-basic-example"
 
+                        :profile             "default"
+
                         :region              "eu-central-1"}}
 
  :tasks {:requires              ([holy-lambda.tasks])

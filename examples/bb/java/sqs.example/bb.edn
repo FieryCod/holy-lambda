@@ -70,6 +70,8 @@
                        :infra
                        {:bucket-prefix       "holy-lambda"
 
+                        :profile             "default"
+
                         :bucket-name         "holy-lambda-template-bucket-sqs-java"
 
                         :region              "eu-central-1"}}
