@@ -20,7 +20,6 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Extra information:**
- - OS: [e.g. MacOS]
- - `tasks` version (SHA):
+ - `OS`: [e.g. MacOS]
  - `holy-lambda` version:
  - `bb stack:doctor` output:
