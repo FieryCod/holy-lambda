@@ -3,8 +3,12 @@
          :deps/root                                 "./modules/holy-lambda-babashka-tasks"
          :sha                                       "756c9f0ad2fe98ab9a962ccd992b8aa1cb87ed5b"}}
 
+ ;; Local repositories should be downloaded to `.holy-lambda` directory
+ ;; This way project artifacts are separated from global ~/.m2 and only project artifacts
+ ;; are deployed to AWS Lambda
  :mvn/local-repo                                    ".holy-lambda/.m2"
 
+ ;; Minimal babashka version which should be used in conjuction with holy-lambda
  :min-bb-version                                    "0.3.7"
 
  :holy-lambda/options {
@@ -30,10 +34,12 @@
 
                                ;; Template file which should be used
                                ;; holy-lambda uses AWS SAM under the hood, therefore
+                               ;; https://aws.amazon.com/serverless/sam/
                                ;; for more template examples search for AWS SAM templates :)
                                :template            "template.yml"
 
 
+                               ;; Check https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html
                                :capabilities        ["CAPABILITY_IAM"]}
 
 
