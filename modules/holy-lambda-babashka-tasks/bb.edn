@@ -1,4 +1,4 @@
-{:deps {fierycod/holy-lambda-babashka-tasks {:local/root "."}}
+{:deps {io.github.FieryCod/holy-lambda-babashka-tasks {:local/root "."}}
 
  :mvn/local-repo ".holy-lambda/.m2"
 

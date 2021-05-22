@@ -1,4 +1,4 @@
-(defproject holy-lambda/lein-template   "0.1.57"
+(defproject holy-lambda/lein-template   "0.1.59"
   :description "Template for holy lambda micro framework"
 
   :url "https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-template"

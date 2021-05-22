@@ -11,19 +11,32 @@
 
 The micro framework that integrates Clojure with AWS Lambda on either Java, Clojure Native, or Babashka runtime. 
 
-``` clojure
-io.github.FieryCod/holy-lambda {:mvn/version "0.1.49"}
-```
-
-**Interceptors namespace is work in progress and subject to change. Consider it as an alpha.**
-
 **Supported runtimes**
   - Babashka
   - Native Clojure runtime
   - Java based Clojure runtime
   - (incoming) Node.js runtime for Clojurescript
 
-[Jump here](https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
+**Stable releases**
+
+``` clojure
+io.github.FieryCod/holy-lambda                     {:mvn/version "0.1.49"}
+
+;; Built in holy-lambda. For core.async support use `async-retriever`
+io.github.FieryCod/holy-lambda-default-retriever   {:mvn/version "0.0.6"}
+
+;; Not supported in babashka runtime
+io.github.FieryCod/holy-lambda-async-retriever     {:mvn/version "0.0.6"}
+
+;; In bb.edn
+io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url "https://github.com/FieryCod/holy-lambda"
+                                                    :deps/root "./modules/holy-lambda-babashka-tasks"
+                                                    :sha     "8986fa8df5491e4f52895f2c11304d070d7a390e"}
+```
+
+[Jump here](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
+
+**Interceptors namespace is work in progress and subject to change. Consider it as an alpha.**
 
 ### Minimal code example
 

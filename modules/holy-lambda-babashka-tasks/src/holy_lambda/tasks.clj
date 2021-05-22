@@ -858,7 +858,7 @@ set -e
     (hpr " AWS directory is:        " (accent AWS_DIR))
     (hpr " AWS directory exists?:   " (accent AWS_DIR_EXISTS?))
     (hpr " Docker version:          " (accent (or (s/trim (shs-no-err "docker" "--version")) "UNKNOWN")))
-    (hpr " Babashka tasks sha:      " (accent (or (:sha (get (:deps BB_EDN) 'fierycod/holy-lambda-babashka-tasks)) "LOCAL")))
+    (hpr " Babashka tasks sha:      " (accent (or (:sha (get (:deps BB_EDN) 'io.github.FieryCod/holy-lambda-babashka-tasks)) "LOCAL")))
     (hpr " Babashka tasks version:  " (accent TASKS_VERSION))
     (hpr " Babashka version:        " (accent (or (s/trim (shs-no-err "bb" "version")) "UNKNOWN")))
     (hpr " Runtime:                 " (accent RUNTIME_NAME))
