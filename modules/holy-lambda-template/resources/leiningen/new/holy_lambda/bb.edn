@@ -38,7 +38,6 @@
                                ;; for more template examples search for AWS SAM templates :)
                                :template            "template.yml"
 
-
                                ;; Check https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html
                                :capabilities        ["CAPABILITY_IAM"]}
 
@@ -46,7 +45,7 @@
                        :runtime
                        {
                         ;; Choose one of the supported runtime `:babashka`, `:native`, `:java`
-                        :name                :native
+                        :name                      :java
 
                         ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
                         ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers
