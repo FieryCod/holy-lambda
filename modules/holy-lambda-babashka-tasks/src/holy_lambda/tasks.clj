@@ -84,6 +84,14 @@
         (:out result))
       (:err result))))
 
+(defn shs-no-err
+  [cmd & args]
+  (let [result (apply csh/sh (remove nil? (into (p/tokenize cmd) args)))]
+    (if (s/blank? (:err result))
+      (when-not (s/blank? (:out result))
+        (:out result))
+      nil)))
+
 (defn command-exists?
   [cmd]
   (= (int (:exit (csh/sh "which" cmd))) 0))
@@ -116,21 +124,30 @@
 (def AVAILABLE_RUNTIMES #{:babashka :native :java})
 (def AVAILABLE_REGIONS #{"us-east-2", "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "cn-north-1", "cn-northwest-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-north-1", "me-south-1", "sa-east-1"})
 (def REMOTE_TASKS "https://raw.githubusercontent.com/FieryCod/holy-lambda/master/modules/holy-lambda-babashka-tasks/src/holy_lambda/tasks.clj")
-(def TASKS_VERSION "0.0.3")
+(def TASKS_VERSION "0.1.49")
 (def TASKS_VERSION_MATCH #"(?:TASKS_VERSION) (\"[0-9]*\.[0-9]*\.[0-9]*\")")
 (def BUCKET_IN_LS_REGEX #"(?:[0-9- :]+)(.*)")
 (def LAYER_CACHE_DIRECTORY ".holy-lambda/.cache/layers")
 
-(defn options
+(defn bb-edn
   []
-  (:holy-lambda/options (edn/read-string (slurp (io/file "bb.edn")))))
+  (edn/read-string (slurp (io/file "bb.edn"))))
+
+(def BB_EDN
+  (try
+    (bb-edn)
+    (catch Exception err
+      (do
+        (hpr (pre "File") (accent "bb.edn") (pre "not found?!")
+             (str "\n" (pre "Original message: ") (pre (.getMessage err))))
+        (System/exit 1)))))
 
 (def OPTIONS
-  (try
-    (options)
-    (catch Exception err_
-      (hpr (pre "Either bb.edn not found or does not contain :holy-lambda/options"))
-      (System/exit 1))))
+  (if-let [opts (:holy-lambda/options BB_EDN)]
+    opts
+    (do (hpr (accent ":holy-lambda/options") (pre "are not declared in") (accent "bb.edn") (pre "file!")
+             (pre "Exiting!"))
+        (System/exit 1))))
 
 (defn stat-file
   [filename]
@@ -270,6 +287,9 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
    (io/file (or
              (System/getenv "XDG_CACHE_HOME")
              (System/getProperty "user.home")))))
+
+(def PROJECT_DIRECTORY
+  (.getAbsolutePath (io/file (System/getProperty "user.dir"))))
 
 (def AWS_DIR
   (.getAbsolutePath (io/file HOME_DIR ".aws")))
@@ -827,21 +847,27 @@ set -e
   "     \033[0;31m>\033[0m Diagnoses common issues of holy-lambda stack"
   []
   (print-task "stack:doctor")
-  (println "")
-  (hpr "---------------------------------------")
-  (hpr " Checking health of holy-lambda stack")
-  (hpr " Home directory is:       " (accent HOME_DIR))
-  (hpr " AWS directory is:        " (accent AWS_DIR))
-  (hpr " AWS directory exists?:   " (accent AWS_DIR_EXISTS?))
-  (hpr " Babashka tasks version:  " (accent TASKS_VERSION))
-  (hpr " Babashka version:        " (accent (s/trim (shs "bb" "version"))))
-  (hpr " Runtime:                 " (accent RUNTIME_NAME))
-  (hpr " Runtime entrypoint:      " (accent ENTRYPOINT))
-  (hpr " Stack name:              " (accent STACK_NAME))
-  (hpr " S3 Bucket name:          " (accent BUCKET_NAME))
-  (hpr " S3 Bucket prefix:        " (accent BUCKET_PREFIX))
-  (hpr " S3 Bucket exists?:       " (accent (bucket-exists?)))
-  (hpr "---------------------------------------\n")
+  (do
+    (println "")
+    (hpr "---------------------------------------")
+    (hpr " Checking health of holy-lambda stack")
+    (hpr " Home directory is:       " (accent HOME_DIR))
+    (hpr " Project directory is:    " (accent PROJECT_DIRECTORY))
+    (hpr " AWS SAM version:         " (accent (or (s/trim (shs-no-err "sam" "--version")) "UNKNOWN")))
+    (hpr " AWS CLI version:         " (accent (or (s/trim (shs-no-err "aws" "--version")) "UNKNOWN")))
+    (hpr " AWS directory is:        " (accent AWS_DIR))
+    (hpr " AWS directory exists?:   " (accent AWS_DIR_EXISTS?))
+    (hpr " Docker version:          " (accent (or (s/trim (shs-no-err "docker" "--version")) "UNKNOWN")))
+    (hpr " Babashka tasks sha:      " (accent (or (:sha (get (:deps BB_EDN) 'fierycod/holy-lambda-babashka-tasks)) "LOCAL")))
+    (hpr " Babashka tasks version:  " (accent TASKS_VERSION))
+    (hpr " Babashka version:        " (accent (or (s/trim (shs-no-err "bb" "version")) "UNKNOWN")))
+    (hpr " Runtime:                 " (accent RUNTIME_NAME))
+    (hpr " Runtime entrypoint:      " (accent ENTRYPOINT))
+    (hpr " Stack name:              " (accent STACK_NAME))
+    (hpr " S3 Bucket name:          " (accent BUCKET_NAME))
+    (hpr " S3 Bucket prefix:        " (accent BUCKET_PREFIX))
+    (hpr " S3 Bucket exists?:       " (accent (bucket-exists?)))
+    (hpr "---------------------------------------\n"))
 
   (when-not (fs/exists? (io/file AWS_DIR))
     (hpr (pre "$HOME/.aws does not exists. Did you run") (accent "aws configure")))
