@@ -179,6 +179,16 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
              (pre "Choose either") (accent ":ce") (pre "or") (accent ":ee") (pre "build variant!"))
         (System/exit 1))))
 
+(defn docker-image-exists?
+  [image]
+  (boolean (shs-no-err "docker" "inspect" "--type=image" image)))
+
+(when-not (docker-image-exists? IMAGE_CORDS)
+  (hpr (prw "Docker image") (accent IMAGE_CORDS) (prw "for") (accent "holy-lambda") (prw "microframework has not been yet downloaded!"))
+  (hpr "Pulling the image" (accent IMAGE_CORDS) "from" (str (accent "DockerHub") "!"))
+  (shell "docker" "pull" IMAGE_CORDS)
+  (println ""))
+
 (def INFRA (:infra OPTIONS))
 (def RUNTIME (:runtime OPTIONS))
 (def RUNTIME_NAME (:name RUNTIME))
