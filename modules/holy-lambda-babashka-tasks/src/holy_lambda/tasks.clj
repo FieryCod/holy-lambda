@@ -191,7 +191,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 
 (def INFRA (:infra OPTIONS))
 (def RUNTIME (:runtime OPTIONS))
-(def RUNTIME_NAME (:name RUNTIME))
+(def *RUNTIME_NAME* (:name RUNTIME))
 (def NATIVE_IMAGE_ARGS (if-let [args (seq (:native-image-args RUNTIME))]
                          (s/join " " args)
                          nil))
@@ -200,6 +200,16 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def BUCKET_PREFIX (:bucket-prefix INFRA))
 (def BUCKET_NAME (:bucket-name INFRA))
 (def REGION_FROM_INFRA (:region INFRA))
+
+(defn override-runtime!
+  [new-runtime]
+  (when new-runtime
+    (let [runtime (keyword (s/replace new-runtime #":" ""))]
+      (if-not (contains? AVAILABLE_RUNTIMES runtime)
+        (do
+          (hpr (pre "Runtime override from") (accent *RUNTIME_NAME*) (pre "to") (accent runtime) (pre "is not possible!"))
+          (hpr (pre "Runtime") (accent runtime) (pre "is not one of") (accent AVAILABLE_RUNTIMES)))
+        (alter-var-root #'*RUNTIME_NAME* (constantly runtime))))))
 
 (defn can-obtain-from-aws-profile?!
   [what]
@@ -328,31 +338,31 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 
 (defn parameters--java
   [opt]
-  {"CodeUri" (if (= :relative opt)
-               OUTPUT_JAR_PATH_RELATIVE
-               OUTPUT_JAR_PATH)
-   "Runtime" "java8"
-   "Entrypoint" ENTRYPOINT})
+  {"CodeUri"        (if (= :relative opt)
+                      OUTPUT_JAR_PATH_RELATIVE
+                      OUTPUT_JAR_PATH)
+   "Runtime"        "java8"
+   "Entrypoint"     ENTRYPOINT})
 
 (defn parameters--babashka
   [opt]
-  {"CodeUri" (if (= :relative opt)
-               "../src"
-               "src")
-   "Runtime" "provided"
-   "Entrypoint" ENTRYPOINT})
+  {"CodeUri"        (if (= :relative opt)
+                      "../src"
+                      "src")
+   "Runtime"        "provided"
+   "Entrypoint"     ENTRYPOINT})
 
 (defn parameters--native
   [opt]
-  {"CodeUri" (if (= :relative opt)
-               "build/latest.zip"
-               ".holy-lambda/build/latest.zip")
-   "Runtime" "provided"
-   "Entrypoint" ENTRYPOINT})
+  {"CodeUri"        (if (= :relative opt)
+                      "build/latest.zip"
+                      ".holy-lambda/build/latest.zip")
+   "Runtime"        "provided"
+   "Entrypoint"     ENTRYPOINT})
 
 (defn -parameters
   [& [opt]]
-  (case RUNTIME_NAME
+  (case *RUNTIME_NAME*
     :java     (parameters--java opt)
     :babashka (parameters--babashka opt)
     :native   (parameters--native opt)))
@@ -380,7 +390,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 
 (defn deps-sync--babashka
   []
-  (when (= RUNTIME_NAME :babashka)
+  (when (= *RUNTIME_NAME* :babashka)
     (when-not (empty? (:pods (:runtime OPTIONS)))
       (hpr "Babashka pods found! Syncing" (str (accent "babashka pods") ".") "Pods should be distributed via a layer which points to" (accent ".holy-lambda/pods"))
       (docker:run "download_pods")
@@ -558,7 +568,7 @@ Resources:
 
 (defn runtime-sync-hook
   []
-  (case RUNTIME_NAME
+  (case *RUNTIME_NAME*
     :babashka (runtime-sync-hook--babashka)
     nil))
 
@@ -611,7 +621,7 @@ Resources:
     (hpr (pre "No") (accent ".holy-lambda") (pre "directory! Run") (accent "stack:sync"))
     (System/exit 1))
 
-  (case (or check RUNTIME_NAME)
+  (case (or check *RUNTIME_NAME*)
     :java   (stack-files-check--java)
     :native (do
               (stack-files-check--java)
@@ -622,7 +632,7 @@ Resources:
 (defn build-stale?
   []
   (and
-   (not= RUNTIME_NAME :babashka)
+   (not= *RUNTIME_NAME* :babashka)
    (boolean (seq (fs/modified-since OUTPUT_JAR_PATH (fs/glob "src" "**/**.{clj,cljc,cljs}"))))))
 
 (defn stack:api
@@ -631,11 +641,13 @@ Resources:
        \t\t        - \033[0;31m:port\033[0m        - local port number to listen to
        \t\t        - \033[0;31m:static-dir\033[0m  - assets which should be presented at \033[0;31m/\033[0m
        \t\t        - \033[0;31m:envs-file\033[0m   - path to \033[0;31menvs file\033[0m
+       \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
        \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM"
   [& args]
   (print-task "stack:api")
   (exit-if-not-synced!)
-  (let [{:keys [static-dir debug envs-file port params]} (norm-args args)]
+  (let [{:keys [static-dir debug envs-file port params runtime]} (norm-args args)]
+    (override-runtime! runtime)
     (stack-files-check)
     (when (build-stale?)
       (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
@@ -654,20 +666,25 @@ Resources:
                 (when debug " --debug")))))
 
 (defn native:conf
-  "     \033[0;31m>\033[0m Provides native configurations for the application"
-  []
+  "     \033[0;31m>\033[0m Provides native configurations for the application
+       \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime "
+  [& args]
   (print-task "native:conf")
-  (when-not (= RUNTIME_NAME :native)
-    (hpr (pre "Command") (accent "native:conf") (pre "supports only") (accent ":native") (pre "runtime!")))
+  (let [{:keys [runtime]} (norm-args args)]
+    (override-runtime! runtime)
 
-  (stack-files-check :default)
+    (when-not (= *RUNTIME_NAME* :native)
+      (hpr (pre "Command") (accent "native:conf") (pre "supports only") (accent ":native") (pre "runtime!"))
+      (System/exit 1))
 
-  (hpr "Compiling with agent support")
-  (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aot true :jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
+    (stack-files-check :default)
 
-  (hpr "Generating native-configurations")
-  (docker:run (str "java -agentlib:native-image-agent=config-output-dir=" NATIVE_CONFIGURATIONS_PATH
-                   " -Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT)))
+    (hpr "Compiling with agent support")
+    (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aot true :jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
+
+    (hpr "Generating native-configurations")
+    (docker:run (str "java -agentlib:native-image-agent=config-output-dir=" NATIVE_CONFIGURATIONS_PATH
+                     " -Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))))
 
 (def -bootstrap-file
 "#!/bin/sh
@@ -683,39 +700,44 @@ set -e
       -bootstrap-file))
 
 (defn native:executable
-  "     \033[0;31m>\033[0m Provides native executable of the application\n\n----------------------------------------------------------------\n"
-  []
+  "     \033[0;31m>\033[0m Provides native executable of the application
+  \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
+\n----------------------------------------------------------------\n"
+  [& args]
   (print-task "native:executable")
-  (when-not (= RUNTIME_NAME :native)
-    (hpr (pre "Command") (accent "native:executable") (pre "supports only") (accent ":native") (pre "runtime!")))
+  (let [{:keys [runtime]} (norm-args args)]
+    (override-runtime! runtime)
+    (when-not (= *RUNTIME_NAME* :native)
+      (hpr (pre "Command") (accent "native:executable") (pre "supports only") (accent ":native") (pre "runtime!"))
+      (System/exit 1))
 
-  (stack-files-check :java)
+    (stack-files-check :java)
 
-  (when (build-stale?)
-    (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
+    (when (build-stale?)
+      (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
 
-  (when-not (fs/exists? (io/file NATIVE_CONFIGURATIONS_PATH))
-    (hpr (prw "No native configurations has been generated. Native image build may fail. Run") (accent "native:conf") (prw "to generate native configurations.")))
+    (when-not (fs/exists? (io/file NATIVE_CONFIGURATIONS_PATH))
+      (hpr (prw "No native configurations has been generated. Native image build may fail. Run") (accent "native:conf") (prw "to generate native configurations.")))
 
-  ;; Copy then build
-  (shell-no-exit "bash -c \"[ -d resources/native-configuration ] && cp -rf resources/native-configuration .holy-lambda/build/\"")
+    ;; Copy then build
+    (shell-no-exit "bash -c \"[ -d resources/native-configuration ] && cp -rf resources/native-configuration .holy-lambda/build/\"")
 
-  (docker:run (str "cd .holy-lambda/build/ && native-image -jar output.jar -H:ConfigurationFileDirectories=native-configuration "
-                   "-H:+AllowIncompleteClasspath"
-                   (when NATIVE_IMAGE_ARGS
-                     (str " " NATIVE_IMAGE_ARGS))))
+    (docker:run (str "cd .holy-lambda/build/ && native-image -jar output.jar -H:ConfigurationFileDirectories=native-configuration "
+                     "-H:+AllowIncompleteClasspath"
+                     (when NATIVE_IMAGE_ARGS
+                       (str " " NATIVE_IMAGE_ARGS))))
 
-  (if-not (fs/exists? (io/file ".holy-lambda/build/output"))
-    (hpr (pre "Native image failed to create executable. Fix your build! Skipping next steps"))
-    (do
-      (spit ".holy-lambda/build/bootstrap" (bootstrap-file))
-      (when (fs/exists? (io/file NATIVE_DEPS_PATH))
-        (hpr "Copying" (accent ":runtime:native-deps"))
-        (shell (str "cp -R " NATIVE_DEPS_PATH " .holy-lambda/build/")))
-      (hpr "Bundling artifacts...")
-      (shell "bash -c \"cd .holy-lambda/build && chmod +x bootstrap\"" )
-      (shell "bash -c \"cd .holy-lambda/build && rm -Rf output-agent.jar configuration output.build_artifacts.txt\"")
-      (shell "bash -c \"cd .holy-lambda/build && zip -r latest.zip . -x 'output.jar'\""))))
+    (if-not (fs/exists? (io/file ".holy-lambda/build/output"))
+      (hpr (pre "Native image failed to create executable. Fix your build! Skipping next steps"))
+      (do
+        (spit ".holy-lambda/build/bootstrap" (bootstrap-file))
+        (when (fs/exists? (io/file NATIVE_DEPS_PATH))
+          (hpr "Copying" (accent ":runtime:native-deps"))
+          (shell (str "cp -R " NATIVE_DEPS_PATH " .holy-lambda/build/")))
+        (hpr "Bundling artifacts...")
+        (shell "bash -c \"cd .holy-lambda/build && chmod +x bootstrap\"" )
+        (shell "bash -c \"cd .holy-lambda/build && rm -Rf output-agent.jar configuration output.build_artifacts.txt\"")
+        (shell "bash -c \"cd .holy-lambda/build && zip -r latest.zip . -x 'output.jar'\"")))))
 
 (defn modify-template
   []
@@ -756,22 +778,25 @@ set -e
     (bucket:create)))
 
 (defn stack:pack
-  "     \033[0;31m>\033[0m Packs \033[0;31mCloudformation\033[0m stack"
-  []
+  "     \033[0;31m>\033[0m Packs \033[0;31mCloudformation\033[0m stack
+   \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime "
+  [& args]
   (print-task "stack:pack")
-  (exit-if-not-synced!)
-  (stack-files-check)
-  ;; Check https://github.com/aws/aws-sam-cli/issues/2835
-  ;; https://github.com/aws/aws-sam-cli/issues/2836
-  (check-n-create-bucket)
-  (modify-template)
-  (shell "sam" "package"
-         "--template-file"        MODIFIED_TEMPLATE_FILE
-         "--output-template-file" PACKAGED_TEMPLATE_FILE
-         "--profile"              AWS_PROFILE
-         "--s3-bucket"            BUCKET_NAME
-         "--s3-prefix"            BUCKET_PREFIX
-         "--region"               REGION))
+  (let [{:keys [runtime]} (norm-args args)]
+    (override-runtime! runtime)
+    (exit-if-not-synced!)
+    (stack-files-check)
+    ;; Check https://github.com/aws/aws-sam-cli/issues/2835
+    ;; https://github.com/aws/aws-sam-cli/issues/2836
+    (check-n-create-bucket)
+    (modify-template)
+    (shell "sam" "package"
+           "--template-file"        MODIFIED_TEMPLATE_FILE
+           "--output-template-file" PACKAGED_TEMPLATE_FILE
+           "--profile"              AWS_PROFILE
+           "--s3-bucket"            BUCKET_NAME
+           "--s3-prefix"            BUCKET_PREFIX
+           "--region"               REGION)))
 
 (defn bucket:remove
   "     \033[0;31m>\033[0m Removes a s3 bucket using \033[0;31m:bucket-name\033[0m\n\n----------------------------------------------------------------\n"
@@ -786,11 +811,13 @@ set -e
   "     \033[0;31m>\033[0m Deploys \033[0;31mCloudformation\033[0m stack
   \t\t        - \033[0;31m:guided\033[0m      - guide the deployment
   \t\t        - \033[0;31m:dry\033[0m         - execute changeset?
-  \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM"
+  \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM
+  \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime "
   [& args]
   (print-task "stack:deploy")
-  (exit-if-not-synced!)
-  (let [{:keys [guided dry params]} (norm-args args)]
+  (let [{:keys [guided dry params runtime]} (norm-args args)]
+    (override-runtime! runtime)
+    (exit-if-not-synced!)
     (if-not (fs/exists? (io/file PACKAGED_TEMPLATE_FILE))
       (hpr (pre "No") (accent PACKAGED_TEMPLATE_FILE) (pre "found. Run") (accent "stack:pack"))
       (do
@@ -812,7 +839,7 @@ set -e
   []
   (print-task "stack:compile")
   (exit-if-not-synced!)
-  (when (= RUNTIME_NAME :babashka)
+  (when (= *RUNTIME_NAME* :babashka)
     (hpr "Nothing to compile. Sources are provided as is to" (accent "babashka") "runtime")
     (System/exit 0))
 
@@ -828,15 +855,17 @@ set -e
        \t\t        - \033[0;31m:event-file\033[0m  - path to \033[0;31mevent file\033[0m
        \t\t        - \033[0;31m:envs-file\033[0m   - path to \033[0;31menvs file\033[0m
        \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM
+       \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
        \t\t        - \033[0;31m:debug\033[0m       - run invoke in \033[0;31mdebug mode\033[0m
        \t\t        - \033[0;31m:logs\033[0m        - logfile to runtime logs to"
   [& args]
   (print-task "stack:invoke")
-  (exit-if-not-synced!)
-  (stack-files-check)
-  (when (build-stale?)
-    (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
-  (let [{:keys [name event-file envs-file logs params debug]} (norm-args args)]
+  (let [{:keys [name event-file envs-file logs params debug runtime]} (norm-args args)]
+    (override-runtime! runtime)
+    (exit-if-not-synced!)
+    (stack-files-check)
+    (when (build-stale?)
+      (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
     (shell "sam" "local" "invoke"    (or name DEFAULT_LAMBDA_NAME)
            "--parameter-overrides"   (if-not params
                                        (parameters)
@@ -871,7 +900,7 @@ set -e
     (hpr " Babashka tasks sha:      " (accent (or (:sha (get (:deps BB_EDN) 'io.github.FieryCod/holy-lambda-babashka-tasks)) "LOCAL")))
     (hpr " Babashka tasks version:  " (accent TASKS_VERSION))
     (hpr " Babashka version:        " (accent (or (s/trim (shs-no-err "bb" "version")) "UNKNOWN")))
-    (hpr " Runtime:                 " (accent RUNTIME_NAME))
+    (hpr " Runtime:                 " (accent *RUNTIME_NAME*))
     (hpr " Runtime entrypoint:      " (accent ENTRYPOINT))
     (hpr " Stack name:              " (accent STACK_NAME))
     (hpr " S3 Bucket name:          " (accent BUCKET_NAME))
@@ -884,9 +913,9 @@ set -e
 
   (read-string (slurp (io/file "deps.edn")))
 
-  (if-not (contains? AVAILABLE_RUNTIMES RUNTIME_NAME)
+  (if-not (contains? AVAILABLE_RUNTIMES *RUNTIME_NAME*)
     (do
-      (hpr (str (pre ":runtime ") (accent RUNTIME_NAME) (pre " is not supported!")))
+      (hpr (str (pre ":runtime ") (accent *RUNTIME_NAME*) (pre " is not supported!")))
       (hpr (str "Choose one of supported build tools: " AVAILABLE_RUNTIMES)))
     (hpr (prs ":runtime looks good")))
 
@@ -901,27 +930,27 @@ set -e
   (when-not INFRA_AWS_PROFILE
     (hpr (prw ":infra:profile which should point to AWS Profile is not declared, therefore") (accent "default") (prw "profile will be used instead")))
 
-  (when (and (not= RUNTIME_NAME :native) BOOTSTRAP_FILE)
+  (when (and (not= *RUNTIME_NAME* :native) BOOTSTRAP_FILE)
     (hpr (prw ":runtime:bootstrap-file is supported only for") (accent ":native") (prw "runtime")))
 
-  (when (and (= RUNTIME_NAME :native) BOOTSTRAP_FILE (not (fs/exists? (io/file BOOTSTRAP_FILE))))
+  (when (and (= *RUNTIME_NAME* :native) BOOTSTRAP_FILE (not (fs/exists? (io/file BOOTSTRAP_FILE))))
     (hpr (prw ":runtime:bootstrap-file does not exists. Default bootstrap file for") (accent ":native") (prw "runtime will be used!")))
 
-  (when (and (not= RUNTIME_NAME :native) NATIVE_DEPS_PATH)
+  (when (and (not= *RUNTIME_NAME* :native) NATIVE_DEPS_PATH)
     (hpr (prw ":runtime:native-deps is supported only for") (accent ":native") (prw "runtime")))
 
-  (when (and (= RUNTIME_NAME :native)
+  (when (and (= *RUNTIME_NAME* :native)
              NATIVE_DEPS_PATH
              (not (fs/exists? (io/file NATIVE_DEPS_PATH))))
     (hpr (prw ":runtime:native-deps folder does not exists") (accent ":native:executable") (prw "will not include any extra deps!")))
 
-  (when (and RUNTIME_VERSION (not= RUNTIME_NAME :babashka))
+  (when (and RUNTIME_VERSION (not= *RUNTIME_NAME* :babashka))
     (hpr (prw ":runtime:version is supported only for") (accent ":babashka") (prw "runtime")))
 
-  (when (and (:pods RUNTIME) (not= RUNTIME_NAME :babashka))
+  (when (and (:pods RUNTIME) (not= *RUNTIME_NAME* :babashka))
     (hpr (prw ":runtime:pods are supported only for") (accent ":babashka") (prw "runtime")))
 
-  (when (and NATIVE_IMAGE_ARGS (not= RUNTIME_NAME :native))
+  (when (and NATIVE_IMAGE_ARGS (not= *RUNTIME_NAME* :native))
     (hpr (prw ":runtime:native-image-args are supported only for") (accent ":native") (prw "runtime")))
 
   (if-not STACK_NAME
