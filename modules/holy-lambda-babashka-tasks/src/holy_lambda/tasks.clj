@@ -238,7 +238,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def PACKAGED_TEMPLATE_FILE ".holy-lambda/packaged.yml")
 (def BABASHKA_RUNTIME_LAYER_FILE ".holy-lambda/babashka-runtime/template.yml")
 (def SELF_MANAGE_LAYERS? (:self-manage-layers? OPTIONS))
-(def NATIVE_CONFIGURATIONS_PATH ".holy-lambda/native/configuration")
+(def NATIVE_CONFIGURATIONS_PATH "resources/native-configuration")
 (def BOOTSTRAP_FILE (:bootstrap-file RUNTIME))
 (def NATIVE_DEPS_PATH (:native-deps RUNTIME))
 (def BABASHKA_LAYER_INSTANCE (str BUCKET_NAME "-hlbbri-" (s/replace RUNTIME_VERSION #"\." "-")))
@@ -698,9 +698,9 @@ set -e
     (hpr (prw "No native configurations has been generated. Native image build may fail. Run") (accent "native:conf") (prw "to generate native configurations.")))
 
   ;; Copy then build
-  (shell-no-exit "bash -c \"[ -d .holy-lambda/native/configuration ] && cp -rf .holy-lambda/native/configuration .holy-lambda/build/\"")
+  (shell-no-exit "bash -c \"[ -d resources/native-configuration ] && cp -rf resources/native-configuration .holy-lambda/build/\"")
 
-  (docker:run (str "cd .holy-lambda/build/ && native-image -jar output.jar -H:ConfigurationFileDirectories=configuration "
+  (docker:run (str "cd .holy-lambda/build/ && native-image -jar output.jar -H:ConfigurationFileDirectories=native-configuration "
                    "-H:+AllowIncompleteClasspath"
                    (when NATIVE_IMAGE_ARGS
                      (str " " NATIVE_IMAGE_ARGS))))
