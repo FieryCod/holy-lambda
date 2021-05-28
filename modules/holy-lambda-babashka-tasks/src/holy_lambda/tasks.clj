@@ -422,16 +422,18 @@ Resources:
    :aliases {:deps {:replace-deps {'org.clojure/tools.deps.alpha {:mvn/version "0.11.910"}
                                    'org.slf4j/slf4j-nop {:mvn/version "1.7.25"}}
                     :ns-default 'clojure.tools.cli.api}
+
              :test {:extra-paths ["test"]}
 
              :uberjar {:replace-deps {'com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
                        :exec-fn 'hf.depstar/uberjar
-                       :exec-args {:aot true}}
+                       :exec-args {}}
 
              ;; build a jar (library):
              :jar {:replace-deps {'com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
                    :exec-fn 'hf.depstar/jar
                    :exec-args {}}
+
              ;; generic depstar alias, use with jar or uberjar function name:
              :depstar {:replace-deps {'com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
                        :ns-default 'hf.depstar
@@ -681,7 +683,7 @@ Resources:
     (stack-files-check :default)
 
     (hpr "Compiling with agent support")
-    (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aot true :jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
+    (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
 
     (hpr "Generating native-configurations")
     (docker:run (str "java -agentlib:native-image-agent=config-output-dir=" NATIVE_CONFIGURATIONS_PATH
@@ -849,7 +851,8 @@ set -e
       (hpr "Nothing to compile. Sources did not change!")
       (System/exit 0))
 
-  (docker:run (str "clojure -X:uberjar :aot true :jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
+  (shell "rm -Rf .cpcache .holy-lambda/build")
+  (docker:run (str "clojure -X:uberjar :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
 
 (defn stack:invoke
   "     \033[0;31m>\033[0m Invokes lambda fn (check sam local invoke --help):
