@@ -670,6 +670,7 @@ Resources:
        \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime "
   [& args]
   (print-task "native:conf")
+  (exit-if-not-synced!)
   (let [{:keys [runtime]} (norm-args args)]
     (override-runtime! runtime)
 
@@ -705,6 +706,7 @@ set -e
 \n----------------------------------------------------------------\n"
   [& args]
   (print-task "native:executable")
+  (exit-if-not-synced!)
   (let [{:keys [runtime]} (norm-args args)]
     (override-runtime! runtime)
     (when-not (= *RUNTIME_NAME* :native)
@@ -731,7 +733,7 @@ set -e
       (hpr (pre "Native image failed to create executable. Fix your build! Skipping next steps"))
       (do
         (spit ".holy-lambda/build/bootstrap" (bootstrap-file))
-        (when (fs/exists? (io/file NATIVE_DEPS_PATH))
+        (when (and NATIVE_DEPS_PATH (fs/exists? (io/file NATIVE_DEPS_PATH)))
           (hpr "Copying" (accent ":runtime:native-deps"))
           (shell (str "cp -R " NATIVE_DEPS_PATH " .holy-lambda/build/")))
         (hpr "Bundling artifacts...")
