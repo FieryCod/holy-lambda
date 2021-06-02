@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# -*- mode: sh -*-
+export RUST_BACKTRACE=1
+
+./hello_world

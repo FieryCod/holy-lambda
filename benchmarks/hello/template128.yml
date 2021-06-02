@@ -1,0 +1,195 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Benchmarking simple hello programs
+
+Parameters:
+  Timeout:
+    Type: Number
+    Default: 40
+  MemorySize:
+    Type: Number
+    Default: 128
+
+Globals:
+  Function:
+    Timeout: !Ref Timeout
+    MemorySize: !Ref MemorySize
+
+Resources:
+  ClojureOnJavaRuntime:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ClojureOnJavaRuntime
+      CodeUri: artifacts/clojure.jar
+      Runtime: java8
+      Handler: hello.Hello
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /clojure-on-java
+            Method: get
+
+  ClojureOnNativeRuntime:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ClojureOnNativeRuntime
+      CodeUri: artifacts/clojure-native.zip
+      Runtime: provided
+      Handler: hello.Hello
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /clojure-on-native
+            Method: get
+
+  ClojureOnBabashkaRuntime:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ClojureOnBabashkaRuntime
+      CodeUri: clojure-babashka
+      Runtime: provided
+      Handler: hello.Hello
+      Layers:
+        - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:31
+      Environment:
+        Variables:
+          Entrypoint: hello
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /clojure-on-babashka
+            Method: get
+
+  Nodejs14Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Nodejs14Runtime
+      CodeUri: nodejs
+      Runtime: nodejs14.x
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /nodejs-14
+            Method: get
+
+  Nodejs12Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Nodejs12Runtime
+      CodeUri: nodejs
+      Runtime: nodejs12.x
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /nodejs-12
+            Method: get
+
+  Nodejs10Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Nodejs10Runtime
+      CodeUri: nodejs
+      Runtime: nodejs10.x
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /nodejs-10
+            Method: get
+
+  PythonRuntime38:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: PythonRuntime38
+      CodeUri: python
+      Runtime: python3.8
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /python-38
+            Method: get
+
+  PythonRuntime27:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: PythonRuntime27
+      CodeUri: python
+      Runtime: python2.7
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /python-27
+            Method: get
+
+  RubyRuntime25:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: RubyRuntime25
+      CodeUri: ruby
+      Runtime: ruby2.5
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /ruby-25
+            Method: get
+
+  RubyRuntime27:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: RubyRuntime27
+      CodeUri: ruby
+      Runtime: ruby2.7
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /ruby-27
+            Method: get
+
+  GolangRuntime:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GolangRuntime
+      CodeUri: artifacts
+      Runtime: go1.x
+      Handler: golang-handler
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /golang-1x
+            Method: get
+
+  RustRuntime:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: RustRuntime
+      CodeUri: artifacts/latest-rust.zip
+      Runtime: provided
+      Handler: provided
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /rust-runtime
+            Method: get
+
+Outputs:
+  RootApiGateway:
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"

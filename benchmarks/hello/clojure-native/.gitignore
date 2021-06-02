@@ -1,0 +1,11 @@
+.DS_Store
+.idea
+*.log
+tmp/
+bootstrap
+clojure.jar
+clojure-native.zip
+hello-clojure.build_artifacts
+hello-clojure
+output.jar
+*.txt
