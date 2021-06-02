@@ -189,6 +189,30 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
   (shell "docker" "pull" IMAGE_CORDS)
   (println ""))
 
+(def DOCKER_VOLUMES_CONF (:docker-volumes OPTIONS))
+(def DOCKER_VOLUMES
+  (if-not (some-> DOCKER_VOLUMES_CONF seq)
+    []
+    (mapv (fn [{:keys [docker host]}]
+            (when (or (not docker) (not host))
+              (hpr (pre "Both") (accent ":docker") (pre "and") (accent ":host") (pre "properties should exist in") (str (accent "docker-volumes") (pre "!")))
+              (System/exit 1))
+
+            (when-not (fs/exists? (io/file host))
+              (hpr (pre "Host path:") (accent host) (pre "from") (accent ":docker-volumes") (pre "does not exists!"))
+              (System/exit 1))
+
+            (when (s/starts-with? docker "/project")
+              (hpr (pre "Docker path:") (accent docker) (pre "from") (accent ":docker-volumes") (pre "cannot be mounted in /project or /project/**."))
+              (System/exit 1))
+
+            (when (= docker "/")
+              (hpr (pre "Docker path:") (accent docker) (pre "from") (accent ":docker-volumes") (pre "cannot be mounted in / path."))
+              (System/exit 1))
+
+            (str (fs/absolutize (io/file host)) ":" docker))
+          DOCKER_VOLUMES_CONF)))
+
 (def INFRA (:infra OPTIONS))
 (def RUNTIME (:runtime OPTIONS))
 (def *RUNTIME_NAME* (:name RUNTIME))
@@ -378,14 +402,17 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (defn docker:run
   "     \033[0;31m>\033[0m Run command in \033[0;31mfierycod/graalvm-native-image\033[0m docker context\n\n----------------------------------------------------------------\n"
   [command]
-  (shell "docker run --rm"
-         "-e" "AWS_CREDENTIAL_PROFILES_FILE=/project/.aws/credentials"
-         "-e" "AWS_CONFIG_FILE=/project/.aws/config"
-         "-v" (str (.getAbsolutePath (io/file "")) ":/project")
-         "-v" (str AWS_DIR ":" "/project/.aws:ro")
-         "--user" USER_GID
-         "-it" IMAGE_CORDS
-         "/bin/bash" "-c" command)
+  (apply shell
+         (concat
+          ["docker run --rm"
+           "-e" "AWS_CREDENTIAL_PROFILES_FILE=/project/.aws/credentials"
+           "-e" "AWS_CONFIG_FILE=/project/.aws/config"
+           "-v" (str (.getAbsolutePath (io/file "")) ":/project")
+           "-v" (str AWS_DIR ":" "/project/.aws:ro")]
+          (flatten (mapv (fn [path] ["-v" path]) DOCKER_VOLUMES))
+          ["--user" USER_GID
+           "-it" IMAGE_CORDS
+           "/bin/bash" "-c" command]))
   (shell "rm -Rf .aws"))
 
 (defn deps-sync--babashka

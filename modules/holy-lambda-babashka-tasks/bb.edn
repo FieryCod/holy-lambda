@@ -4,7 +4,9 @@
 
  :min-bb-version "0.3.7"
 
- :holy-lambda/options {
+ :holy-lambda/options {:docker-volumes [{:docker     "/holy-lambda"
+                                         :host       "../../"}]
+
                        :build-variant :ce
 
                        :stack {:name "holy-lambda-babashka-v2"
