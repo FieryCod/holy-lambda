@@ -20,13 +20,13 @@ The micro framework that integrates Clojure with AWS Lambda on either Java, Cloj
 **Stable releases**
 
 ``` clojure
+io.github.FieryCod/holy-lambda                     {:mvn/version "0.1.49"}
+
 ;; Babashka runtime layer `0.4.4`
 ;; `:runtime:version` are the inner properties of `:holy-lambda/options` in bb.edn
 :holy-lambda/options:runtime:version               "0.0.32" 
 
-io.github.FieryCod/holy-lambda                     {:mvn/version "0.1.49"}
-
-;; Built in holy-lambda. For core.async support use `async-retriever`
+;; Default retriever is built in holy-lambda. For `core.async` support use `async-retriever`
 io.github.FieryCod/holy-lambda-default-retriever   {:mvn/version "0.0.6"}
 
 ;; Not supported in babashka runtime

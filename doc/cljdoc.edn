@@ -1,9 +1,10 @@
-{:cljdoc.doc/tree [["Readme" {:file "README.md"}]
-                   ["Changelog" {:file "CHANGELOG.md"}]
-                   ["Tutorial" {:file "doc/0-00-toc.md"}
-                    ["Rationale" {:file "doc/1-01-rationale.md"}]
-                    ["Getting started" {:file "doc/1-02-getting-started.md"}]
-                    ["Babashka tasks recipes" {:file "doc/1-03-babashka-recipes.md"}]
-                    ["Native agent" {:file "doc/1-04-native-agent.md"}]]
-                   ["Features" {:file "doc/2-00-toc.md"}
-                    ["Interceptors" {:file "doc/2-01-interceptors.md"}]]]}
+{:cljdoc.doc/tree [["Readme"                  {:file "README.md"}]
+                   ["Changelog"               {:file "CHANGELOG.md"}]
+                   ["Tutorial"                {:file "doc/0-00-toc.md"}
+                    ["Rationale"              {:file "doc/1-01-rationale.md"}]
+                    ["Getting started"        {:file "doc/1-02-getting-started.md"}]
+                    ["Tasks"                  {:file "doc/1-03-tasks.md"}]
+                    ["Native agent"           {:file "doc/1-04-native-agent.md"}]
+                    ["Troubleshooting"        {:file "doc/1-05-troubleshooting.md"}]]
+                   ["Features"                {:file "doc/2-00-toc.md"}
+                    ["Interceptors"           {:file "doc/2-01-interceptors.md"}]]]}
