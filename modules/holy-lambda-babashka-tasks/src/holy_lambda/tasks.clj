@@ -683,6 +683,7 @@ Resources:
     (stack-files-check :default)
 
     (hpr "Compiling with agent support")
+    (shell "rm -Rf .cpcache .holy-lambda/build/output-agent.jar")
     (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
 
     (hpr "Generating native-configurations")

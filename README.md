@@ -85,7 +85,7 @@ It allows you to write one code which might run on Official Java AWS Runtime, Na
 
 Available tasks:
 
-``` clojure
+``` sh
 ❯ bb tasks
 The following tasks are available:
 
@@ -100,7 +100,9 @@ docker:run             > Run command in fierycod/graalvm-native-image docker con
 ----------------------------------------------------------------
 
 native:conf            > Provides native configurations for the application
+                        - :runtime     - overrides :runtime:name and run Lambda in specified runtime 
 native:executable      > Provides native executable of the application
+                        - :runtime     - overrides :runtime:name and run Lambda in specified runtime
 
 ----------------------------------------------------------------
 
@@ -114,6 +116,7 @@ stack:invoke           > Invokes lambda fn (check sam local invoke --help):
                         - :event-file  - path to event file
                         - :envs-file   - path to envs file
                         - :params      - map of parameters to override in AWS SAM
+                        - :runtime     - overrides :runtime:name and run Lambda in specified runtime
                         - :debug       - run invoke in debug mode
                         - :logs        - logfile to runtime logs to
 stack:api              > Runs local api (check sam local start-api):
@@ -121,12 +124,15 @@ stack:api              > Runs local api (check sam local start-api):
                         - :port        - local port number to listen to
                         - :static-dir  - assets which should be presented at /
                         - :envs-file   - path to envs file
+                        - :runtime     - overrides :runtime:name and run Lambda in specified runtime
                         - :params      - map of parameters to override in AWS SAM
 stack:pack             > Packs Cloudformation stack
+                        - :runtime     - overrides :runtime:name and run Lambda in specified runtime 
 stack:deploy           > Deploys Cloudformation stack
                         - :guided      - guide the deployment
                         - :dry         - execute changeset?
                         - :params      - map of parameters to override in AWS SAM
+                        - :runtime     - overrides :runtime:name and run Lambda in specified runtime 
 stack:describe         > Describes Cloudformation stack
 stack:doctor           > Diagnoses common issues of holy-lambda stack
 stack:purge            > Purges build artifacts
