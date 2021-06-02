@@ -14,7 +14,7 @@ ENV GITLIBS=/project/.holy-lambda/.gitlibs/
 
 # --------------- UPDATE ------------------
 # -----------------------------------------
-ARG BABASHKA_VERSION=0.3.7
+ARG BABASHKA_VERSION=0.4.4
 ARG CLOJURE_VERSION=1.10.3.822
 # -----------------------------------------
 

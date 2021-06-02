@@ -1,7 +1,7 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:git/url "https://github.com/FieryCod/holy-lambda"
          :deps/root "./modules/holy-lambda-babashka-tasks"
-         :sha     "756c9f0ad2fe98ab9a962ccd992b8aa1cb87ed5b"}}
+         :sha     "f2ff90b23120482e1e8861e083de6ff7aebc8a99"}}
 
  :mvn/local-repo ".holy-lambda/.m2"
 
@@ -52,7 +52,7 @@
 
                         ;; Some of the runtimes are versioned. For instance `:babashka` runtime is a versioned layer which ships it's own version of
                         ;; clojure, holy-lambda, default-retriever
-                        :version             "0.0.31"
+                        :version             "0.0.32"
 
                         ;; Specify custom arguments for native image generation
                         ;; Works only on `:native` runtime.

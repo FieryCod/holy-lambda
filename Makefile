@@ -25,5 +25,3 @@ else
 	docker push $(IMAGE_CORD)
 endif
 
-deploy:
-	@clojure deployer.clj $(VERSION_BUMP)
