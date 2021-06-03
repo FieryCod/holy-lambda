@@ -149,6 +149,22 @@
              (pre "Exiting!"))
         (System/exit 1))))
 
+(def DOCKER (:docker OPTIONS))
+(def BUILD (:build OPTIONS))
+
+(def CLJ_ALIAS_KEY (:clj-alias BUILD))
+(when (and CLJ_ALIAS_KEY (not (keyword? CLJ_ALIAS_KEY)))
+  (hpr (pre "Defined") (accent "build:clj-alias") (pre "should be a keyword")))
+
+(when-not (CLJ_ALIAS_KEY (:aliases (read-string (slurp "deps.edn"))))
+  (hpr (pre "Defined")
+       (accent "build:clj-alias")
+       (accent CLJ_ALIAS_KEY)
+       (pre "does not exists in") (accent "deps.edn")))
+
+(def CLJ_ALIAS (some-> CLJ_ALIAS_KEY name
+                       (str ":")))
+
 (defn stat-file
   [filename]
   (when-not (fs/exists? (io/file filename))
@@ -165,19 +181,14 @@
     (if-not (fs/exists? (io/file (:envs STACK)))
       (throw (Exception. "."))
       (:envs STACK))
-    (catch Exception err_
+    (catch Exception _err
       (hpr (pre "File envs.json for aws sam not found.. Exiting!\n
 Check https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-invoke.html#serverless-sam-cli-using-invoke-environment-file"))
       (System/exit 1))))
 
 (def IMAGE_CORDS
-  (case (:build-variant OPTIONS)
-    :ce "fierycod/graalvm-native-image:ce"
-    :ee "fierycod/graalvm-native-image:ee"
-    (do (hpr (pre "Incorrect build variant choosen:")
-             (str (accent (:build-variant OPTIONS)) (pre "."))
-             (pre "Choose either") (accent ":ce") (pre "or") (accent ":ee") (pre "build variant!"))
-        (System/exit 1))))
+  (or (:image DOCKER)
+      "fierycod/graalvm-native-image:ce"))
 
 (defn docker-image-exists?
   [image]
@@ -189,7 +200,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
   (shell "docker" "pull" IMAGE_CORDS)
   (println ""))
 
-(def DOCKER_VOLUMES_CONF (:docker-volumes OPTIONS))
+(def DOCKER_VOLUMES_CONF (:volumes DOCKER))
 (def DOCKER_VOLUMES
   (if-not (some-> DOCKER_VOLUMES_CONF seq)
     []
@@ -470,7 +481,7 @@ Resources:
   []
   (stat-file "deps.edn")
   (hpr "Syncing project and holy-lambda" (accent "deps.edn"))
-  (docker:run "deps -A:depstar -P && deps -P")
+  (docker:run (str "deps -A:" CLJ_ALIAS "depstar -P && deps -P"))
   (deps-sync--babashka))
 
 (defn cloudformation-description
@@ -711,7 +722,7 @@ Resources:
 
     (hpr "Compiling with agent support")
     (shell "rm -Rf .cpcache .holy-lambda/build/output-agent.jar")
-    (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
+    (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:" CLJ_ALIAS "uberjar :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
 
     (hpr "Generating native-configurations")
     (docker:run (str "java -agentlib:native-image-agent=config-output-dir=" NATIVE_CONFIGURATIONS_PATH
@@ -791,17 +802,20 @@ set -e
               (s/replace #"\!Ref CodeUri" CodeUri)))))
 
 (defn bucket:create
-  "     \033[0;31m>\033[0m Creates a s3 bucket using \033[0;31m:bucket-name\033[0m"
-  []
+  "     \033[0;31m>\033[0m Creates a s3 stack bucket or the one specified by \033[0;31m:name\033[0m"
+  [& args]
   (print-task "bucket:create")
-  (if (bucket-exists?)
-    (do
-      (hpr (prs "Bucket") (accent BUCKET_NAME) (prs "already exists!"))
-      (hpr (prw "If you removed the bucket then note that sometimes bucket is not immediately appear to be removed and is still listed in AWS resources."))
-      (hpr (prw "In such case change:")
-           (str (accent ":infra:bucket-name") "!")))
-    (do (hpr (prs "Creating a bucket") (accent BUCKET_NAME))
-        (-create-bucket))))
+  (let [{:keys [name]} (norm-args args)
+        bucket-name (or name BUCKET_NAME)]
+    (if (bucket-exists? bucket-name)
+      (do
+        (hpr (prs "Bucket") (accent bucket-name) (prs "already exists!"))
+        (hpr (prw "If you removed the bucket then note that sometimes bucket is not immediately appear to be removed and is still listed in AWS resources."))
+        (when-not name
+          (hpr (prw "In such case change:")
+               (str (accent ":infra:bucket-name") "!"))))
+      (do (hpr (prs "Creating a bucket") (accent bucket-name))
+          (-create-bucket bucket-name)))))
 
 (defn check-n-create-bucket
   []
@@ -831,13 +845,15 @@ set -e
            "--region"               REGION)))
 
 (defn bucket:remove
-  "     \033[0;31m>\033[0m Removes a s3 bucket using \033[0;31m:bucket-name\033[0m\n\n----------------------------------------------------------------\n"
-  []
+  "     \033[0;31m>\033[0m Removes a s3 stack bucket or the one specified by \033[0;31m:name\033[0m\n\n----------------------------------------------------------------\n"
+  [& args]
   (print-task "bucket:remove")
-  (if-not (bucket-exists?)
-    (hpr (pre "Bucket") (accent BUCKET_NAME) (pre "does not exists! Nothing to remove!"))
-    (do (hpr (prs "Removing a bucket") (accent BUCKET_NAME))
-        (-remove-bucket))))
+  (let [{:keys [name]} (norm-args args)
+        bucket-name (or name BUCKET_NAME)]
+    (if-not (bucket-exists? bucket-name)
+      (hpr (pre "Bucket") (accent bucket-name) (pre "does not exists! Nothing to remove!"))
+      (do (hpr (prs "Removing a bucket") (accent bucket-name))
+          (-remove-bucket bucket-name)))))
 
 (defn stack:deploy
   "     \033[0;31m>\033[0m Deploys \033[0;31mCloudformation\033[0m stack
@@ -880,7 +896,7 @@ set -e
       (System/exit 0))
 
   (shell "rm -Rf .cpcache .holy-lambda/build")
-  (docker:run (str "clojure -X:uberjar :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
+  (docker:run (str "clojure -X:" CLJ_ALIAS "uberjar :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
 
 (defn stack:invoke
   "     \033[0;31m>\033[0m Invokes lambda fn (check sam local invoke --help):

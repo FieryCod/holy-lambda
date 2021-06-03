@@ -12,11 +12,24 @@
  :min-bb-version                                    "0.3.7"
 
  :holy-lambda/options {
-                       ;; GraalVM holy-lambda compatible docker image
-                       ;; Possible values:
-                       ;; - `:ce` - GraalVM Community Edition
-                       ;; - `:ee` - GraalVM Enterprise Edition - not supported for now by holy-lambda
-                       :build-variant               :ce
+                       :docker {
+
+                                ;; holy-lambda runs almost all of it's tasks in docker context
+                                ;; which means that local libraries will not work out-of-the-box with HL
+                                ;; To make local libraries work with HL you have to include the path to your library
+                                ;; and mount it as a docker volume. The second step is modifying the `deps.edn` to use library path available in docker context.
+                                ;; Preferably use `deps.edn` alias and reference it's name in `:build:clj-name`
+                                ;; Single volume definition:
+                                ;;
+                                ;; {:docker "/path-where-to-mount-local-library-on-docker"
+                                ;;  :host   "relative-local-library-path"}
+                                :volumes            []
+
+                                ;; GraalVM Community holy-lambda compatible docker image
+                                ;; You can always build your own GraalVM image with enterprise edition
+                                :image              "fierycod/graalvm-native-image:ce"}
+
+                       :build {:clj-alias           nil}
 
                        :stack {
                                ;; Stack name which will be used in cloudformation

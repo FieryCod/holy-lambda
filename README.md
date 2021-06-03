@@ -93,8 +93,8 @@ Available tasks:
 ❯ bb tasks
 The following tasks are available:
 
-bucket:create          > Creates a s3 bucket using :bucket-name
-bucket:remove          > Removes a s3 bucket using :bucket-name
+bucket:create          > Creates a s3 stack bucket or the one specified by :name
+bucket:remove          > Removes a s3 stack bucket or the one specified by :name
 
 ----------------------------------------------------------------
 

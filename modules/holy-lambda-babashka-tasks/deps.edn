@@ -1,6 +1,6 @@
-{:deps {
-        ;; org.clojure/clojure {:mvn/version "1.10.3"}
-        ;; io.github.FieryCod/holy-lambda {:mvn/version "0.1.49"}
-        }
+{:deps {}
  :mvn/local-repo ".holy-lambda/.m2"
+ :aliases {:holy-lambda
+           {:replace-deps {org.clojure/clojure {:mvn/version "1.10.3"}
+                           io.github.FieryCod/holy-lambda {:local/root "/holy-lambda"}}}}
  :paths ["src" "resources"]}

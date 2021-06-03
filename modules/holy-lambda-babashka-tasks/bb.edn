@@ -4,10 +4,12 @@
 
  :min-bb-version "0.3.7"
 
- :holy-lambda/options {:docker-volumes [{:docker     "/holy-lambda"
-                                         :host       "../../"}]
+ :holy-lambda/options {:docker {:volumes [{:docker     "/holy-lambda"
+                                           :host       "../../"}]
 
-                       :build-variant :ce
+                                :image "fierycod/graalvm-native-image:ce"}
+
+                       :build {:clj-alias :holy-lambda}
 
                        :stack {:name "holy-lambda-babashka-v2"
 
