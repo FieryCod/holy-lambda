@@ -300,6 +300,9 @@
   "name":"com.fasterxml.jackson.databind.JsonSerializer"
 },
 {
+  "name":"com.fasterxml.jackson.databind.Module"
+},
+{
   "name":"com.fasterxml.jackson.databind.ObjectMapper"
 },
 {

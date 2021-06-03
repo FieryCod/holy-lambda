@@ -722,7 +722,7 @@ Resources:
 
     (hpr "Compiling with agent support")
     (shell "rm -Rf .cpcache .holy-lambda/build/output-agent.jar")
-    (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:" CLJ_ALIAS "uberjar :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
+    (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
 
     (hpr "Generating native-configurations")
     (docker:run (str "java -agentlib:native-image-agent=config-output-dir=" NATIVE_CONFIGURATIONS_PATH
@@ -890,13 +890,11 @@ set -e
   (when (= *RUNTIME_NAME* :babashka)
     (hpr "Nothing to compile. Sources are provided as is to" (accent "babashka") "runtime")
     (System/exit 0))
-
     (when-not (build-stale?)
       (hpr "Nothing to compile. Sources did not change!")
       (System/exit 0))
-
   (shell "rm -Rf .cpcache .holy-lambda/build")
-  (docker:run (str "clojure -X:" CLJ_ALIAS "uberjar :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
+  (docker:run (str "clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
 
 (defn stack:invoke
   "     \033[0;31m>\033[0m Invokes lambda fn (check sam local invoke --help):
