@@ -1,7 +1,7 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:git/url                                   "https://github.com/FieryCod/holy-lambda"
          :deps/root                                 "./modules/holy-lambda-babashka-tasks"
-         :sha                                       "f2ff90b23120482e1e8861e083de6ff7aebc8a99"}}
+         :sha                                       "efb7b17b30c8796e5d69d6ea5e316c846231ba8b"}}
 
  ;; Local repositories should be downloaded to `.holy-lambda` directory
  ;; This way project artifacts are separated from global ~/.m2 and only project artifacts
@@ -14,11 +14,13 @@
  :holy-lambda/options {
                        :docker {
 
-                                ;; holy-lambda runs almost all of it's tasks in docker context
-                                ;; which means that local libraries will not work out-of-the-box with HL
-                                ;; To make local libraries work with HL you have to include the path to your library
-                                ;; and mount it as a docker volume. The second step is modifying the `deps.edn` to use library path available in docker context.
+                                ;; HL runs bb tasks in docker context which means that local libraries will not work out-of-the-box.
+                                ;;
+                                ;; To make local libraries work with HL you have to:
+                                ;; 1. Mount your local library folder as a docker volume.
+                                ;; 2. Modify the `deps.edn` to use library path available in docker context.
                                 ;; Preferably use `deps.edn` alias and reference it's name in `:build:clj-name`
+                                ;; ----------------------------------------------------------------------------
                                 ;; Single volume definition:
                                 ;;
                                 ;; {:docker "/path-where-to-mount-local-library-on-docker"
