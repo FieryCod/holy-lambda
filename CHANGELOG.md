@@ -1,4 +1,20 @@
 # Changelog
+## 0.1.50 (03-06-2021)
+*Changes*
+- [bb tasks] Remove :build-variant. Replaced by [:docker](https://github.com/FieryCod/holy-lambda/blob/master/modules/holy-lambda-template/resources/leiningen/new/holy_lambda/bb.edn#L15) section
+- [bb tasks] Change native-configurations path. User should be able to modify the configuration which is now generated at resources/native-configurations
+- [bb tasks] Allow runtime override when using :native runtime. You can now invoke lambda in :java runtime when :native runtime is declared in bb.edn:
+  ```
+  bb stack:invoke :runtime :java
+  ```
+- [bb tasks] Allow nil value for :native-deps option
+- [bb tasks] Add support for setting :docker:volumes. This is crucial when working with local libraries, since HL runs tasks in docker context!
+- [bb layer] Bump layer version to 0.0.32 which includes babashka v0.4.4
+- [bb tasks] Commands bb bucket:create and bb bucket:remove can now create/remove specified bucket (not only the stack bucket) when :name parameter is used
+- [bb tasks] Inform the user when docker image is not downloaded. This makes HL more user friendly.
+- [bb tasks] Don't AOT whole project when uberjaring. AOT compile only the main class.
+- [bb tasks] Add support for deps.edn aliases in bb.edn. Useful for local libraries
+
 ## 0.1.49 (21-05-2021)
 *Changes*
 - [bb tasks] Fix bb stack:sync which was failing on the first run
