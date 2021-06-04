@@ -13,6 +13,9 @@ all:
 	@docker rm build || true
 
 	@echo "Publishing a new version of the layer"
+	if [ ! `unzip -Z1 holy-lambda-babashka-runtime.zip | grep bb` ]; then \
+		echo "bb does not exists in artifact. Exiting!"; exit 1; \
+	fi;
 	@sam package --template-file template.yml --output-template-file packaged.yml --s3-bucket $(BUCKET_NAME) --s3-prefix $(S3_PREFIX)
 	@sam publish --template-file packaged.yml --semantic-version $(SEMANTIC_VERSION)
 
