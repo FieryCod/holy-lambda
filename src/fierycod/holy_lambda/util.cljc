@@ -45,8 +45,12 @@
          (json/write-value-as-bytes (assoc response :body (json/write-value-as-string (:body response))))
          :cljs nil)
 
-      ;; On text
-      (= (get-in response [:headers "Content-Type"]) "text/plain; charset=utf-8")
+      ;; On text or html
+      (contains? #{"text/plain"
+                   "text/plain; charset=utf-8"
+                   "text/html"
+                   "text/html; charset=utf-8"}
+                 (get-in response [:headers "Content-Type"]))
       #?(:bb
          (.getBytes ^String (json/generate-string response))
          :clj
