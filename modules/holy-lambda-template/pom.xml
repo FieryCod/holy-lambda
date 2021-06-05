@@ -4,7 +4,7 @@
   <groupId>holy-lambda</groupId>
   <artifactId>lein-template</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.63</version>
+  <version>0.1.64</version>
   <name>lein-template</name>
   <description>Template for holy lambda micro framework</description>
   <url>https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-template</url>
