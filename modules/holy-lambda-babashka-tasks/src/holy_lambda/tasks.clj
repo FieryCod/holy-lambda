@@ -271,7 +271,6 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def ENTRYPOINT (:entrypoint (:runtime OPTIONS)))
 (def OUTPUT_JAR_PATH ".holy-lambda/build/output.jar")
 (def OUTPUT_JAR_PATH_WITH_AGENT ".holy-lambda/build/output-agent.jar")
-(def OUTPUT_JAR_PATH_RELATIVE "build/output.jar")
 (def HOLY_LAMBDA_DEPS_PATH ".holy-lambda/clojure/deps.edn")
 (def STACK_NAME (:name STACK))
 (def TEMPLATE_FILE (:template STACK))
@@ -279,8 +278,8 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def CAPABILITIES (if-let [caps (seq (:capabilities STACK))]
                     caps
                     nil))
-(def MODIFIED_TEMPLATE_FILE ".holy-lambda/template.yml")
-(def PACKAGED_TEMPLATE_FILE ".holy-lambda/packaged.yml")
+(def MODIFIED_TEMPLATE_FILE "template-modified.yml")
+(def PACKAGED_TEMPLATE_FILE "packaged.yml")
 (def BABASHKA_RUNTIME_LAYER_FILE ".holy-lambda/babashka-runtime/template.yml")
 (def SELF_MANAGE_LAYERS? (:self-manage-layers? OPTIONS))
 (def NATIVE_CONFIGURATIONS_PATH "resources/native-configuration")
@@ -373,35 +372,29 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
   (contains? (buckets) (or bucket-name BUCKET_NAME)))
 
 (defn parameters--java
-  [opt]
-  {"CodeUri"        (if (= :relative opt)
-                      OUTPUT_JAR_PATH_RELATIVE
-                      OUTPUT_JAR_PATH)
+  []
+  {"CodeUri"        OUTPUT_JAR_PATH
    "Runtime"        "java8"
    "Entrypoint"     ENTRYPOINT})
 
 (defn parameters--babashka
-  [opt]
-  {"CodeUri"        (if (= :relative opt)
-                      "../src"
-                      "src")
+  []
+  {"CodeUri"        "src"
    "Runtime"        "provided"
    "Entrypoint"     ENTRYPOINT})
 
 (defn parameters--native
-  [opt]
-  {"CodeUri"        (if (= :relative opt)
-                      "build/latest.zip"
-                      ".holy-lambda/build/latest.zip")
+  []
+  {"CodeUri"        ".holy-lambda/build/latest.zip"
    "Runtime"        "provided"
    "Entrypoint"     ENTRYPOINT})
 
 (defn -parameters
-  [& [opt]]
+  []
   (case *RUNTIME_NAME*
-    :java     (parameters--java opt)
-    :babashka (parameters--babashka opt)
-    :native   (parameters--native opt)))
+    :java     (parameters--java)
+    :babashka (parameters--babashka)
+    :native   (parameters--native)))
 
 (defn parameters
   [& [opt]]
@@ -786,7 +779,7 @@ set -e
 (defn modify-template
   []
   (let [buffer (slurp TEMPLATE_FILE)
-        {:strs [CodeUri Runtime]} (-parameters :relative)]
+        {:strs [CodeUri Runtime]} (-parameters)]
 
     (when-not (re-find #"<HOLY_LAMBDA_CODE_URI>" buffer)
       (hpr (pre "<HOLY_LAMBDA_CODE_URI> definition should be available. Check related issue https://github.com/aws/aws-sam-cli/issues/2835"))
