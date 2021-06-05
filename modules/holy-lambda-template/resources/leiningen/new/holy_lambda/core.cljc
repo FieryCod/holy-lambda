@@ -1,11 +1,11 @@
 (ns {{main-ns}}.core
   (:gen-class)
   (:require
-    [fierycod.holy-lambda.response :as hr]
-    [fierycod.holy-lambda.interceptor :as i]
-    [fierycod.holy-lambda.native-runtime :as native]
-    [fierycod.holy-lambda.agent :as agent]
-    [fierycod.holy-lambda.core :as h]))
+   [fierycod.holy-lambda.response :as hr]
+   [fierycod.holy-lambda.interceptor :as i]
+   [fierycod.holy-lambda.native-runtime :as native]
+   [fierycod.holy-lambda.agent :as agent]
+   [fierycod.holy-lambda.core :as h]))
 
 ;; optionally, provide runtime specific implementations if needed
 (defn say-hello
@@ -44,4 +44,4 @@
 ;; Useful when it's hard for agent payloads to cover all logic branches.
 
 (agent/in-context
-  (println "I will help in generation of native-configurations"))
+ (println "I will help in generation of native-configurations"))
