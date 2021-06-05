@@ -291,7 +291,8 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 
 ;; VALIDATE IF AWS is configured properly
 (if-not (command-exists? "aws")
-  (hpr (accent "aws") (pre "command does not exists. Did you install AWS command line application?"))
+  (do (hpr (accent "aws") (pre "command does not exists. Did you install AWS command line application?"))
+      (System/exit 1))
   (try
     (can-obtain-from-aws-profile?! "aws_access_key_id")
     (can-obtain-from-aws-profile?! "aws_secret_access_key")
