@@ -156,7 +156,7 @@
 (when (and CLJ_ALIAS_KEY (not (keyword? CLJ_ALIAS_KEY)))
   (hpr (pre "Defined") (accent "build:clj-alias") (pre "should be a keyword")))
 
-(when-not (CLJ_ALIAS_KEY (:aliases (read-string (slurp "deps.edn"))))
+(when (and CLJ_ALIAS_KEY (not (CLJ_ALIAS_KEY (:aliases (read-string (slurp "deps.edn"))))))
   (hpr (pre "Defined")
        (accent "build:clj-alias")
        (accent CLJ_ALIAS_KEY)
