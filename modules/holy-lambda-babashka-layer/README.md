@@ -1,14 +1,12 @@
 [![Slack](https://img.shields.io/badge/Slack-holy--lambda-blue?logo=slack)](https://clojurians.slack.com/messages/holy-lambda/)
-
-[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/lice
-nses/mit-license.php)
+[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
 
 # holy-lambda
 Holy lambda is a micro framework which adds support for running Clojure on the [AWS Lambda](https://aws.amazon.com/lambda/) and might be used with arbitrary AWS Lambda deployment tool. To ease the development holy-lambda comes with special `bb tasks` recipes on which you can read more []() provides very convinient environment compared to other tools such as [uswitch/lambada](https://github.com/uswitch/lambada) or [babashka-lambda](https://github.com/dainiusjocas/babashka-lambda) via simple, but powerful `bb tasks` recipes.
 
 Deployment is as easy as running `bb stack:sync && bb stack:compile && bb stack:pack && bb stack:deploy`
 
-# What is holy-lambda-babashka-layer?
+# holy-lambda-babashka-layer
 It's a special layer for targeting `babashka` runtime from `holy-lambda` microframework. 
 
 For small artifacts mark following dependencies in you build as provided:
@@ -21,9 +19,7 @@ For small artifacts mark following dependencies in you build as provided:
 | holy-lambda                                    | babashka-lambda             |
 |------------------------------------------------|-----------------------------|
 | multiple handlers exported                     | single handler exported     |
-|------------------------------------------------|-----------------------------|
 | asynchrounous handlers (chan, promise, thread) | only synchronous handlers   |
-|------------------------------------------------|-----------------------------|
 | supports pods                                  | does not support pods usage |
 
 ## Babashka as a holy-lambda runtime
