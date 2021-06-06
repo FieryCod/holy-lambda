@@ -1,4 +1,14 @@
 # Changelog
+
+## 0.1.52 (06-06-2021)
+- [bb tasks] Fix adding Clojure/Pods deps for Babashka projects. For now all the the runtime will create a temporary template-modified.yml file which should be ignored.
+- [bb layer] 0.0.34 Fix doubled holy-lambda dependency. Update layer to use the latest holy-lambda library. 
+- [bb layer] Fix edge case when babashka layer is published without the `bb` executable.
+- [holy-lambda] Add html response support
+- [bb tasks] Check if aws command is available. If not then exit early!
+- [bb tasks] Fix `CLJ_ALIAS` checking
+- [readme,docs] Refine docs. Add documentation on using local libraries
+
 ## 0.1.50 (03-06-2021)
 *Changes*
 - [bb tasks] Remove :build-variant. Replaced by [:docker](https://github.com/FieryCod/holy-lambda/blob/master/modules/holy-lambda-template/resources/leiningen/new/holy_lambda/bb.edn#L15) section
