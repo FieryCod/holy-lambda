@@ -365,7 +365,8 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (defn buckets
   []
   (set (mapv (fn [b] (some-> (re-find BUCKET_IN_LS_REGEX b) second))
-             (s/split (shs "aws" "s3" "ls") #"\n"))))
+             (s/split (shs "aws" "--profile" AWS_PROFILE "--region" REGION "s3" "ls")
+                      #"\n"))))
 
 (defn bucket-exists?
   [& [bucket-name]]
