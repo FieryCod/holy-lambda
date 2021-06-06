@@ -4,7 +4,7 @@
   <groupId>io.github.FieryCod</groupId>
   <artifactId>holy-lambda-babashka-shim</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.38</version>
+  <version>0.1.52</version>
   <name>holy-lambda-babashka-shim</name>
   <description>Micro framework which turns your code into AWS Lambda functions suites for babashka based Lambdas</description>
   <url>https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka</url>
@@ -18,7 +18,7 @@
     <url>https://github.com/FieryCod/holy-lambda</url>
   </scm>
   <build>
-    <sourceDirectory>../../src</sourceDirectory>
+    <sourceDirectory>src/clj</sourceDirectory>
     <testSourceDirectory>test</testSourceDirectory>
     <resources>
       <resource>
@@ -46,7 +46,6 @@
             </goals>
             <configuration>
               <sources>
-                <source>src/clj</source>
                 <source>src/java</source>
               </sources>
             </configuration>
@@ -86,11 +85,6 @@
       <artifactId>clojure</artifactId>
       <version>1.10.3</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.github.FieryCod</groupId>
-      <artifactId>holy-lambda-default-retriever</artifactId>
-      <version>0.0.5</version>
     </dependency>
   </dependencies>
 </project>

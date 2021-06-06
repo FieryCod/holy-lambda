@@ -1,4 +1,4 @@
-(defproject holy-lambda/lein-template   "0.1.66"
+(defproject holy-lambda/lein-template   "0.1.68"
   :description "Template for holy lambda micro framework"
 
   :url "https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-template"
@@ -10,8 +10,5 @@
                                      :creds :gpg}
                          "snapshots" {:url "https://clojars.org/repo"
                                       :creds :gpg}]]
-
-  :scm {:name "git"
-        :url "https://github.com/FieryCod/holy-lambda/tree/master/packages/holy-lambda-default-retriever"}
 
   :eval-in-leiningen true)

@@ -29,3 +29,4 @@ dist
 choly.egg-info
 .clj-kondo/.cache
 .holy-lambda
+template-modified.yml

@@ -35,12 +35,20 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: example.core.ExampleLambda
-      # Layers:
-        # - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:31
-
+      Layers:
+        - !Ref SharedClojureBabashkaDepsLayer
       Events:
         HelloEvent:
           Type: Api
           Properties:
             Path: /
             Method: get
+
+  SharedClojureBabashkaDepsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: SharedClojureBabashkaDepsLayer
+      Description: Shared dependencies for stack.
+      ContentUri: ./holy-lambda-babashka-runtime
+      CompatibleRuntimes:
+        - provided

@@ -21,10 +21,6 @@
                          "snapshots" {:url "https://clojars.org/repo"
                                       :creds :gpg}]]
 
-  :scm {:name "git"
-        :url "https://github.com/FieryCod/holy-lambda"
-        :dir "../.."}
-
   :profiles {:eftest {:global-vars {*warn-on-reflection* false}
                       :plugins [[lein-eftest "0.5.9"]]}
              :uberjar {:jvm-opts ["-Dclojure.compiler.direct-linking=true"

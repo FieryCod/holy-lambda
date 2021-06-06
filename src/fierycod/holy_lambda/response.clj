@@ -65,7 +65,12 @@
    :headers {"Content-Type" "text/plain; charset=utf-8"}
    :body    ?msg})
 
-;; (defn )
+(defn html
+  "Returns a skeletal response with the given body, status of 200, and `Content-Type` set to `text/html`."
+  [?body]
+  {:statusCode  200
+   :headers {"Content-Type" "text/html; charset=utf-8"}
+   :body    ?body})
 
 (defn status
   "Returns an updated response with the given status."

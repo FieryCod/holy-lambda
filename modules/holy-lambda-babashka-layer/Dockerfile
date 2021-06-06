@@ -12,6 +12,8 @@ COPY bootstrap .
 COPY deps.edn .
 COPY hacks.clj .
 
+RUN rm -Rf /opt/.m2
+
 # Setup path
 RUN clojure -Sdeps '{:mvn/local-repo "/opt/.m2"}' -Spath
 
