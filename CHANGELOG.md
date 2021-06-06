@@ -8,6 +8,7 @@
 - [bb tasks] Check if aws command is available. If not then exit early!
 - [bb tasks] Fix `CLJ_ALIAS` checking
 - [readme,docs] Refine docs. Add documentation on using local libraries
+- [holy-lambda-template] Apply correct formatting, use up to 6 characters for sha to prevent gen of incorrect bucket names
 
 ## 0.1.50 (03-06-2021)
 *Changes*

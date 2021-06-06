@@ -15,7 +15,7 @@
 
 (defn holy-lambda
   [name]
-  (let [uuid (string/replace (.toString (UUID/randomUUID)) #"-" "")
+  (let [uuid (subs (string/replace (.toString (UUID/randomUUID)) #"-" "") 0 6)
         pname (project-name name)
         main-ns (string/replace (multi-segment (sanitize-ns name)) #".core" "")
         data {:name (project-name name)
