@@ -8,13 +8,15 @@ In this example we will explore the [AWS Polly](https://aws.amazon.com/polly/) s
   3. AWS cli installed and configures via `aws configure`
   4. AWS SAM cli installed
 
-## Demo
-[![Demo](http://img.youtube.com/vi/XJc6xma7v0A/0.jpg)](https://www.youtube.com/watch?v=XJc6xma7v0A "Holy Lambda + Babashka + Scittle + AWS Polly Demo")
-
+## Demo video
+<p align="center">
+ <a href="https://www.youtube.com/watch?v=XJc6xma7v0A">
+   <img src="http://img.youtube.com/vi/XJc6xma7v0A/0.jpg"/>
+ </a>
+</p>
 
 ## Architecture
 ![Architecture](./resources/architecture.png)
-
 
 # Development 
 ## Running REPL
