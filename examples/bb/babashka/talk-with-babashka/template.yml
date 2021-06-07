@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Simple speech synthesis application
+
+Parameters:
+  Runtime:
+    Type: String
+    Default: <HOLY_LAMBDA_RUNTIME>
+  Timeout:
+    Type: Number
+    Default: 40
+  MemorySize:
+    Type: Number
+    Default: 2000
+  CodeUri:
+    Type: String
+    Default: <HOLY_LAMBDA_CODE_URI>
+  Entrypoint:
+    Type: String
+    Default: <HOLY_LAMBDA_ENTRYPOINT>
+
+Globals:
+  Function:
+    Runtime: !Ref Runtime
+    Timeout: !Ref Timeout
+    MemorySize: !Ref MemorySize
+    CodeUri: !Ref CodeUri
+    Environment:
+      Variables:
+        Entrypoint: !Ref Entrypoint
+        S3_BUCKET_NAME: !Ref SpeechSynthesisBucket
+
+Resources:
+  SpeechSynthesisFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SpeechSynthesisFunction
+      Handler: talk-with-babashka.core.SpeechSynthesis
+      Layers:
+        - !Ref SharedBabashkaDepsLayer
+        - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:38 # <-- replace me with your runtime ARN
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref SpeechSynthesisBucket
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - polly:*
+              Resource: '*'
+      Events:
+        SpeechSynthesisEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ServerlessHttpApi
+            Path: /speech
+            Method: POST
+
+  SpeechSynthesisUIFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SpeechSynthesisUIFunction
+      Handler: talk-with-babashka.core.SpeechSynthesisUI
+      Layers:
+        - !Ref SharedBabashkaDepsLayer
+        - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:38 # <-- replace me with your runtime ARN
+      Events:
+        SpeechSynthesisGetHtmlEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ServerlessHttpApi
+            Path: /
+            Method: GET
+
+  SharedBabashkaDepsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: SharedBabashkaDepsLayer
+      Description: Shared pods for stack.
+      ContentUri: ./.holy-lambda/pods
+      CompatibleRuntimes:
+        - provided
+        
+  SpeechSynthesisBucket:
+    Type: AWS::S3::Bucket
+
+  ServerlessHttpApi:
+    Type: AWS::Serverless::HttpApi
+    DeletionPolicy: "Retain"
+    Properties:
+      StageName: Prod
+
+Outputs:
+  SpeechSynthesisEndpoint:
+    Description: "Speech synthesis application URL"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"

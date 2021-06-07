@@ -18,6 +18,8 @@
        (.getInputStream http-conn))))
 
 ;; TODO: Tidy up event read/write
+;; TODO: Local SAM environment passes headers as is without lowercasing
+;; API gateway instead makes all the headers lowercase. We should probably process all the headers and lowercase them to make the environments consistent
 (defn in->edn-event
   [^InputStream event]
   (let [event #?(:bb
@@ -28,7 +30,8 @@
                   (json/object-mapper {:decode-key-fn true}))
                  :default
                  nil)
-        content-type (:Content-Type (:headers event))
+        content-type (or (:Content-Type (:headers event))
+                         (:content-type (:headers event)))
         body (:body event)]
 
     (if (and (not= content-type "application/json")

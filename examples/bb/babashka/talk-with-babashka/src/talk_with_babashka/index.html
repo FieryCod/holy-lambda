@@ -1,0 +1,98 @@
+<!doctype html>
+<html class="no-js" lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Clojure Polly example</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+    <script src="https://borkdude.github.io/scittle/js/scittle.js" type="application/javascript"></script>
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://borkdude.github.io/scittle/js/scittle.reagent.js" type="application/javascript"></script>
+
+    <style>
+      .page {
+          margin: 40px auto;
+      }
+
+      .titles {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .form-container {
+          margin-top: 60px;
+      }
+      .column span {
+          display: block;
+          margin: 0 0 15px 0px;
+      }
+      .column {
+          border: 1px solid #eaeaea;
+          border-radius: 16px;
+          margin: 0 10px;
+          padding: 25px;
+      }
+
+      .result {
+        margin-top: 20px;
+      }
+    </style>
+
+    <script type="application/x-scittle">
+      (require '[reagent.core :as r]
+               '[reagent.dom :as rdom]
+               '[clojure.string :as s])
+
+      (defn Form [state]
+       [:textarea {:class "textarea is-primary"
+                   :placeholder "Write some text here"
+                   :on-change #(swap! state assoc :text (.-value (.-target %)))
+                   :rows "10"}])
+
+      (def state (r/atom {:text ""}))
+
+      (defn on-click
+        []
+        (some-> (js/fetch (str (.-origin js/location) "/speech")
+                  (clj->js
+                    {:method "POST"
+                    :headers {"Content-Type" "application/json"}
+                    :body (js/JSON.stringify (clj->js {:text (:text @state)}))}))
+          (.then (fn [res] (.text res)))
+          (.then (fn [res] (swap! state assoc :response-html res)))))
+
+      (defn Page []
+       [:div.page {}
+        [:div.titles {}
+         [:div.h1.title {} "🔥🔥🔥 Speech synthesis audio generator 🔥🔥🔥"]
+         [:div.h2.subtitle {} "Holy Lambda + AWS Polly + Babashka + Scittle"]]
+        [:hr]
+        [:div.form-container.container {}
+         [:div.columns {}
+          [:div.column {}
+           [:span {:class "has-text-info"} "Step 1: Enter some text"]
+           [Form state]]
+          [:div.column {}
+           [:div {}
+            [:span {:class "has-text-info"} "Step 2: Start synthesis"]
+            [:div.control {}
+              [:button.button.is-primary {:disabled (some-> (:text @state) s/blank?)
+                                          :on-click on-click}
+              "Synthesize text"]]]
+           [:hr ]
+           [:div.result {}
+            [:span {:class "has-text-info"} "Step 3: Result"]
+            [:div {:dangerouslySetInnerHTML {:__html (:response-html @state)}}]]]]]])
+
+      (rdom/render [Page] (.getElementById js/document "app"))
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <div id="app"></div>
+    </div>
+  </body>
+</html>
