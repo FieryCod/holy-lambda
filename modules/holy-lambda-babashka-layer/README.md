@@ -16,11 +16,12 @@ For small artifacts mark following dependencies in you build as provided:
 
 # Holy Lambda vs Babashka Lambda
 
-| holy-lambda                                    | babashka-lambda             |
-|------------------------------------------------|-----------------------------|
-| multiple handlers exported                     | single handler exported     |
-| asynchrounous handlers (chan, promise, thread) | only synchronous handlers   |
-| supports pods                                  | does not support pods usage |
+| holy-lambda                                            | babashka-lambda             |
+|--------------------------------------------------------|-----------------------------|
+| multiple handlers exported                             | single handler exported     |
+| asynchrounous handlers (chan, promise, thread)         | only synchronous handlers   |
+| supports pods                                          | does not support pods usage |
+| automatic body json string -> PersistentMap conversion | no conversion               |
 
 ## Babashka as a holy-lambda runtime
 [Babashka](https://github.com/babashka/babashka) runtime provides interactive development environment. There is no need for compiling the sources since those are provided as is to `AWS SAM`.

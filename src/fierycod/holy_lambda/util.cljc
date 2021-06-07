@@ -17,14 +17,33 @@
        (.getErrorStream http-conn)
        (.getInputStream http-conn))))
 
+;; TODO: Tidy up event read/write
 (defn in->edn-event
   [^InputStream event]
-  #?(:bb
-     (json/parse-string (slurp (InputStreamReader. event "UTF-8")) true)
-     :clj
-     (json/read-value
-      (slurp (InputStreamReader. event "UTF-8"))
-      (json/object-mapper {:decode-key-fn true}))))
+  (let [event #?(:bb
+                 (json/parse-string (slurp (InputStreamReader. event "UTF-8")) true)
+                 :clj
+                 (json/read-value
+                  (slurp (InputStreamReader. event "UTF-8"))
+                  (json/object-mapper {:decode-key-fn true}))
+                 :default
+                 nil)
+        content-type (:Content-Type (:headers event))
+        body (:body event)]
+
+    (if (and (not= content-type "application/json")
+             (not= content-type "application/json; charset=utf-8"))
+      event
+      (assoc event
+             :body
+             (if-not (string? body)
+               body
+               #?(:bb
+                  (json/parse-string body true)
+                  :clj
+                  (json/read-value body (json/object-mapper {:decode-key-fn true}))
+                  :default
+                  nil))))))
 
 (defn success-code?
   [code]
