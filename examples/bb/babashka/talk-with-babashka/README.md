@@ -9,7 +9,8 @@ In this example we will explore the [AWS Polly](https://aws.amazon.com/polly/) s
   4. AWS SAM cli installed
 
 ## Demo
-[![Demo video](./resources/demo.png)](https://www.youtube.com/watch?v=XJc6xma7v0A)
+[![Demo](http://img.youtube.com/vi/XJc6xma7v0A/0.jpg)](https://www.youtube.com/watch?v=XJc6xma7v0A "Holy Lambda + Babashka + Scittle + AWS Polly Demo")
+
 
 ## Architecture
 ![Architecture](./resources/architecture.png)
