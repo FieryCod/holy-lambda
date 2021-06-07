@@ -19,6 +19,7 @@ In this example we will explore the [AWS Polly](https://aws.amazon.com/polly/) s
   Obligatory AWS resources and their permissions are defined in `template.yml`. HL uses AWS SAM under the hood, therefore the same `template.yml` might be used with another language to create the same application.
   
   **Let's dive into the resources configuration**
+  
   If we look at the `Resources` property of `template.yml` we can see that our application will use only 5 resources:
   
   - `ServerlessHttpApi` - API Gateway instance which proxies the payloads to corresponding lambdas. The API does not have to be explicitly defined for simple cases, since AWS SAM automatically creates the API Gateway for us even if we don't declare it. For this specific case we want to have explicit declaration, so that we can get endpoint URL (see the `Outputs`) without having to check the URL on AWS Management Console.
