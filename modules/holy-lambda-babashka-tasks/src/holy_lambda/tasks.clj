@@ -1077,7 +1077,6 @@ set -e
   (let [artifacts [".aws"
                    ".holy-lambda"
                    ".cpcache"
-                   "Dockerfile.ee"
                    "node_modules"]]
 
     (hpr  (str (accent "Purging build artifacts:") "\n\n" (plist artifacts)))
@@ -1102,16 +1101,6 @@ set -e
   (print-task "stack:lint")
   (shell "clj-kondo --lint src:test"))
 
-(defn stack:destroy
-  "     \033[0;31m>\033[0m Destroys \033[0;31mCloudformation\033[0m stack & removes bucket"
-  []
-  (print-task "stack:destroy")
-  (shell "aws" "cloudformation" "delete-stack"
-         "--profile"    AWS_PROFILE
-         "--region"     REGION
-         "--stack-name" STACK_NAME)
-  (bucket:remove))
-
 (defn stack:describe
   "     \033[0;31m>\033[0m Describes \033[0;31mCloudformation\033[0m stack"
   []
@@ -1120,3 +1109,18 @@ set -e
          "--profile"    AWS_PROFILE
          "--region"     REGION
          "--stack-name" STACK_NAME))
+
+(defn stack:destroy
+  "     \033[0;31m>\033[0m Destroys \033[0;31mCloudformation\033[0m stack & removes bucket"
+  []
+  (print-task "stack:destroy")
+  (hpr (prw "Automatic cloudformation") (accent "stack:destroy") (prw "operation might not be always successful."))
+  (shell "aws" "cloudformation" "delete-stack"
+         "--profile"    AWS_PROFILE
+         "--region"     REGION
+         "--stack-name" STACK_NAME)
+  (bucket:remove)
+  (hpr "Waiting 5 seconds for partial/complete cloudformation deletion status...")
+  (Thread/sleep 5000)
+  (hpr "If you see an error regarding not being able to describe not existent stack then destroy was successful!")
+  (stack:describe))

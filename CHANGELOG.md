@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- [bb tasks] Add additional describe:stacks step for stack:destroy, since sometimes stack cannot be destroyed.
+
 ## 0.1.54 (06-06-2021)
 - [bb tasks] Fix adding Clojure/Pods deps for Babashka projects. For now all the the runtime will create a temporary template-modified.yml file which should be ignored.
 - [bb layer] 0.0.34 Fix doubled holy-lambda dependency. Update layer to use the latest holy-lambda library. 
