@@ -39,10 +39,11 @@ Resources:
         - !Ref SharedClojureBabashkaDepsLayer
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
+            ApiId: !Ref ServerlessHttpApi
             Path: /
-            Method: get
+            Method: GET
 
   SharedClojureBabashkaDepsLayer:
     Type: AWS::Serverless::LayerVersion
@@ -52,3 +53,15 @@ Resources:
       ContentUri: ./holy-lambda-babashka-runtime
       CompatibleRuntimes:
         - provided
+
+  ServerlessHttpApi:
+    Type: AWS::Serverless::HttpApi
+    DeletionPolicy: Retain
+    Properties:
+      StageName: Prod
+
+Outputs:
+  TestEndpoint:
+    Description: Test endpoint
+    Value:
+      Fn::Sub: https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com
