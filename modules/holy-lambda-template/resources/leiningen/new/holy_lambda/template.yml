@@ -38,7 +38,20 @@ Resources:
       Handler: {{main-ns}}.core.ExampleLambda
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
+            ApiId: !Ref ServerlessHttpApi
             Path: /
-            Method: get
+            Method: GET
+
+  ServerlessHttpApi:
+    Type: AWS::Serverless::HttpApi
+    DeletionPolicy: Retain
+    Properties:
+      StageName: Prod
+
+Outputs:
+  ExampleLambdaEndpoint:
+    Description: Endpoint for ExampleLambdaFunction
+    Value:
+      Fn::Sub: https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com
