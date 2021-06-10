@@ -1,3 +1,5 @@
 .holy-lambda
 .cpcache
 .nrepl-port
+holy-lambda-babashka-runtime
+holy-lambda-babashka-runtime.zip

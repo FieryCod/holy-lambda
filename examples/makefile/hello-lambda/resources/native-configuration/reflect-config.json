@@ -354,6 +354,9 @@
   "name":"clojure.lang.IFn"
 },
 {
+  "name":"clojure.lang.IHashEq"
+},
+{
   "name":"clojure.lang.IKVReduce"
 },
 {
@@ -463,6 +466,12 @@
 },
 {
   "name":"clojure.lang.Reflector"
+},
+{
+  "name":"clojure.lang.SeqIterator"
+},
+{
+  "name":"clojure.lang.Sequential"
 },
 {
   "name":"clojure.lang.StringSeq"
@@ -735,8 +744,10 @@
   "name":"com.fasterxml.jackson.databind.JsonSerializer"
 },
 {
-  "name":"com.fasterxml.jackson.databind.ObjectMapper",
-  "allPublicMethods":true
+  "name":"com.fasterxml.jackson.databind.Module"
+},
+{
+  "name":"com.fasterxml.jackson.databind.ObjectMapper"
 },
 {
   "name":"com.fasterxml.jackson.databind.SerializationFeature"
@@ -834,6 +845,9 @@
 },
 {
   "name":"java.io.FileOutputStream"
+},
+{
+  "name":"java.io.FileWriter"
 },
 {
   "name":"java.io.InputStream"
@@ -1003,6 +1017,9 @@
 },
 {
   "name":"java.nio.file.LinkOption[]"
+},
+{
+  "name":"java.nio.file.attribute.FileAttribute"
 },
 {
   "name":"java.sql.Timestamp"

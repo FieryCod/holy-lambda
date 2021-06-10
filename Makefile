@@ -27,3 +27,6 @@ endif
 
 verify-cljdoc:
 	@curl -fsSL https://raw.githubusercontent.com/cljdoc/cljdoc/master/script/verify-cljdoc-edn | bash -s doc/cljdoc.edn
+
+test:
+	@lein with-profile eftest eftest
