@@ -878,16 +878,18 @@ set -e
                (when CAPABILITIES "--capabilities") CAPABILITIES)))))
 
 (defn stack:compile
-  "     \033[0;31m>\033[0m Compiles sources if necessary"
-  []
+  "     \033[0;31m>\033[0m Compiles sources if necessary
+  \t\t        - \033[0;31m:force\033[0m      - force compilation even if sources did not change"
+  [& args]
   (print-task "stack:compile")
   (exit-if-not-synced!)
+  (let [{:keys [force]} (norm-args args)])
   (when (= *RUNTIME_NAME* :babashka)
     (hpr "Nothing to compile. Sources are provided as is to" (accent "babashka") "runtime")
     (System/exit 0))
-    (when-not (build-stale?)
-      (hpr "Nothing to compile. Sources did not change!")
-      (System/exit 0))
+  (when (and (not (build-stale?)) (not force))
+    (hpr "Nothing to compile. Sources did not change!")
+    (System/exit 0))
   (shell "rm -Rf .cpcache .holy-lambda/build")
   (docker:run (str "clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
 
