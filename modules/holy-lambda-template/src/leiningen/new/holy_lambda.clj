@@ -22,8 +22,8 @@
               :nested-dirs (name-to-path main-ns)
               :main-ns main-ns
               :sanitized (name-to-path name)
-              :bucket-name (str pname "-" uuid)
-              :stack-name (str pname "-" uuid "-stack")
+              :bucket-name (string/replace (str pname "-" uuid) #"\." "-")
+              :stack-name (string/replace (str pname "-" uuid "-stack") #"\." "-")
               :bucket-prefix "holy-lambda"}
         render* #(render % data)]
     (main/info "Generating new project based on holy-lambda. Make sure that you have babashka tool installed, `docker` running and AWS account properly configured via aws configure.
