@@ -8,6 +8,7 @@
 - [bb tasks] Fix self-manage-layers?
 - [bb layer] Bump babashka version to 0.4.5
 - [holy-lambda-template] Replace "." in stack name to "-"
+- [Dockerfile CE] Bump ClojureTools. Minimize docker image
 
 ## 0.1.54 (06-06-2021)
 - [bb tasks] Fix adding Clojure/Pods deps for Babashka projects. For now all the the runtime will create a temporary template-modified.yml file which should be ignored.
