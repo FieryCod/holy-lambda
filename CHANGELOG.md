@@ -4,6 +4,9 @@
 - [bb tasks] Add additional describe:stacks step for stack:destroy, since sometimes stack cannot be destroyed.
 - [bb tasks] Allow to force compilation on sources
 - [holy-lambda] Unify multiHeaders, headers conversion for both local and AWS environment. Breaking change if you were getting the headers from request.
+- [holy-lambda-template] Add HttpApi reference in outputs for easier deployment
+- [bb tasks] Fix self-manage-layers?
+- [bb layer] Bump babashka version to 0.4.5
 
 ## 0.1.54 (06-06-2021)
 - [bb tasks] Fix adding Clojure/Pods deps for Babashka projects. For now all the the runtime will create a temporary template-modified.yml file which should be ignored.

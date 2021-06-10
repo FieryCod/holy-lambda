@@ -16,7 +16,7 @@ build-artifact-in-place:
 		echo "bb does not exists in artifact. Exiting!"; exit 1; \
 	fi;
 
-all:
+deploy:
 	@echo "Building the artifacts"
 
 	@docker build --target BUILDER -t holy-lambda-babashka-lambda-archiver .
