@@ -38,7 +38,7 @@
        ;; Arity used for Java runtime
        #?(:bb
           ([in out ctx]
-           (throw (ex-info "Babashka should not rely on java based wrapper" {})))
+           (throw (ex-info "Babashka should not rely on Java based wrapper" {})))
 
           :clj
           ([this# ^InputStream in# ^OutputStream out# ^Context ctx#]

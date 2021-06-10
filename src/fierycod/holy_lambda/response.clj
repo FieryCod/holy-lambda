@@ -17,7 +17,7 @@
   ([url] (redirect url :found))
   ([url status]
    {:statusCode  (redirect-status-codes status status)
-    :headers {"Location" url}
+    :headers {"location" url}
     :body    nil}))
 
 (defn created
@@ -26,7 +26,7 @@
   ([url] (created url nil))
   ([url body]
    {:statusCode  201
-    :headers {"Location" url}
+    :headers {"location" url}
     :body    body}))
 
 (defn bad-request
@@ -55,21 +55,21 @@
   "Returns a skeletal response with the given body, status of 200, and `Content-Type` set to `application/json`."
   [body]
   {:statusCode  200
-   :headers {"Content-Type" "application/json; charset=utf-8"}
+   :headers {"content-type" "application/json"}
    :body    body})
 
 (defn text
   "Returns a skeletal response with the given msg, status of 200, and `Content-Type` set to `text/plain`."
   [?msg]
   {:statusCode  200
-   :headers {"Content-Type" "text/plain; charset=utf-8"}
+   :headers {"content-type" "text/plain; charset=utf-8"}
    :body    ?msg})
 
 (defn html
   "Returns a skeletal response with the given body, status of 200, and `Content-Type` set to `text/html`."
   [?body]
   {:statusCode  200
-   :headers {"Content-Type" "text/html; charset=utf-8"}
+   :headers {"content-type" "text/html; charset=utf-8"}
    :body    ?body})
 
 (defn status
@@ -90,7 +90,7 @@
   "Returns an updated response with the a Content-Type header corresponding
   to the given content-type."
   [resp ?content-type]
-  (header resp "Content-Type" ?content-type))
+  (header resp "content-type" ?content-type))
 
 (defn find-header
   "Looks up a header in a response (or request) case insensitively,
@@ -118,7 +118,7 @@
   "Returns an updated response with the supplied charset added to the
   Content-Type header."
   [resp ?charset]
-  (update-header resp "Content-Type"
+  (update-header resp "content-type"
                  (fn [?content-type]
                    (-> (or ?content-type "text/plain")
                        (s/replace #";\s*charset=[^;]*" "")
@@ -135,14 +135,14 @@
 (defn set-cookie
   "Sets a cookie on the response."
   [resp {:keys [k v] :as opts}]
-  (update-in resp [:multiValueHeaders "Set-Cookie"]
+  (update-in resp [:multiValueHeaders "set-cookie"]
              (fn [xv]
                (vec (conj xv (cookie k v (dissoc opts :k :v)))))))
 
 (defn origin
   [resp ?origin]
-  (header resp "Access-Control-Allow-Origin" ?origin))
+  (header resp "access-control-allow-origin" ?origin))
 
 (defn credentials
   [resp ?creds]
-  (header resp "Access-Control-Allow-Credentials" ?creds))
+  (header resp "access-control-allow-credentials" ?creds))

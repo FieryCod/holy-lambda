@@ -2,13 +2,116 @@
   (:require
    [fierycod.holy-lambda.retriever :as retriever]
    #?(:bb [cheshire.core :as json]
-      :clj [jsonista.core :as json]))
+      :clj [jsonista.core :as json])
+   [clojure.string :as s]
+   [fierycod.holy-lambda.util :as u])
   #?(:clj
      (:import
       [java.net URL HttpURLConnection]
       [java.io InputStream InputStreamReader])))
 
-(def ^:private success-codes #{200 202 201})
+(defn x->json-string
+  [x]
+  #?(:bb (json/generate-string x)
+     :clj (json/write-value-as-string x)
+     :default (throw (ex-info "Not implemented" {}))))
+
+(defn x->json-bytes
+  [x]
+  #?(:bb (.getBytes (json/generate-string x))
+     :clj (json/write-value-as-bytes x)
+     :default (throw (ex-info "Not implemented" {}))))
+
+(defn json-stream->x
+  [^InputStream s]
+  #?(:bb
+     (json/parse-string (slurp (InputStreamReader. s "UTF-8")) true)
+     :clj
+     (json/read-value
+      (slurp (InputStreamReader. s "UTF-8"))
+      (json/object-mapper {:decode-key-fn true}))
+     :default
+     (throw (ex-info "Not implemented" {}))))
+
+(defn json-string->x
+  [^String s]
+  #?(:bb
+     (json/parse-string s true)
+     :clj
+     (json/read-value s (json/object-mapper {:decode-key-fn true}))
+     :default
+     (throw (ex-info "Not implemented" {}))))
+
+(defn- normalize-headers
+  [headers]
+  (into {} (keep (fn [[k v]] (when k [(.toLowerCase (name k)) v]))) headers))
+
+(defn response-event->normalized-event
+  [event]
+  (cond-> event
+    (seq (:headers event))
+    (update :headers normalize-headers)
+
+    (seq (:multiValueHeaders event))
+    (update :multiValueHeaders normalize-headers)))
+
+(defn- content-type
+  [x]
+  (get (:headers x) "content-type"))
+
+(defn- json-content-type?
+  [ctype]
+  (= ctype "application/json"))
+
+(defn in->edn-event
+  [^InputStream event-stream]
+  (let [event (-> event-stream json-stream->x)
+        ctype (content-type event)
+        body (:body event)]
+    (cond-> event
+      (and (string? body)
+           (json-content-type? ctype))
+      (assoc :body (json-string->x body)))))
+
+(defn response->bytes
+  [?response]
+  (let [response (retriever/<-wait-for-response ?response)
+        ;; remove internals
+        response (dissoc response :fierycod.holy-lambda.interceptor/interceptors)
+        ctype (content-type response)]
+
+    (cond
+      ;; Optimize the common case
+      (json-content-type? ctype)
+      (x->json-bytes (update response :body x->json-string))
+
+      (contains? #{"text/plain"
+                   "text/plain; charset=utf-8"
+                   "text/html"
+                   "text/html; charset=utf-8"}
+                 ctype)
+      (x->json-bytes response)
+
+      ;; Ack event
+      (nil? response)
+      (x->json-bytes {:body nil
+                      :statusCode 200})
+
+      ;; Handle redirect. Redirect should have nil? body
+      (and (get-in response [:headers "location"])
+           (nil? (:body response)))
+      (x->json-bytes response)
+
+      ;; Corner cases should be handled via interceptor chain
+      :else
+      response)))
+
+#?(:clj
+   (def ^:private success-codes #{200 202 201}))
+
+(defn success-code?
+  [code]
+  (success-codes code))
 
 #?(:clj
    (defn- retrieve-body
@@ -17,101 +120,15 @@
        (.getErrorStream http-conn)
        (.getInputStream http-conn))))
 
-;; TODO: Tidy up event read/write
-;; TODO: Local SAM environment passes headers as is without lowercasing
-;; API gateway instead makes all the headers lowercase. We should probably process all the headers and lowercase them to make the environments consistent
-(defn in->edn-event
-  [^InputStream event]
-  (let [event #?(:bb
-                 (json/parse-string (slurp (InputStreamReader. event "UTF-8")) true)
-                 :clj
-                 (json/read-value
-                  (slurp (InputStreamReader. event "UTF-8"))
-                  (json/object-mapper {:decode-key-fn true}))
-                 :default
-                 nil)
-        content-type (or (:Content-Type (:headers event))
-                         (:content-type (:headers event)))
-        body (:body event)]
-
-    (if (and (not= content-type "application/json")
-             (not= content-type "application/json; charset=utf-8"))
-      event
-      (assoc event
-             :body
-             (if-not (string? body)
-               body
-               #?(:bb
-                  (json/parse-string body true)
-                  :clj
-                  (json/read-value body (json/object-mapper {:decode-key-fn true}))
-                  :default
-                  nil))))))
-
-(defn success-code?
-  [code]
-  (success-codes code))
-
-(defn response->bytes
-  [?response]
-  (let [response (retriever/<-wait-for-response ?response)
-        ;; remove internals
-        response (dissoc response :fierycod.holy-lambda.interceptor/interceptors)]
-
-    (cond
-      ;; Optimize the common case
-      (= (get-in response [:headers "Content-Type"]) "application/json; charset=utf-8")
-      #?(:bb
-         (.getBytes ^String (json/generate-string (assoc response :body (json/generate-string (:body response)))))
-         :clj
-         (json/write-value-as-bytes (assoc response :body (json/write-value-as-string (:body response))))
-         :cljs nil)
-
-      (contains? #{"text/plain"
-                   "text/plain; charset=utf-8"
-                   "text/html"
-                   "text/html; charset=utf-8"}
-                 (get-in response [:headers "Content-Type"]))
-      #?(:bb
-         (.getBytes ^String (json/generate-string response))
-         :clj
-         (json/write-value-as-bytes response)
-         :cljs nil)
-
-      ;; Ack event
-      (nil? response)
-      #?(:bb
-         (.getBytes ^String (json/generate-string {:body ""
-                                                   :statusCode 200
-                                                   :headers {"Content-Type" "text/plain; charset=utf-8"}}))
-         :clj
-         (json/write-value-as-bytes {:body ""
-                                     :statusCode 200
-                                     :headers {"Content-Type" "text/plain; charset=utf-8"}})
-         :cljs nil)
-
-      ;; Handle redirect. Redirect should have nil? body
-      (and (get-in response [:headers "Location"])
-           (nil? (:body response)))
-      #?(:bb
-         (.getBytes ^String (json/generate-string response))
-         :clj
-         (json/write-value-as-bytes response)
-         :cljs nil)
-
-      ;; Corner cases should be handled via interceptor chain
-      :else
-      response)))
-
 #?(:clj
    (defn http
      [method url-s & [response]]
      (let [push? (= method "POST")
-           response-bytes (when push? (response->bytes response))
+           response-bytes (when push? (response->bytes (response-event->normalized-event response)))
            ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
            _ (doto http-conn
                (.setDoOutput push?)
-               (.setRequestProperty "Content-Type" "application/json")
+               (.setRequestProperty "content-type" "application/json")
                (.setRequestMethod method))
            _ (when push?
                (let [output-stream (.getOutputStream http-conn)]
@@ -121,11 +138,13 @@
                    (.write output-stream ^"[B" response-bytes))
                  (.flush output-stream)
                  (.close output-stream)))
+           ;; It's not necessary to normalize the response headers for runtimes since
+           ;; we only rely on Lambda-Runtime-Deadline-Ms and Lambda-Runtime-Aws-Request-Id headers
            headers (into {} (.getHeaderFields http-conn))
            status (.getResponseCode http-conn)]
        {:headers headers
         :status status
-        :body (in->edn-event (retrieve-body http-conn status))})))
+        :body (response-event->normalized-event (in->edn-event (retrieve-body http-conn status)))})))
 
 (defn call
   ([afn-sym]
@@ -139,11 +158,9 @@
      (into {} (System/getenv))))
 
 (defn getf-header
-  ([headers]
-   (partial getf-header headers))
-  ([headers prop]
-   (cond-> (get headers prop)
-     (seq (get headers prop)) first)))
+  [headers prop]
+  (cond-> (get headers prop)
+    (seq (get headers prop)) first))
 
 (defn ctx
   [envs* rem-time-fn fn-name fn-version fn-invoked-arn memory-limit
@@ -161,7 +178,3 @@
    :clientContext client-context
    :envs envs*})
 
-#?(:clj
-   (defn exit!
-     []
-     (System/exit -1)))

@@ -14,11 +14,11 @@
 (defn- ->aws-context
   [headers event env-vars]
   (let [get-env (partial get env-vars)
-        getf-header (u/getf-header headers)
         request-context (:requestContext event)]
+
     (u/ctx env-vars
            (fn []
-             (- (Long/parseLong (getf-header "Lambda-Runtime-Deadline-Ms"))
+             (- (Long/parseLong (u/getf-header headers "Lambda-Runtime-Deadline-Ms"))
                 (System/currentTimeMillis)))
            (get-env "AWS_LAMBDA_FUNCTION_NAME")
            (get-env "AWS_LAMBDA_FUNCTION_VERSION")
@@ -39,12 +39,12 @@
                                       :iid iid
                                       :path "/error"})
                          {:statusCode 500
-                          :headers {"Content-Type" "application/json; charset=utf-8"}
+                          :headers {"content-type" "application/json"}
                           :body {:runtime-error true
                                  :err (Throwable->map err)}})]
     (when-not (u/success-code? (:status response))
       (println "[holy-lambda] Runtime error failed sent to AWS." (:body response))
-      (u/exit!))))
+      (System/exit 1))))
 
 (defn- fetch-aws-event
   [runtime]
@@ -82,11 +82,11 @@
 
     (when-not handler
       (send-runtime-error runtime iid (->ex (str "Handler " handler-name " not found!")))
-      (u/exit!))
+      (System/exit 1))
 
     (when-not iid
       (send-runtime-error runtime iid (->ex (str "Failed to determine new invocation-id. Invocation id is:" iid)))
-      (u/exit!))
+      (System/exit 1))
 
     (when (and (:invocation-id aws-event) (u/success-code? (:status aws-event)))
       (process-event runtime iid aws-event env-vars (u/call handler)))))
