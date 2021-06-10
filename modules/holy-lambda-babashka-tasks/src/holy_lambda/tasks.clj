@@ -281,7 +281,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def MODIFIED_TEMPLATE_FILE "template-modified.yml")
 (def PACKAGED_TEMPLATE_FILE "packaged.yml")
 (def BABASHKA_RUNTIME_LAYER_FILE ".holy-lambda/babashka-runtime/template.yml")
-(def SELF_MANAGE_LAYERS? (:self-manage-layers? OPTIONS))
+(def SELF_MANAGE_LAYERS? (:self-manage-layers? RUNTIME))
 (def NATIVE_CONFIGURATIONS_PATH "resources/native-configuration")
 (def BOOTSTRAP_FILE (:bootstrap-file RUNTIME))
 (def NATIVE_DEPS_PATH (:native-deps RUNTIME))
