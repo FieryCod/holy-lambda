@@ -283,6 +283,15 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def BABASHKA_RUNTIME_LAYER_FILE ".holy-lambda/babashka-runtime/template.yml")
 (def SELF_MANAGE_LAYERS? (:self-manage-layers? RUNTIME))
 (def NATIVE_CONFIGURATIONS_PATH "resources/native-configuration")
+(def NATIVE_CONFIGURATIONS_FILTER_REFLECTIONS_FILE_PATH "resources/native-configuration/reflections-filters.json")
+(def NATIVE_CONFIGURATIONS_FILTER_REFLECTIONS_CONTENT
+"{
+  \"rules\": [
+      {\"excludeClasses\": \"clojure.**\"},
+      {\"includeClasses\": \"clojure.lang.Reflector\"}
+  ]
+}")
+(def NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH "resources/native-configuration/resource-config.json")
 (def BOOTSTRAP_FILE (:bootstrap-file RUNTIME))
 (def NATIVE_DEPS_PATH (:native-deps RUNTIME))
 (def BABASHKA_LAYER_INSTANCE (str BUCKET_NAME "-hlbbri-" (s/replace RUNTIME_VERSION #"\." "-")))
@@ -715,13 +724,36 @@ Resources:
 
     (stack-files-check :default)
 
+    (when-not (fs/exists? (io/file NATIVE_CONFIGURATIONS_FILTER_REFLECTIONS_FILE_PATH))
+      (spit NATIVE_CONFIGURATIONS_FILTER_REFLECTIONS_FILE_PATH NATIVE_CONFIGURATIONS_FILTER_REFLECTIONS_CONTENT))
+
     (hpr "Compiling with agent support")
     (shell "rm -Rf .cpcache .holy-lambda/build/output-agent.jar")
     (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
 
     (hpr "Generating native-configurations")
-    (docker:run (str "java -agentlib:native-image-agent=config-output-dir=" NATIVE_CONFIGURATIONS_PATH
-                     " -Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))))
+    (docker:run (str "java -agentlib:native-image-agent="
+                     "config-output-dir=" NATIVE_CONFIGURATIONS_PATH ","
+                     "caller-filter-file=" NATIVE_CONFIGURATIONS_FILTER_REFLECTIONS_FILE_PATH
+                     " "
+                     "-Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))
+    (if-not (fs/exists? (io/file NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH))
+      (hpr (pre "Native configurations generation failed"))
+      (let [resource-config (json/parse-string (slurp (io/file NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH)))]
+        (hpr "Removing unecessary entries in resource-config.json")
+        (spit NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH
+              (json/generate-string
+               (update-in resource-config
+                          ["resources" "includes"]
+                          (fn [patterns]
+                            (filterv
+                             (fn [p]
+                               (let [patternv (get p "pattern")]
+                                 (not (or (s/includes? patternv ".class")
+                                          (s/includes? patternv ".clj")
+                                          (s/includes? patternv "native-agents-payloads")))))
+                             patterns)))
+               {:pretty true}))))))
 
 (def -bootstrap-file
 "#!/bin/sh
