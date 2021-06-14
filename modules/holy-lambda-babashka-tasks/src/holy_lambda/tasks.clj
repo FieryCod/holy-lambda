@@ -723,6 +723,8 @@ Resources:
 
     (stack-files-check :default)
 
+    (io/make-parents (str NATIVE_CONFIGURATIONS_PATH "/traces.json"))
+
     (hpr "Compiling with agent support!")
     (shell "rm -Rf .cpcache .holy-lambda/build/output-agent.jar")
     (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
