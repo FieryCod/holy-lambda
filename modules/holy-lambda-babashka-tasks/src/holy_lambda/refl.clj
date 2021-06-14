@@ -45,8 +45,13 @@
                  (or
                   (and (= function "forName")
                        (= class "java.lang.Class"))
-                  (= "clojure.lang.RT" caller_class)
-                  (= "clojure.genclass__init" caller_class)
+                  (= class "clojure.lang.Compiler")
+                  (contains?
+                   #{"clojure.lang.Compiler$ObjExpr"
+                     "clojure.lang.RT"
+                     "clojure.genclass__init"}
+                   caller_class)
+
                   (and (str/starts-with? caller_class "clojure.core$fn")
                        (= "java.sql.Timestamp" arg)))
                  (= "forName" function))
