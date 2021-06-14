@@ -98,7 +98,6 @@ bucket:remove          > Removes a s3 stack bucket or the one specified by :name
 
 ----------------------------------------------------------------
 
-docker:build:ee        > Builds local image for GraalVM EE 
 docker:run             > Run command in fierycod/graalvm-native-image docker context
 
 ----------------------------------------------------------------

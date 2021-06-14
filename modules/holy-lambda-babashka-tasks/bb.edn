@@ -82,7 +82,6 @@
          bucket:create          holy-lambda.tasks/bucket:create
          bucket:remove          holy-lambda.tasks/bucket:remove
 
-         docker:build:ee        holy-lambda.tasks/docker:build:ee
          docker:run             holy-lambda.tasks/docker:run
 
          native:conf            holy-lambda.tasks/native:conf

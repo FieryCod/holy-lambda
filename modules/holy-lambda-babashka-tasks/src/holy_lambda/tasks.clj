@@ -1126,15 +1126,6 @@ set -e
 
     (hpr  (prs "Build artifacts purged"))))
 
-(defn docker:build:ee
-  "     \033[0;31m>\033[0m Builds local image for GraalVM EE "
-  []
-  (print-task "docker:build:ee")
-  (hpr  (accent "Building GraalVM EE docker image"))
-  (spit "Dockerfile.ee" (:body (curl/get "https://raw.githubusercontent.com/FieryCod/holy-lambda/master/docker/ee/Dockerfile")))
-  (shell "docker build . -f Dockerfile.ee -t fierycod/graalvm-native-image:ee")
-  (shell "rm -rf Dockerfile.ee"))
-
 (defn stack:lint
   "     \033[0;31m>\033[0m Lints the project"
   []

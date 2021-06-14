@@ -140,7 +140,6 @@ Here's an overview of what we'll create ([version with working links](https://sw
 
     ----------------------------------------------------------------
 
-    docker:build:ee        > Builds local image for GraalVM EE 
     docker:run             > Run command in fierycod/graalvm-native-image docker context
 
     ----------------------------------------------------------------
