@@ -8,13 +8,13 @@
    [clojure.string :as s]
    [clojure.java.io :as io])
   (:import
-   [java.nio.file Files LinkOption]
    [java.io File]))
 
-(def ^:private PAYLOADS (try (or (io/file (io/resource "native-agents-payloads"))
-                                 (io/file "resources/native-agents-payloads"))
-                             (catch Exception _
-                               (io/file "resources/native-agents-payloads"))))
+(def ^:private PAYLOADS
+  (try (or (io/file (io/resource "native-agents-payloads"))
+           (io/file "resources/native-agents-payloads"))
+       (catch Exception _
+         (io/file "resources/native-agents-payloads"))))
 
 (def ^:private AGENT_EXECUTOR "native-agent")
 
@@ -48,9 +48,9 @@
 (defn- agents-payloads->invoke-map
   []
   (->> (file-seq PAYLOADS)
-       (filterv #(Files/isRegularFile (.toPath ^File %1) (into-array LinkOption [])))
-       (filterv #(s/includes? (str %) ".edn"))
-       (mapv #(-> % slurp edn/read-string (assoc :path (str %))))
+       (filterv #(.isFile ^File %))
+       (filterv #(s/includes? (.toString ^File %) ".edn"))
+       (mapv #(-> % slurp edn/read-string (assoc :path (.toString ^File %))))
        (sort-by :path)))
 
 (defn- routes->reflective-call!

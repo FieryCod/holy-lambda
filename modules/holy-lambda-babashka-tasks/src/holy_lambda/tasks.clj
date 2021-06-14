@@ -10,7 +10,8 @@
    [babashka.fs :as fs]
    [babashka.curl :as curl]
    [babashka.process :as p]
-   [clojure.java.io :as io])
+   [clojure.java.io :as io]
+   [holy-lambda.refl :as refl])
   (:refer-clojure :exclude [spit]))
 
 (deps/add-deps {:deps {'clojure-term-colors/clojure-term-colors {:mvn/version "0.1.0"}}})
@@ -289,14 +290,6 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (def BABASHKA_RUNTIME_LAYER_FILE ".holy-lambda/babashka-runtime/template.yml")
 (def SELF_MANAGE_LAYERS? (:self-manage-layers? RUNTIME))
 (def NATIVE_CONFIGURATIONS_PATH "resources/native-configuration")
-(def NATIVE_CONFIGURATIONS_FILTER_REFLECTIONS_FILE_PATH "resources/native-configuration/reflections-filters.json")
-(def NATIVE_CONFIGURATIONS_FILTER_REFLECTIONS_CONTENT
-"{
-  \"rules\": [
-      {\"excludeClasses\": \"clojure.**\"},
-      {\"includeClasses\": \"clojure.lang.Reflector\"}
-  ]
-}")
 (def NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH "resources/native-configuration/resource-config.json")
 (def BOOTSTRAP_FILE (:bootstrap-file RUNTIME))
 (def NATIVE_DEPS_PATH (:native-deps RUNTIME))
@@ -730,19 +723,26 @@ Resources:
 
     (stack-files-check :default)
 
-    (when-not (fs/exists? (io/file NATIVE_CONFIGURATIONS_FILTER_REFLECTIONS_FILE_PATH))
-      (spit NATIVE_CONFIGURATIONS_FILTER_REFLECTIONS_FILE_PATH NATIVE_CONFIGURATIONS_FILTER_REFLECTIONS_CONTENT))
-
-    (hpr "Compiling with agent support")
+    (hpr "Compiling with agent support!")
     (shell "rm -Rf .cpcache .holy-lambda/build/output-agent.jar")
     (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
 
-    (hpr "Generating native-configurations")
+    (hpr "Generating traces to ignore unnecessary reflection entries!")
     (docker:run (str "java -agentlib:native-image-agent="
-                     "config-output-dir=" NATIVE_CONFIGURATIONS_PATH ","
-                     "caller-filter-file=" NATIVE_CONFIGURATIONS_FILTER_REFLECTIONS_FILE_PATH
+                     "trace-output=" (str NATIVE_CONFIGURATIONS_PATH "/traces.json")
                      " "
                      "-Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))
+
+    (hpr "Generating native-configurations!")
+    (docker:run (str "java -agentlib:native-image-agent="
+                     "config-output-dir=" NATIVE_CONFIGURATIONS_PATH
+                     " "
+                     "-Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))
+
+    (hpr "Cleaning up reflection-config.json!")
+    (refl/clean-reflection-config!)
+
+    (hpr "Cleaning up resource-config.json!")
     (if-not (fs/exists? (io/file NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH))
       (hpr (pre "Native configurations generation failed"))
       (let [resource-config (json/parse-string (slurp (io/file NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH)))]

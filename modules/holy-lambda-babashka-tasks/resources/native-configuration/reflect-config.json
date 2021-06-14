@@ -1,29 +1,23 @@
-[
-{
-  "name":"byte[]"
-},
-{
-  "name":"com.fasterxml.jackson.databind.deser.Deserializers[]"
-},
-{
-  "name":"com.fasterxml.jackson.databind.deser.KeyDeserializers[]"
-},
-{
-  "name":"com.fasterxml.jackson.databind.deser.ValueInstantiators[]"
-},
-{
-  "name":"com.fasterxml.jackson.databind.ext.Java7SupportImpl",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"com.fasterxml.jackson.databind.ser.Serializers[]"
-},
-{
-  "name":"java.lang.String",
-  "allPublicMethods":true
-},
-{
-  "name":"java.util.Properties",
-  "allPublicMethods":true
-}
-]
+[ {
+  "name" : "com.fasterxml.jackson.databind.deser.Deserializers[]"
+}, {
+  "name" : "com.fasterxml.jackson.databind.deser.KeyDeserializers[]"
+}, {
+  "name" : "com.fasterxml.jackson.databind.deser.ValueInstantiators[]"
+}, {
+  "name" : "com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "com.fasterxml.jackson.databind.ser.Serializers[]"
+}, {
+  "name" : "java.lang.Object[]"
+}, {
+  "name" : "java.lang.String",
+  "allPublicMethods" : true
+}, {
+  "name" : "java.util.Properties",
+  "allPublicMethods" : true
+} ]
