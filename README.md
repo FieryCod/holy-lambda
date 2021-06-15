@@ -20,7 +20,7 @@ The micro framework that integrates Clojure with AWS Lambda on either Java, Cloj
 **Stable releases**
 
 ``` clojure
-io.github.FieryCod/holy-lambda                     {:mvn/version "0.2.0"}
+io.github.FieryCod/holy-lambda                     {:mvn/version "0.2.1"}
 
 ;; Babashka runtime layer `0.4.5`
 ;; `:runtime:version` are the inner properties of `:holy-lambda/options` in bb.edn
