@@ -4,7 +4,7 @@
   <groupId>io.github.FieryCod</groupId>
   <artifactId>holy-lambda-babashka-shim</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.54</version>
+  <version>0.2.1</version>
   <name>holy-lambda-babashka-shim</name>
   <description>Micro framework which turns your code into AWS Lambda functions suites for babashka based Lambdas</description>
   <url>https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka</url>

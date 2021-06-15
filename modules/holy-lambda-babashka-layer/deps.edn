@@ -1,2 +1,2 @@
-{:deps {io.github.FieryCod/holy-lambda                   {:mvn/version "0.2.0"}
-        io.github.FieryCod/holy-lambda-babashka-shim     {:mvn/version "0.1.54"}}}
+{:deps {io.github.FieryCod/holy-lambda                   {:mvn/version "0.2.1"}
+        io.github.FieryCod/holy-lambda-babashka-shim     {:mvn/version "0.2.1"}}}

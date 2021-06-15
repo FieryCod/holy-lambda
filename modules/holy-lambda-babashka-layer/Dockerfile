@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y wget zip
 
 ENV GITLIBS=".gitlibs/"
 ENV CLOJURE_TOOLS_DIR=/opt
-ARG BABASHKA_VERSION=0.4.5
+ARG BABASHKA_VERSION=0.4.6
 
 COPY bootstrap .
 COPY deps.edn .

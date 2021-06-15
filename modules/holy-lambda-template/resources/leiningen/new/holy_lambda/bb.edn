@@ -89,7 +89,7 @@
 
                         ;; Some of the runtimes are versioned. For instance `:babashka` runtime is a versioned layer which ships it's own version of
                         ;; clojure, holy-lambda, default-retriever
-                        :version                   "0.0.39"
+                        :version                   "0.1.0"
 
                         ;; Specify custom arguments for native image generation
                         ;; Works only on `:native` runtime.
