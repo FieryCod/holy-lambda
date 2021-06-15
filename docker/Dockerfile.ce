@@ -14,10 +14,9 @@ ENV GITLIBS=/project/.holy-lambda/.gitlibs/
 
 # --------------- UPDATE ------------------
 # -----------------------------------------
-ARG BABASHKA_VERSION=0.4.4
+ARG BABASHKA_VERSION=0.4.6
 ARG CLOJURE_VERSION=1.10.3.849
 # -----------------------------------------
-
 
 # Provide download_pods command
 COPY download_pods download_pods.clj /
