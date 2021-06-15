@@ -1,7 +1,15 @@
 # Changelog
 
-## Unreleased
-- [bb tasks] Add additional describe:stacks step for stack:destroy, since sometimes stack cannot be destroyed.
+## 0.2.1 (10-06-2021)
+
+- [bb layer] Bump babashka version to 0.4.6
+- [bb tasks] Add tail mode for `bb stack:logs`
+- [bb tasks] Ignore unnecessary reflections and resources from native-configuration. Based on @borkdude `refl` project
+- [bb tasks] Deprecate `docker:build:ee`. GraalVM EE support will arrive soon.
+- [holy-lambda] Remove additional `LinkOption` reflection.
+
+## 0.2.0 (10-06-2021)
+- [bb tasks] Add additional describe:stacks step for stack:destroy, since sometimes stack cannot be destroyed
 - [bb tasks] Allow to force compilation on sources
 - [holy-lambda] Unify multiHeaders, headers conversion for both local and AWS environment. Breaking change if you were getting the headers from request.
 - [holy-lambda-template] Add HttpApi reference in outputs for easier deployment
@@ -11,7 +19,7 @@
 - [Dockerfile CE] Bump ClojureTools. Minimize docker image
 
 ## 0.1.54 (06-06-2021)
-- [bb tasks] Fix adding Clojure/Pods deps for Babashka projects. For now all the the runtime will create a temporary template-modified.yml file which should be ignored.
+- [bb tasks] Fix adding Clojure/Pods deps for Babashka projects. For now all the runtimes will create a temporary template-modified.yml file which should be ignored.
 - [bb layer] 0.0.34 Fix doubled holy-lambda dependency. Update layer to use the latest holy-lambda library. 
 - [bb layer] Fix edge case when babashka layer is published without the `bb` executable.
 - [holy-lambda] Add html response support

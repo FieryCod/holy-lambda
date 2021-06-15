@@ -24,7 +24,7 @@ io.github.FieryCod/holy-lambda                     {:mvn/version "0.2.1"}
 
 ;; Babashka runtime layer `0.4.5`
 ;; `:runtime:version` are the inner properties of `:holy-lambda/options` in bb.edn
-:holy-lambda/options:runtime:version               "0.1.0" 
+:holy-lambda/options:runtime:version                             "0.1.0" 
 
 ;; Default retriever is built in holy-lambda. For `core.async` support use `async-retriever`
 io.github.FieryCod/holy-lambda-default-retriever   {:mvn/version "0.0.6"}
@@ -33,9 +33,9 @@ io.github.FieryCod/holy-lambda-default-retriever   {:mvn/version "0.0.6"}
 io.github.FieryCod/holy-lambda-async-retriever     {:mvn/version "0.0.6"}
 
 ;; In bb.edn :deps
-io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url "https://github.com/FieryCod/holy-lambda"
-                                                    :deps/root "./modules/holy-lambda-babashka-tasks"
-                                                    :sha      "d8aee875a378fd550ec95b9f8354ab3872f966bd"}
+io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url     "https://github.com/FieryCod/holy-lambda"
+                                                    :deps/root   "./modules/holy-lambda-babashka-tasks"
+                                                    :sha         "50c055b1b9addf6bfc25bca8a1deecfd3af5c36f"}
 ```
 
 [Jump here](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
