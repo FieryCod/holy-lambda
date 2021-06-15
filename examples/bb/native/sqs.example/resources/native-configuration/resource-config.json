@@ -1,0 +1,22 @@
+{
+  "resources" : {
+    "includes" : [ {
+      "pattern" : "\\QMETA-INF/services/org.eclipse.jetty.http.HttpFieldPreEncoder\\E"
+    }, {
+      "pattern" : "\\Qclojure/version.properties\\E"
+    }, {
+      "pattern" : "\\Qcognitect/aws/endpoints.edn\\E"
+    }, {
+      "pattern" : "\\Qcognitect/aws/sqs/service.edn\\E"
+    }, {
+      "pattern" : "\\Qcognitect_aws_http.edn\\E"
+    }, {
+      "pattern" : "\\Qorg/eclipse/jetty/version/build.properties\\E"
+    }, {
+      "pattern" : "\\Qsun/net/idn/uidna.spp\\E"
+    }, {
+      "pattern" : "\\Qsun/text/resources/unorm.icu\\E"
+    } ]
+  },
+  "bundles" : [ ]
+}
