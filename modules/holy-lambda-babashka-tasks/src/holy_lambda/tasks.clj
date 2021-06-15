@@ -1153,7 +1153,7 @@ set -e
          "--region"     REGION
          "--stack-name" STACK_NAME)
   (bucket:remove)
-  (hpr "Waiting 5 seconds for partial/complete cloudformation deletion status...")
-  (Thread/sleep 5000)
+  (hpr "Waiting 15 seconds for partial/complete cloudformation deletion status...")
+  (Thread/sleep 15000)
   (hpr "If you see an error regarding not being able to describe not existent stack then destroy was successful!")
   (stack:describe))
