@@ -1,5 +1,5 @@
 (ns holy-lambda.refl
-  {:author "Michiel Borkent"
+  {:author "Michiel Borkent & Karol Wójcik"
    :doc "Code adapted for purpose of HL from refl project: https://github.com/borkdude/refl/blob/main/script/gen-reflect-config.clj.
          All credits goes to @borkdude"}
   (:require
@@ -38,10 +38,12 @@
 (defn ignore-by-class!
   [{:keys [tracer caller_class class] :as _m}]
   (when (= "reflect" tracer)
-    (when (contains? #{"clojure.lang.Compiler$StaticFieldExpr"
-                       "clojure.lang.Compiler$ObjExpr"
-                       "clojure.lang.Compiler$NewInstanceExpr"}
-                     caller_class)
+    (when (or (contains? #{"clojure.lang.Compiler$StaticFieldExpr"
+                           "clojure.lang.Compiler$CompilerException"
+                           "clojure.lang.Compiler$ObjExpr"
+                           "clojure.lang.Compiler$NewInstanceExpr"}
+                         caller_class)
+              (and class (str/starts-with? class "clojure.lang")))
       (swap! ignored-by-class conj class))))
 
 (defn ignore-by-arg!
@@ -51,9 +53,9 @@
       (let [arg (normalize-array-name arg)]
         (if (and caller_class
                  (or
-                  (and )
                   (= "clojure.lang.RT" caller_class)
                   (= "clojure.genclass__init" caller_class)
+                  (str/starts-with? arg "clojure.lang")
                   (and (str/starts-with? caller_class "clojure.core$fn")
                        (= "java.sql.Timestamp" arg)))
                  (= "forName" function))
@@ -107,6 +109,7 @@
     )
 
   (run! ignore! traces1)
+  @unignored-by-arg
   @ignored-by-arg
   @ignored-by-class
 
