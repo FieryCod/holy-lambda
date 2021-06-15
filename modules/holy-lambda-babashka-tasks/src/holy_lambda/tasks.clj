@@ -1082,6 +1082,7 @@ set -e
        \t\t        - \033[0;31m:name\033[0m        - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
        \t\t        - \033[0;31m:e\033[0m           - fetch logs up to this time
        \t\t        - \033[0;31m:s\033[0m           - fetch logs starting at this time
+       \t\t        - \033[0;31m:tail\033[0m        - fetch logs in tail mode
        \t\t        - \033[0;31m:filter\033[0m      - find logs that match terms "
   [& args]
   (print-task "stack:logs")

@@ -156,6 +156,7 @@ Here's an overview of what we'll create ([version with working links](https://sw
                             - <Clojure>  deps.edn
                             - <Babashka> bb.edn:runtime:pods
     stack:compile          > Compiles sources if necessary
+                            - :force      - force compilation even if sources did not change
     stack:invoke           > Invokes lambda fn (check sam local invoke --help):
                             - :name        - either :name or :stack:default-lambda
                             - :event-file  - path to event file
@@ -186,6 +187,7 @@ Here's an overview of what we'll create ([version with working links](https://sw
                             - :name        - either :name or :stack:default-lambda
                             - :e           - fetch logs up to this time
                             - :s           - fetch logs starting at this time
+                            - :tail        - fetch logs in tail mode
                             - :filter      - find logs that match terms 
     stack:version          > Outputs holy-lambda babashka tasks version
     stack:lint             > Lints the project
