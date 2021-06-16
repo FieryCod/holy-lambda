@@ -744,11 +744,10 @@ Resources:
     (hpr "Cleaning up reflection-config.json!")
     (refl/clean-reflection-config!)
 
-    (hpr "Cleaning up resource-config.json!")
     (if-not (fs/exists? (io/file NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH))
-      (hpr (pre "Native configurations generation failed"))
+      (hpr (pre "Native configurations generation failed!"))
       (let [resource-config (json/parse-string (slurp (io/file NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH)))]
-        (hpr "Removing unecessary entries in resource-config.json")
+        (hpr "Cleaning up resource-config.json!")
         (spit NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH
               (json/generate-string
                (update-in resource-config
