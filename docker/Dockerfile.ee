@@ -3,10 +3,19 @@ MAINTAINER Karol Wójcik <Karol Wójcik>
 
 # Based on https://github.com/graalvm/container/blob/master/community/Dockerfile.ol8
 RUN microdnf update -y oraclelinux-release-el8 \
-    && microdnf --enablerepo ol8_codeready_builder install bzip2-devel ed gcc gcc-c++ gcc-gfortran gzip file fontconfig less libcurl-devel make openssl openssl-devel readline-devel tar \
-    vi which xz-devel zlib-devel findutils glibc-static libstdc++ libstdc++-devel libstdc++-static zlib-static \
+    && microdnf --enablerepo ol8_codeready_builder install bzip2-devel ed gcc gcc-c++ gcc-gfortran gzip file fontconfig less libcurl-devel make openssl openssl-devel readline-devel tar unzip \
+    vi which xz-devel zlib-devel findutils glibc-static libstdc++ libstdc++-devel libstdc++-static zlib-static wget \
     && microdnf clean all
 RUN fc-cache -f -v
+
+ENV CLJ_CACHE=/project/.holy-lambda/clojure
+ENV CLJ_COFIG=/project/.holy-lambda/clojure
+ENV CLOJURE_TOOLS_DIR=/project/.holy-lambda
+ENV HOME=/project/.holy-lambda
+ENV XDG_CACHE_HOME=/project/.holy-lambda
+ENV XDG_CONFIG_HOME=/project/.holy-lambda
+ENV XDG_DATA_HOME=/project/.holy-lambda
+ENV GITLIBS=/project/.holy-lambda/.gitlibs/
 
 # --------------- UPDATE ------------------
 # -----------------------------------------
@@ -14,27 +23,7 @@ ARG BABASHKA_VERSION=0.4.6
 ARG CLOJURE_VERSION=1.10.3.849
 # -----------------------------------------
 
-# Provide download_pods command
-COPY download_pods download_pods.clj /
-RUN chmod +x download_pods && mv download_pods /bin/download_pods
-
-# Install babashka
-RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-amd64.tar.gz -O - | tar -xz \
-    && chmod +x bb \
-    && mv bb /bin/bb
-
-# Install Clojure toolbox for babashka
-RUN curl https://raw.githubusercontent.com/borkdude/deps.clj/master/install | bash && deps -P
-
-# Install clojure
-RUN curl https://download.clojure.org/install/linux-install-$CLOJURE_VERSION.sh | bash
-
-RUN alias java="`which java` -Duser.home=/project/.holy-lambda"
-RUN alias bb="`which bb` -Duser.home=/project/.holy-lambda"
-RUN alias clojure="`which clojure` -J-Duser.home=\"/project/.holy-lambda\""
-RUN alias deps="`which deps` -J-Duser.home=/project/.holy-lambda"
-
-ARG GRAALVM_VERSION=21.0.0.2
+ARG GRAALVM_VERSION=21.1.0
 ARG GRAALVM_JAVA_CORD=graalvm-ee-java8-linux-amd64-$GRAALVM_VERSION.tar.gz
 ARG GRAALVM_NATIVE_IMAGE_CORD=native-image-installable-svm-svmee-java8-linux-amd64-$GRAALVM_VERSION.jar
 
@@ -69,5 +58,25 @@ RUN gu -L install $GRAALVM_NATIVE_IMAGE_CORD
 
 # Cleanup
 RUN rm -Rf $GRAALVM_JAVA_CORD $GRAALVM_NATIVE_IMAGE_CORD
+
+# Provide download_pods command
+COPY download_pods download_pods.clj /
+RUN chmod +x download_pods && mv download_pods /bin/download_pods
+
+# Install babashka
+RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-amd64.tar.gz -O - | tar -xz \
+    && chmod +x bb \
+    && mv bb /bin/bb
+
+# Install Clojure toolbox for babashka
+RUN curl https://raw.githubusercontent.com/borkdude/deps.clj/master/install | bash && deps -P
+
+# Install clojure
+RUN curl https://download.clojure.org/install/linux-install-$CLOJURE_VERSION.sh | bash
+
+RUN alias java="`which java` -Duser.home=/project/.holy-lambda"
+RUN alias bb="`which bb` -Duser.home=/project/.holy-lambda"
+RUN alias clojure="`which clojure` -J-Duser.home=\"/project/.holy-lambda\""
+RUN alias deps="`which deps` -J-Duser.home=/project/.holy-lambda"
 
 WORKDIR /project
