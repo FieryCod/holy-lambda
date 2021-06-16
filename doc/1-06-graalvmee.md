@@ -22,7 +22,7 @@ HL supports `GraalVM EE native-image` via custom `Dockerfile` recipe. Image out 
      - Oracle GraalVM Enterprise Edition Core (SHA256: 1761e2a865a2ab090273d8e1dfec852f457c88a3809c1455ba1a4260e9049a5b)
      - Oracle GraalVM Enterprise Edition Native Image (SHA256: 848bf60df3d0d83e97c45ea4ac83d285131e8c462d5caeb924a4fc9163726fc3)
      
-    ![graalvm-ee-download-components](images/graalvm-ee-02.png "Download 2 components")
+     ![graalvm-ee-download-components](images/graalvm-ee-02.png "Download 2 components")
     
   5. Up to this step you should have following files in `graalm-ee-hl` directory
      ```sh
