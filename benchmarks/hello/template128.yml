@@ -26,7 +26,7 @@ Resources:
       Handler: hello.Hello
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /clojure-on-java
             Method: get
@@ -40,7 +40,7 @@ Resources:
       Handler: hello.Hello
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /clojure-on-native
             Method: get
@@ -59,7 +59,7 @@ Resources:
           Entrypoint: hello
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /clojure-on-babashka
             Method: get
@@ -73,7 +73,7 @@ Resources:
       Handler: index.handler
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /nodejs-14
             Method: get
@@ -87,7 +87,7 @@ Resources:
       Handler: index.handler
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /nodejs-12
             Method: get
@@ -101,7 +101,7 @@ Resources:
       Handler: index.handler
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /nodejs-10
             Method: get
@@ -115,7 +115,7 @@ Resources:
       Handler: index.handler
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /python-38
             Method: get
@@ -129,7 +129,7 @@ Resources:
       Handler: index.handler
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /python-27
             Method: get
@@ -143,7 +143,7 @@ Resources:
       Handler: index.handler
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /ruby-25
             Method: get
@@ -157,7 +157,7 @@ Resources:
       Handler: index.handler
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /ruby-27
             Method: get
@@ -171,7 +171,7 @@ Resources:
       Handler: golang-handler
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /golang-1x
             Method: get
@@ -185,7 +185,7 @@ Resources:
       Handler: provided
       Events:
         HelloEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /rust-runtime
             Method: get

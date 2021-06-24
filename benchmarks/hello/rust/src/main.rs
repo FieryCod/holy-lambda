@@ -3,19 +3,15 @@ use serde_json::{Value, json};
 
 type Error = Box<dyn std::error::Error + Send + Sync + 'static>;
 
-
-
 #[tokio::main]
 async fn main() -> Result<(), Error> {
   let func = handler_fn(func);
+
   lambda_runtime::run(func).await?;
 
-  let xd: Value = json!({"xd": "Hello"});
-
-  print!("XDDD");
   Ok(())
 }
 
-async fn func(event: Value, _: Context) -> Result<Value, Error> {
-  Ok(event)
+async fn func(event: Value, _: Context) -> Result<String, Error> {
+  Ok("Hello world!".to_string())
 }
