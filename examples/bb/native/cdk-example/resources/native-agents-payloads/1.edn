@@ -1,0 +1,4 @@
+{:name "cdk-example.core.ExampleLambda",
+ :request {:event {:pathParameters {:message "Hello world"}},
+           :context {}},
+ :propagate true}
