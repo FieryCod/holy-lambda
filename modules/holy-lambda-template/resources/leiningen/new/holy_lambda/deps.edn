@@ -5,5 +5,11 @@
  ;; This way project artifacts are separated from global ~/.m2 and only project artifacts
  ;; are deployed to AWS Lambda
  :mvn/local-repo                        ".holy-lambda/.m2"
+
  :paths                                 ["src" "resources"]
- :aliases                               {}}
+
+ :aliases                               {
+                                         ;; Required if bb tasks don't use docker
+                                         :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
+                                                   :exec-fn hf.depstar/uberjar
+                                                   :exec-args {}}}}

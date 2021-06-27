@@ -20,6 +20,21 @@
  '[clojure.term.colors :refer [underline blue yellow red green]])
 
 ;;;; [START] HELPERS
+
+(defn normalize-file-path
+  [path]
+  (s/replace (if (string? path)
+               path
+               (str path)) #"~/" (str (.getAbsolutePath (io/file (System/getProperty "user.home"))) "/")))
+
+(defn string->keyword
+  [s]
+  (keyword (s/replace (str s) #":" "")))
+
+(defn file-exists?
+  [file]
+  (boolean (some-> (normalize-file-path file) fs/exists?)))
+
 (defn norm-args
   [args]
   (into {} (mapv
@@ -116,13 +131,6 @@
   (hpr (pre (str "OS: " OS " is not supported by holy-lambda. Please make an issue on Github!")))
   (System/exit 1))
 
-(when-not (or (and (= OS :unix)
-                   (= (:exit (csh/sh "pgrep" "-f" "docker")) 0))
-              (and (= OS :mac)
-                   (= (:exit (csh/sh "pgrep" "-f" "Docker.app")) 0)))
-  (hpr (pre "Docker is not running! Enable and run docker first before using holy-lambda!"))
-  (System/exit 1))
-
 (defn spit
   [file content]
   (io/make-parents file)
@@ -158,8 +166,45 @@
 
 (def DOCKER (:docker OPTIONS))
 (def BUILD (:build OPTIONS))
+(def HL_NO_DOCKER?
+  (boolean (or (nil? DOCKER)
+               (when-let [prop (System/getenv "HL_NO_DOCKER")]
+                   (contains? #{"true" "1"} prop)))))
 
-(def CLJ_ALIAS_KEY (:clj-alias BUILD))
+(let [home (and HL_NO_DOCKER?
+                (some-> (or (System/getenv "GRAALVM_HOME")
+                            (:graalvm-home BUILD))
+                        (str "/bin/")
+                        ))
+      java (some-> home (str "java") normalize-file-path)
+      native-image (some-> home (str "native-image") normalize-file-path)
+      fallback-command (fn [command fallback]
+                         (if (file-exists? command)
+                           command
+                           (do
+                             (hpr (prw "Executable") (accent command) (prw "does not exists! Using fallback:") (accent fallback) (prw "instead!"))
+                             fallback)))]
+  (def JAVA_COMMAND
+    (if-not HL_NO_DOCKER?
+      "java"
+      (fallback-command java "java")))
+
+  (def NATIVE_IMAGE_COMMAND
+    (if-not HL_NO_DOCKER?
+      "native-image"
+      (fallback-command native-image "native-image"))))
+
+(when-not (or HL_NO_DOCKER?
+              (and (= OS :unix)
+                   (= (:exit (csh/sh "pgrep" "-f" "docker")) 0))
+              (and (= OS :mac)
+                   (= (:exit (csh/sh "pgrep" "-f" "Docker.app")) 0)))
+  (hpr (pre "Docker is not running! Enable and run docker first before using holy-lambda!"))
+  (System/exit 1))
+
+(def CLJ_ALIAS_KEY (or (some-> (System/getenv "HL_CLJ_ALIAS") string->keyword)
+                       (:clj-alias BUILD)))
+
 (when (and CLJ_ALIAS_KEY (not (keyword? CLJ_ALIAS_KEY)))
   (hpr (pre "Defined") (accent "build:clj-alias") (pre "should be a keyword")))
 
@@ -174,7 +219,7 @@
 
 (defn stat-file
   [filename]
-  (when-not (fs/exists? (io/file filename))
+  (when-not (file-exists? filename)
     (hpr "PATH" (accent filename) "does not exists.. Exiting!")
     (System/exit 1)))
 
@@ -184,14 +229,9 @@
 
 (def STACK (:stack OPTIONS))
 (def DEFAULT_ENVS_FILE
-  (try
-    (if-not (fs/exists? (io/file (:envs STACK)))
-      (throw (Exception. "."))
-      (:envs STACK))
-    (catch Exception _err
-      (hpr (pre "File envs.json for aws sam not found.. Exiting!\n
-Check https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-invoke.html#serverless-sam-cli-using-invoke-environment-file"))
-      (System/exit 1))))
+  (if-not (file-exists? (:envs STACK))
+    nil
+    (:envs STACK)))
 
 (def IMAGE_CORDS
   (or (:image DOCKER)
@@ -216,7 +256,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
               (hpr (pre "Both") (accent ":docker") (pre "and") (accent ":host") (pre "properties should exist in") (str (accent "docker-volumes") (pre "!")))
               (System/exit 1))
 
-            (when-not (fs/exists? (io/file host))
+            (when-not (file-exists? host)
               (hpr (pre "Host path:") (accent host) (pre "from") (accent ":docker-volumes") (pre "does not exists!"))
               (System/exit 1))
 
@@ -309,7 +349,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 
 (defn exit-if-not-synced!
   []
-  (when-not (fs/exists? (io/file ".holy-lambda/clojure"))
+  (when-not (file-exists? ".holy-lambda/clojure")
     (hpr (pre "Project has not been synced yet. Run") (accent "stack:sync") (pre "before running this command!"))
     (System/exit 1)))
 
@@ -358,7 +398,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
   (.getAbsolutePath (io/file HOME_DIR ".aws")))
 
 (def AWS_DIR_EXISTS?
-  (fs/exists? (io/file AWS_DIR)))
+  (file-exists? AWS_DIR))
 
 (defn edn->pp-sedn
   [edn]
@@ -416,18 +456,21 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
 (defn docker:run
   "     \033[0;31m>\033[0m Run command in \033[0;31mfierycod/graalvm-native-image\033[0m docker context\n\n----------------------------------------------------------------\n"
   [command]
-  (apply shell
-         (concat
-          ["docker run --rm"
-           "-e" "AWS_CREDENTIAL_PROFILES_FILE=/project/.aws/credentials"
-           "-e" "AWS_CONFIG_FILE=/project/.aws/config"
-           "-v" (str (.getAbsolutePath (io/file "")) ":/project")
-           "-v" (str AWS_DIR ":" "/project/.aws:ro")]
-          (flatten (mapv (fn [path] ["-v" path]) DOCKER_VOLUMES))
-          ["--user" USER_GID
-           "-it" IMAGE_CORDS
-           "/bin/bash" "-c" command]))
-  (shell "rm -Rf .aws"))
+  (if-not HL_NO_DOCKER?
+    (do
+      (apply shell
+             (concat
+              ["docker run --rm"
+               "-e" "AWS_CREDENTIAL_PROFILES_FILE=/project/.aws/credentials"
+               "-e" "AWS_CONFIG_FILE=/project/.aws/config"
+               "-v" (str (.getAbsolutePath (io/file "")) ":/project")
+               "-v" (str AWS_DIR ":" "/project/.aws:ro")]
+              (flatten (mapv (fn [path] ["-v" path]) DOCKER_VOLUMES))
+              ["--user" USER_GID
+               "-it" IMAGE_CORDS
+               "/bin/bash" "-c" command]))
+      (shell "rm -Rf .aws"))
+      (shell "bash" "-c" command)))
 
 (defn deps-sync--babashka
   []
@@ -435,7 +478,7 @@ Check https://docs.aws.amazon.com/serverless-application-model/latest/developerg
     (when-not (empty? (:pods (:runtime OPTIONS)))
       (hpr "Babashka pods found! Syncing" (str (accent "babashka pods") ".") "Pods should be distributed via a layer which points to" (accent ".holy-lambda/pods"))
       (docker:run "download_pods")
-      (when (fs/exists? (io/file ".holy-lambda/.babashka"))
+      (when (file-exists? ".holy-lambda/.babashka")
         (shell "rm -Rf .holy-lambda/pods")
         (shell "mkdir -p .holy-lambda/pods")
         (shell "cp -R .holy-lambda/.babashka .holy-lambda/pods/")))))
@@ -460,31 +503,15 @@ Resources:
 
 (def tasks-deps-edn
   {:mvn/local-repo ".holy-lambda/.m2"
-   :aliases {:deps {:replace-deps {'org.clojure/tools.deps.alpha {:mvn/version "0.11.910"}
-                                   'org.slf4j/slf4j-nop {:mvn/version "1.7.25"}}
-                    :ns-default 'clojure.tools.cli.api}
-
-             :test {:extra-paths ["test"]}
-
-             :uberjar {:replace-deps {'com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
+   :aliases {:uberjar {:replace-deps {'com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
                        :exec-fn 'hf.depstar/uberjar
-                       :exec-args {}}
-
-             ;; build a jar (library):
-             :jar {:replace-deps {'com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
-                   :exec-fn 'hf.depstar/jar
-                   :exec-args {}}
-
-             ;; generic depstar alias, use with jar or uberjar function name:
-             :depstar {:replace-deps {'com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
-                       :ns-default 'hf.depstar
                        :exec-args {}}}})
 
 (defn deps-sync--deps
   []
   (stat-file "deps.edn")
   (hpr "Syncing project and holy-lambda" (accent "deps.edn"))
-  (docker:run (str "deps -A:" CLJ_ALIAS "depstar -P && deps -P"))
+  (docker:run (str "clojure -A:" CLJ_ALIAS "uberjar -P && clojure -P"))
   (deps-sync--babashka))
 
 (defn cloudformation-description
@@ -622,17 +649,17 @@ Resources:
        \t\t        - \033[0;31m<Babashka>\033[0m bb.edn:runtime:pods"
   []
   (print-task "stack:sync")
-  (when-not (fs/exists? (io/file ".holy-lambda/clojure/deps.edn"))
+  (when-not (file-exists? ".holy-lambda/clojure/deps.edn")
     (hpr "Project not synced yet. Syncing with docker image!")
     (let [cid (gensym "holy-lambda")]
       (shs "docker" "create" "--user" USER_GID "-ti" "--name" (str cid)  IMAGE_CORDS "bash")
       (shs "docker" "cp" (str cid ":/project/.holy-lambda") ".")
       (shs "docker" "rm" "-f" (str cid))))
 
-  (when-not (fs/exists? (io/file ".holy-lambda"))
+  (when-not (file-exists? ".holy-lambda")
     (hpr (pre "Unable to sync docker image content with") (accent ".holy-lambda") (pre "project directory!")))
 
-  (when-not (fs/exists? (io/file ".holy-lambda/clojure"))
+  (when-not (file-exists? ".holy-lambda/clojure")
     (hpr (pre "Project did not sync properly. Remove .holy-lambda directory and run") (accent "stack:sync")))
 
   ;; Correct holy-lambda deps.edn
@@ -648,19 +675,19 @@ Resources:
 
 (defn stack-files-check--native
   []
-  (when-not (fs/exists? (io/file ".holy-lambda/build/latest.zip"))
+  (when-not (file-exists? ".holy-lambda/build/latest.zip")
     (hpr (pre "No") (accent ".holy-lambda/build/latest.zip") (pre "found! Run") (accent "native:executable"))
     (System/exit 1)))
 
 (defn stack-files-check--java
   []
-  (when-not (fs/exists? (io/file OUTPUT_JAR_PATH))
+  (when-not (file-exists? OUTPUT_JAR_PATH)
     (hpr (pre "No") (accent OUTPUT_JAR_PATH) (pre "found! Run") (accent "stack:compile"))
     (System/exit 1)))
 
 (defn stack-files-check
   [& [check]]
-  (when-not (fs/exists? (io/file ".holy-lambda"))
+  (when-not (file-exists? ".holy-lambda")
     (hpr (pre "No") (accent ".holy-lambda") (pre "directory! Run") (accent "stack:sync"))
     (System/exit 1))
 
@@ -704,7 +731,8 @@ Resources:
                 " -p "                       (or port 3000)
                 (when static-dir " -s ")     static-dir
                 " --warm-containers LAZY"
-                " -n "                       (or envs-file DEFAULT_ENVS_FILE)
+                (when-let [envs-file (or envs-file DEFAULT_ENVS_FILE)]
+                  " -n " envs-file)
                 " --layer-cache-basedir "    LAYER_CACHE_DIRECTORY
                 (when debug " --debug")))))
 
@@ -730,13 +758,15 @@ Resources:
     (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
 
     (hpr "Generating traces to ignore unnecessary reflection entries!")
-    (docker:run (str "java -agentlib:native-image-agent="
+    (docker:run (str JAVA_COMMAND
+                     " -agentlib:native-image-agent="
                      "trace-output=" (str NATIVE_CONFIGURATIONS_PATH "/traces.json")
                      " "
                      "-Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))
 
     (hpr "Generating native-configurations!")
-    (docker:run (str "java -agentlib:native-image-agent="
+    (docker:run (str JAVA_COMMAND
+                     " -agentlib:native-image-agent="
                      "config-output-dir=" NATIVE_CONFIGURATIONS_PATH
                      " "
                      "-Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))
@@ -744,7 +774,7 @@ Resources:
     (hpr "Cleaning up reflection-config.json!")
     (refl/clean-reflection-config!)
 
-    (if-not (fs/exists? (io/file NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH))
+    (if-not (file-exists? NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH)
       (hpr (pre "Native configurations generation failed!"))
       (let [resource-config (json/parse-string (slurp (io/file NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH)))]
         (hpr "Cleaning up resource-config.json!")
@@ -771,7 +801,7 @@ set -e
 
 (defn bootstrap-file
   []
-  (or (when (fs/exists? (io/file BOOTSTRAP_FILE))
+  (or (when (file-exists? BOOTSTRAP_FILE)
        (slurp BOOTSTRAP_FILE))
       -bootstrap-file))
 
@@ -793,22 +823,22 @@ set -e
     (when (build-stale?)
       (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
 
-    (when-not (fs/exists? (io/file NATIVE_CONFIGURATIONS_PATH))
+    (when-not (file-exists? NATIVE_CONFIGURATIONS_PATH)
       (hpr (prw "No native configurations has been generated. Native image build may fail. Run") (accent "native:conf") (prw "to generate native configurations.")))
 
     ;; Copy then build
     (shell-no-exit "bash -c \"[ -d resources/native-configuration ] && cp -rf resources/native-configuration .holy-lambda/build/\"")
 
-    (docker:run (str "cd .holy-lambda/build/ && native-image -jar output.jar -H:ConfigurationFileDirectories=native-configuration "
+    (docker:run (str "cd .holy-lambda/build/ && " NATIVE_IMAGE_COMMAND " -jar output.jar -H:ConfigurationFileDirectories=native-configuration "
                      "-H:+AllowIncompleteClasspath"
                      (when NATIVE_IMAGE_ARGS
                        (str " " NATIVE_IMAGE_ARGS))))
 
-    (if-not (fs/exists? (io/file ".holy-lambda/build/output"))
+    (if-not (file-exists? ".holy-lambda/build/output")
       (hpr (pre "Native image failed to create executable. Fix your build! Skipping next steps"))
       (do
         (spit ".holy-lambda/build/bootstrap" (bootstrap-file))
-        (when (and NATIVE_DEPS_PATH (fs/exists? (io/file NATIVE_DEPS_PATH)))
+        (when (and NATIVE_DEPS_PATH (file-exists? NATIVE_DEPS_PATH))
           (hpr "Copying" (accent ":runtime:native-deps"))
           (shell (str "cp -R " NATIVE_DEPS_PATH " .holy-lambda/build/")))
         (hpr "Bundling artifacts...")
@@ -900,7 +930,7 @@ set -e
   (let [{:keys [guided dry params runtime]} (norm-args args)]
     (override-runtime! runtime)
     (exit-if-not-synced!)
-    (if-not (fs/exists? (io/file PACKAGED_TEMPLATE_FILE))
+    (if-not (file-exists? PACKAGED_TEMPLATE_FILE)
       (hpr (pre "No") (accent PACKAGED_TEMPLATE_FILE) (pre "found. Run") (accent "stack:pack"))
       (do
         (check-n-create-bucket)
@@ -957,7 +987,8 @@ set -e
            (when debug "--debug")
            (when logs "-l")          logs
            (when event-file "-e")    event-file
-           "-n" (or envs-file DEFAULT_ENVS_FILE))))
+           (when-let [envs-file (or envs-file DEFAULT_ENVS_FILE)]
+             " -n " envs-file))))
 
 (defn mvn-local-test
   [file]
@@ -991,7 +1022,7 @@ set -e
     (hpr " S3 Bucket exists?:       " (accent (bucket-exists?)))
     (hpr "---------------------------------------\n"))
 
-  (when-not (fs/exists? (io/file AWS_DIR))
+  (when-not (file-exists? AWS_DIR)
     (hpr (pre "$HOME/.aws does not exists. Did you run") (accent "aws configure")))
 
   (read-string (slurp (io/file "deps.edn")))
@@ -1016,7 +1047,7 @@ set -e
   (when (and (not= *RUNTIME_NAME* :native) BOOTSTRAP_FILE)
     (hpr (prw ":runtime:bootstrap-file is supported only for") (accent ":native") (prw "runtime")))
 
-  (when (and (= *RUNTIME_NAME* :native) BOOTSTRAP_FILE (not (fs/exists? (io/file BOOTSTRAP_FILE))))
+  (when (and (= *RUNTIME_NAME* :native) BOOTSTRAP_FILE (not (file-exists? BOOTSTRAP_FILE)))
     (hpr (prw ":runtime:bootstrap-file does not exists. Default bootstrap file for") (accent ":native") (prw "runtime will be used!")))
 
   (when (and (not= *RUNTIME_NAME* :native) NATIVE_DEPS_PATH)
@@ -1024,7 +1055,7 @@ set -e
 
   (when (and (= *RUNTIME_NAME* :native)
              NATIVE_DEPS_PATH
-             (not (fs/exists? (io/file NATIVE_DEPS_PATH))))
+             (not (file-exists? NATIVE_DEPS_PATH)))
     (hpr (prw ":runtime:native-deps folder does not exists") (accent ":native:executable") (prw "will not include any extra deps!")))
 
   (when (and RUNTIME_VERSION (not= *RUNTIME_NAME* :babashka))
@@ -1043,7 +1074,7 @@ set -e
   (mvn-local-test "deps.edn")
   (mvn-local-test "bb.edn")
 
-  (if (fs/exists? (io/file HOLY_LAMBDA_DEPS_PATH))
+  (if (file-exists? HOLY_LAMBDA_DEPS_PATH)
     (hpr (prs "Syncing stack is not required"))
     (hpr (pre "Stack is not synced! Run:") (accent "stack:sync")))
 

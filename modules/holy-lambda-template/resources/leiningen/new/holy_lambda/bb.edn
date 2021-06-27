@@ -12,6 +12,9 @@
  :min-bb-version                                    "0.3.7"
 
  :holy-lambda/options {
+                       ;; User should use docker for local development and use `HL_NO_DOCKER` environment variable
+                       ;; set to "true" for CI based deployments.
+                       ;; For CI based deployments user should base it's builder image on `fierycod/graalvm-native-image:ce`
                        :docker {
 
                                 ;; HL runs bb tasks in docker context which means that local libraries will not work out-of-the-box.
@@ -31,7 +34,13 @@
                                 ;; You can always build your own GraalVM image with enterprise edition
                                 :image              "fierycod/graalvm-native-image:ce"}
 
-                       :build {:clj-alias           nil}
+                       :build {;; clj alias might be set via environment variable
+                               ;; `HL_CLJ_ALIAS` like:  HL_CLJ_ALIAS="dev"
+                               :clj-alias           nil
+                               ;; Used when either :docker is nil or
+                               ;; `HL_NO_DOCKER` environment variable is set to "true"
+                               ;; Might be set via `GRAALVM_HOME` environment variable
+                               :graalvm-home        "~/.graalvm"}
 
                        :stack {
                                ;; Stack name which will be used in cloudformation

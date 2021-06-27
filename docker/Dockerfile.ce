@@ -38,17 +38,17 @@ RUN alias bb="`which bb` -Duser.home=/project/.holy-lambda"
 RUN alias clojure="`which clojure` -J-Duser.home=\"/project/.holy-lambda\""
 RUN alias deps="`which deps` -J-Duser.home=/project/.holy-lambda"
 
-# # Install aws command
-# RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
-#     && unzip awscliv2.zip -d aws \
-#     && ./aws/aws/install \
-#     && rm -Rf awscliv2.zip aws
+# Install aws command
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip -d aws \
+    && ./aws/aws/install \
+    && rm -Rf awscliv2.zip aws
 
 # # Install aws-sam command
-# RUN curl -L "https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip" -o "aws-sam.zip" \
-#  && unzip aws-sam.zip -d aws-sam \
-#  && ./aws-sam/install \
-#  && rm -Rf aws-sam aws-sam.zip
+RUN curl -L "https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip" -o "aws-sam.zip" \
+ && unzip aws-sam.zip -d aws-sam \
+ && ./aws-sam/install \
+ && rm -Rf aws-sam aws-sam.zip
 
 RUN gu install native-image
 

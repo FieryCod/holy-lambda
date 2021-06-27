@@ -9,7 +9,8 @@
 
                                 :image "fierycod/graalvm-native-image:ce"}
 
-                       :build {:clj-alias :holy-lambda}
+                       :build {:clj-alias :holy-lambda
+                               :graalvm-home "~/.graalvm"}
 
                        :stack {:name "holy-lambda-babashka-v2"
 

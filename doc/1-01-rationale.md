@@ -11,7 +11,7 @@ When Clojure code is compiled and packed to uberjar, every function expands to a
 For only a single Java AWS Lambda handler class, the cold start is around ~1s. For Clojure, the cold start starts from ~8s on a 2GB memory-sized environment. The difference between cold starts comes from the number of classes load upon startup (Clojure > 100, Java > 1). 
 
 **Holy Lambda (HL)**
-HL is a microframework for running Clojure on the [AWS Lambda](https://aws.amazon.com/lambda/). HL is a deployment tool independent, although ships with `bb tasks` for convenience.
+HL is a micro-framework for running Clojure on the [AWS Lambda](https://aws.amazon.com/lambda/). HL is a deployment tool independent, although ships with `bb tasks` for convenience.
 HL supports at the time of writing three AWS Lambda runtimes. The first one is Clojure/Java runtime that is good for development, but a bad idea for production due to the cold starts and high memory usage of Java-based lambdas. 
 The second one is custom native runtime which utilizes GraalVM native image to provide fast startup and a low memory footprint. The tradeoff in using native runtime is the steep learning curve of GraalVM.
 The last one is the `babashka` runtime which is both fast and memory efficient. Babashka supports interactive development, and it's a great fit for beginners. It's fast enough, although it's not as fast as the native runtime. The tradeoff of using babashka is that not all of the Clojure language features are supported.
