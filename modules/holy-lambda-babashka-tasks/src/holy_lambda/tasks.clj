@@ -349,7 +349,8 @@
 
 (defn exit-if-not-synced!
   []
-  (when-not (file-exists? ".holy-lambda/clojure")
+  (when (and (not HL_NO_DOCKER?)
+             (not (file-exists? ".holy-lambda/clojure/deps.edn")))
     (hpr (pre "Project has not been synced yet. Run") (accent "stack:sync") (pre "before running this command!"))
     (System/exit 1)))
 
@@ -649,21 +650,25 @@ Resources:
        \t\t        - \033[0;31m<Babashka>\033[0m bb.edn:runtime:pods"
   []
   (print-task "stack:sync")
-  (when-not (file-exists? ".holy-lambda/clojure/deps.edn")
+  (when (and (not HL_NO_DOCKER?)
+             (not (file-exists? ".holy-lambda/clojure/deps.edn")))
     (hpr "Project not synced yet. Syncing with docker image!")
     (let [cid (gensym "holy-lambda")]
       (shs "docker" "create" "--user" USER_GID "-ti" "--name" (str cid)  IMAGE_CORDS "bash")
       (shs "docker" "cp" (str cid ":/project/.holy-lambda") ".")
       (shs "docker" "rm" "-f" (str cid))))
 
-  (when-not (file-exists? ".holy-lambda")
-    (hpr (pre "Unable to sync docker image content with") (accent ".holy-lambda") (pre "project directory!")))
+  (if HL_NO_DOCKER?
+    (shell "mkdir -p .holy-lambda")
+    (do
+      (when-not (file-exists? ".holy-lambda")
+        (hpr (pre "Unable to sync docker image content with") (accent ".holy-lambda") (pre "project directory!")))
 
-  (when-not (file-exists? ".holy-lambda/clojure")
-    (hpr (pre "Project did not sync properly. Remove .holy-lambda directory and run") (accent "stack:sync")))
+      (when-not (file-exists? ".holy-lambda/clojure")
+        (hpr (pre "Project did not sync properly. Remove .holy-lambda directory and run") (accent "stack:sync")))
 
-  ;; Correct holy-lambda deps.edn
-  (spit HOLY_LAMBDA_DEPS_PATH (edn->pp-sedn tasks-deps-edn))
+      ;; Correct holy-lambda deps.edn
+      (spit HOLY_LAMBDA_DEPS_PATH (edn->pp-sedn tasks-deps-edn))))
 
   ;; Sync
   (deps-sync--deps)
