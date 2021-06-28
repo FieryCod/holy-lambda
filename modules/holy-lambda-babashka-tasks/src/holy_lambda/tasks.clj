@@ -458,20 +458,17 @@
   "     \033[0;31m>\033[0m Run command in \033[0;31mfierycod/graalvm-native-image\033[0m docker context\n\n----------------------------------------------------------------\n"
   [command]
   (if-not HL_NO_DOCKER?
-    (do
-      (apply shell
-             (concat
-              ["docker run --rm"
-               "-e" "AWS_CREDENTIAL_PROFILES_FILE=/project/.aws/credentials"
-               "-e" "AWS_CONFIG_FILE=/project/.aws/config"
-               "-v" (str (.getAbsolutePath (io/file "")) ":/project")
-               "-v" (str AWS_DIR ":" "/project/.aws:ro")]
-              (flatten (mapv (fn [path] ["-v" path]) DOCKER_VOLUMES))
-              ["--user" USER_GID
-               "-it" IMAGE_CORDS
-               "/bin/bash" "-c" command]))
-      (shell "rm -Rf .aws"))
-      (shell "bash" "-c" command)))
+    (apply shell
+           (concat
+            ["docker run --rm"
+             "-e" "AWS_CREDENTIAL_PROFILES_FILE=/project/.aws/credentials"
+             "-e" "AWS_CONFIG_FILE=/project/.aws/config"
+             "-v" (str (.getAbsolutePath (io/file "")) ":/project")]
+            (flatten (mapv (fn [path] ["-v" path]) DOCKER_VOLUMES))
+            ["--user" USER_GID
+             "-it" IMAGE_CORDS
+             "/bin/bash" "-c" command]))
+    (shell "bash" "-c" command)))
 
 (defn deps-sync--babashka
   []
