@@ -718,7 +718,8 @@ Resources:
   [& args]
   (print-task "stack:api")
   (exit-if-not-synced!)
-  (let [{:keys [static-dir debug envs-file port params runtime]} (norm-args args)]
+  (let [{:keys [static-dir debug envs-file port params runtime]} (norm-args args)
+        envs-file (or envs-file DEFAULT_ENVS_FILE)]
     (override-runtime! runtime)
     (stack-files-check)
     (when (build-stale?)
@@ -733,8 +734,7 @@ Resources:
                 " -p "                       (or port 3000)
                 (when static-dir " -s ")     static-dir
                 " --warm-containers LAZY"
-                (when-let [envs-file (or envs-file DEFAULT_ENVS_FILE)]
-                  " -n " envs-file)
+                (when envs-file " -n ") envs-file
                 " --layer-cache-basedir "    LAYER_CACHE_DIRECTORY
                 (when debug " --debug")))))
 
@@ -975,7 +975,8 @@ set -e
        \t\t        - \033[0;31m:logs\033[0m        - logfile to runtime logs to"
   [& args]
   (print-task "stack:invoke")
-  (let [{:keys [name event-file envs-file logs params debug runtime]} (norm-args args)]
+  (let [{:keys [name event-file envs-file logs params debug runtime]} (norm-args args)
+        envs-file (or envs-file DEFAULT_ENVS_FILE)]
     (override-runtime! runtime)
     (exit-if-not-synced!)
     (stack-files-check)
@@ -989,8 +990,7 @@ set -e
            (when debug "--debug")
            (when logs "-l")          logs
            (when event-file "-e")    event-file
-           (when-let [envs-file (or envs-file DEFAULT_ENVS_FILE)]
-             " -n " envs-file))))
+           (when envs-file "-n")     envs-file)))
 
 (defn mvn-local-test
   [file]
