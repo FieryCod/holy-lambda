@@ -58,7 +58,8 @@
   (doseq [{:keys [request path propagate] :as invoke-map} (agents-payloads->invoke-map)
           :let [callable-var (routes (:name invoke-map))]]
     (when-not callable-var
-      (println "[holy-lambda] Lambda" (:name invoke-map) "does not exists in classpath. Incorrect name?"))
+      (println "[holy-lambda] Lambda" (:name invoke-map) "does not exists in classpath. Incorrect name?")
+      (System/exit 1))
     (println "[holy-lambda] Calling lambda" (:name invoke-map) "with payloads from" (re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" path))
     (if propagate
       (u/call callable-var request)

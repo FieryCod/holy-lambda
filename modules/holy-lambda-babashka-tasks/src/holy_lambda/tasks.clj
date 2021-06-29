@@ -463,7 +463,9 @@
             ["docker run --rm"
              "-e" "AWS_CREDENTIAL_PROFILES_FILE=/project/.aws/credentials"
              "-e" "AWS_CONFIG_FILE=/project/.aws/config"
-             "-v" (str (.getAbsolutePath (io/file "")) ":/project")]
+             "-e" "HOME=/"
+             "-v" (str (.getAbsolutePath (io/file "")) ":/project")
+             "-v" (str AWS_DIR ":" "/project/.aws:ro")]
             (flatten (mapv (fn [path] ["-v" path]) DOCKER_VOLUMES))
             ["--user" USER_GID
              "-it" IMAGE_CORDS
