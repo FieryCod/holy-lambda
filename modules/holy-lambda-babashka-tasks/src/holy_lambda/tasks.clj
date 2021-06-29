@@ -279,9 +279,9 @@
                          (s/join " " args)
                          nil))
 (def INFRA_AWS_PROFILE (:profile INFRA))
-(def AWS_PROFILE (or (:profile INFRA) "default"))
-(def BUCKET_PREFIX (:bucket-prefix INFRA))
-(def BUCKET_NAME (:bucket-name INFRA))
+(def AWS_PROFILE (or (System/getenv "HL_PROFILE") (:profile INFRA) "default"))
+(def BUCKET_PREFIX (or (System/getenv "HL_BUCKET_PREFIX") (:bucket-prefix INFRA)))
+(def BUCKET_NAME (or (System/getenv "HL_BUCKET_NAME") (:bucket-name INFRA)))
 (def REGION_FROM_INFRA (:region INFRA))
 
 (defn override-runtime!
@@ -306,13 +306,14 @@
       true)))
 
 (def REGION
-  (if REGION_FROM_INFRA
-    REGION_FROM_INFRA
-    (try
-      (can-obtain-from-aws-profile?! "region")
-      (s/trim (:out (csh/sh "aws" "configure" "get" "region" "--profile" AWS_PROFILE)))
-      (catch Exception e
-        (hpr (ex-message e))))))
+  (or (System/getenv "HL_REGION")
+      (if REGION_FROM_INFRA
+        REGION_FROM_INFRA
+        (try
+          (can-obtain-from-aws-profile?! "region")
+          (s/trim (:out (csh/sh "aws" "configure" "get" "region" "--profile" AWS_PROFILE)))
+          (catch Exception e
+            (hpr (ex-message e)))))))
 
 (def DEFAULT_LAMBDA_NAME (:default-lambda STACK))
 (def RUNTIME_VERSION (:version RUNTIME))
@@ -320,7 +321,7 @@
 (def OUTPUT_JAR_PATH ".holy-lambda/build/output.jar")
 (def OUTPUT_JAR_PATH_WITH_AGENT ".holy-lambda/build/output-agent.jar")
 (def HOLY_LAMBDA_DEPS_PATH ".holy-lambda/clojure/deps.edn")
-(def STACK_NAME (:name STACK))
+(def STACK_NAME (or (System/getenv "HL_STACK_NAME") (:name STACK)))
 (def TEMPLATE_FILE (:template STACK))
 (def REQUIRED_COMMANDS ["aws" "sam" "bb" "docker" "clojure" "zip" "id" "clj-kondo" "bash"])
 (def CAPABILITIES (if-let [caps (seq (:capabilities STACK))]
@@ -361,26 +362,23 @@
        "\n------------------------------------------"))
 
 (defn -create-bucket
-  [& [bucket throw?]]
+  [& [bucket profile]]
   (let [bucket (or bucket BUCKET_NAME)
         result (csh/sh "aws" "s3" "mb" (str "s3://" bucket)
-                       "--profile" AWS_PROFILE
+                       "--profile" (or profile AWS_PROFILE)
                        "--region" REGION)]
     (if (not= (:exit result) 0)
       (do (hpr (pre "Unable to create a bucket")
                (str (accent bucket) "."))
           (hpr (aws-command-output->str (:err result)))
-          (hpr (pre "Resolve the error then run the command once again if you have to."))
-          (if throw?
-            (throw (Exception. ""))
-            (System/exit 1)))
+          (hpr (pre "Resolve the error then run the command once again if you have to.")))
       (hpr (prs "Bucket") (accent bucket) (prs "has been succesfully created!")))))
 
 (defn -remove-bucket
-  [& [bucket]]
+  [& [bucket aws-profile]]
   (shsp "aws" "s3" "rb"
         "--force" (str "s3://" (or bucket BUCKET_NAME))
-        "--profile" AWS_PROFILE
+        "--profile" (or aws-profile AWS_PROFILE)
         "--region" REGION))
 
 (def USER_GID
@@ -413,14 +411,14 @@
                     m)))
 
 (defn buckets
-  []
+  [& [aws-profile]]
   (set (mapv (fn [b] (some-> (re-find BUCKET_IN_LS_REGEX b) second))
-             (s/split (shs "aws" "--profile" AWS_PROFILE "--region" REGION "s3" "ls")
+             (s/split (shs "aws" "--profile" (or aws-profile AWS_PROFILE) "--region" REGION "s3" "ls")
                       #"\n"))))
 
 (defn bucket-exists?
-  [& [bucket-name]]
-  (contains? (buckets) (or bucket-name BUCKET_NAME)))
+  [& [bucket-name aws-profile]]
+  (contains? (buckets aws-profile) (or bucket-name BUCKET_NAME)))
 
 (defn parameters--java
   []
@@ -713,12 +711,12 @@ Resources:
 
 (defn stack:api
   "     \033[0;31m>\033[0m Runs local api (check sam local start-api):
-       \t\t        - \033[0;31m:debug\033[0m       - run api in \033[0;31mdebug mode\033[0m
-       \t\t        - \033[0;31m:port\033[0m        - local port number to listen to
-       \t\t        - \033[0;31m:static-dir\033[0m  - assets which should be presented at \033[0;31m/\033[0m
-       \t\t        - \033[0;31m:envs-file\033[0m   - path to \033[0;31menvs file\033[0m
-       \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
-       \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM"
+       \t\t        - \033[0;31m:debug\033[0m         - run api in \033[0;31mdebug mode\033[0m
+       \t\t        - \033[0;31m:port\033[0m          - local port number to listen to
+       \t\t        - \033[0;31m:static-dir\033[0m    - assets which should be presented at \033[0;31m/\033[0m
+       \t\t        - \033[0;31m:envs-file\033[0m     - path to \033[0;31menvs file\033[0m
+       \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
+       \t\t        - \033[0;31m:params\033[0m        - map of parameters to override in AWS SAM"
   [& args]
   (print-task "stack:api")
   (exit-if-not-synced!)
@@ -744,7 +742,7 @@ Resources:
 
 (defn native:conf
   "     \033[0;31m>\033[0m Provides native configurations for the application
-       \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime "
+       \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime "
   [& args]
   (print-task "native:conf")
   (exit-if-not-synced!)
@@ -813,7 +811,7 @@ set -e
 
 (defn native:executable
   "     \033[0;31m>\033[0m Provides native executable of the application
-  \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
+  \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
 \n----------------------------------------------------------------\n"
   [& args]
   (print-task "native:executable")
@@ -872,12 +870,14 @@ set -e
               (s/replace #"\!Ref CodeUri" CodeUri)))))
 
 (defn bucket:create
-  "     \033[0;31m>\033[0m Creates a s3 stack bucket or the one specified by \033[0;31m:name\033[0m"
+  "     \033[0;31m>\033[0m Creates a s3 stack bucket or the one specified by \033[0;31m:infra:bucket-name\033[0m
+  \t\t        - \033[0;31m:bucket-name\033[0m   - overrides \033[0;31m:infra:bucket-name\033[0m
+  \t\t        - \033[0;31m:profile\033[0m       - overrides \033[0;31m:infra:profile\033[0m "
   [& args]
   (print-task "bucket:create")
-  (let [{:keys [name]} (norm-args args)
-        bucket-name (or name BUCKET_NAME)]
-    (if (bucket-exists? bucket-name)
+  (let [{:keys [bucket-name profile]} (norm-args args)
+        bucket-name (or bucket-name BUCKET_NAME)]
+    (if (bucket-exists? bucket-name profile)
       (do
         (hpr (prs "Bucket") (accent bucket-name) (prs "already exists!"))
         (hpr (prw "If you removed the bucket then note that sometimes bucket is not immediately appear to be removed and is still listed in AWS resources."))
@@ -885,64 +885,75 @@ set -e
           (hpr (prw "In such case change:")
                (str (accent ":infra:bucket-name") "!"))))
       (do (hpr (prs "Creating a bucket") (accent bucket-name))
-          (-create-bucket bucket-name)))))
+          (-create-bucket bucket-name profile)))))
 
 (defn check-n-create-bucket
-  []
-  (when-not (bucket-exists?)
-    (hpr (prw "Bucket") (accent BUCKET_NAME) "does not exists. Creating one!")
-    (bucket:create)))
+  [& args]
+  (let [{:keys [bucket-name profile]} (norm-args args)]
+    (when-not (bucket-exists? (or bucket-name BUCKET_NAME) profile)
+      (hpr (prw "Bucket") (accent (or bucket-name BUCKET_NAME)) "does not exists. Creating one!")
+      (apply bucket:create args))))
 
 (defn stack:pack
   "     \033[0;31m>\033[0m Packs \033[0;31mCloudformation\033[0m stack
-   \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime "
+  \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
+  \t\t        - \033[0;31m:bucket-name\033[0m   - overrides \033[0;31m:infra:bucket-name\033[0m
+  \t\t        - \033[0;31m:bucket-prefix\033[0m - overrides \033[0;31m:infra:bucket-prefix\033[0m "
   [& args]
   (print-task "stack:pack")
-  (let [{:keys [runtime]} (norm-args args)]
+  (let [{:keys [runtime bucket-name bucket-prefix]} (norm-args args)]
     (override-runtime! runtime)
     (exit-if-not-synced!)
     (stack-files-check)
     ;; Check https://github.com/aws/aws-sam-cli/issues/2835
     ;; https://github.com/aws/aws-sam-cli/issues/2836
-    (check-n-create-bucket)
+    (apply check-n-create-bucket args)
     (modify-template)
     (shell "sam" "package"
            "--template-file"        MODIFIED_TEMPLATE_FILE
            "--output-template-file" PACKAGED_TEMPLATE_FILE
            "--profile"              AWS_PROFILE
-           "--s3-bucket"            BUCKET_NAME
-           "--s3-prefix"            BUCKET_PREFIX
+           "--s3-bucket"            (or bucket-name BUCKET_NAME)
+           "--s3-prefix"            (or bucket-prefix BUCKET_PREFIX)
            "--region"               REGION)))
 
 (defn bucket:remove
-  "     \033[0;31m>\033[0m Removes a s3 stack bucket or the one specified by \033[0;31m:name\033[0m\n\n----------------------------------------------------------------\n"
+  "     \033[0;31m>\033[0m Removes a s3 stack bucket or the one specified by \033[0;31m:infra:bucket-name\033[0m
+  \t\t        - \033[0;31m:bucket-name\033[0m   - overrides \033[0;31m:infra:bucket-name\033[0m
+  \t\t        - \033[0;31m:profile\033[0m       - overrides \033[0;31m:infra:profile\033[0m
+  \n----------------------------------------------------------------\n"
   [& args]
   (print-task "bucket:remove")
-  (let [{:keys [name]} (norm-args args)
-        bucket-name (or name BUCKET_NAME)]
-    (if-not (bucket-exists? bucket-name)
+  (let [{:keys [bucket-name profile]} (norm-args args)
+        bucket-name (or bucket-name BUCKET_NAME)]
+    (if-not (bucket-exists? bucket-name profile)
       (hpr (pre "Bucket") (accent bucket-name) (pre "does not exists! Nothing to remove!"))
       (do (hpr (prs "Removing a bucket") (accent bucket-name))
-          (-remove-bucket bucket-name)))))
+          (-remove-bucket bucket-name profile)))))
 
 (defn stack:deploy
   "     \033[0;31m>\033[0m Deploys \033[0;31mCloudformation\033[0m stack
-  \t\t        - \033[0;31m:guided\033[0m      - guide the deployment
-  \t\t        - \033[0;31m:dry\033[0m         - execute changeset?
-  \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM
-  \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime "
+  \t\t        - \033[0;31m:guided\033[0m        - guide the deployment
+  \t\t        - \033[0;31m:dry\033[0m           - execute changeset?
+  \t\t        - \033[0;31m:params\033[0m        - map of parameters to override in AWS SAM
+  \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
+  \t\t        - \033[0;31m:stack\033[0m         - overrides \033[0;31m:stack:name\033[0m
+  \t\t        - \033[0;31m:bucket-name\033[0m   - overrides \033[0;31m:infra:bucket-name\033[0m
+  \t\t        - \033[0;31m:bucket-prefix\033[0m - overrides \033[0;31m:infra:bucket-prefix\033[0m "
   [& args]
   (print-task "stack:deploy")
-  (let [{:keys [guided dry params runtime]} (norm-args args)]
+  (let [{:keys [guided dry params runtime stack bucket-name bucket-prefix]} (norm-args args)]
     (override-runtime! runtime)
     (exit-if-not-synced!)
     (if-not (file-exists? PACKAGED_TEMPLATE_FILE)
       (hpr (pre "No") (accent PACKAGED_TEMPLATE_FILE) (pre "found. Run") (accent "stack:pack"))
       (do
-        (check-n-create-bucket)
+        (apply check-n-create-bucket args)
         (apply shell "sam" "deploy"
                "--template-file" PACKAGED_TEMPLATE_FILE
-               "--stack-name"    STACK_NAME
+               "--stack-name"    (or stack STACK_NAME)
+               "--s3-prefix"     (or bucket-prefix BUCKET_PREFIX)
+               "--s3-bucket"     (or bucket-name BUCKET_PREFIX)
                "--profile"       AWS_PROFILE
                "--region"        REGION
                (when dry "--no-execute-changeset")
@@ -954,7 +965,7 @@ set -e
 
 (defn stack:compile
   "     \033[0;31m>\033[0m Compiles sources if necessary
-  \t\t        - \033[0;31m:force\033[0m      - force compilation even if sources did not change"
+  \t\t        - \033[0;31m:force\033[0m         - force compilation even if sources did not change"
   [& args]
   (print-task "stack:compile")
   (exit-if-not-synced!)
@@ -970,13 +981,13 @@ set -e
 
 (defn stack:invoke
   "     \033[0;31m>\033[0m Invokes lambda fn (check sam local invoke --help):
-       \t\t        - \033[0;31m:name\033[0m        - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
-       \t\t        - \033[0;31m:event-file\033[0m  - path to \033[0;31mevent file\033[0m
-       \t\t        - \033[0;31m:envs-file\033[0m   - path to \033[0;31menvs file\033[0m
-       \t\t        - \033[0;31m:params\033[0m      - map of parameters to override in AWS SAM
-       \t\t        - \033[0;31m:runtime\033[0m     - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
-       \t\t        - \033[0;31m:debug\033[0m       - run invoke in \033[0;31mdebug mode\033[0m
-       \t\t        - \033[0;31m:logs\033[0m        - logfile to runtime logs to"
+       \t\t        - \033[0;31m:name\033[0m          - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
+       \t\t        - \033[0;31m:event-file\033[0m    - path to \033[0;31mevent file\033[0m
+       \t\t        - \033[0;31m:envs-file\033[0m     - path to \033[0;31menvs file\033[0m
+       \t\t        - \033[0;31m:params\033[0m        - map of parameters to override in AWS SAM
+       \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
+       \t\t        - \033[0;31m:debug\033[0m         - run invoke in \033[0;31mdebug mode\033[0m
+       \t\t        - \033[0;31m:logs\033[0m          - logfile to runtime logs to"
   [& args]
   (print-task "stack:invoke")
   (let [{:keys [name event-file envs-file logs params debug runtime]} (norm-args args)
@@ -1115,11 +1126,11 @@ set -e
 
 (defn stack:logs
   "     \033[0;31m>\033[0m Possible arguments (check sam logs --help):
-       \t\t        - \033[0;31m:name\033[0m        - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
-       \t\t        - \033[0;31m:e\033[0m           - fetch logs up to this time
-       \t\t        - \033[0;31m:s\033[0m           - fetch logs starting at this time
-       \t\t        - \033[0;31m:tail\033[0m        - fetch logs in tail mode
-       \t\t        - \033[0;31m:filter\033[0m      - find logs that match terms "
+       \t\t        - \033[0;31m:name\033[0m          - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
+       \t\t        - \033[0;31m:e\033[0m             - fetch logs up to this time
+       \t\t        - \033[0;31m:s\033[0m             - fetch logs starting at this time
+       \t\t        - \033[0;31m:tail\033[0m          - fetch logs in tail mode
+       \t\t        - \033[0;31m:filter\033[0m        - find logs that match terms "
   [& args]
   (print-task "stack:logs")
   (let [{:keys [name tail s e filter]} (norm-args args)]
@@ -1172,25 +1183,29 @@ set -e
   (shell "clj-kondo --lint src:test"))
 
 (defn stack:describe
-  "     \033[0;31m>\033[0m Describes \033[0;31mCloudformation\033[0m stack"
-  []
-  (print-task "stack:describe")
-  (shell "aws" "cloudformation" "describe-stacks"
-         "--profile"    AWS_PROFILE
-         "--region"     REGION
-         "--stack-name" STACK_NAME))
+  "     \033[0;31m>\033[0m Describes \033[0;31mCloudformation\033[0m stack
+  \t\t        - \033[0;31m:stack\033[0m         - overrides \033[0;31m:stack:name\033[0m "
+  [& args]
+  (let [{:keys [stack]} (norm-args args)]
+    (print-task "stack:describe")
+    (shell "aws" "cloudformation" "describe-stacks"
+           "--profile"    AWS_PROFILE
+           "--region"     REGION
+           "--stack-name" (or stack STACK_NAME))))
 
 (defn stack:destroy
-  "     \033[0;31m>\033[0m Destroys \033[0;31mCloudformation\033[0m stack & removes bucket"
-  []
-  (print-task "stack:destroy")
-  (hpr (prw "Automatic cloudformation") (accent "stack:destroy") (prw "operation might not be always successful."))
-  (shell "aws" "cloudformation" "delete-stack"
-         "--profile"    AWS_PROFILE
-         "--region"     REGION
-         "--stack-name" STACK_NAME)
-  (bucket:remove)
-  (hpr "Waiting 15 seconds for partial/complete cloudformation deletion status...")
-  (Thread/sleep 15000)
-  (hpr "If you see an error regarding not being able to describe not existent stack then destroy was successful!")
-  (stack:describe))
+  "     \033[0;31m>\033[0m Destroys \033[0;31mCloudformation\033[0m stack & removes bucket
+  \t\t        - \033[0;31m:bucket-name\033[0m   - overrides \033[0;31m:infra:bucket-name\033[0m "
+  [& args]
+  (let [{:keys [stack bucket-name]} (norm-args args)]
+    (print-task "stack:destroy")
+    (hpr (prw "Automatic cloudformation") (accent "stack:destroy") (prw "operation might not be always successful."))
+    (shell "aws" "cloudformation" "delete-stack"
+           "--profile"    AWS_PROFILE
+           "--region"     REGION
+           "--stack-name" (or stack STACK_NAME))
+    (apply bucket:remove args)
+    (hpr "Waiting 15 seconds for partial/complete cloudformation deletion status...")
+    (Thread/sleep 15000)
+    (hpr "If you see an error regarding not being able to describe not existent stack then destroy was successful!")
+    (apply stack:describe args)))

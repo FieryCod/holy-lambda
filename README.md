@@ -93,9 +93,13 @@ Available tasks:
 ❯ bb tasks
 The following tasks are available:
 
-bucket:create          > Creates a s3 stack bucket or the one specified by :name
-bucket:remove          > Removes a s3 stack bucket or the one specified by :name
-
+bucket:create          > Creates a s3 stack bucket or the one specified by :infra:bucket-name
+                        - :bucket-name   - overrides :infra:bucket-name
+                        - :profile       - overrides :infra:profile 
+bucket:remove          > Removes a s3 stack bucket or the one specified by :infra:bucket-name
+                        - :bucket-name   - overrides :infra:bucket-name
+                        - :profile       - overrides :infra:profile
+  
 ----------------------------------------------------------------
 
 docker:run             > Run command in fierycod/graalvm-native-image docker context
@@ -103,9 +107,9 @@ docker:run             > Run command in fierycod/graalvm-native-image docker con
 ----------------------------------------------------------------
 
 native:conf            > Provides native configurations for the application
-                        - :runtime     - overrides :runtime:name and run Lambda in specified runtime 
+                        - :runtime       - overrides :runtime:name and run Lambda in specified runtime 
 native:executable      > Provides native executable of the application
-                        - :runtime     - overrides :runtime:name and run Lambda in specified runtime
+                        - :runtime       - overrides :runtime:name and run Lambda in specified runtime
 
 ----------------------------------------------------------------
 
@@ -114,39 +118,46 @@ stack:sync             > Syncs project & dependencies from either:
                         - <Clojure>  deps.edn
                         - <Babashka> bb.edn:runtime:pods
 stack:compile          > Compiles sources if necessary
-                        - :force      - force compilation even if sources did not change
+                        - :force         - force compilation even if sources did not change
 stack:invoke           > Invokes lambda fn (check sam local invoke --help):
-                        - :name        - either :name or :stack:default-lambda
-                        - :event-file  - path to event file
-                        - :envs-file   - path to envs file
-                        - :params      - map of parameters to override in AWS SAM
-                        - :runtime     - overrides :runtime:name and run Lambda in specified runtime
-                        - :debug       - run invoke in debug mode
-                        - :logs        - logfile to runtime logs to
+                        - :name          - either :name or :stack:default-lambda
+                        - :event-file    - path to event file
+                        - :envs-file     - path to envs file
+                        - :params        - map of parameters to override in AWS SAM
+                        - :runtime       - overrides :runtime:name and run Lambda in specified runtime
+                        - :debug         - run invoke in debug mode
+                        - :logs          - logfile to runtime logs to
 stack:api              > Runs local api (check sam local start-api):
-                        - :debug       - run api in debug mode
-                        - :port        - local port number to listen to
-                        - :static-dir  - assets which should be presented at /
-                        - :envs-file   - path to envs file
-                        - :runtime     - overrides :runtime:name and run Lambda in specified runtime
-                        - :params      - map of parameters to override in AWS SAM
+                        - :debug         - run api in debug mode
+                        - :port          - local port number to listen to
+                        - :static-dir    - assets which should be presented at /
+                        - :envs-file     - path to envs file
+                        - :runtime       - overrides :runtime:name and run Lambda in specified runtime
+                        - :params        - map of parameters to override in AWS SAM
 stack:pack             > Packs Cloudformation stack
-                        - :runtime     - overrides :runtime:name and run Lambda in specified runtime 
+                        - :runtime       - overrides :runtime:name and run Lambda in specified runtime
+                        - :bucket-name   - overrides :infra:bucket-name
+                        - :bucket-prefix - overrides :infra:bucket-prefix 
 stack:deploy           > Deploys Cloudformation stack
-                        - :guided      - guide the deployment
-                        - :dry         - execute changeset?
-                        - :params      - map of parameters to override in AWS SAM
-                        - :runtime     - overrides :runtime:name and run Lambda in specified runtime 
+                        - :guided        - guide the deployment
+                        - :dry           - execute changeset?
+                        - :params        - map of parameters to override in AWS SAM
+                        - :runtime       - overrides :runtime:name and run Lambda in specified runtime
+                        - :stack         - overrides :stack:name
+                        - :bucket-name   - overrides :infra:bucket-name
+                        - :bucket-prefix - overrides :infra:bucket-prefix 
 stack:describe         > Describes Cloudformation stack
+                        - :stack         - overrides :stack:name 
 stack:doctor           > Diagnoses common issues of holy-lambda stack
 stack:purge            > Purges build artifacts
 stack:destroy          > Destroys Cloudformation stack & removes bucket
+                        - :bucket-name   - overrides :infra:bucket-name 
 stack:logs             > Possible arguments (check sam logs --help):
-                        - :name        - either :name or :stack:default-lambda
-                        - :e           - fetch logs up to this time
-                        - :s           - fetch logs starting at this time
-                        - :tail        - fetch logs in tail mode
-                        - :filter      - find logs that match terms 
+                        - :name          - either :name or :stack:default-lambda
+                        - :e             - fetch logs up to this time
+                        - :s             - fetch logs starting at this time
+                        - :tail          - fetch logs in tail mode
+                        - :filter        - find logs that match terms 
 stack:version          > Outputs holy-lambda babashka tasks version
 stack:lint             > Lints the project
 ```
