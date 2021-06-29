@@ -1,7 +1,5 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
-        {:git/url "https://github.com/FieryCod/holy-lambda"
-         :deps/root "./modules/holy-lambda-babashka-tasks"
-         :sha     "c37ac845fd0ef0476cf522dc51e6af4195e6f1d1"}}
+        {:local/root "../../../../modules/holy-lambda-babashka-tasks"}}
 
  :mvn/local-repo ".holy-lambda/.m2"
 
@@ -10,9 +8,12 @@
  :holy-lambda/options {
                        :docker {:volumes []
 
+                                :network "host"
+
                                 :image "fierycod/graalvm-native-image:ce"}
 
-                       :build {:clj-alias nil}
+                       :build {:clj-alias nil
+                               :graalvm-hoke nil}
 
                        :stack {:name "holy-lambda-template-stack-java-basic"
 

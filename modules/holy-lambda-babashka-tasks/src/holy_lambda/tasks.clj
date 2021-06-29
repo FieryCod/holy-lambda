@@ -33,7 +33,7 @@
 
 (defn file-exists?
   [file]
-  (boolean (some-> (normalize-file-path file) fs/exists?)))
+  (boolean (some-> file normalize-file-path fs/exists?)))
 
 (defn norm-args
   [args]
@@ -58,12 +58,13 @@
   [cmd & args]
   (exit-non-zero (p/process (into (p/tokenize cmd) (remove nil? args)) {:inherit true})))
 
+(defn- shell-no-exit-n-inherit
+  [cmd & args]
+  (p/process (into (p/tokenize cmd) (remove nil? args))))
+
 (defn- shell-no-exit
   [cmd & args]
   (p/process (into (p/tokenize cmd) (remove nil? args)) {:inherit true}))
-
-(defn- clojure [cmd & args]
-  (exit-non-zero (deps/clojure (into (p/tokenize cmd) args))))
 
 (defn accent
   [s]
@@ -164,6 +165,7 @@
              (pre "Exiting!"))
         (System/exit 1))))
 
+(def TTY? (= (:exit @(shell-no-exit "test" "-t" "1")) 0))
 (def DOCKER (:docker OPTIONS))
 (def BUILD (:build OPTIONS))
 (def HL_NO_DOCKER?
@@ -174,15 +176,14 @@
 (let [home (and HL_NO_DOCKER?
                 (some-> (or (System/getenv "GRAALVM_HOME")
                             (:graalvm-home BUILD))
-                        (str "/bin/")
-                        ))
+                        (str "/bin/")))
       java (some-> home (str "java") normalize-file-path)
       native-image (some-> home (str "native-image") normalize-file-path)
       fallback-command (fn [command fallback]
                          (if (file-exists? command)
                            command
                            (do
-                             (hpr (prw "Executable") (accent command) (prw "does not exists! Using fallback:") (accent fallback) (prw "instead!"))
+                             (hpr (prw "Executable") (accent (or command "UNKNOWN")) (prw "does not exists! Using fallback:") (accent fallback) (prw "instead! Did you set up GRAALVM_HOME?"))
                              fallback)))]
   (def JAVA_COMMAND
     (if-not HL_NO_DOCKER?
@@ -468,7 +469,7 @@
             (when DOCKER_NETWORK [(str "--network=" DOCKER_NETWORK)])
             (vec (flatten (mapv (fn [path] ["-v" path]) DOCKER_VOLUMES)))
             ["--user" USER_GID
-             "-it" IMAGE_CORDS
+             (str "-i" (when TTY? "t")) IMAGE_CORDS
              "/bin/bash" "-c" command]))
     (shell "bash" "-c" command)))
 
@@ -987,25 +988,52 @@ set -e
        \t\t        - \033[0;31m:params\033[0m        - map of parameters to override in AWS SAM
        \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
        \t\t        - \033[0;31m:debug\033[0m         - run invoke in \033[0;31mdebug mode\033[0m
+       \t\t        - \033[0;31m:validation-fn\033[0m - useful for fast CI tests
        \t\t        - \033[0;31m:logs\033[0m          - logfile to runtime logs to"
   [& args]
   (print-task "stack:invoke")
-  (let [{:keys [name event-file envs-file logs params debug runtime]} (norm-args args)
+  (let [{:keys [name event-file envs-file logs params debug runtime validation-fn]} (norm-args args)
         envs-file (or envs-file DEFAULT_ENVS_FILE)]
     (override-runtime! runtime)
     (exit-if-not-synced!)
     (stack-files-check)
     (when (build-stale?)
       (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
-    (shell "sam" "local" "invoke"          (or name DEFAULT_LAMBDA_NAME)
-           "--parameter-overrides"         (if-not params
-                                             (parameters)
-                                             (str (parameters) " " (map->parameters-inline (edn/read-string params))))
-           "--profile"                     AWS_PROFILE
-           (when debug      "--debug")
-           (when logs       "-l")          logs
-           (when event-file "-e")          event-file
-           (when envs-file  "-n")          envs-file)))
+    (let [{:keys [err out exit]}
+          @(shell-no-exit-n-inherit
+            "sam" "local" "invoke"          (or name DEFAULT_LAMBDA_NAME)
+            "--parameter-overrides"         (if-not params
+                                              (parameters)
+                                              (str (parameters) " " (map->parameters-inline (edn/read-string params))))
+            "--profile"                     AWS_PROFILE
+            (when debug      "--debug")
+            (when logs       "-l")          logs
+            (when event-file "-e")          event-file
+            (when envs-file  "-n")          envs-file)
+          err (slurp err)
+          out (slurp out)
+          out-json (try (json/parse-string (s/trim out) true)
+                        (catch Exception _
+                          nil))]
+      (if (and (= exit 0) validation-fn)
+        (if ((eval (read-string validation-fn)) out-json)
+          (do
+            (hpr (prs "Validation fn") (accent validation-fn) (prs "succeed for input") (accent out-json))
+            (hpr (prs "Test passed!"))
+            (System/exit 0))
+          (do
+            (hpr (pre "Validation fn") (accent validation-fn) (pre "failed for input") (accent out-json))
+            (hpr (pre "Test failed!"))
+            (System/exit 1)))
+        (do 
+          (hpr "-----------------------------" (accent "Runtime Output:") "----------------------------")
+          (hpr err)
+          (hpr "-------------------------------------------------------------------------")
+          (println "")
+          (hpr "-----------------------------" (accent "Function Output:") "--------------------------")
+          (hpr out)
+          (hpr "-------------------------------------------------------------------------")))
+      (System/exit exit))))
 
 (defn mvn-local-test
   [file]
@@ -1032,6 +1060,7 @@ set -e
     (hpr " Babashka tasks version:  " (accent TASKS_VERSION))
     (hpr " Babashka version:        " (accent (or (s/trim (shs-no-err "bb" "version")) "UNKNOWN")))
     (hpr " Runtime:                 " (accent *RUNTIME_NAME*))
+    (hpr " TTY:                     " (accent TTY?))
     (hpr " Runtime entrypoint:      " (accent ENTRYPOINT))
     (hpr " Stack name:              " (accent STACK_NAME))
     (hpr " S3 Bucket name:          " (accent BUCKET_NAME))

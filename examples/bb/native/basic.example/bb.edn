@@ -1,7 +1,5 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
-        {:git/url "https://github.com/FieryCod/holy-lambda"
-         :deps/root "./modules/holy-lambda-babashka-tasks"
-         :sha     "c37ac845fd0ef0476cf522dc51e6af4195e6f1d1"}}
+        {:local/root "../../../../modules/holy-lambda-babashka-tasks"}}
 
  :mvn/local-repo ".holy-lambda/.m2"
 
@@ -10,9 +8,12 @@
  :holy-lambda/options {
                        :docker {:volumes []
 
+                                :network "host"
+
                                 :image "fierycod/graalvm-native-image:ce"}
 
-                       :build {:clj-alias nil}
+                       :build {:clj-alias nil
+                               :graalvm-home nil}
 
                        :stack {:name "holy-lambda-template-stack-native-basic"
 
@@ -38,7 +39,7 @@
                         ;; For now pods should be declared in `bb.edn`. See: https://github.com/babashka/babashka/issues/768#issuecomment-825016317
                         ;;
                         ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
-                        :pods                {org.babashka/aws "0.0.5"}
+                        ;; :pods                {org.babashka/aws "0.0.5"}
 
                         ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
                         ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call

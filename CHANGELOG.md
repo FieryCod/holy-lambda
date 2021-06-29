@@ -8,6 +8,7 @@
 - [bb tasks] Add support for CI deployments. 
 - [bb tasks] Add support for docker `:network` option
 - [docs] Add FAQ, CI support documents
+- [bb tasks] Fix using docker in CI environment
 
 ## 0.2.1 (10-06-2021)
 

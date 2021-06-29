@@ -4,11 +4,38 @@ trigger:
 pool:
   name: Default
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+jobs:
+  # Native + Docker runtime tests
+  - job: native_basic_docker_1
+    displayName: '(Native)-(Basic)-(Docker) GraalVM Native Image Custom Runtime compilation test'
+    variables:
+      WORKING_DIRECTORY: examples/bb/native/basic.example
+      CLJ_ALIAS_KEY: holy-lambda-local
+    steps:
+      - script: |
+          # Regenerate partial cache
+          bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+          # Regular test tasks
+          bb stack:compile && \
+          bb native:executable && \
+          bb stack:invoke :validation-fn "(fn [{:keys [body]}] (= body \"Hello world\"))"
+        workingDirectory: ${{variables.WORKING_DIRECTORY}}
+        displayName: 'Compilation + Invoke'
+
+  # Java + Docker runtime tests
+  - job: java_basic_docker_1
+    displayName: '(Java)-(Basic)-(Docker) GraalVM Native Image Custom Runtime compilation test'
+    variables:
+      WORKING_DIRECTORY: examples/bb/java/basic.example
+      CLJ_ALIAS_KEY: holy-lambda-local
+    steps:
+      - script: |
+          # Regenerate partial cache
+          bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
+
+          # Regular test tasks
+          bb stack:compile && \
+          bb stack:invoke :validation-fn "(fn [{:keys [body]}] (= body \"Hello world\"))"
+        workingDirectory: ${{variables.WORKING_DIRECTORY}}
+        displayName: 'Compilation + Invoke'
