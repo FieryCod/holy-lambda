@@ -461,11 +461,11 @@
     (apply shell
            (concat
             ["docker run --rm"
-             "-e" "AWS_CREDENTIAL_PROFILES_FILE=/project/.aws/credentials"
-             "-e" "AWS_CONFIG_FILE=/project/.aws/config"
-             "-e" "HOME=/"
+             "-e" "AWS_CREDENTIAL_PROFILES_FILE=/.aws/credentials"
+             "-e" "AWS_CONFIG_FILE=/.aws/config"
+             "-e" "AWS_SHARED_CREDENTIALS_FILE=/.aws/credentials"
              "-v" (str (.getAbsolutePath (io/file "")) ":/project")
-             "-v" (str AWS_DIR ":" "/project/.aws:ro")]
+             "-v" (str AWS_DIR ":" "/.aws:ro")]
             (flatten (mapv (fn [path] ["-v" path]) DOCKER_VOLUMES))
             ["--user" USER_GID
              "-it" IMAGE_CORDS
