@@ -176,3 +176,6 @@
    :clientContext client-context
    :envs envs*})
 
+(defn exit!
+  []
+  (System/exit 1))
