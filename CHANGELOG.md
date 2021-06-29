@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.2 (29-06-2021)
+- [docs] Add documentation about using GraalVM-EE 
+- [examples] Add basic cdk example
+- [holy-lambda] System/exit 1 when handler is not found during `native:conf`
+- [bb tasks] Don't remove empty `.aws` folder since tasks might not have proper permissions set, bind `~/.aws` folder at `/.aws` path instead.
+- [bb tasks] Add support for CI deployments. 
+- [bb tasks] Add support for docker `:network` option
+- [docs] Add FAQ, CI support documents
+
 ## 0.2.1 (10-06-2021)
 
 - [bb layer] Bump babashka version to 0.4.6

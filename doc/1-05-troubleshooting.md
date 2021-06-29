@@ -128,3 +128,8 @@
      ```
      
    Now your local library should work well with `holy-lambda`! :)
+
+  5. Empty `.aws` directory created.
+  
+     **Solution**:
+     If you see anywhere `.aws` empty directory then remove it and update HL stack.
