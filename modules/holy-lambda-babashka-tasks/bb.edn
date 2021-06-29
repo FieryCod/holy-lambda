@@ -7,6 +7,8 @@
  :holy-lambda/options {:docker {:volumes [{:docker     "/holy-lambda"
                                            :host       "../../"}]
 
+                                :network "host"
+
                                 :image "fierycod/graalvm-native-image:ce"}
 
                        :build {:clj-alias :holy-lambda

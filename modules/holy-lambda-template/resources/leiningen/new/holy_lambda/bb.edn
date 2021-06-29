@@ -17,6 +17,11 @@
                        ;; For CI based deployments user should base it's builder image on `fierycod/graalvm-native-image:ce`
                        :docker {
 
+                                ;; Check https://docs.docker.com/network/
+                                ;; Network setting for future versions of HL will propagate to AWS SAM as well
+                                ;; Options: "host"|"bridge"|"overlay"|"none"|nil|"macvlan"
+                                :network            nil
+
                                 ;; HL runs bb tasks in docker context which means that local libraries will not work out-of-the-box.
                                 ;;
                                 ;; To make local libraries work with HL you have to:
@@ -37,6 +42,7 @@
                        :build {;; clj alias might be set via environment variable
                                ;; `HL_CLJ_ALIAS` like:  HL_CLJ_ALIAS="dev"
                                :clj-alias           nil
+
                                ;; Used when either :docker is nil or
                                ;; `HL_NO_DOCKER` environment variable is set to "true"
                                ;; Might be set via `GRAALVM_HOME` environment variable

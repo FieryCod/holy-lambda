@@ -35,8 +35,6 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: example.core.ExampleLambda
-      Layers:
-        - !Ref SharedClojureBabashkaDepsLayer
       Events:
         HelloEvent:
           Type: HttpApi

@@ -271,6 +271,7 @@
             (str (fs/absolutize (io/file host)) ":" docker))
           DOCKER_VOLUMES_CONF)))
 
+(def DOCKER_NETWORK (:network DOCKER))
 (def INFRA (:infra OPTIONS))
 (def RUNTIME (:runtime OPTIONS))
 (def *RUNTIME_NAME* (:name RUNTIME))
@@ -466,7 +467,8 @@
              "-e" "AWS_SHARED_CREDENTIALS_FILE=/.aws/credentials"
              "-v" (str (.getAbsolutePath (io/file "")) ":/project")
              "-v" (str AWS_DIR ":" "/.aws:ro")]
-            (flatten (mapv (fn [path] ["-v" path]) DOCKER_VOLUMES))
+            (when DOCKER_NETWORK [(str "--network=" DOCKER_NETWORK)])
+            (vec (flatten (mapv (fn [path] ["-v" path]) DOCKER_VOLUMES)))
             ["--user" USER_GID
              "-it" IMAGE_CORDS
              "/bin/bash" "-c" command]))
@@ -984,15 +986,15 @@ set -e
     (stack-files-check)
     (when (build-stale?)
       (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
-    (shell "sam" "local" "invoke"    (or name DEFAULT_LAMBDA_NAME)
-           "--parameter-overrides"   (if-not params
-                                       (parameters)
-                                       (str (parameters) " " (map->parameters-inline (edn/read-string params))))
-           "--profile"               AWS_PROFILE
-           (when debug "--debug")
-           (when logs "-l")          logs
-           (when event-file "-e")    event-file
-           (when envs-file "-n")     envs-file)))
+    (shell "sam" "local" "invoke"          (or name DEFAULT_LAMBDA_NAME)
+           "--parameter-overrides"         (if-not params
+                                             (parameters)
+                                             (str (parameters) " " (map->parameters-inline (edn/read-string params))))
+           "--profile"                     AWS_PROFILE
+           (when debug      "--debug")
+           (when logs       "-l")          logs
+           (when event-file "-e")          event-file
+           (when envs-file  "-n")          envs-file)))
 
 (defn mvn-local-test
   [file]
