@@ -6,7 +6,8 @@
  :min-bb-version "0.3.7"
 
  :holy-lambda/options {
-                       :docker {:volumes []
+                       :docker {:volumes [{:docker     "/holy-lambda"
+                                           :host       "../../../../"}]
 
                                 :network "host"
 

@@ -6,16 +6,18 @@
  :min-bb-version "0.3.7"
 
  :holy-lambda/options {
-                       :docker {:volumes []
+                       :docker {:volumes [{:docker     "/holy-lambda"
+                                           :host       "../../../../"}]
 
                                 :network "host"
 
                                 :image "fierycod/graalvm-native-image:ce"}
 
                        :build {:clj-alias nil
+
                                :graalvm-home nil}
 
-                       :stack {:name "holy-lambda-template-stack-native-basic"
+                       :stack {:name "hl-nbetest-az-native"
 
                                :default-lambda "ExampleLambdaFunction"
 
@@ -74,11 +76,11 @@
 
                        ;; Infrastructure properties
                        :infra
-                       {:bucket-prefix       "holy-lambda"
+                       {:bucket-prefix       "hl"
 
                         :profile             "default"
 
-                        :bucket-name         "holy-lambda-template-bucket-basic-java"
+                        :bucket-name         "hl-nbetest-az-nativeb"
 
                         :region              "eu-central-1"}}
 

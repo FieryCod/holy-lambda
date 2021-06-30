@@ -5,12 +5,87 @@ pool:
   name: Default
 
 jobs:
-  # Native + Docker runtime tests
-  - job: native_basic_docker_1
-    displayName: '(1.1)-(Native)-(Basic)-(Docker) GraalVM Native Image Custom Runtime compilation test'
+  # Tasks health check
+  - job: tasks_health_check_1
+    displayName: '(1.0) Tasks health check'
     variables:
       WORKING_DIRECTORY: examples/bb/native/basic.example
-      HL_CLJ_ALIAS: holy-lambda-local
+      HL_CLJ_ALIAS: holy-lambda
+    steps:
+      - script: |
+          # Regenerate partial cache
+          bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip"
+
+          # Sync
+          printf "\n-----------------------------\n"
+          printf "        (1) Sync check"
+          printf "\n-----------------------------\n"
+          #------------------------
+          bb stack:sync || exit 1
+          printf "\n-----------------------------\n"
+
+          # Lint check
+          printf "\n-----------------------------\n"
+          printf "        (2) Lint check"
+          printf "\n-----------------------------\n"
+          #------------------------
+          bb stack:lint || exit 1
+          printf "\n-----------------------------\n"
+
+          # Bucket deletion
+          printf "\n-----------------------------\n"
+          printf "        (3) Doctor check"
+          printf "\n-----------------------------\n"
+          #------------------------
+          bb stack:doctor || exit 1
+          printf "\n-----------------------------\n"
+
+          # Bucket creation
+          printf "\n-----------------------------\n"
+          printf "        (4) Bucket creation test"
+          printf "\n-----------------------------\n"
+          #------------------------
+          bb bucket:create || exit 1
+          bb bucket:create :bucket-name hlhlnativetestzxcqwedsasd1
+          printf "\n-----------------------------\n"
+
+          # Bucket deletion
+          printf "\n-----------------------------\n"
+          printf "        (5) Bucket deletion test"
+          printf "\n-----------------------------\n"
+          #------------------------
+          bb bucket:remove || exit 1
+          bb bucket:remove :bucket-name hlhlnativetestzxcqwedsasd1
+          printf "\n-----------------------------\n"
+
+          # Stack version test
+          printf "\n-----------------------------\n"
+          printf "        (6) Stack version
+          printf "\n-----------------------------\n"
+          #------------------------
+          bb stack:version || exit 1
+          printf "\n-----------------------------\n"
+
+          # Stack purge test
+          printf "\n-----------------------------\n"
+          printf "        (7) Stack purge
+          printf "\n-----------------------------\n"
+          #------------------------
+          bb stack:purge || exit 1
+          printf "\n-----------------------------\n"
+
+        workingDirectory: ${{variables.WORKING_DIRECTORY}}
+        displayName: 'Tasks health check'
+
+  # Native + Docker runtime tests
+  - job: native_basic_docker_1
+    displayName: '(2.1)-(Native)-(Basic)-(Docker) GraalVM Native Image Custom Runtime compilation test'
+    dependsOn:
+      - tasks_health_check_1
+    condition: succeeded()
+    variables:
+      WORKING_DIRECTORY: examples/bb/native/basic.example
+      HL_CLJ_ALIAS: holy-lambda
     steps:
       - script: |
           # Regenerate partial cache
@@ -25,10 +100,13 @@ jobs:
 
   # Java + Docker runtime tests
   - job: java_basic_docker_1
-    displayName: '(1.2)-(Java)-(Basic)-(Docker) Java runtime test'
+    displayName: '(3.1)-(Java)-(Basic)-(Docker) Java runtime test'
+    dependsOn:
+      - tasks_health_check_1
+    condition: succeeded()
     variables:
       WORKING_DIRECTORY: examples/bb/java/basic.example
-      HL_CLJ_ALIAS: holy-lambda-local
+      HL_CLJ_ALIAS: holy-lambda
     steps:
       - script: |
           # Regenerate partial cache

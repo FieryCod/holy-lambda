@@ -1044,114 +1044,126 @@ set -e
 (defn stack:doctor
   "     \033[0;31m>\033[0m Diagnoses common issues of holy-lambda stack"
   []
-  (print-task "stack:doctor")
-  (do
-    (println "")
-    (hpr "---------------------------------------")
-    (hpr " Checking health of holy-lambda stack")
-    (hpr " Home directory is:       " (accent HOME_DIR))
-    (hpr " Project directory is:    " (accent PROJECT_DIRECTORY))
-    (hpr " AWS SAM version:         " (accent (or (s/trim (shs-no-err "sam" "--version")) "UNKNOWN")))
-    (hpr " AWS CLI version:         " (accent (or (s/trim (shs-no-err "aws" "--version")) "UNKNOWN")))
-    (hpr " AWS directory is:        " (accent AWS_DIR))
-    (hpr " AWS directory exists?:   " (accent AWS_DIR_EXISTS?))
-    (hpr " Docker version:          " (accent (or (s/trim (shs-no-err "docker" "--version")) "UNKNOWN")))
-    (hpr " Babashka tasks sha:      " (accent (or (:sha (get (:deps BB_EDN) 'io.github.FieryCod/holy-lambda-babashka-tasks)) "LOCAL")))
-    (hpr " Babashka tasks version:  " (accent TASKS_VERSION))
-    (hpr " Babashka version:        " (accent (or (s/trim (shs-no-err "bb" "version")) "UNKNOWN")))
-    (hpr " Runtime:                 " (accent *RUNTIME_NAME*))
-    (hpr " TTY:                     " (accent TTY?))
-    (hpr " Runtime entrypoint:      " (accent ENTRYPOINT))
-    (hpr " Stack name:              " (accent STACK_NAME))
-    (hpr " S3 Bucket name:          " (accent BUCKET_NAME))
-    (hpr " S3 Bucket prefix:        " (accent BUCKET_PREFIX))
-    (hpr " S3 Bucket exists?:       " (accent (bucket-exists?)))
-    (hpr "---------------------------------------\n"))
-
-  (when-not (file-exists? AWS_DIR)
-    (hpr (pre "$HOME/.aws does not exists. Did you run") (accent "aws configure")))
-
-  (read-string (slurp (io/file "deps.edn")))
-
-  (if-not (contains? AVAILABLE_RUNTIMES *RUNTIME_NAME*)
+  (let [exit-code (atom 0)
+        exit-code-err! #(reset! exit-code 1)]
+    (print-task "stack:doctor")
     (do
-      (hpr (str (pre ":runtime ") (accent *RUNTIME_NAME*) (pre " is not supported!")))
-      (hpr (str "Choose one of supported build tools: " AVAILABLE_RUNTIMES)))
-    (hpr (prs ":runtime looks good")))
+      (println "")
+      (hpr "---------------------------------------")
+      (hpr " Checking health of holy-lambda stack")
+      (hpr " Home directory is:       " (accent HOME_DIR))
+      (hpr " Project directory is:    " (accent PROJECT_DIRECTORY))
+      (hpr " AWS SAM version:         " (accent (or (s/trim (shs-no-err "sam" "--version")) "UNKNOWN")))
+      (hpr " AWS CLI version:         " (accent (or (s/trim (shs-no-err "aws" "--version")) "UNKNOWN")))
+      (hpr " AWS directory is:        " (accent AWS_DIR))
+      (hpr " AWS directory exists?:   " (accent AWS_DIR_EXISTS?))
+      (hpr " Docker version:          " (accent (or (s/trim (shs-no-err "docker" "--version")) "UNKNOWN")))
+      (hpr " Babashka tasks sha:      " (accent (or (:sha (get (:deps BB_EDN) 'io.github.FieryCod/holy-lambda-babashka-tasks)) "LOCAL")))
+      (hpr " Babashka tasks version:  " (accent TASKS_VERSION))
+      (hpr " Babashka version:        " (accent (or (s/trim (shs-no-err "bb" "version")) "UNKNOWN")))
+      (hpr " Runtime:                 " (accent *RUNTIME_NAME*))
+      (hpr " TTY:                     " (accent TTY?))
+      (hpr " Runtime entrypoint:      " (accent ENTRYPOINT))
+      (hpr " Stack name:              " (accent STACK_NAME))
+      (hpr " S3 Bucket name:          " (accent BUCKET_NAME))
+      (hpr " S3 Bucket prefix:        " (accent BUCKET_PREFIX))
+      (hpr " S3 Bucket exists?:       " (accent (bucket-exists?)))
+      (hpr "---------------------------------------\n"))
 
-  (if-not ENTRYPOINT
-    (hpr (pre ":runtime:entrypoint is required!"))
-    (hpr (prs ":runtime:entrypoint looks good")))
+    (when-not (file-exists? AWS_DIR)
+      (hpr (pre "$HOME/.aws does not exists. Did you run") (accent "aws configure"))
+      (exit-code-err!))
 
-  (if-not CAPABILITIES
-    (hpr (pre ":stack:capabilities is required!"))
-    (hpr (prs ":stack:capabilities looks good")))
+    (when-not (file-exists? "deps.edn")
+      (hpr (pre "File deps.edn does not exists!"))
+      (exit-code-err!))
 
-  (when-not INFRA_AWS_PROFILE
-    (hpr (prw ":infra:profile which should point to AWS Profile is not declared, therefore") (accent "default") (prw "profile will be used instead")))
+    (if-not (contains? AVAILABLE_RUNTIMES *RUNTIME_NAME*)
+      (do
+        (hpr (str (pre ":runtime ") (accent *RUNTIME_NAME*) (pre " is not supported!")))
+        (hpr (str "Choose one of supported build tools: " AVAILABLE_RUNTIMES)))
+      (hpr (prs ":runtime looks good")))
 
-  (when (and (not= *RUNTIME_NAME* :native) BOOTSTRAP_FILE)
-    (hpr (prw ":runtime:bootstrap-file is supported only for") (accent ":native") (prw "runtime")))
+    (if-not ENTRYPOINT
+      (hpr (pre ":runtime:entrypoint is required!"))
+      (hpr (prs ":runtime:entrypoint looks good")))
 
-  (when (and (= *RUNTIME_NAME* :native) BOOTSTRAP_FILE (not (file-exists? BOOTSTRAP_FILE)))
-    (hpr (prw ":runtime:bootstrap-file does not exists. Default bootstrap file for") (accent ":native") (prw "runtime will be used!")))
+    (if-not CAPABILITIES
+      (hpr (pre ":stack:capabilities is required!"))
+      (hpr (prs ":stack:capabilities looks good")))
 
-  (when (and (not= *RUNTIME_NAME* :native) NATIVE_DEPS_PATH)
-    (hpr (prw ":runtime:native-deps is supported only for") (accent ":native") (prw "runtime")))
+    (when-not INFRA_AWS_PROFILE
+      (hpr (prw ":infra:profile which should point to AWS Profile is not declared, therefore") (accent "default") (prw "profile will be used instead")))
 
-  (when (and (= *RUNTIME_NAME* :native)
-             NATIVE_DEPS_PATH
-             (not (file-exists? NATIVE_DEPS_PATH)))
-    (hpr (prw ":runtime:native-deps folder does not exists") (accent ":native:executable") (prw "will not include any extra deps!")))
+    (when (and (not= *RUNTIME_NAME* :native) BOOTSTRAP_FILE)
+      (hpr (prw ":runtime:bootstrap-file is supported only for") (accent ":native") (prw "runtime")))
 
-  (when (and RUNTIME_VERSION (not= *RUNTIME_NAME* :babashka))
-    (hpr (prw ":runtime:version is supported only for") (accent ":babashka") (prw "runtime")))
+    (when (and (= *RUNTIME_NAME* :native) BOOTSTRAP_FILE (not (file-exists? BOOTSTRAP_FILE)))
+      (hpr (prw ":runtime:bootstrap-file does not exists. Default bootstrap file for") (accent ":native") (prw "runtime will be used!")))
 
-  (when (and (:pods RUNTIME) (not= *RUNTIME_NAME* :babashka))
-    (hpr (prw ":runtime:pods are supported only for") (accent ":babashka") (prw "runtime")))
+    (when (and (not= *RUNTIME_NAME* :native) NATIVE_DEPS_PATH)
+      (hpr (prw ":runtime:native-deps is supported only for") (accent ":native") (prw "runtime")))
 
-  (when (and NATIVE_IMAGE_ARGS (not= *RUNTIME_NAME* :native))
-    (hpr (prw ":runtime:native-image-args are supported only for") (accent ":native") (prw "runtime")))
+    (when (and (= *RUNTIME_NAME* :native)
+               NATIVE_DEPS_PATH
+               (not (file-exists? NATIVE_DEPS_PATH)))
+      (hpr (prw ":runtime:native-deps folder does not exists") (accent ":native:executable") (prw "will not include any extra deps!")))
 
-  (if-not STACK_NAME
-    (hpr (pre ":stack:name is required!"))
-    (hpr (prs ":stack:name looks good")))
+    (when (and RUNTIME_VERSION (not= *RUNTIME_NAME* :babashka))
+      (hpr (prw ":runtime:version is supported only for") (accent ":babashka") (prw "runtime")))
 
-  (mvn-local-test "deps.edn")
-  (mvn-local-test "bb.edn")
+    (when (and (:pods RUNTIME) (not= *RUNTIME_NAME* :babashka))
+      (hpr (prw ":runtime:pods are supported only for") (accent ":babashka") (prw "runtime")))
 
-  (if (file-exists? HOLY_LAMBDA_DEPS_PATH)
-    (hpr (prs "Syncing stack is not required"))
-    (hpr (pre "Stack is not synced! Run:") (accent "stack:sync")))
+    (when (and NATIVE_IMAGE_ARGS (not= *RUNTIME_NAME* :native))
+      (hpr (prw ":runtime:native-image-args are supported only for") (accent ":native") (prw "runtime")))
 
-  (if-not (contains? AVAILABLE_REGIONS REGION)
-    (do
-      (hpr (str (pre "Region ") (accent REGION) (pre " is not supported!")))
-      (hpr (str "Choose one of supported regions:\n" (with-out-str (pprint/pprint AVAILABLE_REGIONS)))))
-    (hpr (prs ":infra:region definition looks good")))
+    (if-not STACK_NAME
+      (hpr (pre ":stack:name is required!"))
+      (hpr (prs ":stack:name looks good")))
 
-  (if (s/includes? BUCKET_PREFIX "_")
-    (hpr (pre ":infra:bucket-prefix should not contain any of _ characters"))
-    (hpr (prs ":infra:bucket-prefix looks good")))
+    (mvn-local-test "deps.edn")
+    (mvn-local-test "bb.edn")
 
-  (if-not TEMPLATE_FILE
-    (hpr (pre ":stack:template is required!"))
-    (hpr (prs ":stack:template looks good")))
+    (if (file-exists? HOLY_LAMBDA_DEPS_PATH)
+      (hpr (prs "Syncing stack is not required"))
+      (do
+        (hpr (pre "Stack is not synced! Run:") (accent "stack:sync"))
+        (exit-code-err!)))
 
-  (if (s/includes? BUCKET_NAME "_")
-    (hpr (pre ":infra:bucket-name should not contain any of _ characters"))
-    (hpr (str (prs ":infra:bucket-name looks good")
-              (when-not (bucket-exists?)
-                (str (prs ", but ") (accent BUCKET_NAME) (prw " does not exists (use bb :bucket:create)"))))))
+    (if-not (contains? AVAILABLE_REGIONS REGION)
+      (do
+        (hpr (str (pre "Region ") (accent REGION) (pre " is not supported!")))
+        (hpr (str "Choose one of supported regions:\n" (with-out-str (pprint/pprint AVAILABLE_REGIONS)))))
+      (hpr (prs ":infra:region definition looks good")))
 
-  (if-let [cmds-not-found (seq (filter (comp not command-exists?) REQUIRED_COMMANDS))]
-    (hpr (str (pre (str "Commands " cmds-not-found " not found. Install all then run: ")) (underline "bb doctor")))
-    (do
-      (hpr (prs "Required commands") (accent (str REQUIRED_COMMANDS)) (prs "installed!"))
-      (println)
-      (stat-file TEMPLATE_FILE)
-      (hpr "Validating" (accent TEMPLATE_FILE))
-      (shell "sam validate"))))
+    (if (s/includes? BUCKET_PREFIX "_")
+      (hpr (pre ":infra:bucket-prefix should not contain any of _ characters"))
+      (hpr (prs ":infra:bucket-prefix looks good")))
+
+    (if-not TEMPLATE_FILE
+      (hpr (pre ":stack:template is required!"))
+      (hpr (prs ":stack:template looks good")))
+
+    (if (s/includes? BUCKET_NAME "_")
+      (do
+        (hpr (pre ":infra:bucket-name should not contain any of _ characters"))
+        (exit-code-err!))
+      (hpr (str (prs ":infra:bucket-name looks good")
+                (when-not (bucket-exists?)
+                  (str (prs ", but ") (accent BUCKET_NAME) (prw " does not exists (use bb :bucket:create)"))))))
+
+    (if-let [cmds-not-found (seq (filter (comp not command-exists?) REQUIRED_COMMANDS))]
+      (do
+        (hpr (str (pre (str "Commands " cmds-not-found " not found. Install all then run: ")) (underline "bb doctor")))
+        (exit-code-err!))
+      (do
+        (hpr (prs "Required commands") (accent (str REQUIRED_COMMANDS)) (prs "installed!"))
+        (println)
+        (stat-file TEMPLATE_FILE)
+        (hpr "Validating" (accent TEMPLATE_FILE))
+        (shell "sam validate")))
+    (System/exit @exit-code)))
 
 (defn stack:logs
   "     \033[0;31m>\033[0m Possible arguments (check sam logs --help):
@@ -1199,7 +1211,15 @@ set -e
   "     \033[0;31m>\033[0m Lints the project"
   []
   (print-task "stack:lint")
-  (shell "clj-kondo --lint src:test"))
+  (let [{:keys [exit out]} (csh/sh "clj-kondo" "--lint" "src:test")]
+    (if (not= exit 0)
+      (do
+        (hpr (pre "Warnings/Errors found:"))
+        (println out)
+        (System/exit 1))
+      (do
+        (hpr (prs "No Warnings/Errorrs found!"))
+        (System/exit 0)))))
 
 (defn stack:describe
   "     \033[0;31m>\033[0m Describes \033[0;31mCloudformation\033[0m stack
@@ -1208,9 +1228,9 @@ set -e
   (let [{:keys [stack]} (norm-args args)]
     (print-task "stack:describe")
     (shell "aws" "cloudformation" "describe-stacks"
-           "--profile"    AWS_PROFILE
-           "--region"     REGION
-           "--stack-name" (or stack STACK_NAME))))
+            "--profile"    AWS_PROFILE
+            "--region"     REGION
+            "--stack-name" (or stack STACK_NAME))))
 
 (defn stack:destroy
   "     \033[0;31m>\033[0m Destroys \033[0;31mCloudformation\033[0m stack & removes bucket

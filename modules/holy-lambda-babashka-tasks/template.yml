@@ -43,15 +43,6 @@ Resources:
             Path: /
             Method: GET
 
-  #SharedClojureBabashkaDepsLayer:
-  #  Type: AWS::Serverless::LayerVersion
-  #  Properties:
-  #    LayerName: SharedClojureBabashkaDepsLayer
-  #    Description: Shared dependencies for stack.
-  #    ContentUri: ./holy-lambda-babashka-runtime
-  #    CompatibleRuntimes:
-  #      - provided
-
   ServerlessHttpApi:
     Type: AWS::Serverless::HttpApi
     DeletionPolicy: Retain
