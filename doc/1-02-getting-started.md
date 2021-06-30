@@ -201,7 +201,6 @@ Here's an overview of what we'll create ([version with working links](https://sw
                             - :tail          - fetch logs in tail mode
                             - :filter        - find logs that match terms 
     stack:version          > Outputs holy-lambda babashka tasks version
-    stack:lint             > Lints the project
     ```
 
 ## Initialise the Project

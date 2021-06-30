@@ -1207,20 +1207,6 @@ set -e
 
     (hpr  (prs "Build artifacts purged"))))
 
-(defn stack:lint
-  "     \033[0;31m>\033[0m Lints the project"
-  []
-  (print-task "stack:lint")
-  (let [{:keys [exit out]} (csh/sh "clj-kondo" "--lint" "src:test")]
-    (if (not= exit 0)
-      (do
-        (hpr (pre "Warnings/Errors found:"))
-        (println out)
-        (System/exit 1))
-      (do
-        (hpr (prs "No Warnings/Errorrs found!"))
-        (System/exit 0)))))
-
 (defn stack:describe
   "     \033[0;31m>\033[0m Describes \033[0;31mCloudformation\033[0m stack
   \t\t        - \033[0;31m:stack\033[0m         - overrides \033[0;31m:stack:name\033[0m "

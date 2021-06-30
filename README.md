@@ -159,7 +159,6 @@ stack:logs             > Possible arguments (check sam logs --help):
                         - :tail          - fetch logs in tail mode
                         - :filter        - find logs that match terms 
 stack:version          > Outputs holy-lambda babashka tasks version
-stack:lint             > Lints the project
 ```
 
 ## Thanks to

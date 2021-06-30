@@ -103,6 +103,5 @@
          stack:destroy          holy-lambda.tasks/stack:destroy
          stack:logs             holy-lambda.tasks/stack:logs
          stack:version          holy-lambda.tasks/stack:version
-         stack:lint             holy-lambda.tasks/stack:lint
          }
  }

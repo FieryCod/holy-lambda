@@ -7,7 +7,7 @@ pool:
 jobs:
   # Tasks health check
   - job: tasks_health_check_1
-    displayName: '(1.0) Tasks health check'
+    displayName: '(1.0) General tasks tests'
     variables:
       WORKING_DIRECTORY: examples/bb/native/basic.example
       HL_CLJ_ALIAS: holy-lambda
@@ -17,62 +17,94 @@ jobs:
           bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip"
 
           # Sync
-          printf "\n-----------------------------\n"
-          printf "        (1) Sync check"
-          printf "\n-----------------------------\n"
+          printf "\n------------------------------------------------------\n"
+          printf "                    (1) Sync check                        "
+          printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:sync || exit 1
-          printf "\n-----------------------------\n"
-
-          # Lint check
-          printf "\n-----------------------------\n"
-          printf "        (2) Lint check"
-          printf "\n-----------------------------\n"
-          #------------------------
-          bb stack:lint || exit 1
-          printf "\n-----------------------------\n"
+          printf "------------------------------------------------------\n"
 
           # Bucket deletion
-          printf "\n-----------------------------\n"
-          printf "        (3) Doctor check"
-          printf "\n-----------------------------\n"
+          printf "\n------------------------------------------------------\n"
+          printf "                    (3) Doctor check                      "
+          printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:doctor || exit 1
-          printf "\n-----------------------------\n"
+          printf "------------------------------------------------------\n"
 
           # Bucket creation
-          printf "\n-----------------------------\n"
-          printf "        (4) Bucket creation test"
-          printf "\n-----------------------------\n"
+          printf "\n------------------------------------------------------\n"
+          printf "                    (4) Bucket creation test              "
+          printf "\n------------------------------------------------------\n"
           #------------------------
           bb bucket:create || exit 1
           bb bucket:create :bucket-name hlhlnativetestzxcqwedsasd1
-          printf "\n-----------------------------\n"
+          printf "------------------------------------------------------\n"
 
           # Bucket deletion
-          printf "\n-----------------------------\n"
-          printf "        (5) Bucket deletion test"
-          printf "\n-----------------------------\n"
+          printf "\n------------------------------------------------------\n"
+          printf "                    (5) Bucket deletion test              "
+          printf "\n------------------------------------------------------\n"
           #------------------------
           bb bucket:remove || exit 1
           bb bucket:remove :bucket-name hlhlnativetestzxcqwedsasd1
-          printf "\n-----------------------------\n"
+          printf "------------------------------------------------------\n"
 
           # Stack version test
-          printf "\n-----------------------------\n"
-          printf "        (6) Stack version
-          printf "\n-----------------------------\n"
+          printf "\n------------------------------------------------------\n"
+          printf "                   (6) Stack version                      "
+          printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:version || exit 1
-          printf "\n-----------------------------\n"
+          printf "------------------------------------------------------\n"
+
+          # Basic stack compilation
+          printf "\n------------------------------------------------------\n"
+          printf "                   (7) Stack compilation                  "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:compile || exit 1
+          printf "------------------------------------------------------\n"
+
+          # Basic stack pack
+          printf "\n------------------------------------------------------\n"
+          printf "                  (8) Stack pack                          "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:pack || exit 1
+          printf "------------------------------------------------------\n"
+
+          # Deploy stack dry
+          printf "\n------------------------------------------------------\n"
+          printf "                  (9) Stack deploy dry                    "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:deploy :dry || exit 1
+          printf "------------------------------------------------------\n"
+
+          # Deploy stack
+          printf "\n------------------------------------------------------\n"
+          printf "                  (10) Stack deploy                       "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:deploy || exit 1
+          printf "------------------------------------------------------\n"
+
+          # Destroy stack
+          printf "\n------------------------------------------------------\n"
+          printf "                  (11) Stack destroy                      "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:destroy || exit 1
+          printf "------------------------------------------------------\n"
 
           # Stack purge test
-          printf "\n-----------------------------\n"
-          printf "        (7) Stack purge
-          printf "\n-----------------------------\n"
+          printf "\n------------------------------------------------------\n"
+          printf "                 (12) Stack purge                         "
+          printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:purge || exit 1
-          printf "\n-----------------------------\n"
+          printf "------------------------------------------------------\n"
 
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Tasks health check'
