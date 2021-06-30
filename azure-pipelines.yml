@@ -122,20 +122,20 @@ jobs:
           HL_NO_DOCKER=true bb docker:run "something" && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
           echo "------------------------------------------------------"
 
+          # Stack deletion confirmation
+          printf "\n------------------------------------------------------\n"
+          printf "                 (15) Stack removed check                 "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          sleep 5 && bb stack:describe && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
+          echo "------------------------------------------------------"
+
           # Stack purge test
           printf "\n------------------------------------------------------\n"
-          printf "                 (15) Stack purge                         "
+          printf "                 (16) Stack purge                         "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:purge || exit 1
-          echo "------------------------------------------------------"
-
-          # Stack deletion confirmation
-          printf "\n------------------------------------------------------\n"
-          printf "                 (16) Stack removed check                 "
-          printf "\n------------------------------------------------------\n"
-          #------------------------
-          bb stack:describe && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
           echo "------------------------------------------------------"
 
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
@@ -181,3 +181,32 @@ jobs:
           bb stack:invoke :validation-fn "(fn [{:keys [body]}] (= body \"Hello world\"))"
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Compilation + Invoke'
+
+  # Babashka runtime build
+  - job: basic_babashka_build
+    displayName: '(4) Babashka runtime build'
+    dependsOn:
+      - tasks_health_check_1
+    condition: succeeded()
+    variables:
+      WORKING_DIRECTORY: modules/holy-lambda-babashka-layer
+    steps:
+      - script: |
+          make build-artifact-in-place
+        workingDirectory: ${{variables.WORKING_DIRECTORY}}
+        displayName: 'Build layer code'
+
+  # Babashka based tests
+  - job: basic_babashka_build_1
+    displayName: '(5.1)-(Babashka)-(Basic)-(Docker) Babashka runtime test'
+    dependsOn:
+      - tasks_health_check_1
+      - basic_babashka_build
+    condition: succeeded()
+    variables:
+      WORKING_DIRECTORY: modules/holy-lambda-babashka-layer
+    steps:
+      - script: |
+          ls -la
+        workingDirectory: ${{variables.WORKING_DIRECTORY}}
+        displayName: 'Build layer code'
