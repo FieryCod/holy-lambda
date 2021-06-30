@@ -7,10 +7,10 @@ pool:
 jobs:
   # Native + Docker runtime tests
   - job: native_basic_docker_1
-    displayName: '(Native)-(Basic)-(Docker) GraalVM Native Image Custom Runtime compilation test'
+    displayName: '(1.1)-(Native)-(Basic)-(Docker) GraalVM Native Image Custom Runtime compilation test'
     variables:
       WORKING_DIRECTORY: examples/bb/native/basic.example
-      CLJ_ALIAS_KEY: holy-lambda-local
+      HL_CLJ_ALIAS: holy-lambda-local
     steps:
       - script: |
           # Regenerate partial cache
@@ -25,10 +25,10 @@ jobs:
 
   # Java + Docker runtime tests
   - job: java_basic_docker_1
-    displayName: '(Java)-(Basic)-(Docker) GraalVM Native Image Custom Runtime compilation test'
+    displayName: '(1.2)-(Java)-(Basic)-(Docker) Java runtime test'
     variables:
       WORKING_DIRECTORY: examples/bb/java/basic.example
-      CLJ_ALIAS_KEY: holy-lambda-local
+      HL_CLJ_ALIAS: holy-lambda-local
     steps:
       - script: |
           # Regenerate partial cache

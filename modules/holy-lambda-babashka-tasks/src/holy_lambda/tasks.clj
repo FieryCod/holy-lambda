@@ -14,6 +14,8 @@
    [holy-lambda.refl :as refl])
   (:refer-clojure :exclude [spit]))
 
+(def TASKS_VERSION "0.2.2")
+
 (deps/add-deps {:deps {'clojure-term-colors/clojure-term-colors {:mvn/version "0.1.0"}}})
 
 (require
@@ -139,9 +141,7 @@
 
 (def AVAILABLE_RUNTIMES #{:babashka :native :java})
 (def AVAILABLE_REGIONS #{"us-east-2", "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "cn-north-1", "cn-northwest-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-north-1", "me-south-1", "sa-east-1"})
-(def REMOTE_TASKS "https://raw.githubusercontent.com/FieryCod/holy-lambda/master/modules/holy-lambda-babashka-tasks/src/holy_lambda/tasks.clj")
-(def TASKS_VERSION "0.1.49")
-(def TASKS_VERSION_MATCH #"(?:TASKS_VERSION) (\"[0-9]*\.[0-9]*\.[0-9]*\")")
+(def REMOTE_TASKS "https://raw.githubusercontent.com/FieryCod/holy-lambda/master/modules/holy-lambda-babashka-tasks/STABLE_VERSION")
 (def BUCKET_IN_LS_REGEX #"(?:[0-9- :]+)(.*)")
 (def LAYER_CACHE_DIRECTORY ".holy-lambda/.cache/layers")
 
@@ -949,12 +949,12 @@ set -e
     (if-not (file-exists? PACKAGED_TEMPLATE_FILE)
       (hpr (pre "No") (accent PACKAGED_TEMPLATE_FILE) (pre "found. Run") (accent "stack:pack"))
       (do
-        (apply check-n-create-bucket args)
+        (when-not dry (apply check-n-create-bucket args))
         (apply shell "sam" "deploy"
                "--template-file" PACKAGED_TEMPLATE_FILE
                "--stack-name"    (or stack STACK_NAME)
                "--s3-prefix"     (or bucket-prefix BUCKET_PREFIX)
-               "--s3-bucket"     (or bucket-name BUCKET_PREFIX)
+               "--s3-bucket"     (or bucket-name BUCKET_NAME)
                "--profile"       AWS_PROFILE
                "--region"        REGION
                (when dry "--no-execute-changeset")
@@ -1171,30 +1171,20 @@ set -e
            (when filter "--filter") (when filter filter)
            (when tail "-t"))))
 
-(defn local-tasks-match-remote?
-  []
-  (= (s/replace
-      (second (re-find
-               TASKS_VERSION_MATCH
-               (:body (curl/get REMOTE_TASKS))))
-      "\""
-      "")
-     TASKS_VERSION))
-
 (defn stack:version
   "     \033[0;31m>\033[0m Outputs holy-lambda babashka tasks version"
   []
   (print-task "stack:version")
   (hpr (str (prs "Current tasks version is: ") (accent TASKS_VERSION)))
-  (when-not (local-tasks-match-remote?)
-    (hpr "There is newer version of tasks on remote. Please update tasks :sha")))
+  (when-not (= (s/trim (:body (curl/get REMOTE_TASKS))) TASKS_VERSION)
+    (hpr (pre "Local version of tasks does not match stable tasks version. Update tasks sha!"))
+    (System/exit 1)))
 
 (defn stack:purge
   "     \033[0;31m>\033[0m Purges build artifacts"
   []
   (print-task "stack:purge")
-  (let [artifacts [".aws"
-                   ".holy-lambda"
+  (let [artifacts [".holy-lambda"
                    ".cpcache"
                    "node_modules"]]
 

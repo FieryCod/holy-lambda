@@ -14,7 +14,7 @@
                        :build {:clj-alias :holy-lambda
                                :graalvm-home "~/.graalvm"}
 
-                       :stack {:name "holy-lambda-babashka-v2"
+                       :stack {:name "hl-tasks-test"
 
                                :default-lambda "ExampleLambdaFunction"
 
@@ -72,9 +72,9 @@
 
                        ;; Infrastructure properties
                        :infra
-                       {:bucket-prefix       "holy-lambda"
+                       {:bucket-prefix       "hl"
 
-                        :bucket-name         "holy-lambda1-example"
+                        :bucket-name         "hltaskstest"
 
                         :profile             "default"
 
