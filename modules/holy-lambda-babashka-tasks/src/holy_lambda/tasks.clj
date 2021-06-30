@@ -454,8 +454,7 @@
     map->parameters-inline)
    (-parameters)))
 
-(defn docker:run
-  "     \033[0;31m>\033[0m Run command in \033[0;31mfierycod/graalvm-native-image\033[0m docker context\n\n----------------------------------------------------------------\n"
+(defn- docker-run
   [command]
   (if-not HL_NO_DOCKER?
     (apply shell
@@ -473,12 +472,21 @@
              "/bin/bash" "-c" command]))
     (shell "bash" "-c" command)))
 
+(defn docker:run
+  "     \033[0;31m>\033[0m Run command in \033[0;31mfierycod/graalvm-native-image\033[0m docker context \n\n----------------------------------------------------------------\n"
+  [command]
+  (if HL_NO_DOCKER?
+    (do
+      (hpr (pre "Command") (accent "docker:run") (pre "is not available when environment variable") (accent "HL_NO_DOCKER") (pre "is set to true!"))
+      (System/exit 1))
+    (docker-run command)))
+
 (defn deps-sync--babashka
   []
   (when (= *RUNTIME_NAME* :babashka)
     (when-not (empty? (:pods (:runtime OPTIONS)))
       (hpr "Babashka pods found! Syncing" (str (accent "babashka pods") ".") "Pods should be distributed via a layer which points to" (accent ".holy-lambda/pods"))
-      (docker:run "download_pods")
+      (docker-run "download_pods")
       (when (file-exists? ".holy-lambda/.babashka")
         (shell "rm -Rf .holy-lambda/pods")
         (shell "mkdir -p .holy-lambda/pods")
@@ -512,7 +520,7 @@ Resources:
   []
   (stat-file "deps.edn")
   (hpr "Syncing project and holy-lambda" (accent "deps.edn"))
-  (docker:run (str "clojure -A:" CLJ_ALIAS "uberjar -P && clojure -P"))
+  (docker-run (str "clojure -A:" CLJ_ALIAS "uberjar -P && clojure -P"))
   (deps-sync--babashka))
 
 (defn cloudformation-description
@@ -760,17 +768,17 @@ Resources:
 
     (hpr "Compiling with agent support!")
     (shell "rm -Rf .cpcache .holy-lambda/build/output-agent.jar")
-    (docker:run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
+    (docker-run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
 
     (hpr "Generating traces to ignore unnecessary reflection entries!")
-    (docker:run (str JAVA_COMMAND
+    (docker-run (str JAVA_COMMAND
                      " -agentlib:native-image-agent="
                      "trace-output=" (str NATIVE_CONFIGURATIONS_PATH "/traces.json")
                      " "
                      "-Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))
 
     (hpr "Generating native-configurations!")
-    (docker:run (str JAVA_COMMAND
+    (docker-run (str JAVA_COMMAND
                      " -agentlib:native-image-agent="
                      "config-output-dir=" NATIVE_CONFIGURATIONS_PATH
                      " "
@@ -834,7 +842,7 @@ set -e
     ;; Copy then build
     (shell-no-exit "bash -c \"[ -d resources/native-configuration ] && cp -rf resources/native-configuration .holy-lambda/build/\"")
 
-    (docker:run (str "cd .holy-lambda/build/ && " NATIVE_IMAGE_COMMAND " -jar output.jar -H:ConfigurationFileDirectories=native-configuration "
+    (docker-run (str "cd .holy-lambda/build/ && " NATIVE_IMAGE_COMMAND " -jar output.jar -H:ConfigurationFileDirectories=native-configuration "
                      "-H:+AllowIncompleteClasspath"
                      (when NATIVE_IMAGE_ARGS
                        (str " " NATIVE_IMAGE_ARGS))))
@@ -978,7 +986,7 @@ set -e
     (hpr "Nothing to compile. Sources did not change!")
     (System/exit 0))
   (shell "rm -Rf .cpcache .holy-lambda/build")
-  (docker:run (str "clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
+  (docker-run (str "clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
 
 (defn stack:invoke
   "     \033[0;31m>\033[0m Invokes lambda fn (check sam local invoke --help):
@@ -988,7 +996,7 @@ set -e
        \t\t        - \033[0;31m:params\033[0m        - map of parameters to override in AWS SAM
        \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
        \t\t        - \033[0;31m:debug\033[0m         - run invoke in \033[0;31mdebug mode\033[0m
-       \t\t        - \033[0;31m:validation-fn\033[0m - useful for fast CI tests
+       \t\t        - \033[0;31m:validation-fn\033[0m - useful for fast CI tests (e.g. \033[0;31mbb stack:invoke \"(fn [request] (= request {:body nil :headers nil}))\"\033[0m)
        \t\t        - \033[0;31m:logs\033[0m          - logfile to runtime logs to"
   [& args]
   (print-task "stack:invoke")
