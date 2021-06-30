@@ -1159,7 +1159,8 @@ set -e
         (exit-code-err!))
       (hpr (str (prs ":infra:bucket-name looks good")
                 (when-not (bucket-exists?)
-                  (str (prs ", but ") (accent BUCKET_NAME) (prw " does not exists (use bb :bucket:create)"))))))
+                  (str (prs ", but ") (accent BUCKET_NAME) (prw " does not exists (use ")
+                       (accent "bb :bucket:create") ")")))))
 
     (if-let [cmds-not-found (seq (filter (comp not command-exists?) REQUIRED_COMMANDS))]
       (do
@@ -1208,7 +1209,7 @@ set -e
                    ".cpcache"
                    "node_modules"]]
 
-    (hpr  (str (accent "Purging build artifacts:") "\n\n" (plist artifacts)))
+    (hpr  (str "Purging build artifacts:" "\n\n" (plist artifacts)))
 
     (doseq [art artifacts]
       (shell (str "rm -rf " art)))
@@ -1230,7 +1231,7 @@ set -e
   "     \033[0;31m>\033[0m Destroys \033[0;31mCloudformation\033[0m stack & removes bucket
   \t\t        - \033[0;31m:bucket-name\033[0m   - overrides \033[0;31m:infra:bucket-name\033[0m "
   [& args]
-  (let [{:keys [stack bucket-name]} (norm-args args)]
+  (let [{:keys [stack]} (norm-args args)]
     (print-task "stack:destroy")
     (hpr (prw "Automatic cloudformation") (accent "stack:destroy") (prw "operation might not be always successful."))
     (shell "aws" "cloudformation" "delete-stack"
@@ -1238,7 +1239,7 @@ set -e
            "--region"     REGION
            "--stack-name" (or stack STACK_NAME))
     (apply bucket:remove args)
-    (hpr "Waiting 15 seconds for partial/complete cloudformation deletion status...")
-    (Thread/sleep 15000)
+    (hpr "Waiting 30 seconds for partial/complete cloudformation deletion status...")
+    (Thread/sleep 30000)
     (hpr "If you see an error regarding not being able to describe not existent stack then destroy was successful!")
     (apply stack:describe args)))
