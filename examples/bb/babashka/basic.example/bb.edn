@@ -1,20 +1,22 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
-        {:git/url "https://github.com/FieryCod/holy-lambda"
-         :deps/root "./modules/holy-lambda-babashka-tasks"
-         :sha     "c37ac845fd0ef0476cf522dc51e6af4195e6f1d1"}}
+        {:local/root "../../../../modules/holy-lambda-babashka-tasks"}}
 
  :mvn/local-repo ".holy-lambda/.m2"
 
  :min-bb-version "0.3.7"
 
  :holy-lambda/options {
-                       :docker {:volumes []
+                       :docker {:volumes [{:docker     "/holy-lambda"
+                                           :host       "../../../../"}]
+
+                                :network "host"
 
                                 :image "fierycod/graalvm-native-image:ce"}
 
-                       :build {:clj-alias nil}
+                       :build {:clj-alias nil
+                               :graalvm-hoke nil}
 
-                       :stack {:name "holy-lambda-template-stack"
+                       :stack {:name "holy-lambda-template-stack-java-basic"
 
                                :default-lambda "ExampleLambdaFunction"
 
@@ -38,7 +40,7 @@
                         ;; For now pods should be declared in `bb.edn`. See: https://github.com/babashka/babashka/issues/768#issuecomment-825016317
                         ;;
                         ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
-                        :pods                {org.babashka/aws "0.0.5"}
+                        :pods                {org.babashka/aws "0.0.6"}
 
                         ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
                         ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
@@ -46,7 +48,7 @@
 
                         ;; Flag which indicates that holy-lambda should auto deploy the applications and layers for the corresponding :runtime
                         ;; If set to false holy-lambda will guide you through the steps of dependants deployment.
-                        :self-manage-layers? false
+                        :self-manage-layers? true
 
                         ;; For `:native` runtime you can provide your own bootstrap file
                         :bootstrap-file      "bootstrap"
@@ -57,7 +59,7 @@
 
                         ;; Some of the runtimes are versioned. For instance `:babashka` runtime is a versioned layer which ships it's own version of
                         ;; clojure, holy-lambda, default-retriever
-                        :version             "0.0.38"
+                        :version             "0.1.1"
 
                         ;; Specify custom arguments for native image generation
                         ;; Works only on `:native` runtime.
@@ -75,9 +77,9 @@
                        :infra
                        {:bucket-prefix       "holy-lambda"
 
-                        :bucket-name         "holy-lambda-basic-example"
-
                         :profile             "default"
+
+                        :bucket-name         "holy-lambda-template-bucket-basic-java"
 
                         :region              "eu-central-1"}}
 

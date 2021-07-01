@@ -31,13 +31,22 @@ Globals:
         Entrypoint: !Ref Entrypoint
 
 Resources:
+  HLBabashkaLocalRuntime:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: HLBabashkaLocalRuntime
+      Description: Shared dependencies for stack.
+      ContentUri: ./holy-lambda-babashka-runtime
+      CompatibleRuntimes:
+        - provided
+
   ExampleLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: ExampleLambdaFunction
       Handler: basic.example.core.ExampleLambda
       Layers:
-        - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:33
+        - !Ref HLBabashkaLocalRuntime
       Events:
         HelloEvent:
           Type: Api
