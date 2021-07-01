@@ -988,6 +988,19 @@ set -e
   (shell "rm -Rf .cpcache .holy-lambda/build")
   (docker-run (str "clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
 
+(defn- normalize-headers
+  [headers]
+  (into {} (keep (fn [[k v]] (when k [(.toLowerCase (name k)) v]))) headers))
+
+(defn response-event->normalized-event
+  [event]
+  (cond-> event
+    (seq (:headers event))
+    (update :headers normalize-headers)
+
+    (seq (:multiValueHeaders event))
+    (update :multiValueHeaders normalize-headers)))
+
 (defn stack:invoke
   "     \033[0;31m>\033[0m Invokes lambda fn (check sam local invoke --help):
        \t\t        - \033[0;31m:name\033[0m          - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
@@ -1020,9 +1033,11 @@ set -e
             (when envs-file  "-n")          envs-file)
           err (slurp err)
           out (slurp out)
-          out-json (try (json/parse-string (s/trim out) true)
-                        (catch Exception _
-                          nil))]
+          out-json (try
+                     (let [parsed (json/parse-string (s/trim out) true)]
+                       (response-event->normalized-event parsed))
+                     (catch Exception _
+                       nil))]
       (if (and (= exit 0) validation-fn)
         (if ((eval (read-string validation-fn)) out-json)
           (do
@@ -1070,6 +1085,7 @@ set -e
       (hpr " Babashka tasks version:  " (accent TASKS_VERSION))
       (hpr " Babashka version:        " (accent (or (s/trim (shs-no-err "bb" "version")) "UNKNOWN")))
       (hpr " Runtime:                 " (accent *RUNTIME_NAME*))
+      (hpr " Runtime version:         " (accent (or RUNTIME_VERSION "UNKNOWN")))
       (hpr " TTY:                     " (accent TTY?))
       (hpr " Runtime entrypoint:      " (accent ENTRYPOINT))
       (hpr " Stack name:              " (accent STACK_NAME))

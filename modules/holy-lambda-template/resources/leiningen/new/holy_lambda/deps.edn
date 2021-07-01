@@ -1,5 +1,5 @@
 {:deps {org.clojure/clojure             {:mvn/version "1.10.3"}
-        io.github.FieryCod/holy-lambda  {:mvn/version "0.2.1"}}
+        io.github.FieryCod/holy-lambda  {:mvn/version "0.2.2"}}
 
  ;; Local repositories should be downloaded to `.holy-lambda` directory
  ;; This way project artifacts are separated from global ~/.m2 and only project artifacts

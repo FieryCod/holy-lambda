@@ -5,7 +5,7 @@ pool:
   name: Default
 
 jobs:
-  # # Tasks health check
+  # Tasks health check
   - job: tasks_health_check_1
     displayName: '(1.0) General tasks tests'
     variables:
@@ -111,7 +111,7 @@ jobs:
           printf "                  (13) Stack destroy                      "
           printf "\n------------------------------------------------------\n"
           #------------------------
-          bb stack:destroy || printf "Not yet removed"
+          bb stack:destroy && printf "Not yet removed!\n" || printf "Already removed!\n"
           echo "------------------------------------------------------"
 
           # Stack local run test
@@ -141,7 +141,7 @@ jobs:
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Tasks health check'
 
-  # # Native + Docker runtime tests
+  # Native + Docker runtime tests
   - job: native_basic_docker_1
     displayName: '(2.1)-(Native)-(Basic)-(Docker) GraalVM Native Image Custom Runtime compilation test'
     dependsOn:

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.2 (29-06-2021)
+## 0.2.2 (01-07-2021)
 - [docs] Add documentation about using GraalVM-EE 
 - [examples] Add basic cdk example
 - [holy-lambda] System/exit 1 when handler is not found during `native:conf`
@@ -10,7 +10,14 @@
 - [docs] Add FAQ, CI support documents
 - [bb tasks] Fix using docker in CI environment
 - [bb tasks] Remove broken stack:lint command. Use plain clj-kondo instead
-- [bb layer] Add a type hint & fix bb layer
+- [bb layer] Add a type hint & fix bb layer. Users should update to :runtime:version 0.1.1
+- [CI] Add full test suite for basic lambda examples
+- [bb tasks] Add support for multi environment deployments
+- [bb tasks] Add `:validation-fn` for `bb stack:invoke` command:
+  ```
+    bb stack:invoke :validation-fn '(fn [{:keys [body headers statusCode]}] (= body "Hello world"))'
+  ```
+
 
 ## 0.2.1 (10-06-2021)
 
