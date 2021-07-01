@@ -6,188 +6,204 @@ pool:
 
 jobs:
   # # Tasks health check
-  # - job: tasks_health_check_1
-  #   displayName: '(1.0) General tasks tests'
-  #   variables:
-  #     WORKING_DIRECTORY: examples/bb/native/basic.example
-  #     HL_CLJ_ALIAS: holy-lambda
-  #   steps:
-  #     - script: |
-  #         # Regenerate partial cache
-  #         bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip"
+  - job: tasks_health_check_1
+    displayName: '(1.0) General tasks tests'
+    variables:
+      WORKING_DIRECTORY: examples/bb/native/basic.example
+      HL_CLJ_ALIAS: holy-lambda
+    steps:
+      - script: |
+          # Regenerate partial cache
+          bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip"
 
-  #         # Sync
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "                    (1) Sync check                        "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb stack:sync || exit 1
-  #         echo "------------------------------------------------------"
+          # Sync
+          printf "\n------------------------------------------------------\n"
+          printf "                    (1) Sync check                        "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:sync || exit 1
+          echo "------------------------------------------------------"
 
-  #         # Bucket deletion
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "                    (3) Doctor check                      "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb stack:doctor || exit 1
-  #         echo "------------------------------------------------------"
+          # Bucket deletion
+          printf "\n------------------------------------------------------\n"
+          printf "                    (3) Doctor check                      "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:doctor || exit 1
+          echo "------------------------------------------------------"
 
-  #         # Bucket creation
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "                    (4) Bucket creation test              "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb bucket:create || exit 1
-  #         bb bucket:create :bucket-name hlhlnativetestzxcqwedsasd1 || exit 1
-  #         echo "------------------------------------------------------"
+          # Bucket creation
+          printf "\n------------------------------------------------------\n"
+          printf "                    (4) Bucket creation test              "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb bucket:create || exit 1
+          bb bucket:create :bucket-name hlhlnativetestzxcqwedsasd1 || exit 1
+          echo "------------------------------------------------------"
 
-  #         # Bucket deletion
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "                    (5) Bucket deletion test              "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb bucket:remove || exit 1
-  #         bb bucket:remove :bucket-name hlhlnativetestzxcqwedsasd1 || exit 1
-  #         echo "------------------------------------------------------"
+          # Bucket deletion
+          printf "\n------------------------------------------------------\n"
+          printf "                    (5) Bucket deletion test              "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb bucket:remove || exit 1
+          bb bucket:remove :bucket-name hlhlnativetestzxcqwedsasd1 || exit 1
+          echo "------------------------------------------------------"
 
-  #         # Stack version test
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "                   (6) Stack version                      "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb stack:version || exit 1
-  #         echo "------------------------------------------------------"
+          # Stack version test
+          printf "\n------------------------------------------------------\n"
+          printf "                   (6) Stack version                      "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:version || exit 1
+          echo "------------------------------------------------------"
 
-  #         # Basic stack compilation
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "                   (7) Stack compilation                  "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb stack:compile || exit 1
-  #         echo "------------------------------------------------------"
+          # Basic stack compilation
+          printf "\n------------------------------------------------------\n"
+          printf "                   (7) Stack compilation                  "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:compile || exit 1
+          echo "------------------------------------------------------"
 
-  #         # Basic stack compilation
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "              (8) Stack compilation + Force               "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb stack:compile :force || exit 1
-  #         echo "------------------------------------------------------"
+          # Basic stack compilation
+          printf "\n------------------------------------------------------\n"
+          printf "              (8) Stack compilation + Force               "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:compile :force || exit 1
+          echo "------------------------------------------------------"
 
-  #         # Basic stack pack
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "            (9) Stack pack + RT overwrite                 "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb stack:pack :runtime :java || exit 1
-  #         echo "------------------------------------------------------"
+          # Basic stack pack
+          printf "\n------------------------------------------------------\n"
+          printf "            (9) Stack pack + RT overwrite                 "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:pack :runtime :java || exit 1
+          echo "------------------------------------------------------"
 
-  #         # Deploy stack dry
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "            (10) Stack deploy dry + RT overwrite          "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb stack:deploy :runtime :java :dry || exit 1
-  #         echo "------------------------------------------------------"
+          # Deploy stack dry
+          printf "\n------------------------------------------------------\n"
+          printf "            (10) Stack deploy dry + RT overwrite          "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:deploy :runtime :java :dry || exit 1
+          echo "------------------------------------------------------"
 
-  #         # Deploy stack
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "             (11) Stack deploy + RT overwrite             "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb stack:deploy :runtime :java || exit 1
-  #         echo "------------------------------------------------------"
+          # Deploy stack
+          printf "\n------------------------------------------------------\n"
+          printf "             (11) Stack deploy + RT overwrite             "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:deploy :runtime :java || exit 1
+          echo "------------------------------------------------------"
 
-  #         # Describe full stack
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "                 (12) Stack describe                      "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb stack:describe || exit 1
-  #         echo "------------------------------------------------------"
+          # Describe full stack
+          printf "\n------------------------------------------------------\n"
+          printf "                 (12) Stack describe                      "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:describe || exit 1
+          echo "------------------------------------------------------"
 
-  #         # Destroy stack
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "                  (13) Stack destroy                      "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb stack:destroy || printf "Not yet removed"
-  #         echo "------------------------------------------------------"
+          # Destroy stack
+          printf "\n------------------------------------------------------\n"
+          printf "                  (13) Stack destroy                      "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:destroy || printf "Not yet removed"
+          echo "------------------------------------------------------"
 
-  #         # Stack local run test
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "           (14) In docker:run in local context fail       "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         HL_NO_DOCKER=true bb docker:run "something" && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
-  #         echo "------------------------------------------------------"
+          # Stack local run test
+          printf "\n------------------------------------------------------\n"
+          printf "           (14) In docker:run in local context fail       "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          HL_NO_DOCKER=true bb docker:run "something" && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
+          echo "------------------------------------------------------"
 
-  #         # Stack deletion confirmation
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "                 (15) Stack removed check                 "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         sleep 5 && bb stack:describe && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
-  #         echo "------------------------------------------------------"
+          # Stack deletion confirmation
+          printf "\n------------------------------------------------------\n"
+          printf "                 (15) Stack removed check                 "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          sleep 5 && bb stack:describe && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
+          echo "------------------------------------------------------"
 
-  #         # Stack purge test
-  #         printf "\n------------------------------------------------------\n"
-  #         printf "                 (16) Stack purge                         "
-  #         printf "\n------------------------------------------------------\n"
-  #         #------------------------
-  #         bb stack:purge || exit 1
-  #         echo "------------------------------------------------------"
+          # Stack purge test
+          printf "\n------------------------------------------------------\n"
+          printf "                 (16) Stack purge                         "
+          printf "\n------------------------------------------------------\n"
+          #------------------------
+          bb stack:purge || exit 1
+          echo "------------------------------------------------------"
 
-  #       workingDirectory: ${{variables.WORKING_DIRECTORY}}
-  #       displayName: 'Tasks health check'
+        workingDirectory: ${{variables.WORKING_DIRECTORY}}
+        displayName: 'Tasks health check'
 
   # # Native + Docker runtime tests
-  # - job: native_basic_docker_1
-  #   displayName: '(2.1)-(Native)-(Basic)-(Docker) GraalVM Native Image Custom Runtime compilation test'
-  #   dependsOn:
-  #     - tasks_health_check_1
-  #   condition: succeeded()
-  #   variables:
-  #     WORKING_DIRECTORY: examples/bb/native/basic.example
-  #     HL_CLJ_ALIAS: holy-lambda
-  #   steps:
-  #     - script: |
-  #         # Regenerate partial cache
-  #         bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
+  - job: native_basic_docker_1
+    displayName: '(2.1)-(Native)-(Basic)-(Docker) GraalVM Native Image Custom Runtime compilation test'
+    dependsOn:
+      - tasks_health_check_1
+    condition: succeeded()
+    variables:
+      WORKING_DIRECTORY: examples/bb/native/basic.example
+      HL_CLJ_ALIAS: holy-lambda
+    steps:
+      - script: |
+          # Regenerate partial cache
+          bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
 
-  #         # Regular test tasks
-  #         bb stack:compile && \
-  #         bb native:executable && \
-  #         bb stack:invoke :validation-fn "(fn [{:keys [body]}] (= body \"Hello world\"))"
-  #       workingDirectory: ${{variables.WORKING_DIRECTORY}}
-  #       displayName: 'Compilation + Invoke'
+          # Regular test tasks
+          bb stack:compile && \
+          bb native:executable && \
+          bb stack:invoke :validation-fn "(fn [{:keys [body]}] (= body \"Hello world\"))"
+        workingDirectory: ${{variables.WORKING_DIRECTORY}}
+        displayName: 'Compilation + Invoke'
 
-  # # Java + Docker runtime tests
-  # - job: java_basic_docker_1
-  #   displayName: '(3.1)-(Java)-(Basic)-(Docker) Java runtime test'
-  #   dependsOn:
-  #     - tasks_health_check_1
-  #   condition: succeeded()
-  #   variables:
-  #     WORKING_DIRECTORY: examples/bb/java/basic.example
-  #     HL_CLJ_ALIAS: holy-lambda
-  #   steps:
-  #     - script: |
-  #         # Regenerate partial cache
-  #         bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
+  # Java + Docker runtime tests
+  - job: java_basic_docker_1
+    displayName: '(3.1)-(Java)-(Basic)-(Docker) Java runtime test'
+    dependsOn:
+      - tasks_health_check_1
+    condition: succeeded()
+    variables:
+      WORKING_DIRECTORY: examples/bb/java/basic.example
+      HL_CLJ_ALIAS: holy-lambda
+    steps:
+      - script: |
+          # Regenerate partial cache
+          bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
 
-  #         # Regular test tasks
-  #         bb stack:compile && \
-  #         bb stack:invoke :validation-fn "(fn [{:keys [body]}] (= body \"Hello world\"))"
-  #       workingDirectory: ${{variables.WORKING_DIRECTORY}}
-  #       displayName: 'Compilation + Invoke'
+          # Regular test tasks
+          bb stack:compile && \
+          bb stack:invoke :validation-fn "(fn [{:keys [body]}] (= body \"Hello world\"))"
+        workingDirectory: ${{variables.WORKING_DIRECTORY}}
+        displayName: 'Compilation + Invoke'
+
+  - job: babashka_basic_build_1
+    displayName: '(4.1) Build Babashka layer'
+    dependsOn:
+      - tasks_health_check_1
+    condition: succeeded()
+    variables:
+      WORKING_DIRECTORY: modules/holy-lambda-babashka-layer
+    steps:
+      - script: |
+          rm -Rf holy-lambda-babashka-runtime.zip && make build-artifact-in-place
+          rm -Rf ~/azure-agent/local_cache/holy-lambda-babashka-runtime.zip
+          cp holy-lambda-babashka-runtime.zip ~/azure-agent/local_cache/
+        workingDirectory: ${{variables.WORKING_DIRECTORY}}
+        displayName: 'Build holy-lambda-babashka layer'
 
   # Babashka based tests
   - job: babashka_basic_docker_1
     displayName: '(5.1)-(Babashka)-(Basic)-(Docker) Babashka runtime test'
-    # dependsOn:
-    #   - tasks_health_check_1
-    # condition: succeeded()
+    dependsOn:
+      - tasks_health_check_1
+      - babashka_basic_build_1
+    condition: succeeded()
     variables:
       WORKING_DIRECTORY: examples/bb/babashka/basic.example
       HL_CLJ_ALIAS: holy-lambda
@@ -196,11 +212,11 @@ jobs:
          # Regenerate partial cache
          bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync
 
-         # Copy babashka runtime zip
-         cp ../../../../modules/holy-lambda-babashka-layer/holy-lambda-babashka-runtime.zip . && unzip holy-lambda-babashka-runtime.zip -d holy-lambda-babashka-runtime
+         # Copy freshly build babashka runtime
+         cp ~/azure-agent/local_cache/holy-lambda-babashka-runtime.zip . && unzip -qq holy-lambda-babashka-runtime.zip -d holy-lambda-babashka-runtime
 
          # Test
-         bb stack:invoke :validation-fn '(fn [request] (= nil request))'
+         bb stack:invoke :validation-fn '(fn [{:keys [body]}] (= "Hello world. Babashka is sweet friend of mine! Babashka version: 0.4.6" body))'
 
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Basic babashka invoke'
