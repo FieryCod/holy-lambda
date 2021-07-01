@@ -14,10 +14,12 @@
 - [CI] Add full test suite for basic lambda examples
 - [bb tasks] Add support for multi environment deployments
 - [bb tasks] Add `:validation-fn` for `bb stack:invoke` command:
+ 
+  **Example**:
+
   ```
     bb stack:invoke :validation-fn '(fn [{:keys [body headers statusCode]}] (= body "Hello world"))'
   ```
-
 
 ## 0.2.1 (10-06-2021)
 
@@ -28,6 +30,7 @@
 - [holy-lambda] Remove additional `LinkOption` reflection.
 
 ## 0.2.0 (10-06-2021)
+
 - [bb tasks] Add additional describe:stacks step for stack:destroy, since sometimes stack cannot be destroyed
 - [bb tasks] Allow to force compilation on sources
 - [holy-lambda] Unify multiHeaders, headers conversion for both local and AWS environment. Breaking change if you were getting the headers from request.
@@ -38,6 +41,7 @@
 - [Dockerfile CE] Bump ClojureTools. Minimize docker image
 
 ## 0.1.54 (06-06-2021)
+
 - [bb tasks] Fix adding Clojure/Pods deps for Babashka projects. For now all the runtimes will create a temporary template-modified.yml file which should be ignored.
 - [bb layer] 0.0.34 Fix doubled holy-lambda dependency. Update layer to use the latest holy-lambda library. 
 - [bb layer] Fix edge case when babashka layer is published without the `bb` executable.
@@ -49,13 +53,17 @@
 - [holy-lambda-template] Apply correct formatting, use up to 6 characters for sha to prevent gen of incorrect bucket names
 
 ## 0.1.50 (03-06-2021)
-*Changes*
+
 - [bb tasks] Remove :build-variant. Replaced by [:docker](https://github.com/FieryCod/holy-lambda/blob/master/modules/holy-lambda-template/resources/leiningen/new/holy_lambda/bb.edn#L15) section
 - [bb tasks] Change native-configurations path. User should be able to modify the configuration which is now generated at resources/native-configurations
 - [bb tasks] Allow runtime override when using :native runtime. You can now invoke lambda in :java runtime when :native runtime is declared in bb.edn:
+ 
+  **Example**:
+
   ```
   bb stack:invoke :runtime :java
   ```
+
 - [bb tasks] Allow nil value for :native-deps option
 - [bb tasks] Add support for setting :docker:volumes. This is crucial when working with local libraries, since HL runs tasks in docker context!
 - [bb layer] Bump layer version to 0.0.32 which includes babashka v0.4.4
@@ -65,7 +73,7 @@
 - [bb tasks] Add support for deps.edn aliases in bb.edn. Useful for local libraries
 
 ## 0.1.49 (21-05-2021)
-*Changes*
+
 - [bb tasks] Fix bb stack:sync which was failing on the first run
 - [bb tasks] Add support for the custom profile in :infra
 - Update babashka layer to version 0.4.1
@@ -83,7 +91,7 @@
   ```
 
 ## 0.1.45 (05-05-2021)
-*Changes*
+
 - [docker] ce tag is used internally by bb tasks. Projects which use Makefiles should either switch to bb tasks or use image without tag
 - [bb tasks] introduce bb tasks to manage stack, infrastracture and runtimes
 - [bb layer] don't require uberjar. Provide sources as is.
@@ -93,7 +101,7 @@
 - [holy-lambda-babashka-shim] Provide a shim for jsonista and AWS interfaces so that babashka runtime works flawlessly
 
 ## 0.1.21 (21-04-2021)
-*Changes*
+
 - Add new docker tags: 
   - ce - for community edition
   - ce-ci - suitable for usage in docker to deploy with sam. Changes in Makefile are in progress
@@ -104,7 +112,7 @@
 - Add slack badge
 
 ## 0.1.15 (19-04-2021)
-*Changes*
+
 - Add partial support for GraalVMEE (PGO optimizations in progress)
 - Move code to separate packages
 - Add interceptors support
@@ -116,7 +124,7 @@
 - Fixup tests
 
 ## 0.1.2 (05-04-2021)
-*Changes*
+
 - Add full support for async-retriever (look at examples/hello-world & https://github.com/FieryCod/holy-lambda-async-retriever)
 - Remove unecessary steps for CircleCI
 - Add tests. Allow async handlers (future, promise, map)
@@ -126,7 +134,6 @@
 ## 0.1.1 (05-04-2021) (Breaking change) 
 Handler definition has been changed from `[event,context] -> response` to `[request] -> response`.
 
-*Changes*
 - Fixup reflection
 - Add deps.edn; Pregenerate routes; Split runtimes; Add tests
 - Switch to rum based macro. Add hook support based on rum hook
@@ -151,7 +158,6 @@ Handler definition has been changed from `[event,context] -> response` to `[requ
 
 ## 0.0.7 (18-07-2019)
 
-*Changes*
 - chore(documentation) Introduce the first draft of documentation
 - fix(custom_runtime,choly) Keywordize hashmap & fix CodeUri gen
 - chore(test,readme.md): Change badge & attempt to fix test run
@@ -159,7 +165,6 @@ Handler definition has been changed from `[event,context] -> response` to `[requ
 
 ## 0.0.5 (17-07-2019)
 
-*Changes*
 - feat(choly,agent): Add basic choly cli tool & agent executor
 - Initial repro for https://github.com/oracle/graal/issues/1367
 - refactor(core,agent): Move the core to separate namespaces & implement draft of GraalVM agent
@@ -168,7 +173,6 @@ Handler definition has been changed from `[event,context] -> response` to `[requ
 
 ## 0.0.2 (09-06-2019)
 
-*Changes*
 - ci(circleci): Add CircleCi automation
 - feat(sqs-example): Add reproducible error in sqs-example for GraalVM team
 - feat(example, runtime, version): Add sqs example & bump the version of Clojure dependency
