@@ -24,7 +24,7 @@ io.github.FieryCod/holy-lambda                     {:mvn/version "0.2.1"}
 
 ;; Babashka runtime layer `0.4.6`
 ;; `:runtime:version` are the inner properties of `:holy-lambda/options` in bb.edn
-:holy-lambda/options:runtime:version                             "0.1.0" 
+:holy-lambda/options:runtime:version                             "0.0.38" 
 
 ;; Default retriever is built in holy-lambda. For `core.async` support use `async-retriever`
 io.github.FieryCod/holy-lambda-default-retriever   {:mvn/version "0.0.6"}
