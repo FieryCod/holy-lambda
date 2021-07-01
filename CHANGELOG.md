@@ -10,6 +10,7 @@
 - [docs] Add FAQ, CI support documents
 - [bb tasks] Fix using docker in CI environment
 - [bb tasks] Remove broken stack:lint command. Use plain clj-kondo instead
+- [bb layer] Add a type hint & fix bb layer
 
 ## 0.2.1 (10-06-2021)
 
