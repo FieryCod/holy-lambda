@@ -124,7 +124,7 @@
      (let [push? (= method "POST")
            response-bytes (when push? (response->bytes (response-event->normalized-event response)))
            ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
-           _ (doto http-conn
+           _ (doto ^HttpURLConnection http-conn
                (.setDoOutput push?)
                (.setRequestProperty "content-type" "application/json")
                (.setRequestMethod method))
