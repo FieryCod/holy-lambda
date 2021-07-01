@@ -10,7 +10,7 @@
 - [docs] Add FAQ, CI support documents
 - [bb tasks] Fix using docker in CI environment
 - [bb tasks] Remove broken stack:lint command. Use plain clj-kondo instead
-- [bb layer] Add a type hint & fix bb layer. Users should update to :runtime:version 0.1.1
+- [bb layer] Add a type hint & fix bb layer. Users should update to :runtime:version 0.1.2
 - [CI] Add full test suite for basic lambda examples
 - [bb tasks] Add support for multi environment deployments
 - [bb tasks] Add `:validation-fn` for `bb stack:invoke` command:

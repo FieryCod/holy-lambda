@@ -144,7 +144,7 @@ Here's an overview of what we'll create ([version with working links](https://sw
 
     ----------------------------------------------------------------
 
-    docker:run             > Run command in fierycod/graalvm-native-image docker context
+    docker:run             > Run command in fierycod/graalvm-native-image docker context 
 
     ----------------------------------------------------------------
 
@@ -168,6 +168,7 @@ Here's an overview of what we'll create ([version with working links](https://sw
                             - :params        - map of parameters to override in AWS SAM
                             - :runtime       - overrides :runtime:name and run Lambda in specified runtime
                             - :debug         - run invoke in debug mode
+                            - :validation-fn - useful for fast CI tests (e.g. bb stack:invoke "(fn [request] (= request {:body nil :headers nil}))")
                             - :logs          - logfile to runtime logs to
     stack:api              > Runs local api (check sam local start-api):
                             - :debug         - run api in debug mode

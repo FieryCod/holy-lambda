@@ -24,7 +24,7 @@ io.github.FieryCod/holy-lambda                     {:mvn/version "0.2.2"}
 
 ;; Babashka runtime layer `0.4.6`
 ;; `:runtime:version` are the inner properties of `:holy-lambda/options` in bb.edn
-:holy-lambda/options:runtime:version                             "0.1.1" 
+:holy-lambda/options:runtime:version                             "0.1.2" 
 
 ;; Default retriever is built in holy-lambda. For `core.async` support use `async-retriever`
 io.github.FieryCod/holy-lambda-default-retriever   {:mvn/version "0.0.6"}
@@ -102,7 +102,7 @@ bucket:remove          > Removes a s3 stack bucket or the one specified by :infr
   
 ----------------------------------------------------------------
 
-docker:run             > Run command in fierycod/graalvm-native-image docker context
+docker:run             > Run command in fierycod/graalvm-native-image docker context 
 
 ----------------------------------------------------------------
 
@@ -126,6 +126,7 @@ stack:invoke           > Invokes lambda fn (check sam local invoke --help):
                         - :params        - map of parameters to override in AWS SAM
                         - :runtime       - overrides :runtime:name and run Lambda in specified runtime
                         - :debug         - run invoke in debug mode
+                        - :validation-fn - useful for fast CI tests (e.g. bb stack:invoke "(fn [request] (= request {:body nil :headers nil}))")
                         - :logs          - logfile to runtime logs to
 stack:api              > Runs local api (check sam local start-api):
                         - :debug         - run api in debug mode
