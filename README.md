@@ -35,7 +35,7 @@ io.github.FieryCod/holy-lambda-async-retriever     {:mvn/version "0.0.6"}
 ;; In bb.edn :deps
 io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url     "https://github.com/FieryCod/holy-lambda"
                                                     :deps/root   "./modules/holy-lambda-babashka-tasks"
-                                                    :sha         "5df6435c0b55e7e723bcfa838187ca18d90cbcc7"}
+                                                    :sha         "f0fb9a181445a8b153f11895475ad76cf8a5da5e"}
 ```
 
 [Jump here](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
