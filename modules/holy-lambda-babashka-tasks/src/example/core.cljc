@@ -24,3 +24,6 @@
 
 (agent/in-context
  (println "In agent context"))
+
+(println
+ (->> (map ns-name (all-ns)) (remove #(str/starts-with? % "clojure")) (map #(str/split (str %) #"\.")) (keep butlast) (map #(str/join "." %)) distinct (map munge) (cons "clojure")))

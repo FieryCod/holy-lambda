@@ -165,13 +165,17 @@
              (pre "Exiting!"))
         (System/exit 1))))
 
+(defn env-true?
+  [env]
+  (when-let [prop (System/getenv env)]
+    (contains? #{"true" "1"} prop)))
+
 (def TTY? (= (:exit @(shell-no-exit "test" "-t" "1")) 0))
 (def DOCKER (:docker OPTIONS))
 (def BUILD (:build OPTIONS))
 (def HL_NO_DOCKER?
   (boolean (or (nil? DOCKER)
-               (when-let [prop (System/getenv "HL_NO_DOCKER")]
-                   (contains? #{"true" "1"} prop)))))
+               (env-true? "HL_NO_DOCKER"))))
 
 (let [home (and HL_NO_DOCKER?
                 (some-> (or (System/getenv "GRAALVM_HOME")
@@ -281,8 +285,20 @@
 (def NATIVE_IMAGE_ARGS (if-let [args (seq (:native-image-args RUNTIME))]
                          (s/join " " args)
                          nil))
+
 (def INFRA_AWS_PROFILE (:profile INFRA))
-(def AWS_PROFILE (or (System/getenv "HL_PROFILE") (:profile INFRA) "default"))
+(def HL_NO_PROFILE? (env-true? "HL_NO_PROFILE"))
+(def AWS_PROFILE
+  (when-not HL_NO_PROFILE?
+    (or (System/getenv "HL_PROFILE")
+        (System/getenv "AWS_PROFILE")
+        (System/getenv "AWS_DEFAULT_PROFILE")
+        (:profile INFRA))))
+
+(when (and (not AWS_PROFILE) (not HL_NO_PROFILE?))
+  (hpr (prw "No AWS Profile has been specified. ACCESS, SECRET keys from environment variables will be taken instead!")
+       (prw "You can use env variable HL_NO_PROFILE=1 to hide this message!")))
+
 (def BUCKET_PREFIX (or (System/getenv "HL_BUCKET_PREFIX") (:bucket-prefix INFRA)))
 (def BUCKET_NAME (or (System/getenv "HL_BUCKET_NAME") (:bucket-name INFRA)))
 (def REGION_FROM_INFRA (:region INFRA))
@@ -310,13 +326,20 @@
 
 (def REGION
   (or (System/getenv "HL_REGION")
+      (System/getenv "AWS_REGION")
+      (System/getenv "AWS_DEFAULT_REGION")
       (if REGION_FROM_INFRA
         REGION_FROM_INFRA
-        (try
-          (can-obtain-from-aws-profile?! "region")
-          (s/trim (:out (csh/sh "aws" "configure" "get" "region" "--profile" AWS_PROFILE)))
-          (catch Exception e
-            (hpr (ex-message e)))))))
+        (if HL_NO_PROFILE?
+          (do
+            (hpr (pre "Unable to get region from any of the sources: envs, credentials file."))
+            (System/exit 1))
+          (try
+            (can-obtain-from-aws-profile?! "region")
+            (s/trim (:out (csh/sh "aws" "configure" "get" "region" "--profile" AWS_PROFILE)))
+            (catch Exception e
+              (hpr (ex-message e))
+              (System/exit 1)))))))
 
 (def DEFAULT_LAMBDA_NAME (:default-lambda STACK))
 (def RUNTIME_VERSION (:version RUNTIME))
@@ -341,16 +364,18 @@
 (def BABASHKA_LAYER_INSTANCE (str BUCKET_NAME "-hlbbri-" (s/replace RUNTIME_VERSION #"\." "-")))
 (def OFFICIAL_BABASHKA_LAYER_ARN "arn:aws:serverlessrepo:eu-central-1:443526418261:applications/holy-lambda-babashka-runtime")
 
-;; VALIDATE IF AWS is configured properly
-(if-not (command-exists? "aws")
-  (do (hpr (accent "aws") (pre "command does not exists. Did you install AWS command line application?"))
-      (System/exit 1))
-  (try
-    (can-obtain-from-aws-profile?! "aws_access_key_id")
-    (can-obtain-from-aws-profile?! "aws_secret_access_key")
-    (catch Exception e
-      (hpr (ex-message e))
-      (System/exit 1))))
+(when (and (not HL_NO_PROFILE?)
+           (not (System/getenv "AWS_ACCESS_KEY_ID"))
+           (not (System/getenv "AWS_SECRET_ACCESS_KEY")))
+  (if-not (command-exists? "aws")
+    (do (hpr (accent "aws") (pre "command does not exists. Did you install AWS command line application?"))
+        (System/exit 1))
+    (try
+      (can-obtain-from-aws-profile?! "aws_access_key_id")
+      (can-obtain-from-aws-profile?! "aws_secret_access_key")
+      (catch Exception e
+        (hpr (ex-message e))
+        (System/exit 1)))))
 
 (defn exit-if-not-synced!
   []
@@ -367,9 +392,11 @@
 (defn -create-bucket
   [& [bucket profile]]
   (let [bucket (or bucket BUCKET_NAME)
-        result (csh/sh "aws" "s3" "mb" (str "s3://" bucket)
-                       "--profile" (or profile AWS_PROFILE)
-                       "--region" REGION)]
+        result (apply csh/sh
+                      (keep identity
+                            ["aws" "s3" "mb" (str "s3://" bucket)
+                             (when (or profile AWS_PROFILE) "--profile") (or profile AWS_PROFILE)
+                             "--region" REGION]))]
     (if (not= (:exit result) 0)
       (do (hpr (pre "Unable to create a bucket")
                (str (accent bucket) "."))
@@ -378,10 +405,10 @@
       (hpr (prs "Bucket") (accent bucket) (prs "has been succesfully created!")))))
 
 (defn -remove-bucket
-  [& [bucket aws-profile]]
+  [& [bucket profile]]
   (shsp "aws" "s3" "rb"
         "--force" (str "s3://" (or bucket BUCKET_NAME))
-        "--profile" (or aws-profile AWS_PROFILE)
+        (when (or profile AWS_PROFILE) "--profile") (or profile AWS_PROFILE)
         "--region" REGION))
 
 (def USER_GID
@@ -414,9 +441,10 @@
                     m)))
 
 (defn buckets
-  [& [aws-profile]]
+  [& [profile]]
   (set (mapv (fn [b] (some-> (re-find BUCKET_IN_LS_REGEX b) second))
-             (s/split (shs "aws" "--profile" (or aws-profile AWS_PROFILE) "--region" REGION "s3" "ls")
+             (s/split (shs "aws" (when (or profile AWS_PROFILE) "--profile") (or profile AWS_PROFILE)
+                           "--region" REGION "s3" "ls")
                       #"\n"))))
 
 (defn bucket-exists?
@@ -598,10 +626,10 @@ Resources:
 
   (apply shell
          "sam deploy"
-         "--template-file"  BABASHKA_RUNTIME_LAYER_FILE
-         "--stack-name"     BABASHKA_LAYER_INSTANCE
-         "--profile"        AWS_PROFILE
-         "--s3-bucket"      BABASHKA_LAYER_INSTANCE
+         "--template-file"                     BABASHKA_RUNTIME_LAYER_FILE
+         "--stack-name"                        BABASHKA_LAYER_INSTANCE
+         (when AWS_PROFILE "--profile")        AWS_PROFILE
+         "--s3-bucket"                         BABASHKA_LAYER_INSTANCE
          "--no-confirm-changeset"
          "--capabilities"   ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"])
 
@@ -739,16 +767,31 @@ Resources:
       (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
 
     (shell (str "sam local start-api"
-                " --parameter-overrides "    (if-not params
-                                               (parameters)
-                                               (str (parameters) " " (map->parameters-inline (edn/read-string params))))
-                " --template "               TEMPLATE_FILE
-                " --profile "                AWS_PROFILE
-                " -p "                       (or port 3000)
-                (when static-dir " -s ")     static-dir
+                " --parameter-overrides "
+                (if-not params
+                  (parameters)
+                  (str (parameters) " " (map->parameters-inline (edn/read-string params))))
+
+                " --template "
+                TEMPLATE_FILE
+
+                (when AWS_PROFILE " --profile ")
+                AWS_PROFILE
+
+                " -p "
+                (or port 3000)
+
+                (when static-dir " -s ")
+                static-dir
+
                 " --warm-containers LAZY"
-                (when envs-file " -n ") envs-file
-                " --layer-cache-basedir "    LAYER_CACHE_DIRECTORY
+
+                (when envs-file " -n ")
+                envs-file
+
+                " --layer-cache-basedir "
+                LAYER_CACHE_DIRECTORY
+
                 (when debug " --debug")))))
 
 (defn native:conf
@@ -923,7 +966,8 @@ set -e
     (shell "sam" "package"
            "--template-file"        MODIFIED_TEMPLATE_FILE
            "--output-template-file" PACKAGED_TEMPLATE_FILE
-           "--profile"              AWS_PROFILE
+           (when AWS_PROFILE
+             "--profile")           AWS_PROFILE
            "--s3-bucket"            (or bucket-name BUCKET_NAME)
            "--s3-prefix"            (or bucket-prefix BUCKET_PREFIX)
            "--region"               REGION)))
@@ -961,17 +1005,18 @@ set -e
       (do
         (when-not dry (apply check-n-create-bucket args))
         (apply shell "sam" "deploy"
-               "--template-file" PACKAGED_TEMPLATE_FILE
-               "--stack-name"    (or stack STACK_NAME)
-               "--s3-prefix"     (or bucket-prefix BUCKET_PREFIX)
-               "--s3-bucket"     (or bucket-name BUCKET_NAME)
-               "--profile"       AWS_PROFILE
-               "--region"        REGION
+               "--template-file"                    PACKAGED_TEMPLATE_FILE
+               "--parameter-overrides"
+               (if-not params
+                 (parameters)
+                 (str (parameters) " " (map->parameters-inline (edn/read-string params))))
+               "--stack-name"                       (or stack STACK_NAME)
+               "--s3-prefix"                        (or bucket-prefix BUCKET_PREFIX)
+               "--s3-bucket"                        (or bucket-name BUCKET_NAME)
+               (when AWS_PROFILE "--profile")       AWS_PROFILE
+               "--region"                           REGION
                (when dry "--no-execute-changeset")
                (when guided "--guided")
-               "--parameter-overrides" (if-not params
-                                         (parameters)
-                                         (str (parameters) " " (map->parameters-inline (edn/read-string params))))
                (when CAPABILITIES "--capabilities") CAPABILITIES)))))
 
 (defn stack:compile
@@ -1028,7 +1073,7 @@ set -e
             "--parameter-overrides"         (if-not params
                                               (parameters)
                                               (str (parameters) " " (map->parameters-inline (edn/read-string params))))
-            "--profile"                     AWS_PROFILE
+            (when AWS_PROFILE "--profile")  AWS_PROFILE
             (when debug      "--debug")
             (when logs       "-l")          logs
             (when event-file "-e")          event-file
@@ -1203,7 +1248,7 @@ set -e
   (print-task "stack:logs")
   (let [{:keys [name tail s e filter]} (norm-args args)]
     (shell "sam" "logs"
-           "--profile"  AWS_PROFILE
+           (when AWS_PROFILE "--profile")  AWS_PROFILE
            "-n" (or name DEFAULT_LAMBDA_NAME)
            (when s "-s") (when s s)
            (when e "-e") (when e e)
@@ -1241,7 +1286,7 @@ set -e
   (let [{:keys [stack]} (norm-args args)]
     (print-task "stack:describe")
     (shell "aws" "cloudformation" "describe-stacks"
-            "--profile"    AWS_PROFILE
+           (when AWS_PROFILE "--profile")    AWS_PROFILE
             "--region"     REGION
             "--stack-name" (or stack STACK_NAME))))
 
@@ -1253,7 +1298,8 @@ set -e
     (print-task "stack:destroy")
     (hpr (prw "Automatic cloudformation") (accent "stack:destroy") (prw "operation might not be always successful."))
     (shell "aws" "cloudformation" "delete-stack"
-           "--profile"    AWS_PROFILE
+           (when AWS_PROFILE
+             "--profile") AWS_PROFILE
            "--region"     REGION
            "--stack-name" (or stack STACK_NAME))
     (apply bucket:remove args)

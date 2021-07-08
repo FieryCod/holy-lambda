@@ -1,8 +1,12 @@
+name: $(Date:yyyyMMdd)-$(BuildID)
+
 trigger:
   - master
 
 pool:
   name: Default
+
+pr: none
 
 jobs:
   # Add additional check for cljdoc
