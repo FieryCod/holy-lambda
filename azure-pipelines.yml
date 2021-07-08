@@ -19,7 +19,18 @@ jobs:
     dependsOn:
       - cljdoc_verify
     condition: succeeded()
+    strategy:
+      matrix:
+        DOCKER_GRAALVM_CE_LATEST_JAVA_8:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
+
+        DOCKER_GRAALVM_CE_DEV_JAVA_8:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
+
+        DOCKER_GRAALVM_EE_LATEST:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
     variables:
+      HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/native/basic.example
       HL_CLJ_ALIAS: holy-lambda
     steps:
@@ -158,7 +169,18 @@ jobs:
     dependsOn:
       - tasks_health_check_1
     condition: succeeded()
+    strategy:
+      matrix:
+        DOCKER_GRAALVM_CE_LATEST_JAVA_8:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
+
+        DOCKER_GRAALVM_CE_DEV_JAVA_8:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
+
+        DOCKER_GRAALVM_EE_LATEST:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
     variables:
+      HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/native/basic.example
       HL_CLJ_ALIAS: holy-lambda
     steps:
@@ -179,7 +201,18 @@ jobs:
     dependsOn:
       - tasks_health_check_1
     condition: succeeded()
+    strategy:
+      matrix:
+        DOCKER_GRAALVM_CE_LATEST_JAVA_8:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
+
+        DOCKER_GRAALVM_CE_DEV_JAVA_8:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
+
+        DOCKER_GRAALVM_EE_LATEST:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
     variables:
+      HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/java/basic.example
       HL_CLJ_ALIAS: holy-lambda
     steps:
@@ -211,11 +244,22 @@ jobs:
   # Babashka based tests
   - job: babashka_basic_docker_1
     displayName: '(5.1)-(Babashka)-(Basic)-(Docker) Babashka runtime test'
+    strategy:
+      matrix:
+        DOCKER_GRAALVM_CE_LATEST_JAVA_8:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
+
+        DOCKER_GRAALVM_CE_DEV_JAVA_8:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
+
+        DOCKER_GRAALVM_EE_LATEST:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
     dependsOn:
       - tasks_health_check_1
       - babashka_basic_build_1
     condition: succeeded()
     variables:
+      HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/babashka/basic.example
       HL_CLJ_ALIAS: holy-lambda
     steps:

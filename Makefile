@@ -21,7 +21,6 @@ else
 endif
 
 build-docker:
-	echo $(USE_DEV)
 	@docker build docker -f docker/Dockerfile.$(IMAGE_BUILD) -t $(IMAGE_CORD)
 
 push-docker:

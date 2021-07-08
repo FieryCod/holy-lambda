@@ -235,8 +235,10 @@
     (:envs STACK)))
 
 (def IMAGE_CORDS
-  (or (:image DOCKER)
-      "fierycod/graalvm-native-image:ce"))
+  (or
+   (System/getenv "HL_DOCKER_IMAGE")
+   (:image DOCKER)
+   "fierycod/graalvm-native-image:ce"))
 
 (defn docker-image-exists?
   [image]
