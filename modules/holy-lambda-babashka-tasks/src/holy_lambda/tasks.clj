@@ -1224,10 +1224,10 @@ set -e
       (do
         (hpr (pre ":infra:bucket-name should not contain any of _ characters"))
         (exit-code-err!))
-      (hpr (str (prs ":infra:bucket-name looks good")
+      (hpr (str (prs ":infra:bucket-name looks good,")
                 (when-not (bucket-exists?)
-                  (str (prs ", but ") (accent BUCKET_NAME) (prw " does not exists (use ")
-                       (accent "bb :bucket:create") ")")))))
+                  (str (prw " but ") (accent BUCKET_NAME) (prw " does not exists (use ")
+                       (accent "bb :bucket:create") (prw " to create a bucket!)"))))))
 
     (if-let [cmds-not-found (seq (filter (comp not command-exists?) REQUIRED_COMMANDS))]
       (do

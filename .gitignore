@@ -3,6 +3,7 @@
 .lsp
 packaged.yaml
 server
+docker/graalvm-ee*
 native-packaged.yaml
 invoke-envs.json
 fnative-envs.list
