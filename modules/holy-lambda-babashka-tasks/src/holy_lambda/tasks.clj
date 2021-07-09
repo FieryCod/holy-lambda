@@ -39,9 +39,13 @@
 
 (defn norm-args
   [args]
-  (into {} (mapv
+  (into {}
+        (mapv
             (fn [[k v]]
               [(cond-> k
+                 (s/includes? k "--")
+                 (subs 2)
+
                  (s/includes? k ":")
                  (subs 1)
 

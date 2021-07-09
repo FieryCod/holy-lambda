@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.3 
+- [bb tasks] Add support for passing arguments to commands in `--` style.
+
+  **Example**
+  ```
+  bb stack:invoke --validation-fn '(fn [response] true)'
+  ```
+  
+- [ci] Run integration tests on all supported GraalVM images
+- [bb tasks] Add experimental support for setting some of HL options via AWS variables. This should ease pain of using HL with AWS vault.
+- [docker] Add `fierycod/graalvm-native-image:dev` which targets GraalVM CE dev releases :)
 ## 0.2.2 (01-07-2021)
 - [docs] Add documentation about using GraalVM-EE 
 - [examples] Add basic cdk example

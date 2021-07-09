@@ -196,6 +196,8 @@ jobs:
           bb stack:compile && \
           bb native:executable && \
           bb stack:invoke :validation-fn "(fn [{:keys [body]}] (= body \"Hello world\"))"
+
+          bb stack:invoke --validation-fn "(fn [{:keys [body]}] (= body \"Hello world\"))"
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Compilation + Invoke'
 
