@@ -1236,9 +1236,10 @@ set -e
       (do
         (hpr (prs "Required commands") (accent (str REQUIRED_COMMANDS)) (prs "installed!"))
         (println)
-        (stat-file TEMPLATE_FILE)
-        (hpr "Validating" (accent TEMPLATE_FILE))
-        (shell "sam validate")))
+        (when-not (env-true? "HL_SAM_NO_VALIDATE")
+          (stat-file TEMPLATE_FILE)
+          (hpr "Validating" (accent TEMPLATE_FILE))
+          (shell "sam validate"))))
     (System/exit @exit-code)))
 
 (defn stack:logs
