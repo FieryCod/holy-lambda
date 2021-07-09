@@ -68,7 +68,8 @@
                          "--report-unsupported-elements-at-runtime"
                          "-H:+AllowIncompleteClasspath"
                          "--no-server"
-                         "--initialize-at-build-time"]}
+                         "--initialize-at-build-time=com.fasterxml.jackson"
+                         "--initialize-at-build-time=clojure,fierycod.holy_lambda,jsonista,example"]}
 
                        ;; Infrastructure properties
                        :infra

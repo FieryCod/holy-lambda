@@ -4,6 +4,7 @@
    [fierycod.holy-lambda.retriever :as r]
    [fierycod.holy-lambda.interceptor :as i]
    [fierycod.holy-lambda.agent :as agent]
+   [clojure.string :as str]
    [fierycod.holy-lambda.native-runtime :as native]
    [fierycod.holy-lambda.response :as hr]
    [fierycod.holy-lambda.core :as h]))
@@ -25,5 +26,15 @@
 (agent/in-context
  (println "In agent context"))
 
-(println
- (->> (map ns-name (all-ns)) (remove #(str/starts-with? % "clojure")) (map #(str/split (str %) #"\.")) (keep butlast) (map #(str/join "." %)) distinct (map munge) (cons "clojure")))
+;; (defn initialize-at-build-time-list
+;;   [& args]
+;;   (println
+;;    (->> (map ns-name (all-ns))
+;;         (remove #(clojure.string/starts-with? % "clojure"))
+;;         (map #(clojure.string/split (str %) #"\."))
+;;         (keep butlast)
+;;         (map #(clojure.string/join "." %))
+;;         distinct
+;;         (map munge)
+;;         (cons "clojure")
+;;         (clojure.string/join ","))))

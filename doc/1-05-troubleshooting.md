@@ -30,6 +30,7 @@
       ```
    
       **Solution**:
+      
       Increase the RAM limit in Docker UI [preferences](https://docs.docker.com/docker-for-mac/#resources).
       
   4. Command `bb stack:invoke` fails with the following message
@@ -40,12 +41,14 @@
       time="2021-05-17T16:52:48.279" level=error msg="INIT DONE failed: Runtime.InvalidEntrypoint"
       ```
   
-      **Solution**
+      **Solution**:
+      
       The layers of your template have not been configured correctly. Ensure that stack:sync reports an ARN and it has been added to the `template.yml`
       
   5. Could not find `/project/.holy-lambda/clojure-tools-1.10.3.849.jar`
   
-     **Solution**
+     **Solution**:
+     
      Ignore this. Nothing bad happens!
      
   6. Fatal `error:com.oracle.svm.core.util.VMError$HostedError: SomeClassDefinition has no code offset set`
@@ -60,7 +63,8 @@
      
 7. Unable to use local library with holy-lambda
 
-   **Solution**
+   **Solution**:
+   
    Holy lambda uses docker context for reproducible builds and GraalVM native-image compilation, therefore local libraries referenced in `deps.edn` will not work out of the box. However it's fairly simple to support local libraries via `:docker:volumes` + custom clojure alias.
    
 
@@ -141,11 +145,14 @@
   5. Empty `.aws` directory created.
   
      **Solution**:
+     
      If you see anywhere `.aws` empty directory then remove it and update HL stack.
      
   6. Long running HL `bb commands` on M1 based MacOS.
   
-     **Solution**: None!
+     **Solution**: 
+     
+     None!
      
      We need to wait for official GraalVM CE Images unfortunetely: 
      https://github.com/oracle/graal/issues/2666
@@ -162,7 +169,22 @@
      ```
      bb stack:purge
      ```
-        
+
+  8. I'm using AWS vault and I don't have `~/.aws` folder.
+  
+     Upon `bb stack:sync` or any other command I see:
+     ```
+      ❯ bb stack:sync
+      [holy-lambda] AWS configuration check failed. Unable to get value from the profile: default
+
+      The config profile (default) could not be found
+
+      Did you run command: aws configure?
+     ```
+    
+     **Solution**
+     
+     Add `HL_NO_PROFILE=1` environment variable like: `HL_NO_PROFILE=1 bb stack:sync`
   
      
      

@@ -323,7 +323,7 @@
     (if-not (= (:exit result) 0)
       (throw (ex-info (str (pre "AWS configuration check failed. Unable to get value from the profile: ") (accent AWS_PROFILE)
                            (when-not (s/blank? (:err result))
-                             (str "\n\n" (pre (:err result))))
+                             (str "\n" (pre (:err result))))
                            (pre "\nDid you run command: ") (accent "aws configure") (pre "?"))
                       {}))
       true)))

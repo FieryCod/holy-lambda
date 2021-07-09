@@ -1,0 +1,48 @@
+
+* Upstream bugs
+  - Slow docker emulation on M1: https://github.com/oracle/graal/issues/2666
+  - Unable to use java11 (:java runtime) https://github.com/aws/aws-sam-cli/issues/2787
+  - Hack for switching runtime anytime  https://github.com/aws/aws-sam-cli/issues/2836
+
+* Roadmap
+** [ ] 0.2.3
+- Tasks, Environment variables documentation
+- Native agent, native-runtime documentation
+  - What are native-agents-payloads?
+  - Using agent/in-context.
+- Add entry about local testing in FAQ
+- Benchmarks between Clojure based runtimes and other ones: rust, golang, nodejs, python, ruby etc.
+- Add more tests for complex examples like the ones which use cognitect aws-api
+- Add built in support for application/edn
+- Add META-INF with native-image.properties
+
+  *Docs*
+  https://www.graalvm.org/reference-manual/native-image/BuildConfiguration/
+
+  - propose a PR to jsonista with args: "--initialize-at-build-time=com.fasterxml.jackson,jsonista"
+
+** [ ] 0.2.4
+- Add documentation about using ~initialize-at-build-time~ with the list of packages to initialize. Link to GraalVM documentation,
+- Add full features implementation of interceptors. Same model of execution as in Pedestal (breaking change). Adjust examples
+- Add documentation for interceptors. Link to Pedestal documentation.
+
+** [ ] 0.3.0
+- Add Node.js runtime support. Add documentation and tutorial.
+- Fix tasks args parsing, so that single arguments like :debug | --debug are not required on tail position
+
+** [ ] 0.4.0
+- Add optional babashka build to docker image for the applications which exceed 250 MB limit. Add documentation
+
+** [ ] 0.5.0
+- Add fully functional live development environment, but Clojure style :)
+  https://docs.serverless-stack.com/live-lambda-development
+
+  Discussion?!
+
+** [ ] 0.6.0
+- Investigate how to support step functions in a more Clojure'y way
+- Investigate whether it's worth to make runtime fully asynchronous + thread pool. If yes make it optional via ~HL_USE_ASYNC_RUNTIME=1~.
+
+** [ ] 0.7.0
+- Add support for PGO GraalVM optimizations. Provide benchmarks.
+  Use ~-XX:ProfilesDumpFile=YourFileName~ on instrumented image to save profile file somewhere else. Use Amazon EFS to catch the ~.iprof~ file when runtime is being destroyed.
