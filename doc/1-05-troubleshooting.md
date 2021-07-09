@@ -19,6 +19,15 @@
       Fix all errors reported by the tool. If you still experience any issue please report it at [Github](https://github.com/FieryCod/holy-lambda/issues).
       
   3. GraalVM native-image compilation fails due to not enough RAM memory on MacOS
+      **Error**:
+      ```
+      Error: Image build request failed with exit status 137
+      com.oracle.svm.driver.NativeImage$NativeImageError: Image build request failed with exit status 137
+        at com.oracle.svm.driver.NativeImage.showError(NativeImage.java:1772)
+        at com.oracle.svm.driver.NativeImage.build(NativeImage.java:1519)
+        at com.oracle.svm.driver.NativeImage.performBuild(NativeImage.java:1480)
+        at com.oracle.svm.driver.NativeImage.main(NativeImage.java:1467)
+      ```
    
       **Solution**:
       Increase the RAM limit in Docker UI [preferences](https://docs.docker.com/docker-for-mac/#resources).
@@ -133,3 +142,30 @@
   
      **Solution**:
      If you see anywhere `.aws` empty directory then remove it and update HL stack.
+     
+  6. Long running HL `bb commands` on M1 based MacOS.
+  
+     **Solution**: None!
+     
+     We need to wait for official GraalVM CE Images unfortunetely: 
+     https://github.com/oracle/graal/issues/2666
+     
+  7. bb stack:sync or any other commands hang:
+  
+     **Possible causes**:
+     1. You have M1 based MacOS. See 6)
+     2. Docker volume broken state, caused by interrupted copy from remote to host. See solution!
+     3. Poor internet connection, which may cause docker volume broken state.
+        See solution!
+        
+     **Solution**
+     ```
+     bb stack:purge
+     ```
+        
+  
+     
+     
+     
+  
+     
