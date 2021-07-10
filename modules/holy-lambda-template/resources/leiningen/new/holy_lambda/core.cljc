@@ -37,11 +37,10 @@
   ;; return a successful plain text response. See also, hr/json
   (hr/text (say-hello)))
 
-;; (native only) specify the Lambda's entry point as a static main function when generating a class file
+;; (native + babashka only) specify the Lambda's entry point as a static main function when generating a class file
 (native/entrypoint [#'ExampleLambda])
 
-;; (native only) Executes the body in a safe agent context for native configuration generation.
+;; (native + babashka only) Executes the body in a safe agent context for native configuration generation.
 ;; Useful when it's hard for agent payloads to cover all logic branches.
-
 (agent/in-context
  (println "I will help in generation of native-configurations"))
