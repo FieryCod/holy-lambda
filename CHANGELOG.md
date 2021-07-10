@@ -12,6 +12,7 @@
 - [bb tasks] Add experimental support for setting some of HL options via AWS variables. This should ease pain of using HL with AWS vault.
 - [docker] Add `fierycod/graalvm-native-image:dev` which targets GraalVM CE dev releases :)
 - [docker] Add zip program for CI based deployments where tasks are run in Docker context
+- [bb tasks] Remove clj-kondo from the required commands
 
 ## 0.2.2 (01-07-2021)
 - [docs] Add documentation about using GraalVM-EE 

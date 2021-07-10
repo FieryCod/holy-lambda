@@ -353,7 +353,7 @@
 (def HOLY_LAMBDA_DEPS_PATH ".holy-lambda/clojure/deps.edn")
 (def STACK_NAME (or (System/getenv "HL_STACK_NAME") (:name STACK)))
 (def TEMPLATE_FILE (:template STACK))
-(def REQUIRED_COMMANDS ["aws" "sam" "bb" "docker" "clojure" "zip" "id" "clj-kondo" "bash"])
+(def REQUIRED_COMMANDS ["aws" "sam" "bb" "docker" "clojure" "zip" "id" "bash"])
 (def CAPABILITIES (if-let [caps (seq (:capabilities STACK))]
                     caps
                     nil))
