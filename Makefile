@@ -35,3 +35,6 @@ verify-cljdoc:
 
 test:
 	@lein with-profile eftest eftest
+
+cache-m2:
+	bash -c "cd ~/.m2/repository/ && zip -r m2-cached.zip . && rm -Rf ~/azure-agent/local_cache/m2-cached.zip && mv m2-cached.zip ~/azure-agent/local_cache/"
