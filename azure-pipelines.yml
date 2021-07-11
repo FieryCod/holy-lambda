@@ -281,3 +281,38 @@ jobs:
 
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Basic babashka invoke'
+
+
+  # Native + Docker runtime tests
+  - job: native_no_list_docker_1
+    displayName: '(2.1)-(Native built-time-no-list)-(S3)-(Docker) GraalVM Native Image Custom Runtime compilation test'
+    dependsOn:
+      - tasks_health_check_1
+    condition: succeeded()
+    strategy:
+      matrix:
+        DOCKER_GRAALVM_CE_LATEST_JAVA_8:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
+
+        DOCKER_GRAALVM_CE_DEV_JAVA_8:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
+
+        DOCKER_GRAALVM_EE_LATEST:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
+    variables:
+      HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
+      WORKING_DIRECTORY: examples/bb/native/hl.aws-bucket
+      HL_CLJ_ALIAS: holy-lambda
+    steps:
+      - script: |
+          # Regenerate partial cache
+          bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
+
+          # Regular test tasks
+          bb stack:compile && \
+          bb native:conf && \
+          bb native:executable && \
+          bb stack:invoke --validation-fn '(fn [response] (= (:body response) "true"))'
+
+        workingDirectory: ${{variables.WORKING_DIRECTORY}}
+        displayName: 'Compilation + Invoke'
