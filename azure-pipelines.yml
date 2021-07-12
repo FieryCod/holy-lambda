@@ -40,7 +40,7 @@ jobs:
     steps:
       - script: |
           # Regenerate partial cache
-          bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip"
+          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip"
 
           # Sync
           printf "\n------------------------------------------------------\n"
@@ -190,7 +190,7 @@ jobs:
     steps:
       - script: |
           # Regenerate partial cache
-          bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
+          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
 
           # Regular test tasks
           bb stack:compile && \
@@ -224,7 +224,7 @@ jobs:
     steps:
       - script: |
           # Regenerate partial cache
-          bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
+          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
 
           # Regular test tasks
           bb stack:compile && \
@@ -271,7 +271,7 @@ jobs:
     steps:
       - script: |
          # Regenerate partial cache
-         bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync
+         bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync
 
          # Copy freshly build babashka runtime
          cp ~/azure-agent/local_cache/holy-lambda-babashka-runtime.zip . && unzip -qq holy-lambda-babashka-runtime.zip -d holy-lambda-babashka-runtime
@@ -306,7 +306,7 @@ jobs:
     steps:
       - script: |
           # Regenerate partial cache
-          bash -c "mkdir -p .holy-lambda && cd .holy-lambda && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
+          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
 
           # Regular test tasks
           bb stack:compile && \
