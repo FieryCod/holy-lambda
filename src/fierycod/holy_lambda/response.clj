@@ -1,6 +1,7 @@
 (ns fierycod.holy-lambda.response
   "Response helpers adapted from ring-core/util/response.clj"
   (:require
+   [fierycod.holy-lambda.util :as u]
    [clojure.string :as s]))
 
 (def redirect-status-codes
@@ -19,6 +20,13 @@
    {:statusCode  (redirect-status-codes status status)
     :headers {"location" url}
     :body    nil}))
+
+(defn png-image
+  [base64-str]
+  {:isBase64Encoded true
+   :body base64-str
+   :statusCode 200
+   :headers {"content-type" "image/png"}})
 
 (defn created
   "Returns a response for a HTTP 201 created response."

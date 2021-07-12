@@ -74,26 +74,35 @@
 (defn response->bytes
   [?response]
   (let [response (retriever/<-wait-for-response ?response)
+        bytes-response? #?(:clj (bytes? response)
+                           :default false)
         ;; remove internals
-        response (dissoc response :fierycod.holy-lambda.interceptor/interceptors)
-        ctype (content-type response)]
+        response (if-not bytes-response?
+                   (dissoc response :fierycod.holy-lambda.interceptor/interceptors)
+                   response)
+        ctype (when-not bytes-response?
+                (content-type response))]
 
     (cond
+      bytes-response?
+      response
+
       ;; Optimize the common case
       (json-content-type? ctype)
       (x->json-bytes (update response :body x->json-string))
-
-      (contains? #{"text/plain"
-                   "text/plain; charset=utf-8"
-                   "text/html"
-                   "text/html; charset=utf-8"}
-                 ctype)
-      (x->json-bytes response)
 
       ;; Ack event
       (nil? response)
       (x->json-bytes {:body nil
                       :statusCode 200})
+
+      (contains? #{"text/plain"
+                   "text/plain; charset=utf-8"
+                   "image/png"
+                   "text/html"
+                   "text/html; charset=utf-8"}
+                 ctype)
+      (x->json-bytes response)
 
       ;; Handle redirect. Redirect should have nil? body
       (and (get-in response [:headers "location"])

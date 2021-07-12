@@ -4,7 +4,7 @@
   <groupId>io.github.FieryCod</groupId>
   <artifactId>holy-lambda-async-retriever</artifactId>
   <packaging>jar</packaging>
-  <version>0.0.6</version>
+  <version>0.0.7-SNAPSHOT</version>
   <name>holy-lambda-async-retriever</name>
   <description>Support for async handlers which returns channel as a response.</description>
   <url>https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-async-retriever</url>
@@ -14,12 +14,7 @@
       <url>https://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
-  <scm>
-    <url>https://github.com/FieryCod/holy-lambda</url>
-    <connection>scm:git:git://github.com/FieryCod/holy-lambda.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/FieryCod/holy-lambda.git</developerConnection>
-    <tag>8747d72e4c1a8d7a842d4da392a8d95f9d15b453</tag>
-  </scm>
+  <scm/>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <testSourceDirectory>test</testSourceDirectory>

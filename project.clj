@@ -1,4 +1,4 @@
-(defproject io.github.FieryCod/holy-lambda   "0.2.2"
+(defproject io.github.FieryCod/holy-lambda   "0.2.3-SNAPSHOT"
   :description "Micro framework which turns your code into AWS Lambda functions"
 
   :url "https://github.com/FieryCod/holy-lambda"
@@ -13,7 +13,7 @@
   :dependencies [[org.clojure/clojure                              "1.10.3" :scope "provided"]
                  [metosin/jsonista                                 "0.3.3"]
                  [com.amazonaws/aws-lambda-java-core               "1.2.1"]
-                 [io.github.FieryCod/holy-lambda-default-retriever "0.0.6"]]
+                 [io.github.FieryCod/holy-lambda-default-retriever "0.0.7-SNAPSHOT"]]
 
   :eftest {:thread-count 4}
 

@@ -25,10 +25,13 @@
     (throw (Exception. (str "Entry " ~?type " for interceptor \"" ~?sym "\" should be a function.")))
     (fn [payload#]
       (try
-        (update-in (retriever/<-wait-for-response (~?handler payload#))
-                   [::interceptors :complete ~?type]
-                   (fnil conj [])
-                   ~?sym)
+        (let [response# (retriever/<-wait-for-response (~?handler payload#))]
+          (if-not (map? response#)
+            response#
+            (update-in response#
+                       [::interceptors :complete ~?type]
+                       (fnil conj [])
+                       ~?sym)))
         (catch Exception ex#
           (update-in payload#
                      [::interceptors :ex]
@@ -65,7 +68,22 @@
                           :leave ~wrapped-leave}]
         `(def ~?sym ~?docstring ~interceptor)))))
 
-#?(:bb
+#?(:clj
+   (defn- process-interceptors
+     [mixin payload type]
+     (if-let [interceptors (seq (:interceptors mixin))]
+       (loop [interceptors (if (= type :leave)
+                             (reverse interceptors)
+                             interceptors)
+              result payload]
+         (if-not (seq interceptors)
+           result
+           (recur (rest interceptors)
+                  (if-let [interceptor (type (first interceptors))]
+                    (interceptor result)
+                    result))))
+       payload))
+   :default
    (defn- process-interceptors
      [mixin payload type]
      (if-let [interceptors (seq (:interceptors mixin))]
@@ -76,32 +94,4 @@
          (if-not (seq interceptors)
            result
            (recur (rest interceptors) (if-let [interceptor (type (first interceptors))] (interceptor result) result))))
-       payload))
-   :cljs
-   (defn- process-interceptors
-     [mixin payload type]
-     (if-let [interceptors (seq (:interceptors mixin))]
-       (loop [interceptors (if (= type :leave)
-                             (reverse interceptors)
-                             interceptors)
-              result payload]
-         (if-not (seq interceptors)
-           result
-           (recur (rest interceptors) (if-let [interceptor (type (first interceptors))] (interceptor result) result))))
-       payload))
-   :clj
-   (defn- process-interceptors
-     [mixin payload type]
-     (if-let [interceptors (seq (:interceptors mixin))]
-       (let [it (some-> (if (= type :leave)
-                          (reverse interceptors)
-                          interceptors)
-                        clojure.lang.RT/iter)]
-         (loop [result payload]
-           (if (.hasNext it)
-             (recur
-              (if-let [interceptor (some-> (.next it) type)]
-                (interceptor result)
-                result))
-             result)))
        payload)))

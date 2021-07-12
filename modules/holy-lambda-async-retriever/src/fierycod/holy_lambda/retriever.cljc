@@ -29,9 +29,11 @@
    (defn <-wait-for-response
      [response]
      (cond
-       (or (map? response)
-           (nil? response)
-           (string? response))
+       (or
+        (bytes? response)
+        (map? response)
+        (nil? response)
+        (string? response))
        response
 
        (chan? response)
