@@ -212,7 +212,7 @@
   (System/exit 1))
 
 (def CLJ_ALIAS_KEY (or (some-> (System/getenv "HL_CLJ_ALIAS") string->keyword)
-                       (string->keyword (:clj-alias BUILD))))
+                       (some-> (:clj-alias BUILD) string->keyword)))
 
 (when (and CLJ_ALIAS_KEY (not (keyword? CLJ_ALIAS_KEY)))
   (hpr (pre "Defined") (accent "build:clj-alias") (pre "should be a keyword")))
