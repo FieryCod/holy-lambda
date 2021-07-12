@@ -40,7 +40,7 @@
 
                        :build {;; clj alias might be set via environment variable
                                ;; `HL_CLJ_ALIAS` like:  HL_CLJ_ALIAS="dev"
-                               :clj-alias           nil
+                               :clj-alias           :holy-lambda
 
                                ;; Used when either :docker is nil or
                                ;; `HL_NO_DOCKER` environment variable is set to "true"

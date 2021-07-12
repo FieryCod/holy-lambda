@@ -297,8 +297,8 @@ jobs:
         DOCKER_GRAALVM_CE_DEV_JAVA_8:
           GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
 
-        DOCKER_GRAALVM_EE_LATEST:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
+        # DOCKER_GRAALVM_EE_LATEST:
+        #   GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
     variables:
       HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/native/hl.aws-bucket

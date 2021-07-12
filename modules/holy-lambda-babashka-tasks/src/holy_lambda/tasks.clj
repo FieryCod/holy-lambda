@@ -212,7 +212,7 @@
   (System/exit 1))
 
 (def CLJ_ALIAS_KEY (or (some-> (System/getenv "HL_CLJ_ALIAS") string->keyword)
-                       (:clj-alias BUILD)))
+                       (string->keyword (:clj-alias BUILD))))
 
 (when (and CLJ_ALIAS_KEY (not (keyword? CLJ_ALIAS_KEY)))
   (hpr (pre "Defined") (accent "build:clj-alias") (pre "should be a keyword")))
@@ -223,8 +223,7 @@
        (accent CLJ_ALIAS_KEY)
        (pre "does not exists in") (accent "deps.edn")))
 
-(def CLJ_ALIAS (some-> CLJ_ALIAS_KEY name
-                       (str ":")))
+(def CLJ_ALIAS (some-> CLJ_ALIAS_KEY name))
 
 (defn stat-file
   [filename]
@@ -554,7 +553,7 @@ Resources:
   []
   (stat-file "deps.edn")
   (hpr "Syncing project and holy-lambda" (accent "deps.edn"))
-  (docker-run (str "clojure -A:" CLJ_ALIAS "uberjar -P && clojure -P"))
+  (docker-run (str "clojure -A:" (and CLJ_ALIAS (str CLJ_ALIAS ":")) "uberjar -P; clojure" (and CLJ_ALIAS (str " -A:" CLJ_ALIAS " ")) "-P"))
   (deps-sync--babashka))
 
 (defn cloudformation-description
