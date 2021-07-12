@@ -553,7 +553,7 @@ Resources:
   []
   (stat-file "deps.edn")
   (hpr "Syncing project and holy-lambda" (accent "deps.edn"))
-  (docker-run (str "clojure -A:" (and CLJ_ALIAS (str CLJ_ALIAS ":")) "uberjar -P; clojure" (and CLJ_ALIAS (str " -A:" CLJ_ALIAS " ")) "-P"))
+  (docker-run (str "clojure -A:" (and CLJ_ALIAS (str CLJ_ALIAS ":")) "uberjar -P"))
   (deps-sync--babashka))
 
 (defn cloudformation-description
