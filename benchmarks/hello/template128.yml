@@ -190,6 +190,34 @@ Resources:
             Path: /rust-runtime
             Method: get
 
+  HaskellRuntime:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: HaskellRuntime
+      CodeUri: artifacts/haskell.zip
+      Runtime: provided
+      Handler: src/Lib.handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /haskell-runtime
+            Method: get
+
+  CsharpRuntime:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CsharpRuntime
+      CodeUri: artifacts/csharp.zip
+      Runtime: dotnetcore2.1
+      Handler: dotnet21::dotnet21.Hello::Handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /csharp-runtime
+            Method: get
+
 Outputs:
   RootApiGateway:
     Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"

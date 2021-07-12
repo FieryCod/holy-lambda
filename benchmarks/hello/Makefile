@@ -16,6 +16,12 @@ artifacts/clojure-native.zip:
 artifacts/latest-rust.zip:
 	@cd rust && make build
 
+artifacts/haskell.zip:
+	@cd haskell && make
+
+artifacts/csharp.zip:
+	@cd csharp && make
+
 clean:
 	rm -Rf artifacts/latest-rust.zip artifacts/clojure-native.zip artifacts/clojure-native.zip artifacts/golang artifacts/clojure.jar
 

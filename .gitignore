@@ -5,6 +5,7 @@ packaged.yaml
 server
 docker/graalvm-ee*
 native-packaged.yaml
+haskell.zip
 invoke-envs.json
 fnative-envs.list
 envs.example.json

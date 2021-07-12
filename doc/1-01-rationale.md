@@ -1,8 +1,6 @@
 # Rationale
 Writing Clojure handlers for AWS Lambda is not always as simple as it should be. For many years, Clojure developers used libraries such as `uswitch/lambada` as a glue between Java and Clojure with mediocre results due to the cold starts and high memory usage. 
 
-PS: I don't claim the AWS Lambda or Serverless is superior to traditional servers, and I will never do. AWS Lambda is a viable choice in only a limited of tasks. Still, though, it's worth having Clojure support for low memory, high-performance Clojure handlers on it, and that's why holy-lambda exists.
-
 **Cold starts**
 To understand what causes cold starts, we have to know how Clojure distributes program classes. 
 
@@ -20,11 +18,11 @@ Holy lambda provides very convenient environment compared to other tools such as
 
 **Features**
 - interceptors
-- ring request, response model
+- ring request, response alike model
 - async handlers
 
 ## Java runtime
-Prior work towards targeting Java runtime was done by [uswitch/lambada](https://github.com/uswitch/lambada), but lacked being convenient. Holy lambda in the other hand is very convenient and does things which lambada lacked:
+Prior work towards targeting Java runtime was done by [uswitch/lambada](https://github.com/uswitch/lambada), but lacked being convenient and fast. Holy lambda in the other hand is very convenient extremely fast, and does things which lambada lacked:
 
 - full class identifier is created during macro expansion of `deflambda` 
 - request is automatically slurped and converted to a map
@@ -58,3 +56,5 @@ If you feel overhelmed by holy-lambda ecosystem you can check very [this](https:
 | :native   | low        | high        | high     >= 16mb | low                | No          | very long    | no                  |
 | :babashka | low        | moderate    | low      >= 50kb | low                | Yes         | no compile   | yes                 |
 | :java     | high       | high        | moderate >= 12mb | high               | No          | long         | yes                 |
+
+PS: I don't claim the AWS Lambda or Serverless is superior to traditional servers, and I will never do. AWS Lambda is a viable choice in only a limited of tasks. Still, though, it's worth having Clojure support for low memory, high-performance Clojure handlers on it, and that's why holy-lambda exists.
