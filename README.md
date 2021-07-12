@@ -53,21 +53,11 @@ io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url     "https://github
   (:gen-class)
   (:require 
     [fierycod.holy-lambda.core :as h]
-    [fierycod.holy-lambda.interceptor :as i]
     [fierycod.holy-lambda.native :as native]
     [fierycod.holy-lambda.response :as hr]))
-
-(i/definterceptor LambdaLogger
-  {:enter (fn [request]
-            (println "REQUEST:" request)
-            request)
-   :leave (fn [response]
-            (println "RESPONSE:" response)
-            response)})
- 
+    
 (h/deflambda ExampleLambda
   "I can run on Java, Babashka or Native runtime..."
-  < {:interceptors [LambdaLogger]}
   [{:keys [event ctx]}]
   (hr/text "Hello world"))
   

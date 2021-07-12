@@ -2,7 +2,6 @@
   (:gen-class)
   (:require
    [fierycod.holy-lambda.response :as hr]
-   [fierycod.holy-lambda.interceptor :as i]
    [fierycod.holy-lambda.native-runtime :as native]
    [fierycod.holy-lambda.agent :as agent]
    [fierycod.holy-lambda.core :as h]))
@@ -13,25 +12,8 @@
   #?(:bb  (str "Hello world. Babashka is a sweet friend of mine! Babashka version: " (System/getProperty "babashka.version"))
      :clj "Hello world"))
 
-;; (alpha feature) An interceptor is a single or pair of unary functions representing inbound requests and/or outbound
-;; responses, allowing code to inspect or amend requests/responses between AWS and your Lambda function.
-;; See here https://cljdoc.org/d/fierycod/holy-lambda/CURRENT/doc/features/interceptors
-
-(i/definterceptor LambdaLogger
-  {:enter (fn [request]
-            (println "REQUEST:" request)
-            request)
-   :leave (fn [response]
-            (println "RESPONSE:" response)
-            response)})
-
-(i/definterceptor AddHeaderToResponse
-  {:leave (fn [response]
-            (hr/header response "Custom-Header" "Some Value"))})
-
 (h/deflambda ExampleLambda
   "I can run on Java, Babashka or Native runtime..."
-  < {:interceptors [LambdaLogger AddHeaderToResponse]}
   [{:keys [event ctx] :as request}]
 
   ;; return a successful plain text response. See also, hr/json

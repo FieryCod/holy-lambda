@@ -27,7 +27,7 @@
               :bucket-prefix "holy-lambda"}
         render* #(render % data)]
     (main/info "Generating new project based on holy-lambda. Make sure that you have babashka tool installed, `docker` running and AWS account properly configured via `aws configure`.
-                If you're using AWS Vault make sure to set `HL_NO_PROFILE=1` environment variable.
+If you're using AWS Vault make sure to set `HL_NO_PROFILE=1` environment variable.
 
 First steps in new project:
 - 1. Choose a runtime in holy-lambda runtime in bb.edn file. :runtime:name
