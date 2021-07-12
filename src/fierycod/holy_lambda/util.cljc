@@ -96,22 +96,8 @@
       (x->json-bytes {:body nil
                       :statusCode 200})
 
-      (contains? #{"text/plain"
-                   "text/plain; charset=utf-8"
-                   "image/png"
-                   "text/html"
-                   "text/html; charset=utf-8"}
-                 ctype)
-      (x->json-bytes response)
-
-      ;; Handle redirect. Redirect should have nil? body
-      (and (get-in response [:headers "location"])
-           (nil? (:body response)))
-      (x->json-bytes response)
-
-      ;; Corner cases should be handled via interceptor chain
-      :else
-      response)))
+      :else 
+      (x->json-bytes response))))
 
 #?(:clj
    (def ^:private success-codes #{200 202 201}))
