@@ -1,7 +1,7 @@
 .PHONY: build
 BUCKET_NAME:=none
 
-build: artifacts/clojure-native.zip artifacts/clojure.jar artifacts/golang artifacts/latest-rust.zip
+build: artifacts/clojure-native.zip artifacts/clojure.jar artifacts/golang artifacts/latest-rust.zip artifacts/haskell.zip artifacts/csharp.zip
 	@echo "All deployable artifacts has been build!"
 
 artifacts/clojure.jar:
@@ -23,7 +23,7 @@ artifacts/csharp.zip:
 	@cd csharp && make
 
 clean:
-	rm -Rf artifacts/latest-rust.zip artifacts/clojure-native.zip artifacts/clojure-native.zip artifacts/golang artifacts/clojure.jar
+	rm -Rf artifacts/latest-rust.zip artifacts/clojure-native.zip artifacts/clojure-native.zip artifacts/golang artifacts/clojure.jar artficats/csharp.zip artifacts/haskell.zip
 
 deploy-128:
 	BUCKET_NAME=bench-hello-128
