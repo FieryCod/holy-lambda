@@ -828,7 +828,7 @@ Resources:
     (hpr "Generating native-configurations!")
     (docker-run (str JAVA_COMMAND
                      " -agentlib:native-image-agent="
-                     "config-output-dir=" NATIVE_CONFIGURATIONS_PATH
+                     "config-merge-dir=" NATIVE_CONFIGURATIONS_PATH
                      " "
                      "-Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))
 
