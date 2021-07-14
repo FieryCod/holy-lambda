@@ -15,6 +15,8 @@
 - [bb tasks] Remove clj-kondo from the required commands
 - [holy-lambda] Interceptors should not throw when response is byte encoded
 - [holy-lambda] JSON encoded byte-array is a valid response
+- [holy-lambda] Don't use -H:+AllowIncompleteClasspath on behalf of user
+- [holy-lambda] Use `DISABLE_SIGNAL_HANDLERS="true"` in bootstrap file
 
 ## 0.2.2 (01-07-2021)
 - [docs] Add documentation about using GraalVM-EE 

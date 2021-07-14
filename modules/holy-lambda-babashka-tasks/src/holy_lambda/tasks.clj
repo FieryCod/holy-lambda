@@ -856,6 +856,7 @@ Resources:
 (def -bootstrap-file
 "#!/bin/sh
 
+export DISABLE_SIGNAL_HANDLERS=\"true\"
 set -e
 
 ./output")
