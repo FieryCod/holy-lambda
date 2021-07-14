@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.3 
+## 0.2.3 (14-07-2021)
 - [bb tasks] Add support for passing arguments to commands in `--` style.
 
   **Example**

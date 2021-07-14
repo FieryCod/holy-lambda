@@ -6,6 +6,7 @@
 [![Slack](https://img.shields.io/badge/Slack-holy--lambda-blue?logo=slack)](https://clojurians.slack.com/messages/holy-lambda/)
 [![DockerHub](https://img.shields.io/docker/pulls/fierycod/graalvm-native-image.svg?logo=docker)](https://hub.docker.com/r/fierycod/graalvm-native-image)
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
+[![Build Status](https://dev.azure.com/vetcard/holy-lambda/_apis/build/status/FieryCod.holy-lambda?branchName=master)](https://dev.azure.com/vetcard/holy-lambda/_build/latest?definitionId=2&branchName=master)
 
 ---
 
