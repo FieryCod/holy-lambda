@@ -1,5 +1,5 @@
 {:deps {org.clojure/clojure                              {:mvn/version "1.10.3"}
         metosin/jsonista                                 {:mvn/version "0.3.3"}
-        io.github.FieryCod/holy-lambda-default-retriever {:mvn/version "0.0.7-SNAPSHOT"}
+        io.github.FieryCod/holy-lambda-default-retriever {:mvn/version "0.0.7"}
         com.amazonaws/aws-lambda-java-core               {:mvn/version "1.2.1"}}
  :paths ["src"]}

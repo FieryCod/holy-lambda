@@ -27,7 +27,7 @@
                        :runtime
                        {
                         ;; Choose one of the supported runtime `:babashka`, `:native`, `:java`
-                        :name                :native
+                        :name                :babashka
 
                         ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
                         ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers
@@ -45,7 +45,7 @@
 
                         ;; Flag which indicates that holy-lambda should auto deploy the applications and layers for the corresponding :runtime
                         ;; If set to false holy-lambda will guide you through the steps of dependants deployment.
-                        :self-manage-layers? true
+                        :self-manage-layers? false
 
                         ;; For `:native` runtime you can provide your own bootstrap file
                         :bootstrap-file      "bootstrap"
@@ -56,7 +56,7 @@
 
                         ;; Some of the runtimes are versioned. For instance `:babashka` runtime is a versioned layer which ships it's own version of
                         ;; clojure, holy-lambda, default-retriever
-                        :version             "0.0.38"
+                        :version             "0.1.3"
 
                         ;; Specify custom arguments for native image generation
                         ;; Works only on `:native` runtime.

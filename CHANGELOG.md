@@ -19,6 +19,7 @@
 - [holy-lambda] Allow users to support arbitrary response if the response is byte encoded. Opens a way to support transit and other content-types.
 - [holy-lambda] Properly parse response. Add support for AWS Step Functions.
 - [holy-lambda] Use config-merge-dir instead of config-output-dir when executing bb native:conf. User should be allowed to specify custom configuration in `reflect-config.json`, `resource-config.json` that should not be overriden.
+- [holy-lambda] Add support for sending a base64 encoded images from HL `hr/png-image`
 
 ## 0.2.2 (01-07-2021)
 - [docs] Add documentation about using GraalVM-EE 

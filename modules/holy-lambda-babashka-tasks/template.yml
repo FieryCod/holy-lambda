@@ -35,6 +35,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: example.core.ExampleLambda
+      # Layers:
+      #   - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:44
       Events:
         HelloEvent:
           Type: HttpApi
