@@ -890,8 +890,7 @@ set -e
     ;; Copy then build
     (shell-no-exit "bash -c \"[ -d resources/native-configuration ] && cp -rf resources/native-configuration .holy-lambda/build/\"")
 
-    (docker-run (str "cd .holy-lambda/build/ && " NATIVE_IMAGE_COMMAND " -jar output.jar -H:ConfigurationFileDirectories=native-configuration "
-                     "-H:+AllowIncompleteClasspath"
+    (docker-run (str "cd .holy-lambda/build/ && " NATIVE_IMAGE_COMMAND " -jar output.jar -H:ConfigurationFileDirectories=native-configuration"
                      (when NATIVE_IMAGE_ARGS
                        (str " " NATIVE_IMAGE_ARGS))))
 
