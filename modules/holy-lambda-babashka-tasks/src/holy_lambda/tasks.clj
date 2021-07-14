@@ -553,7 +553,7 @@ Resources:
   []
   (stat-file "deps.edn")
   (hpr "Syncing project and holy-lambda" (accent "deps.edn"))
-  (docker-run (str "clojure -A:" (and CLJ_ALIAS (str CLJ_ALIAS ":")) "uberjar -P"))
+  (docker-run (str "bb clojure -A:" (and CLJ_ALIAS (str CLJ_ALIAS ":")) "uberjar -P"))
   (deps-sync--babashka))
 
 (defn cloudformation-description
@@ -816,7 +816,7 @@ Resources:
 
     (hpr "Compiling with agent support!")
     (shell "rm -Rf .cpcache .holy-lambda/build/output-agent.jar")
-    (docker-run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
+    (docker-run (str "USE_AGENT_CONTEXT=true bb clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
 
     (hpr "Generating traces to ignore unnecessary reflection entries!")
     (docker-run (str JAVA_COMMAND
@@ -1036,7 +1036,7 @@ set -e
     (hpr "Nothing to compile. Sources did not change!")
     (System/exit 0))
   (shell "rm -Rf .cpcache .holy-lambda/build")
-  (docker-run (str "clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
+  (docker-run (str "bb clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
 
 (defn- normalize-headers
   [headers]

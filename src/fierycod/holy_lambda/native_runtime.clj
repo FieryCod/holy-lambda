@@ -34,7 +34,7 @@
 
 (defn- send-runtime-error
   [runtime iid ^Exception err]
-  (println "[holy-lambda] Runtime error:" err)
+  (u/println-err! (str "[holy-lambda] Runtime error:\n" err))
   (let [response (u/http "POST" (url {:runtime runtime
                                       :iid iid
                                       :path "/error"})
@@ -43,7 +43,7 @@
                           :body {:runtime-error true
                                  :err (Throwable->map err)}})]
     (when-not (u/success-code? (:status response))
-      (println "[holy-lambda] Runtime error failed sent to AWS." (:body response))
+      (u/println-err! (str "[holy-lambda] Runtime error failed sent to AWS.\n" (:body response)))
       (System/exit 1))))
 
 (defn- fetch-aws-event

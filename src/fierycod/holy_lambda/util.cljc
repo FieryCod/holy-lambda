@@ -8,6 +8,11 @@
       [java.net URL HttpURLConnection]
       [java.io InputStream InputStreamReader])))
 
+(defn println-err!
+  [msg]
+  (binding [*out* *err*]
+    (println msg)))
+
 (defn x->json-string
   [x]
   #?(:bb (json/generate-string x)

@@ -57,7 +57,7 @@
                 (.write out# ^"[B" response#)
                 (.flush out#))
               (catch Exception error#
-                (println "[Holy Lambda] Exception during request handling" error#))
+                (u/println-err! "[Holy Lambda] Exception during request handling" error#))
               (finally
                 (.close out#))))))))
 
