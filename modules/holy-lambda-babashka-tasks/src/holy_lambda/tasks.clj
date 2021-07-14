@@ -1035,7 +1035,6 @@ set -e
   (when (and (not (build-stale?)) (not force))
     (hpr "Nothing to compile. Sources did not change!")
     (System/exit 0))
-  (shell "rm -Rf .cpcache .holy-lambda/build")
   (docker-run (str "bb clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
 
 (defn- normalize-headers
