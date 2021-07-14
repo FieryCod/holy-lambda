@@ -14,9 +14,11 @@
 - [docker] Add zip program for CI based deployments where tasks are run in Docker context
 - [bb tasks] Remove clj-kondo from the required commands
 - [holy-lambda] Interceptors should not throw when response is byte encoded
-- [holy-lambda] JSON encoded byte-array is a valid response
 - [holy-lambda] Don't use -H:+AllowIncompleteClasspath on behalf of user
 - [holy-lambda] Use `DISABLE_SIGNAL_HANDLERS="true"` in bootstrap file
+- [holy-lambda] Allow users to support arbitrary response if the response is byte encoded. Opens a way to support transit and other content-types.
+- [holy-lambda] Properly parse response. Add support for AWS Step Functions.
+- [holy-lambda] Use config-merge-dir instead of config-output-dir when executing bb native:conf. User should be allowed to specify custom configuration in `reflect-config.json`, `resource-config.json` that should not be overriden.
 
 ## 0.2.2 (01-07-2021)
 - [docs] Add documentation about using GraalVM-EE 
