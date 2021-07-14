@@ -14,7 +14,7 @@
    [holy-lambda.refl :as refl])
   (:refer-clojure :exclude [spit]))
 
-(def TASKS_VERSION "0.2.2")
+(def TASKS_VERSION "0.2.3")
 
 (deps/add-deps {:deps {'clojure-term-colors/clojure-term-colors {:mvn/version "0.1.0"}}})
 

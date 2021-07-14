@@ -1,7 +1,7 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:git/url                                   "https://github.com/FieryCod/holy-lambda"
          :deps/root                                 "./modules/holy-lambda-babashka-tasks"
-         :sha                                       "f0fb9a181445a8b153f11895475ad76cf8a5da5e"}}
+         :sha                                       "be919cc3776a08a8929c0f3f5191a81cb0b0ffed"}}
 
  ;; Local repositories should be downloaded to `.holy-lambda` directory
  ;; This way project artifacts are separated from global ~/.m2 and only project artifacts
@@ -104,7 +104,7 @@
 
                         ;; Some of the runtimes are versioned. For instance `:babashka` runtime is a versioned layer which ships it's own version of
                         ;; clojure, holy-lambda, default-retriever
-                        :version                   "0.1.2"
+                        :version                   "0.1.3"
 
                         ;; Specify custom arguments for native image generation
                         ;; Works only on `:native` runtime.

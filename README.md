@@ -27,10 +27,10 @@ io.github.FieryCod/holy-lambda                     {:mvn/version "0.2.2"}
 :holy-lambda/options:runtime:version                             "0.1.2" 
 
 ;; Default retriever is built in holy-lambda. For `core.async` support use `async-retriever`
-io.github.FieryCod/holy-lambda-default-retriever   {:mvn/version "0.0.6"}
+io.github.FieryCod/holy-lambda-default-retriever   {:mvn/version "0.0.7"}
 
 ;; Not supported in babashka runtime
-io.github.FieryCod/holy-lambda-async-retriever     {:mvn/version "0.0.6"}
+io.github.FieryCod/holy-lambda-async-retriever     {:mvn/version "0.0.7"}
 
 ;; Babashka tasks docker images
 fierycod/graalvm-native-image:ce                   ;; GraalVM CE 21.1.0
@@ -39,7 +39,7 @@ fierycod/graalvm-native-image:dev                  ;; GraalVM CE-dev 21.3.0-dev-
 ;; In bb.edn :deps
 io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url     "https://github.com/FieryCod/holy-lambda"
                                                     :deps/root   "./modules/holy-lambda-babashka-tasks"
-                                                    :sha         "f0fb9a181445a8b153f11895475ad76cf8a5da5e"}
+                                                    :sha         "be919cc3776a08a8929c0f3f5191a81cb0b0ffed"}
 ```
 
 [Jump here](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
