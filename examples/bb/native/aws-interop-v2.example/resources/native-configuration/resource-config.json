@@ -1,0 +1,14 @@
+{
+  "resources" : {
+    "includes" : [ {
+      "pattern" : "\\Qclojure/version.properties\\E"
+    }, {
+      "pattern" : "\\Qcom/amazonaws/xray/interceptors/DefaultOperationParameterWhitelist.json\\E"
+    }, {
+      "pattern" : "\\Qsoftware/amazon/awssdk/global/handlers/execution.interceptors\\E"
+    }, {
+      "pattern" : "\\Qsoftware/amazon/awssdk/services/s3/execution.interceptors\\E"
+    } ]
+  },
+  "bundles" : [ ]
+}

@@ -109,13 +109,18 @@
                         ;; Specify custom arguments for native image generation
                         ;; Works only on `:native` runtime.
                         ;; Check https://www.graalvm.org/reference-manual/native-image/Options/
-                        :native-image-args         ["--verbose"
+                        :native-image-args         [;"--verbose"
                                                     "--no-fallback"
                                                     "--enable-url-protocols=http,https"
                                                     "--report-unsupported-elements-at-runtime"
                                                     "-H:+AllowIncompleteClasspath"
                                                     "--no-server"
-                                                    "--initialize-at-build-time"]}
+                                                    "--initialize-at-build-time"
+                                                    ; these are required to allow AWS v2 API to run in native on AWS
+                                                    "--initialize-at-run-time=com.amazonaws.xray" ; entire x-ray package
+                                                    "--initialize-at-run-time=com.amazonaws.xray.interceptors.TracingInterceptor"
+                                                    "--initialize-at-run-time=com.amazonaws.xray.strategy.sampling.LocalizedSamplingStrategy"
+                                                    ]}
 
                        ;; Infrastructure properties
                        :infra

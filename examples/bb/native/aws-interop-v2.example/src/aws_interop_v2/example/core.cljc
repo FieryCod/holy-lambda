@@ -97,13 +97,13 @@
 
 (h/deflambda
   ExampleLambda
-  "handles 2 uris: one to list an s3 bucket, the second to display meta-data for an s3 object"
+  "handles 2 uris: one to list an s3 bucket, the second to display the ACL/permissions for an s3 object"
   [{:keys [event ctx] :as request}]
   (let [{:keys [envs]} event
         bucket (get envs "S3_BUCKET")
-        s3-client (aws-client {:id            :s3
-                               :default-thunk (fn [] (s3-client {:x-ray? xray-enabled?}))
-                               :conf          (mock-s3-client (fn [v _] v))
+        s3-client (aws-client {:id            :s3           ; you could have N s3 clients e.g. different regions
+                               :default-thunk (fn [] (s3-client {:x-ray? xray-enabled?})) ; used in AWS cloud
+                               :conf          (mock-s3-client (fn [v _] v)) ; used during native:conf payloads
                                :request       request})]
 
     ; allow requests to control logging of full request. Note: this could record your AWS keys in cloudwatch
@@ -123,7 +123,7 @@
                                        "</a></p>")))
                            (str/join "\n")))))
       ; object perms page
-      (str/starts-with? (:path request) "/obj")
+      (some-> request :path (str/starts-with? "/obj"))
       (let [s3-acl-response (s3-get-acl s3-client {:bucket bucket
                                                    :key    "TODO"})]
         (hr/html (str "<h2>"
@@ -136,6 +136,25 @@
 
 (native/entrypoint [#'ExampleLambda])
 
-(agent/in-context
+; native:conf forms i.e. exercise all code paths that must be captured by Graalvm for inclusion during native:executable
 
-  )
+(def bucket-name "yourbucketname")
+
+(agent/in-context
+  ; safe s3 request i.e. no side effects
+  (-> (s3-client {#_#_:region Region/AP_SOUTHEAST_2})
+      (s3-list-objects {:bucket bucket-name})
+      count
+      (->> (println "s3 bucket count:"))))
+
+(agent/in-context
+  ; safe s3 request with x-ray enabled to sample x-ray init blocks. need all classes from this added to runtime init list
+  ; https://github.com/quarkusio/quarkus/blob/main/extensions/amazon-lambda-xray/deployment/src/main/java/io/quarkus/amazon/lambda/xray/XrayBuildStep.java
+  (try
+    (-> {#_#_:region Region/AP_SOUTHEAST_2
+         :x-ray? true}
+        s3-client
+        (s3-list-objects {:bucket bucket-name}))
+    (catch Exception e
+      (println (.getMessage e)))))
+
