@@ -1,0 +1,33 @@
+{:deps           {org.clojure/clojure                            {:mvn/version "1.10.3"}
+                  io.github.FieryCod/holy-lambda                 {:mvn/version "0.2.3"}
+
+                  ; AWS API
+
+                  ; must use this client instead of default/apache for graal native:executable compat
+                  software.amazon.awssdk/url-connection-client   {:mvn/version "2.16.72"}
+                  ; important: excluding unused http clients below fixes graal native:executable breaking on
+                  ; Random/SecureRandom due to DnsClient static init
+                  software.amazon.awssdk/s3                      {:mvn/version "2.16.99"
+                                                                  :exclusions  [software.amazon.awssdk/netty-nio-client
+                                                                                software.amazon.awssdk/apache-client]}
+                  com.amazonaws/aws-xray-recorder-sdk-aws-sdk-v2 {:mvn/version "2.9.1"}}
+
+ ;; Local repositories should be downloaded to `.holy-lambda` directory
+ ;; This way project artifacts are separated from global ~/.m2 and only project artifacts
+ ;; are deployed to AWS Lambda
+ :mvn/local-repo ".holy-lambda/.m2"
+
+ :paths          ["src" "resources"]
+
+ :aliases        {:test    {:extra-paths ["test"]
+                            :extra-deps  {clj-fakes/clj-fakes {:mvn/version "0.12.0"}}}
+                  :dev     {:extra-paths ["dev"]
+                            :extra-deps  {vvvvalvalval/scope-capture      {:mvn/version "0.3.2"}
+                                          ring/ring-core                  {:mvn/version "1.9.3"}
+                                          ring/ring-jetty-adapter         {:mvn/version "1.9.3"}
+                                          metosin/reitit-ring             {:mvn/version "0.2.9"}
+                                          org.martinklepsch/clj-http-lite {:mvn/version "0.4.3"}}}
+                  ;; Required if bb tasks don't use docker
+                  :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
+                            :exec-fn      hf.depstar/uberjar
+                            :exec-args    {}}}}
