@@ -493,10 +493,13 @@
     (apply shell
            (concat
             ["docker run --rm"
-             ;; Support more aws variables
              "-e" "AWS_CREDENTIAL_PROFILES_FILE=/.aws/credentials"
              "-e" "AWS_CONFIG_FILE=/.aws/config"
              "-e" "AWS_SHARED_CREDENTIALS_FILE=/.aws/credentials"
+             (when-let [aws-access-key (System/getenv "AWS_ACCESS_KEY_ID")]
+               ["-e" (str "AWS_ACCESS_KEY_ID=" aws-access-key)])
+             (when-let [aws-secret-access-key (System/getenv "AWS_SECRET_ACCESS_KEY")]
+               ["-e" (str "AWS_SECRET_ACCESS_KEY=" aws-secret-access-key)])
              "-v" (str (.getAbsolutePath (io/file "")) ":/project")
              "-v" (str AWS_DIR ":" "/.aws:ro")]
             (when DOCKER_NETWORK [(str "--network=" DOCKER_NETWORK)])
@@ -1107,7 +1110,7 @@ set -e
             (hpr (prw "No function output!"))
             (do
               (hpr "-----------------------------" (accent "Function Output:") "--------------------------")
-              (hpr out)))
+              (println out)))
           (hpr "-------------------------------------------------------------------------")))
       (System/exit exit))))
 
