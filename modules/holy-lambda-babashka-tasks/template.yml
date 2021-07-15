@@ -42,8 +42,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: example.core.ExampleLambda
-      Layers:
-        - !Ref BabashkaLayer
+      # Layers:
+        # - !Ref BabashkaLayer
       Events:
         HelloEvent:
           Type: HttpApi

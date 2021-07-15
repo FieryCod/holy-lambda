@@ -77,6 +77,7 @@
   (let [runtime (get env-vars "AWS_LAMBDA_RUNTIME_API")
         handler-name (get env-vars "_HANDLER")
         aws-event (fetch-aws-event runtime)
+        ;; _ (println aws-event)
         handler (get routes handler-name)
         iid (:invocation-id aws-event)]
 
