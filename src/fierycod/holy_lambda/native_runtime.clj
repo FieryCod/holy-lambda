@@ -77,9 +77,12 @@
   (let [runtime (get env-vars "AWS_LAMBDA_RUNTIME_API")
         handler-name (get env-vars "_HANDLER")
         aws-event (fetch-aws-event runtime)
-        ;; _ (println aws-event)
         handler (get routes handler-name)
         iid (:invocation-id aws-event)]
+
+    ;; https://github.com/aws/aws-xray-sdk-java/blob/master/aws-xray-recorder-sdk-core/src/main/java/com/amazonaws/xray/contexts/LambdaSegmentContext.java#L40
+    (when-let [trace-id (u/getf-header (:headers aws-event) "Lambda-Runtime-Trace-Id")]
+      (System/setProperty "com.amazonaws.xray.traceHeader" trace-id))
 
     (when-not handler
       (send-runtime-error runtime iid (->ex (str "Handler " handler-name " not found!")))
