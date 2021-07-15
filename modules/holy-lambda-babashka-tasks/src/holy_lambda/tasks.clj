@@ -493,6 +493,7 @@
     (apply shell
            (concat
             ["docker run --rm"
+             ;; Support more aws variables
              "-e" "AWS_CREDENTIAL_PROFILES_FILE=/.aws/credentials"
              "-e" "AWS_CONFIG_FILE=/.aws/config"
              "-e" "AWS_SHARED_CREDENTIALS_FILE=/.aws/credentials"

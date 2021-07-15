@@ -3,4 +3,7 @@
 (alter-var-root #'babashka.deps/add-deps
                 (fn [f]
                   (fn [m]
-                    (f (merge m {:mvn/local-repo "/opt/.m2"})))))
+                    (println "[holy-lambda] Dependencies should not be added via add-deps. Move your dependencies to a layer!")
+                    (System/exit 1)
+                    ;; (f (merge m {:mvn/local-repo "/opt/.m2"}))
+                    )))

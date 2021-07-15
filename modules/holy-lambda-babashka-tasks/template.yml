@@ -31,12 +31,19 @@ Globals:
         Entrypoint: !Ref Entrypoint
 
 Resources:
+  BabashkaLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: holy-lambda-babashka-runtime
+      Description: holy-lambda micro framework babashka compatible runtime layer
+      ContentUri: ./holy-lambda-babashka-runtime
+
   ExampleLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: example.core.ExampleLambda
-      # Layers:
-      #   - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:44
+      Layers:
+        - !Ref BabashkaLayer
       Events:
         HelloEvent:
           Type: HttpApi
