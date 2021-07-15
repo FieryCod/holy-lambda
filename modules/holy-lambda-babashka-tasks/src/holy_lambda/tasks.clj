@@ -316,7 +316,7 @@
           (hpr (pre "Runtime") (accent runtime) (pre "is not one of") (accent AVAILABLE_RUNTIMES)))
         (alter-var-root #'*RUNTIME_NAME* (constantly runtime))))))
 
-(defn can-obtain-from-aws-profile?!
+(defn obtain-from-aws-profile
   [what]
   (let [result (csh/sh "aws" "configure" "get" what "--profile" AWS_PROFILE)]
     (if-not (= (:exit result) 0)
@@ -325,7 +325,7 @@
                              (str "\n" (pre (:err result))))
                            (pre "\nDid you run command: ") (accent "aws configure") (pre "?"))
                       {}))
-      true)))
+      (s/trim (:out result)))))
 
 (def REGION
   (or (System/getenv "HL_REGION")
@@ -338,8 +338,7 @@
             (hpr (pre "Unable to get region from any of the sources: envs, credentials file."))
             (System/exit 1))
           (try
-            (can-obtain-from-aws-profile?! "region")
-            (s/trim (:out (csh/sh "aws" "configure" "get" "region" "--profile" AWS_PROFILE)))
+            (obtain-from-aws-profile "region")
             (catch Exception e
               (hpr (ex-message e))
               (System/exit 1)))))))
@@ -367,15 +366,20 @@
 (def BABASHKA_LAYER_INSTANCE (str BUCKET_NAME "-hlbbri-" (s/replace RUNTIME_VERSION #"\." "-")))
 (def OFFICIAL_BABASHKA_LAYER_ARN "arn:aws:serverlessrepo:eu-central-1:443526418261:applications/holy-lambda-babashka-runtime")
 
+(def AWS_ACCESS_KEY_ID (atom (System/getenv "AWS_ACCESS_KEY_ID")))
+(def AWS_SECRET_ACCESS_KEY (atom (System/getenv "AWS_SECRET_ACCESS_KEY")))
+
 (when (and (not HL_NO_PROFILE?)
-           (not (System/getenv "AWS_ACCESS_KEY_ID"))
-           (not (System/getenv "AWS_SECRET_ACCESS_KEY")))
+           (not @AWS_ACCESS_KEY_ID)
+           (not @AWS_SECRET_ACCESS_KEY))
   (if-not (command-exists? "aws")
     (do (hpr (accent "aws") (pre "command does not exists. Did you install AWS command line application?"))
         (System/exit 1))
     (try
-      (can-obtain-from-aws-profile?! "aws_access_key_id")
-      (can-obtain-from-aws-profile?! "aws_secret_access_key")
+      (let [access-key (obtain-from-aws-profile "aws_access_key_id")
+            secret-key (obtain-from-aws-profile "aws_secret_access_key")]
+        (reset! AWS_ACCESS_KEY_ID access-key)
+        (reset! AWS_SECRET_ACCESS_KEY secret-key))
       (catch Exception e
         (hpr (ex-message e))
         (System/exit 1)))))
@@ -496,9 +500,9 @@
              "-e" "AWS_CREDENTIAL_PROFILES_FILE=/.aws/credentials"
              "-e" "AWS_CONFIG_FILE=/.aws/config"
              "-e" "AWS_SHARED_CREDENTIALS_FILE=/.aws/credentials"
-             (when-let [aws-access-key (System/getenv "AWS_ACCESS_KEY_ID")]
+             (when-let [aws-access-key @AWS_ACCESS_KEY_ID]
                ["-e" (str "AWS_ACCESS_KEY_ID=" aws-access-key)])
-             (when-let [aws-secret-access-key (System/getenv "AWS_SECRET_ACCESS_KEY")]
+             (when-let [aws-secret-access-key @AWS_SECRET_ACCESS_KEY]
                ["-e" (str "AWS_SECRET_ACCESS_KEY=" aws-secret-access-key)])
              "-v" (str (.getAbsolutePath (io/file "")) ":/project")
              "-v" (str AWS_DIR ":" "/.aws:ro")]
