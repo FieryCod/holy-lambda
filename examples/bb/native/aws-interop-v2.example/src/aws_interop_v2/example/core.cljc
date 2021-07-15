@@ -9,7 +9,7 @@
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.time Instant]
            [java.net HttpURLConnection]
-    ; AWS API
+           ;; AWS API
            [software.amazon.awssdk.regions Region]
            [com.amazonaws.xray.interceptors TracingInterceptor]
            [software.amazon.awssdk.core.client.config ClientOverrideConfiguration]
@@ -17,8 +17,8 @@
            [software.amazon.awssdk.http.urlconnection UrlConnectionHttpClient]
            [software.amazon.awssdk.core ResponseInputStream SdkBytes]
            [software.amazon.awssdk.http AbortableInputStream]
-    ; AWS S3 API
-    ; https://sdk.amazonaws.com/java/api/latest/index.html?software/amazon/awssdk/services/s3/package-summary.html
+           ;; AWS S3 API
+           ;; https://sdk.amazonaws.com/java/api/latest/index.html?software/amazon/awssdk/services/s3/package-summary.html
            [software.amazon.awssdk.services.s3 S3Client]
            [software.amazon.awssdk.services.s3.model S3Object
                                                      ListObjectsRequest ListObjectsResponse
@@ -95,8 +95,7 @@
                     (.build))]
     (.getObjectAcl client request)))
 
-(h/deflambda
-  ExampleLambda
+(h/deflambda ExampleLambda
   "handles 2 uris: one to list an s3 bucket, the second to display the ACL/permissions for an s3 object"
   [{:keys [event ctx] :as request}]
   (let [{:keys [envs]} event

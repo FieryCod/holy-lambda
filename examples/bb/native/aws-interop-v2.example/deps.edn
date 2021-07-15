@@ -1,12 +1,12 @@
 {:deps           {org.clojure/clojure                            {:mvn/version "1.10.3"}
                   io.github.FieryCod/holy-lambda                 {:mvn/version "0.2.3"}
 
-                  ; AWS API
+                  ;; AWS API
 
-                  ; must use this client instead of default/apache for graal native:executable compat
+                  ;; must use this client instead of default/apache for graal native:executable compat
                   software.amazon.awssdk/url-connection-client   {:mvn/version "2.16.72"}
-                  ; important: excluding unused http clients below fixes graal native:executable breaking on
-                  ; Random/SecureRandom due to DnsClient static init
+                  ;; important: excluding unused http clients below fixes graal native:executable breaking on
+                  ;; Random/SecureRandom due to DnsClient static init
                   software.amazon.awssdk/s3                      {:mvn/version "2.16.99"
                                                                   :exclusions  [software.amazon.awssdk/netty-nio-client
                                                                                 software.amazon.awssdk/apache-client]}
