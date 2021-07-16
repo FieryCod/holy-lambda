@@ -18,6 +18,13 @@
 
 (deps/add-deps {:deps {'clojure-term-colors/clojure-term-colors {:mvn/version "0.1.0"}}})
 
+(defn env-true?
+  [env]
+  (when-let [prop (System/getenv env)]
+    (contains? #{"true" "1"} prop)))
+
+(def HL_DEBUG? (env-true? "HL_DEBUG"))
+
 (require
  '[clojure.term.colors :refer [underline blue yellow red green]])
 
@@ -54,24 +61,6 @@
                (or v true)])
             (partition-all 2 args))))
 
-(defn- exit-non-zero
-  [proc]
-  (when-let [exit-code (some-> proc deref :exit)]
-    (when (not (zero? exit-code))
-      (System/exit exit-code))))
-
-(defn- shell
-  [cmd & args]
-  (exit-non-zero (p/process (into (p/tokenize cmd) (remove nil? args)) {:inherit true})))
-
-(defn- shell-no-exit-n-inherit
-  [cmd & args]
-  (p/process (into (p/tokenize cmd) (remove nil? args))))
-
-(defn- shell-no-exit
-  [cmd & args]
-  (p/process (into (p/tokenize cmd) (remove nil? args)) {:inherit true}))
-
 (defn accent
   [s]
   (underline (blue s)))
@@ -91,6 +80,29 @@
 (defn prs
   [s]
   (green s))
+
+(defn hprd
+  [& args]
+  (apply println (accent "[holy-lambda][debug]") args))
+
+(defn- exit-non-zero
+  [proc]
+  (when HL_DEBUG? (hprd (s/trim (s/join " " (:cmd @proc)))))
+  (when-let [exit-code (some-> proc deref :exit)]
+    (when (not (zero? exit-code))
+      (System/exit exit-code))))
+
+(defn- shell
+  [cmd & args]
+  (exit-non-zero (p/process (into (p/tokenize cmd) (remove nil? args)) {:inherit true})))
+
+(defn- shell-no-exit-n-inherit
+  [cmd & args]
+  (p/process (into (p/tokenize cmd) (remove nil? args))))
+
+(defn- shell-no-exit
+  [cmd & args]
+  (p/process (into (p/tokenize cmd) (remove nil? args)) {:inherit true}))
 
 (defn shsp
   [cmd & args]
@@ -168,11 +180,6 @@
     (do (hpr (accent ":holy-lambda/options") (pre "are not declared in") (accent "bb.edn") (pre "file!")
              (pre "Exiting!"))
         (System/exit 1))))
-
-(defn env-true?
-  [env]
-  (when-let [prop (System/getenv env)]
-    (contains? #{"true" "1"} prop)))
 
 (def TTY? (= (:exit @(shell-no-exit "test" "-t" "1")) 0))
 (def DOCKER (:docker OPTIONS))
