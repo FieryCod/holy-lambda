@@ -137,23 +137,24 @@
 
 ; native:conf forms i.e. exercise all code paths that must be captured by Graalvm for inclusion during native:executable
 
-(def bucket-name "yourbucketname")
+(def bucket-name "hltaskstest")
 
 (agent/in-context
   ; safe s3 request i.e. no side effects
   (-> (s3-client {#_#_:region Region/AP_SOUTHEAST_2})
       (s3-list-objects {:bucket bucket-name})
+      (.contents)
       count
       (->> (println "s3 bucket count:"))))
 
 (agent/in-context
   ; safe s3 request with x-ray enabled to sample x-ray init blocks. need all classes from this added to runtime init list
   ; https://github.com/quarkusio/quarkus/blob/main/extensions/amazon-lambda-xray/deployment/src/main/java/io/quarkus/amazon/lambda/xray/XrayBuildStep.java
-  (try
-    (-> {#_#_:region Region/AP_SOUTHEAST_2
-         :x-ray? true}
-        s3-client
-        (s3-list-objects {:bucket bucket-name}))
-    (catch Exception e
-      (println (.getMessage e)))))
-
+  ;; (try
+  ;;   (-> {#_#_:region Region/AP_SOUTHEAST_2
+  ;;        :x-ray? true}
+  ;;       s3-client
+  ;;       (s3-list-objects {:bucket bucket-name}))
+  ;;   (catch Exception e
+  ;;     (println (.getMessage e))))
+  )
