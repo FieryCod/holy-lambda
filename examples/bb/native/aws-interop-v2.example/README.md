@@ -38,7 +38,6 @@ The more idiomatic Clojure wrapper from Cognitect:
 
 - does not support x-ray
 - does not support pre-signed S3 requests
-- is alpha
 
 ## Why local server?
 
