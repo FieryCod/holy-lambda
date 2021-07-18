@@ -4,6 +4,17 @@
 packaged.yaml
 server
 docker/graalvm-ee*
+.settings
+clojure8.zip
+clojure11.zip
+.project
+.classpath
+java11.zip
+output11
+output11.build*
+java8.zip
+output8
+output8.build*
 native-packaged.yaml
 haskell.zip
 invoke-envs.json

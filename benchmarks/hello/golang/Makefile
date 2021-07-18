@@ -8,4 +8,4 @@ build: build-docker
 	@mv handler ../artifacts/golang-handler
 
 build-docker:
-	@[ -n "$(IMAGE_EXISTS)" ] || docker build . -t amazon-golang
+	[ -n "$(IMAGE_EXISTS)" ] || docker build . -t amazon-golang

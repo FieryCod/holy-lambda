@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+
+./output11 $_HANDLER

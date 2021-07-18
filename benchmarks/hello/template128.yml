@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  Benchmarking simple hello programs
+  Benchmarking simple hello programs using different runtimes
 
 Parameters:
   Timeout:
@@ -17,32 +17,102 @@ Globals:
     MemorySize: !Ref MemorySize
 
 Resources:
-  ClojureOnJavaRuntime:
+  ClojureJava8Runtime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ClojureOnJavaRuntime
-      CodeUri: artifacts/clojure.jar
+      FunctionName: ClojureJava8Runtime
+      CodeUri: artifacts/clojure8.jar
       Runtime: java8
       Handler: hello.Hello
       Events:
         HelloEvent:
           Type: HttpApi
           Properties:
-            Path: /clojure-on-java
+            Path: /clojure-java8
             Method: get
 
-  ClojureOnNativeRuntime:
+  ClojureJava11Runtime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ClojureOnNativeRuntime
-      CodeUri: artifacts/clojure-native.zip
+      FunctionName: ClojureJava8Runtime
+      CodeUri: artifacts/clojure11.jar
+      Runtime: java11
+      Handler: hello.Hello
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojure-java11
+            Method: get
+
+  ClojureGraalVM211CE8:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ClojureGraalVM211CE8
+      CodeUri: artifacts/clojure8.zip
       Runtime: provided
       Handler: hello.Hello
       Events:
         HelloEvent:
           Type: HttpApi
           Properties:
-            Path: /clojure-on-native
+            Path: /clojuregraalnative21ce8
+            Method: get
+
+  ClojureGraalVM211CE11:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ClojureGraalVM211CE11
+      CodeUri: artifacts/clojure11.zip
+      Runtime: provided
+      Handler: hello.Hello
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojuregraalnative21ce11
+            Method: get
+
+  Java8Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Java8Runtime
+      CodeUri: artifacts/java-8.jar
+      Runtime: java8
+      Handler: fierycod.App::handleRequest
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /java8
+            Method: get
+
+  JavaGraalVM211CE8:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: JavaGraalVM211CE8
+      CodeUri: artifacts/java8.zip
+      Runtime: provided
+      Handler: fierycod.App::handleRequest
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /javagraalnative21ce8
+            Method: get
+
+  Java11Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Java11Runtime
+      CodeUri: artifacts/java-11.jar
+      Runtime: java11
+      Handler: fierycod.App
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /java11
             Method: get
 
   ClojureOnBabashkaRuntime:

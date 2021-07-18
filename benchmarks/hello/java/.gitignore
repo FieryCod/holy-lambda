@@ -1,0 +1,9 @@
+.DS_Store
+.idea
+*.log
+tmp/
+
+*.class
+build
+target
+pom.xml.versionsBackup
