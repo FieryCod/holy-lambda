@@ -5,6 +5,10 @@
     }, {
       "pattern" : "\\Qcom/amazonaws/xray/interceptors/DefaultOperationParameterWhitelist.json\\E"
     }, {
+      "pattern" : "\\Qcom/amazonaws/xray/sdk.properties\\E"
+    }, {
+      "pattern" : "\\Qcom/amazonaws/xray/strategy/sampling/DefaultSamplingRules.json\\E"
+    }, {
       "pattern" : "\\Qsoftware/amazon/awssdk/global/handlers/execution.interceptors\\E"
     }, {
       "pattern" : "\\Qsoftware/amazon/awssdk/services/s3/execution.interceptors\\E"
