@@ -41,6 +41,7 @@ I've started experimenting with native runtime around May 2019 inspired by @hjha
 - target both Java & native runtime
 - mix GraalVM supported languages freely (polyglot)
 - use Profile-Guided Optimizations on GraalVM EE [PGO](https://www.graalvm.org/reference-manual/native-image/PGO/)
+- supports API Gateway Http and Authorizer policy responses [Lambda Authorizer](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-output.html)
 
 **Tradeoffs**
 - you have to generate native-configurations for GraalVM (automated by running `bb native:conf`)
