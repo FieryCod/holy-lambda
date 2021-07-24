@@ -15,12 +15,14 @@ Globals:
   Function:
     Timeout: !Ref Timeout
     MemorySize: !Ref MemorySize
+    ReservedConcurrentExecutions: 30
 
 Resources:
   ClojureJava8Runtime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ClojureJava8Runtime
+      Tracing: Active
+      FunctionName: !Sub "ClojureJava8Runtime-${MemorySize}"
       CodeUri: artifacts/clojure8.jar
       Runtime: java8
       Handler: hello.Hello
@@ -34,7 +36,8 @@ Resources:
   ClojureJava11Runtime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ClojureJava8Runtime
+      Tracing: Active
+      FunctionName: !Sub "ClojureJava11Runtime-${MemorySize}"
       CodeUri: artifacts/clojure11.jar
       Runtime: java11
       Handler: hello.Hello
@@ -48,7 +51,8 @@ Resources:
   ClojureGraalVM211CE8:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ClojureGraalVM211CE8
+      Tracing: Active
+      FunctionName: !Sub "ClojureGraalVM211CE8-${MemorySize}"
       CodeUri: artifacts/clojure8.zip
       Runtime: provided
       Handler: hello.Hello
@@ -62,7 +66,8 @@ Resources:
   ClojureGraalVM211CE11:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ClojureGraalVM211CE11
+      Tracing: Active
+      FunctionName: !Sub "ClojureGraalVM211CE11-${MemorySize}"
       CodeUri: artifacts/clojure11.zip
       Runtime: provided
       Handler: hello.Hello
@@ -76,7 +81,8 @@ Resources:
   Java8Runtime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: Java8Runtime
+      Tracing: Active
+      FunctionName: !Sub "Java8Runtime-${MemorySize}"
       CodeUri: artifacts/java-8.jar
       Runtime: java8
       Handler: fierycod.App::handleRequest
@@ -90,7 +96,8 @@ Resources:
   JavaGraalVM211CE8:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: JavaGraalVM211CE8
+      Tracing: Active
+      FunctionName: !Sub "JavaGraalVM211CE8-${MemorySize}"
       CodeUri: artifacts/java8.zip
       Runtime: provided
       Handler: fierycod.App::handleRequest
@@ -104,7 +111,8 @@ Resources:
   Java11Runtime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: Java11Runtime
+      Tracing: Active
+      FunctionName: !Sub "Java11Runtime-${MemorySize}"
       CodeUri: artifacts/java-11.jar
       Runtime: java11
       Handler: fierycod.App
@@ -118,7 +126,8 @@ Resources:
   ClojureOnBabashkaRuntime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ClojureOnBabashkaRuntime
+      Tracing: Active
+      FunctionName: !Sub "ClojureOnBabashkaRuntime-${MemorySize}"
       CodeUri: clojure-babashka
       Runtime: provided
       Handler: hello.Hello
@@ -137,7 +146,8 @@ Resources:
   Nodejs14Runtime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: Nodejs14Runtime
+      Tracing: Active
+      FunctionName: !Sub "Nodejs14Runtime-${MemorySize}"
       CodeUri: nodejs
       Runtime: nodejs14.x
       Handler: index.handler
@@ -151,7 +161,8 @@ Resources:
   Nodejs12Runtime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: Nodejs12Runtime
+      Tracing: Active
+      FunctionName: !Sub "Nodejs12Runtime-${MemorySize}"
       CodeUri: nodejs
       Runtime: nodejs12.x
       Handler: index.handler
@@ -165,7 +176,8 @@ Resources:
   Nodejs10Runtime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: Nodejs10Runtime
+      Tracing: Active
+      FunctionName: !Sub "Nodejs10Runtime-${MemorySize}"
       CodeUri: nodejs
       Runtime: nodejs10.x
       Handler: index.handler
@@ -179,7 +191,8 @@ Resources:
   PythonRuntime38:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: PythonRuntime38
+      Tracing: Active
+      FunctionName: !Sub "PythonRuntime38-${MemorySize}"
       CodeUri: python
       Runtime: python3.8
       Handler: index.handler
@@ -193,7 +206,8 @@ Resources:
   PythonRuntime27:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: PythonRuntime27
+      Tracing: Active
+      FunctionName: !Sub "PythonRuntime27-${MemorySize}"
       CodeUri: python
       Runtime: python2.7
       Handler: index.handler
@@ -207,7 +221,8 @@ Resources:
   RubyRuntime25:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: RubyRuntime25
+      Tracing: Active
+      FunctionName: !Sub "RubyRuntime25-${MemorySize}"
       CodeUri: ruby
       Runtime: ruby2.5
       Handler: index.handler
@@ -221,7 +236,8 @@ Resources:
   RubyRuntime27:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: RubyRuntime27
+      Tracing: Active
+      FunctionName: !Sub "RubyRuntime27-${MemorySize}"
       CodeUri: ruby
       Runtime: ruby2.7
       Handler: index.handler
@@ -235,7 +251,8 @@ Resources:
   GolangRuntime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: GolangRuntime
+      Tracing: Active
+      FunctionName: !Sub "GolangRuntime-${MemorySize}"
       CodeUri: artifacts
       Runtime: go1.x
       Handler: golang-handler
@@ -249,7 +266,8 @@ Resources:
   RustRuntime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: RustRuntime
+      Tracing: Active
+      FunctionName: !Sub "RustRuntime-${MemorySize}"
       CodeUri: artifacts/latest-rust.zip
       Runtime: provided
       Handler: provided
@@ -263,7 +281,8 @@ Resources:
   HaskellRuntime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: HaskellRuntime
+      Tracing: Active
+      FunctionName: !Sub "HaskellRuntime-${MemorySize}"
       CodeUri: artifacts/haskell.zip
       Runtime: provided
       Handler: src/Lib.handler
@@ -277,7 +296,8 @@ Resources:
   CsharpRuntime:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: CsharpRuntime
+      Tracing: Active
+      FunctionName: !Sub "CsharpRuntime-${MemorySize}"
       CodeUri: artifacts/csharp.zip
       Runtime: dotnetcore2.1
       Handler: dotnet21::dotnet21.Hello::Handler

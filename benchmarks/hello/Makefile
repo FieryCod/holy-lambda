@@ -1,5 +1,6 @@
 .PHONY: build
 BUCKET_NAME:=none
+STACK_NAME:=hl-hello-benches-v1
 
 build: artifacts/clojure8.zip artifacts/clojure11.zip artifacts/clojure8.jar artifacts/clojure11.jar artifacts/golang-handler artifacts/latest-rust.zip artifacts/haskell.zip artifacts/csharp.zip artifacts/java-8.jar artifacts/java-11.jar artifacts/java8.zip artifacts/java11.zip
 	@echo "All deployable artifacts has been build!"
@@ -7,7 +8,7 @@ build: artifacts/clojure8.zip artifacts/clojure11.zip artifacts/clojure8.jar art
 artifacts/clojure8.jar artifacts/clojure11.jar:
 	@cd clojure && make build
 
-artifacts/golang:
+artifacts/golang-handler:
 	@cd golang && make build
 
 artifacts/clojure8.zip artifacts/clojure11.zip:
@@ -29,10 +30,18 @@ clean:
 	rm -Rf artifacts/clojure8.zip artifacts/clojure11.zip artifacts/clojure8.jar artifacts/clojure11.jar artifacts/golang-handler artifacts/latest-rust.zip artifacts/haskell.zip artifacts/csharp.zip artifacts/java-8.jar artifacts/java-11.jar artifacts/java8.zip artifacts/java11.zip
 
 deploy-128:
-	BUCKET_NAME=hlbench-hello-128
-
+ifeq ($(BUCKET_NAME), none)
+	make BUCKET_NAME=hl-hellobench-128 deploy-128
+endif
 	@aws s3 ls s3://$(BUCKET_NAME) || aws s3 mb s3://$(BUCKET_NAME)
-	@sam package --template-file template128.yml --output-template-file packaged-128.yml --s3-bucket $(BUCKET_NAME) --s3-prefix $(S3_PREFIX)
+	@sam package --template-file template128.yml --output-template-file packaged-128.yml --s3-bucket $(BUCKET_NAME)
+	@sam deploy  --template-file packaged-128.yml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region eu-central-1 --s3-bucket $(BUCKET_NAME)
+
+destroy-128:
+ifeq ($(BUCKET_NAME), none)
+	make BUCKET_NAME=hl-hellobench-128 destroy-128
+endif
+	@aws cloudformation delete-stack --stack-name $(STACK_NAME) --region eu-central-1
 
 test:
 	@echo "---------------------------------------------------------"

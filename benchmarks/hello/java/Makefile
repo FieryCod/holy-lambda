@@ -41,11 +41,12 @@ output11: output11.jar
 		native-image -jar output11.jar \
 		  -H:+AllowIncompleteClasspath \
 		  --report-unsupported-elements-at-runtime \
-      --no-fallback \
+			-H:ConfigurationFileDirectories=resources \
+			--no-fallback \
       --verbose \
       --enable-url-protocols=http,https \
-      --no-server \
-      --initialize-at-build-time"
+			--no-server \
+      --initialize-at-build-time=org.slf4j"
 
 clean:
 	rm -Rf output8.jar output8 output11.jar output11 target
@@ -56,5 +57,5 @@ build8: output8.jar output8
 build11: output11.jar output11
 	@chmod +x output11 && cp resources/bootstrap-native-11 bootstrap && chmod +x bootstrap && zip -r -j java11 bootstrap output11 && rm -Rf bootstrap && mv java11.zip ../artifacts/
 
-build: build-java build8 build11
+build: output8.jar output11.jar build8 build11
 	@echo "Building Java Native artifacts"

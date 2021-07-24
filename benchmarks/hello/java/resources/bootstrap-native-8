@@ -2,4 +2,4 @@
 
 set -e
 
-./output8 $_HANDLER
+./output8
