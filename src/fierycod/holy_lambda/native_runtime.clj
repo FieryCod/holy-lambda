@@ -95,7 +95,7 @@
   "Generates the entrypoint function which has the two roles:
   1. The `-main` might be then launched by AWS in the lambda runtime.
      Lambda runtime tries to proxy the payloads from AWS to corresponding handlers
-     defined in `native-template.yml`.
+     defined in `template.yml`.
 
   2. The `-main` might be used to generate the configuration necessary to compile
      the project to native.

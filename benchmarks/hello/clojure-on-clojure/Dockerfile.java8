@@ -1,0 +1,6 @@
+FROM openjdk:8
+MAINTAINER Karol Wójcik <karol.wojcik@tuta.io>
+
+ADD clojure-on-clojure-8.jar output.jar
+
+CMD java -jar output.jar

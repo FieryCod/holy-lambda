@@ -18,19 +18,34 @@ Globals:
     ReservedConcurrentExecutions: 30
 
 Resources:
+  ClojureClojureJava11Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "ClojureClojureJava11Runtime-${MemorySize}"
+      PackageType: Image
+      ImageUri: fierycod/clojure-on-clojure-java11:latest
+      Handler: hello.Hello
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojure-on-java8
+            Method: get
+
   ClojureJava8Runtime:
     Type: AWS::Serverless::Function
     Properties:
       Tracing: Active
       FunctionName: !Sub "ClojureJava8Runtime-${MemorySize}"
-      CodeUri: artifacts/clojure8.jar
+      CodeUri: artifacts/clojure-on-java-8.jar
       Runtime: java8
       Handler: hello.Hello
       Events:
         HelloEvent:
           Type: HttpApi
           Properties:
-            Path: /clojure-java8
+            Path: /clojure-on-java8
             Method: get
 
   ClojureJava11Runtime:
@@ -38,14 +53,14 @@ Resources:
     Properties:
       Tracing: Active
       FunctionName: !Sub "ClojureJava11Runtime-${MemorySize}"
-      CodeUri: artifacts/clojure11.jar
+      CodeUri: artifacts/clojure-on-java-11.jar
       Runtime: java11
       Handler: hello.Hello
       Events:
         HelloEvent:
           Type: HttpApi
           Properties:
-            Path: /clojure-java11
+            Path: /clojure-on-java11
             Method: get
 
   ClojureGraalVM211CE8:
