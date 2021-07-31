@@ -6,6 +6,7 @@ server
 docker/graalvm-ee*
 native-packaged.yaml
 invoke-envs.json
+.aws-sam
 fnative-envs.list
 envs.example.json
 /classes

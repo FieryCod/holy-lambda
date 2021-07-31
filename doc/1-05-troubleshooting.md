@@ -97,7 +97,6 @@
     │           ├── agent.clj
     │           ├── core.cljc
     │           ├── interceptor.cljc
-    │           ├── java_runtime.clj
     │           ├── native_runtime.clj
     │           ├── response.clj
     │           └── util.cljc

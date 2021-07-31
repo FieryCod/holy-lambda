@@ -4,28 +4,20 @@ Description: >
   Example basic lambda using `holy-lambda` micro library
 
 Parameters:
-  Runtime:
-    Type: String
-    Default: <HOLY_LAMBDA_RUNTIME>
   Timeout:
     Type: Number
     Default: 40
   MemorySize:
     Type: Number
-    Default: 2000
-  CodeUri:
-    Type: String
-    Default: <HOLY_LAMBDA_CODE_URI>
+    Default: 128
   Entrypoint:
     Type: String
     Default: <HOLY_LAMBDA_ENTRYPOINT>
 
 Globals:
   Function:
-    Runtime: !Ref Runtime
     Timeout: !Ref Timeout
     MemorySize: !Ref MemorySize
-    CodeUri: !Ref CodeUri
     Environment:
       Variables:
         Entrypoint: !Ref Entrypoint
@@ -41,9 +33,8 @@ Resources:
   ExampleLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
+      PackageType: Image
       Handler: example.core.ExampleLambda
-      # Layers:
-        # - !Ref BabashkaLayer
       Events:
         HelloEvent:
           Type: HttpApi
@@ -51,6 +42,28 @@ Resources:
             ApiId: !Ref ServerlessHttpApi
             Path: /
             Method: GET
+    Metadata:
+      DockerTag: new-tag
+      DockerContext: .
+      Dockerfile: Dockerfile
+
+  ExampleLambdaFunctionv2:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Handler: example.core.ExampleLambdav2
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ServerlessHttpApi
+            Path: /example
+            Method: GET
+
+    Metadata:
+      DockerTag: new-tag
+      DockerContext: .
+      Dockerfile: Dockerfile
 
   ServerlessHttpApi:
     Type: AWS::Serverless::HttpApi

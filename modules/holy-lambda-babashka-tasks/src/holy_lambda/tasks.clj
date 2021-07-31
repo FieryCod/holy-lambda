@@ -465,10 +465,10 @@
   [& [bucket-name aws-profile]]
   (contains? (buckets aws-profile) (or bucket-name BUCKET_NAME)))
 
-(defn parameters--java
+(defn parameters--clojure
   []
-  {"CodeUri"        OUTPUT_JAR_PATH
-   "Runtime"        "java8"
+  {"CodeUri"        ".holy-lambda/build/latest-clojure.zip"
+   "Runtime"        "provided"
    "Entrypoint"     ENTRYPOINT})
 
 (defn parameters--babashka
@@ -486,9 +486,11 @@
 (defn -parameters
   []
   (case *RUNTIME_NAME*
-    :java     (parameters--java)
+    :clojure (parameters--clojure)
     :babashka (parameters--babashka)
-    :native   (parameters--native)))
+    :native   (parameters--native)
+    :java (do (hpr (pre "Java runtime is not longer supported. Use Clojure runtime which is cleaner and faster!"))
+              (System/exit 1))))
 
 (defn parameters
   [& [opt]]
@@ -740,7 +742,7 @@ Resources:
     (hpr (pre "No") (accent ".holy-lambda/build/latest.zip") (pre "found! Run") (accent "native:executable"))
     (System/exit 1)))
 
-(defn stack-files-check--java
+(defn stack-files-check--jar
   []
   (when-not (file-exists? OUTPUT_JAR_PATH)
     (hpr (pre "No") (accent OUTPUT_JAR_PATH) (pre "found! Run") (accent "stack:compile"))
@@ -753,10 +755,12 @@ Resources:
     (System/exit 1))
 
   (case (or check *RUNTIME_NAME*)
-    :java   (stack-files-check--java)
+    :java   (do (hpr (pre "Java runtime is not longer supported. Use Clojure runtime which is cleaner and faster!"))
+              (System/exit 1))
     :native (do
-              (stack-files-check--java)
+              (stack-files-check--jar)
               (stack-files-check--native))
+    :clojure (stack-files-check--jar)
     :babashka nil
     nil))
 
@@ -922,24 +926,24 @@ set -e
         (shell "bash -c \"cd .holy-lambda/build && rm -Rf output-agent.jar native-configuration resources/native-configuration resources/native-agents-payloads output.build_artifacts.txt\"")
         (shell "bash -c \"cd .holy-lambda/build && zip -r latest.zip . -x 'output.jar'\"")))))
 
-(defn modify-template
-  []
-  (let [buffer (slurp TEMPLATE_FILE)
-        {:strs [CodeUri Runtime]} (-parameters)]
+;; (defn modify-template
+;;   []
+;;   (let [buffer (slurp TEMPLATE_FILE)
+;;         {:strs [CodeUri Runtime]} (-parameters)]
 
-    (when-not (re-find #"<HOLY_LAMBDA_CODE_URI>" buffer)
-      (hpr (pre "<HOLY_LAMBDA_CODE_URI> definition should be available. Check related issue https://github.com/aws/aws-sam-cli/issues/2835"))
-      (System/exit 1))
+;;     (when-not (re-find #"<HOLY_LAMBDA_CODE_URI>" buffer)
+;;       (hpr (pre "<HOLY_LAMBDA_CODE_URI> definition should be available. Check related issue https://github.com/aws/aws-sam-cli/issues/2835"))
+;;       (System/exit 1))
 
-    (when-not (re-find #"<HOLY_LAMBDA_RUNTIME>" buffer)
-      (hpr (pre "<HOLY_LAMBDA_RUNTIME> definition should be available. Check related issue https://github.com/aws/aws-sam-cli/issues/2835"))
-      (System/exit 1))
+;;     (when-not (re-find #"<HOLY_LAMBDA_RUNTIME>" buffer)
+;;       (hpr (pre "<HOLY_LAMBDA_RUNTIME> definition should be available. Check related issue https://github.com/aws/aws-sam-cli/issues/2835"))
+;;       (System/exit 1))
 
-    (spit MODIFIED_TEMPLATE_FILE
-          (-> buffer
-              (s/replace #"<HOLY_LAMBDA_CODE_URI>" CodeUri)
-              (s/replace #"<HOLY_LAMBDA_RUNTIME>" Runtime)
-              (s/replace #"\!Ref CodeUri" CodeUri)))))
+;;     (spit MODIFIED_TEMPLATE_FILE
+;;           (-> buffer
+;;               (s/replace #"<HOLY_LAMBDA_CODE_URI>" CodeUri)
+;;               (s/replace #"<HOLY_LAMBDA_RUNTIME>" Runtime)
+;;               (s/replace #"\!Ref CodeUri" CodeUri)))))
 
 (defn bucket:create
   "     \033[0;31m>\033[0m Creates a s3 stack bucket or the one specified by \033[0;31m:infra:bucket-name\033[0m
@@ -980,9 +984,9 @@ set -e
     ;; Check https://github.com/aws/aws-sam-cli/issues/2835
     ;; https://github.com/aws/aws-sam-cli/issues/2836
     (apply check-n-create-bucket args)
-    (modify-template)
+    ;; (modify-template)
     (shell "sam" "package"
-           "--template-file"        MODIFIED_TEMPLATE_FILE
+           "--template-file"        "template.yml"
            "--output-template-file" PACKAGED_TEMPLATE_FILE
            (when AWS_PROFILE
              "--profile")           AWS_PROFILE
@@ -1186,11 +1190,11 @@ set -e
     (when-not INFRA_AWS_PROFILE
       (hpr (prw ":infra:profile which should point to AWS Profile is not declared, therefore") (accent "default") (prw "profile will be used instead")))
 
-    (when (and (not= *RUNTIME_NAME* :native) BOOTSTRAP_FILE)
-      (hpr (prw ":runtime:bootstrap-file is supported only for") (accent ":native") (prw "runtime")))
+    (when (and (not (contains? #{:native :clojure} *RUNTIME_NAME*)) BOOTSTRAP_FILE)
+      (hpr (prw ":runtime:bootstrap-file is supported in") (accent ":native") (prw "and") (accent ":clojure") (prw "runtimes!")))
 
-    (when (and (= *RUNTIME_NAME* :native) BOOTSTRAP_FILE (not (file-exists? BOOTSTRAP_FILE)))
-      (hpr (prw ":runtime:bootstrap-file does not exists. Default bootstrap file for") (accent ":native") (prw "runtime will be used!")))
+    (when (and (not (contains? #{:native :clojure} *RUNTIME_NAME*)) BOOTSTRAP_FILE (not (file-exists? BOOTSTRAP_FILE)))
+      (hpr (prw ":runtime:bootstrap-file:") (accent BOOTSTRAP_FILE) (prw "does not exists!")))
 
     (when (and (not= *RUNTIME_NAME* :native) NATIVE_DEPS_PATH)
       (hpr (prw ":runtime:native-deps is supported only for") (accent ":native") (prw "runtime")))

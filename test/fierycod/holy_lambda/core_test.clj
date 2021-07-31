@@ -32,13 +32,3 @@
                             [(symbol "request")]
                             `(println (symbol "request"))])
                           [:lname :doc :mixin])))))
-
-(t/deftest merge-mixins-test
-  (t/testing "merging mixins should work"
-    (t/is (= {:interceptors []} (h/merge-mixins {} {})))
-    (t/is (= {:interceptors []} (h/merge-mixins {:interceptors []} {:interceptors []})))
-    (t/is (= {:interceptors []} (h/merge-mixins {:interceptors nil} {:interceptors []})))
-    (t/is (= {:interceptors []} (h/merge-mixins {:interceptors []} {:interceptors nil})))
-    (t/is (= {:interceptors [1 2]} (h/merge-mixins {:interceptors [1 2]} {:interceptors nil})))
-    (t/is (= {:interceptors [1 2]} (h/merge-mixins {:interceptors nil} {:interceptors [1 2]})))
-    (t/is (= {:interceptors [1 1 2]} (h/merge-mixins {:interceptors [1]} {:interceptors [1 2]})))))
