@@ -15,22 +15,36 @@ Globals:
   Function:
     Timeout: !Ref Timeout
     MemorySize: !Ref MemorySize
-    ReservedConcurrentExecutions: 30
 
 Resources:
+  ClojureClojureJava8Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "ClojureClojureJava8Runtime-${MemorySize}"
+      ImageUri: 443526418261.dkr.ecr.eu-central-1.amazonaws.com/fierycod/clojure-on-clojure:8
+      PackageType: Image
+      # Handler: hello.Hello
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojure-on-clojure-8
+            Method: get
+
   ClojureClojureJava11Runtime:
     Type: AWS::Serverless::Function
     Properties:
       Tracing: Active
       FunctionName: !Sub "ClojureClojureJava11Runtime-${MemorySize}"
+      ImageUri: 443526418261.dkr.ecr.eu-central-1.amazonaws.com/fierycod/clojure-on-clojure:11
       PackageType: Image
-      ImageUri: fierycod/clojure-on-clojure-java11:latest
-      Handler: hello.Hello
+      # Handler: hello.Hello
       Events:
         HelloEvent:
           Type: HttpApi
           Properties:
-            Path: /clojure-on-java8
+            Path: /clojure-on-clojure-11
             Method: get
 
   ClojureJava8Runtime:
