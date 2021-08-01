@@ -33,8 +33,10 @@ Resources:
   ExampleLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      PackageType: Image
+      # PackageType: Image
+      Runtime: provided
       Handler: example.core.ExampleLambda
+      CodeUri: ./.holy-lambda/build/latest.zip
       Events:
         HelloEvent:
           Type: HttpApi
@@ -42,10 +44,10 @@ Resources:
             ApiId: !Ref ServerlessHttpApi
             Path: /
             Method: GET
-    Metadata:
-      DockerTag: new-tag
-      DockerContext: .
-      Dockerfile: Dockerfile
+    # Metadata:
+    #   DockerTag: new-tag
+    #   DockerContext: .
+    #   Dockerfile: Dockerfile
 
   ExampleLambdaFunctionv2:
     Type: AWS::Serverless::Function

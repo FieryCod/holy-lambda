@@ -73,9 +73,9 @@
         (send-runtime-error runtime iid err)))))
 
 (defn- next-iter
-  [routes env-vars]
+  [maybe-handler routes env-vars]
   (let [runtime (get env-vars "AWS_LAMBDA_RUNTIME_API")
-        handler-name (get env-vars "_HANDLER")
+        handler-name (get env-vars "_HANDLER" maybe-handler)
         aws-event (fetch-aws-event runtime)
         handler (get routes handler-name)
         iid (:invocation-id aws-event)]
@@ -121,7 +121,7 @@
   [lambdas]
   `(do
      (def ~'PRVL_ROUTES (into {} (mapv (fn [l#] [(str (str (:ns (meta l#)) "." (str (:name (meta l#))))) l#]) ~lambdas)))
-     (defn ~'-main []
+     (defn ~'-main [& attrs#]
        ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image`
        ;;                               will be generated via the agent.
        ;;                               Example in: `examples/sqs-example/Makefile` at `gen-native-configuration` command
@@ -133,4 +133,4 @@
 
          ;; Start native runtime loop
          (while true
-           (#'fierycod.holy-lambda.native-runtime/next-iter ~'PRVL_ROUTES (#'fierycod.holy-lambda.util/envs)))))))
+           (#'fierycod.holy-lambda.native-runtime/next-iter (first attrs#) ~'PRVL_ROUTES (#'fierycod.holy-lambda.util/envs)))))))

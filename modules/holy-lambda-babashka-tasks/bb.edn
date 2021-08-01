@@ -27,7 +27,7 @@
                        :runtime
                        {
                         ;; Choose one of the supported runtime `:babashka`, `:native`, `:clojure`
-                        :name                :clojure
+                        :name                :native
 
                         ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
                         ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers

@@ -755,8 +755,6 @@ Resources:
     (System/exit 1))
 
   (case (or check *RUNTIME_NAME*)
-    :java   (do (hpr (pre "Java runtime is not longer supported. Use Clojure runtime which is cleaner and faster!"))
-              (System/exit 1))
     :native (do
               (stack-files-check--jar)
               (stack-files-check--native))
@@ -899,7 +897,7 @@ set -e
       (hpr (pre "Command") (accent "native:executable") (pre "supports only") (accent ":native") (pre "runtime!"))
       (System/exit 1))
 
-    (stack-files-check :java)
+    (stack-files-check--jar)
 
     (when (build-stale?)
       (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
