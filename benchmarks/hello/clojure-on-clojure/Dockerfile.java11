@@ -3,4 +3,4 @@ MAINTAINER Karol Wójcik <karol.wojcik@tuta.io>
 
 ADD clojure-on-clojure-11.jar output.jar
 
-CMD java -jar output.jar
+CMD java -jar output.jar "hello.Hello"

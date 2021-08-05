@@ -24,7 +24,6 @@ Resources:
       FunctionName: !Sub "ClojureClojureJava8Runtime-${MemorySize}"
       ImageUri: 443526418261.dkr.ecr.eu-central-1.amazonaws.com/fierycod/clojure-on-clojure:8
       PackageType: Image
-      # Handler: hello.Hello
       Events:
         HelloEvent:
           Type: HttpApi
@@ -39,7 +38,6 @@ Resources:
       FunctionName: !Sub "ClojureClojureJava11Runtime-${MemorySize}"
       ImageUri: 443526418261.dkr.ecr.eu-central-1.amazonaws.com/fierycod/clojure-on-clojure:11
       PackageType: Image
-      # Handler: hello.Hello
       Events:
         HelloEvent:
           Type: HttpApi
@@ -135,6 +133,21 @@ Resources:
           Type: HttpApi
           Properties:
             Path: /javagraalnative21ce8
+            Method: get
+
+  JavaGraalVM211CE11:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "JavaGraalVM211CE11-${MemorySize}"
+      CodeUri: artifacts/java11.zip
+      Runtime: provided
+      Handler: fierycod.App::handleRequest
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /javagraalnative21ce11
             Method: get
 
   Java11Runtime:

@@ -1,0 +1,673 @@
+#+TITLE: Benchmark
+#+DATE: <2021-08-02 Mon>
+#+AUTHOR: Karol Wójcik<karol.wojcik@tuta.io
+
+#+begin_src python :session pb1 :results value raw :exports none
+from scipy.stats import zscore
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from tabulate import tabulate
+
+def read_csv(filename):
+    return pd.read_csv("./results/" + filename + ".csv")
+
+def into_dict(seq):
+    dict = {}
+    for k, v in seq:
+        dict[k] = v
+    return dict
+
+alpha = ["A", "B", "C", "D", "E", "F", "G", "H", \
+         "I", "J", "K", "L", "M", "N", "O", "P", \
+         "Q", "R", "S", "T", "U", "V","W", "X", "Y", "Z"]
+
+def ds_with_substitute_names(ds):
+    dict = {}
+    fn_names = set(ds["function_name"])
+    replace_dict = into_dict([[fn, alpha[i]] for i, fn in zip(range(len(fn_names)), fn_names)])
+    new_column = ds["function_name"].replace(replace_dict)
+    ds_new = ds.copy()
+    ds_new["function_name"] = new_column
+
+    return ds, ds_new
+
+def file_to_dses(filename):
+    return ds_with_substitute_names(read_csv(filename))
+
+def filter_by_z_score(group):
+  abs_zscore = np.abs(zscore(group))
+  filtered = (abs_zscore < 3)
+
+  return group[filtered]
+
+def groups_to_describe_table(groups):
+    table = []
+    for name, group in groups:
+        group["time_s"] = filter_by_z_score(group["time_s"])
+        gds = group.describe()
+        series = group["status"].apply(lambda x: True if x == 200 else False)
+        table.append([
+            name,
+            gds["time_s"][1],  # #mean
+            gds["time_s"][2],  # #std
+            gds["time_s"][3],  # #min
+            gds["time_s"][7],  # #max
+            gds["time_s"][4],  # #25%
+            gds["time_s"][5],  # #50%
+            gds["time_s"][6],  # #75%
+            str((len(series[series == True].index) / 1000) * 100) + "%"
+        ])
+    return table
+
+def boxplots(groups, coldstarts=True):
+  print(coldstarts)
+  for i, [name, group] in zip(range(len(groups)), groups):
+      fig = plt.figure(i)
+      plt.boxplot(group["time_s"], showfliers=False)
+      plt.title("Boxplot of: " + name)
+      plt.ylabel("Time in seconds")
+      fig.savefig("results/img/" + name + ("cold" if coldstarts else "warm") + ".png", dpi=100)
+      fig.clear()
+      fig.clf()
+      plt.clf()
+      plt.close()
+
+def ds_describe_table(ds):
+    return tabulate(
+        groups_to_describe_table(ds.groupby(by="function_name")),
+        headers = ["mean", "std", "min", "max", "25%", "50%", "75%", "status 200 in %"],
+        tablefmt="orgtbl"
+    )
+#+end_src
+
+#+RESULTS:
+
+* About the benchmark
+Following synthetic benchmark aggregates the results of running sample "Hello World" program on curated list of AWS Lambda runtimes:
+
+1. Official AWS Node.js runtime (Nodejs v10, Nodejs v12, Nodejs v14)
+2. Official AWS Ruby runtime (ruby2.5, ruby2.7)
+3. Official AWS Python runtime (python2.7, python3.8)
+4. Official AWS Rust runtime (runtime v0.3.0)
+5. Official AWS Java runtime (Java8, Java11)
+6. Official AWS DotnetCore runtime (dotnetcore2.1)
+7. Community Haskell runtime (aws-lambda-haskell-runtime 1.1.1)
+8. Official AWS Golang runtime (golang1.x)
+9. Custom Clojure on Babashka Runtime (Babashka 0.4.6) (HL)
+10. Clojure on Official AWS Java runtime (Java8, Java11)
+11. Clojure on Custom Clojure runtime (Java8, Java11) (HL)
+12. Official AWS Java Main Function adapter. Native compiled with GraalVM (Java8 GraalVM CE 21.1.0, Java11 GraalVM CE 21.1.0)
+13. Clojure on Custom Clojure runtime. Native compiled with GraalVM (Java8 GraalVM CE 21.1.0, Java11 GraalVM CE 21.1.0) (HL)
+
+Benchmark has been crafted to compare the results of the already established AWS Lambda runtimes with the ones proposed by the ~Holy Lambda~ microframework. In order to make the comparision fair, we limited the scope of the test to return the "Hello world!" text from each Lambda. Although the test might seem to simple and naive it's truly not.
+
+Architecture of every runtime more or less follows the official AWS recommendations for creating a Custom Runtime. This means each of the presented runtime:
+
+1. Fetches the new event from the API gateway
+2. Decodes JSON event to a structure which might be read by the user handler
+3. Handler returns a structure ~{"body": "Hello world!", "Content-Type": "plain/text"}~ which is then encoded to valid json string and POST to an API Gateway.
+
+The test is both minimal enough, complete and fair, because we compare only the runtimes work.
+
+* Expectations
+1. Holy Lambda runtimes should be as fast as the others.
+2. Holy Lambda runtimes should be statistically stable.
+3. Holy Lambda runtimes should work without the errors under the same load as other runtimes.
+4. Holy Lambda runtimes should have approximetely same memory usage characteristics as other runtimes.
+
+* Analysed parameters
+In the test the following parameters are closely studied:
+- memory usage of each runtime (mean, max, min, std)
+- percentage of successful responses of each runtime
+- cold start time, processing, and response (mean, max, min, std, 25%, 50%, 75%)
+- warm start time, processing, and response (mean, max, min, std, 25%, 50%, 75%)
+- cold start time, and processing (without response)
+- warm start time, and processing (without response)
+
+* Test variants
+1. Thousand full curl GET requests to each Lambda representing the runtime with cold start simulation:
+   a) Lambda with 128 MB of memory
+   b) Lambda with 512 MB of memory
+   c) Lambda with 1024 MB of memory
+   d) Lambda with 2048 MB of memory
+2. Thousand full curl GET requests to each Lambda representing the runtime. Warm Lambda execution only:
+   a) Lambda with 128 MB of memory
+   b) Lambda with 512 MB of memory
+   c) Lambda with 1024 MB of memory
+   d) Lambda with 2048 MB of memory
+
+* Lambda functions names
+1. /ClojureClojureJava8Runtime-{MemorySize}/ - HL Custom Clojure runtime on Java8
+2. /ClojureClojureJava11Runtime-{MemorySize}/ - HL Custom Clojure runtime on Java11
+3. /ClojureJava8Runtime-{MemorySize}/ - Clojure on official Java runtime. Java8
+4. /ClojureJava11Runtime-{MemorySize}/ - Clojure on official Java runtime. Java11
+5. /ClojureGraalVM211CE8-{MemorySize}/ - HL Custom Clojure runtime native compiled with GraalVM 21.1 on Java8
+6. /ClojureGraalVM211CE11-{MemorySize}/ - HL Custom Clojure runtime native compiled with GraalVM 21.1 on Java11
+7. /Java8Runtime-{MemorySize}/ - Official AWS Lambda Java runtime. Java8
+8. /Java11Runtime-{MemorySize}/ - Official AWS Lambda Java runtime. Java11
+9. /JavaGraalVM211CE8-{MemorySize}/ - Custom Java runtime native compiled with GraalVM 21.1 on Java8
+10. /JavaGraalVM211CE11-{MemorySize}/ - Custom Java runtime native compiled with GraalVM 21.1 on Java11
+11. /ClojureOnBabashkaRuntime-{MemorySize}/ - Custom Clojure runtime running on Babashka (0.4.6)
+12. /Nodejs14Runtime-{MemorySize}/ - Official Node.js runtime (v14)
+13. /Nodejs12Runtime-{MemorySize}/ - Official Node.js runtime (v12)
+14. /Nodejs10Runtime-{MemorySize}/ - Official Node.js runtime (v10)
+15. /PythonRuntime38-{MemorySize}/ - Official Python runtime (Python3.8)
+16. /PythonRuntime27-{MemorySize}/ - Official Python runtime (Python2.7)
+17. /RubyRuntime25-{MemorySize}/ - Official Ruby runtime (ruby2.5)
+18. /RubyRuntime27-{MemorySize}/ - Official Ruby runtime (ruby2.7)
+19. /GolangRuntime-{MemorySize}/ - Official Golang runtime (go1.x)
+20. /RustRuntime-{MemorySize}/ - Official Rust runtime (v0.3.0)
+21. /HaskellRuntime-{MemorySize}/ - Community Haskell runtime (v1.1.1)
+22. /CsharpRuntime-{MemorySize}/ - Official DotnetCore runtime (v2.1)
+
+Function name changes according to dynamic MemorySize parameter, where MemoriSize is one of {128, 512, 1024, 2048}.
+
+* Results
+1. Variant 1
+   a) Lambda with 128 MB of memory
+      In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime.
+      Runtimes has been ignored, because the memory size usage exceeds 128MB.
+
+      1) Basic statistics
+         #+begin_src python :session pb1 :results value raw :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-128-cold--yes")
+ds_describe_table(ds)
+         #+end_src
+
+         #+RESULTS[c3c844ff1db115f35f4a868666f673dd4b655604]:
+         |                                 |     mean |       std |      min |      max |      25% |      50% |      75% | status 200 in % |
+         |---------------------------------+----------+-----------+----------+----------+----------+----------+----------+-----------------|
+         | ClojureClojureJava11Runtime-128 |  6.08771 |  0.757943 | 0.225984 |  13.1076 |  5.60007 |  6.05276 |  6.51737 |          100.0% |
+         | ClojureClojureJava8Runtime-128  |  6.65313 |  0.681719 | 0.344653 |  9.06927 |   6.1978 |  6.65984 |  7.06698 |          100.0% |
+         | ClojureGraalVM211CE11-128       | 0.828724 |  0.117205 | 0.652419 |  1.72424 |  0.74832 | 0.793866 | 0.879724 |          100.0% |
+         | ClojureGraalVM211CE8-128        | 0.771296 |  0.115864 | 0.614926 |  1.95322 | 0.691726 | 0.742336 | 0.824451 |          100.0% |
+         | ClojureOnBabashkaRuntime-128    |  1.15274 |  0.171174 | 0.865743 |  3.89775 |  1.05382 |  1.13846 |  1.23452 |          100.0% |
+         | CsharpRuntime-128               |  5.09289 |  0.263522 |  4.12351 |   5.9761 |  4.89601 |  5.07652 |   5.2674 |          100.0% |
+         | GolangRuntime-128               |  5.66458 |   0.25087 |  5.31004 |  10.8347 |  5.54658 |   5.6448 |  5.74886 |          100.0% |
+         | HaskellRuntime-128              | 0.479279 |   0.10431 | 0.370303 |  1.63456 | 0.420765 | 0.447225 | 0.494169 |          100.0% |
+         | Java11Runtime-128               | 0.784365 |  0.111533 | 0.622361 |  1.41665 | 0.703803 | 0.750294 |  0.84296 |          100.0% |
+         | Java8Runtime-128                | 0.622034 |  0.110277 | 0.460173 |  1.56784 | 0.547961 | 0.589728 | 0.672422 |          100.0% |
+         | JavaGraalVM211CE11-128          | 0.922261 |  0.119225 | 0.735816 |   1.6257 | 0.834785 | 0.892154 |  0.98802 |          100.0% |
+         | JavaGraalVM211CE8-128           | 0.780372 |  0.188021 | 0.617164 |  5.63973 | 0.701002 | 0.745607 | 0.819596 |          100.0% |
+         | Nodejs10Runtime-128             | 0.527241 |  0.102561 | 0.396876 |  1.44104 | 0.464314 | 0.496601 | 0.545269 |          100.0% |
+         | Nodejs12Runtime-128             | 0.497375 |  0.106019 | 0.373778 |  1.52464 | 0.434123 | 0.460923 | 0.521661 |          100.0% |
+         | Nodejs14Runtime-128             | 0.497824 |  0.093518 | 0.377916 |  1.06769 | 0.438679 | 0.467119 | 0.522506 |          100.0% |
+         | PythonRuntime27-128             |  0.39614 | 0.0940445 | 0.287905 |    1.294 | 0.340305 | 0.363754 | 0.409175 |          100.0% |
+         | PythonRuntime38-128             | 0.489687 | 0.0990112 | 0.366226 | 0.910882 | 0.424909 | 0.456745 | 0.517597 |          100.0% |
+         | RubyRuntime25-128               | 0.475066 | 0.0965885 | 0.351247 |   1.3725 | 0.415409 |  0.44368 | 0.496152 |          100.0% |
+         | RubyRuntime27-128               | 0.501787 |  0.101542 | 0.389072 |  1.41724 |  0.44488 | 0.469224 | 0.517396 |          100.0% |
+         | RustRuntime-128                 | 0.425008 | 0.0914694 | 0.307065 |   1.3415 | 0.369308 | 0.394492 | 0.442785 |          100.0% |
+      2) Box plot
+         #+begin_src python :session pb1 :results none :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-128-cold--yes")
+groups = ds.groupby(by="function_name", group_keys=True)
+boxplots(groups)
+       #+end_src
+
+       #+RESULTS[2c93d9a558fe011e01347aa9af96ba841f382053]:
+       None
+
+        [[./results/img/ClojureClojureJava11Runtime-128cold.png]]
+        [[./results/img/ClojureClojureJava8Runtime-128cold.png]]
+        [[./results/img/ClojureGraalVM211CE11-128cold.png]]
+        [[./results/img/ClojureGraalVM211CE8-128cold.png]]
+        [[./results/img/ClojureOnBabashkaRuntime-128cold.png]]
+        [[./results/img/CsharpRuntime-128cold.png]]
+        [[./results/img/GolangRuntime-128cold.png]]
+        [[./results/img/HaskellRuntime-128cold.png]]
+        [[./results/img/Java11Runtime-128cold.png]]
+        [[./results/img/Java8Runtime-128cold.png]]
+        [[./results/img/JavaGraalVM211CE11-128cold.png]]
+        [[./results/img/JavaGraalVM211CE8-128cold.png]]
+        [[./results/img/Nodejs10Runtime-128cold.png]]
+        [[./results/img/Nodejs12Runtime-128cold.png]]
+        [[./results/img/Nodejs14Runtime-128cold.png]]
+        [[./results/img/PythonRuntime27-128cold.png]]
+        [[./results/img/PythonRuntime38-128cold.png]]
+        [[./results/img/RubyRuntime25-128cold.png]]
+        [[./results/img/RubyRuntime27-128cold.png]]
+        [[./results/img/RustRuntime-128cold.png]]
+   b) Lambda with 512 MB of memory
+      In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime. Runtimes has been ignored, because the memory size usage exceeds 128MB.
+
+      1) Basic statistics
+         #+begin_src python :session pb1 :results value raw :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-512-cold--yes")
+ds_describe_table(ds)
+         #+end_src
+
+         #+RESULTS[b415912a06dc6a27dab5489975b44362deb02b01]:
+         |                                 |     mean |       std |      min |      max |      25% |      50% |      75% | status 200 in % |
+         |---------------------------------+----------+-----------+----------+----------+----------+----------+----------+-----------------|
+         | ClojureClojureJava11Runtime-512 |  3.56312 |  0.326665 |  2.95072 |  4.94755 |  3.30697 |  3.50517 |  3.81774 |          100.0% |
+         | ClojureClojureJava8Runtime-512  |  3.65212 |  0.360775 |  2.97839 |  6.48438 |  3.37076 |  3.56543 |  3.90394 |          100.0% |
+         | ClojureGraalVM211CE11-512       | 0.802015 |  0.122457 | 0.632224 |  1.55671 | 0.716621 | 0.762494 | 0.856796 |          100.0% |
+         | ClojureGraalVM211CE8-512        | 0.746143 |  0.119515 | 0.592789 |  1.31326 | 0.664177 | 0.704419 | 0.796183 |          100.0% |
+         | ClojureOnBabashkaRuntime-512    |  1.05925 |  0.123206 | 0.792032 |  1.57932 | 0.969186 |   1.0622 |  1.13719 |          100.0% |
+         | CsharpRuntime-512               |  1.50559 |  0.137707 |  1.23253 |  2.05366 |  1.39306 |  1.49164 |  1.59488 |          100.0% |
+         | GolangRuntime-512               |  5.61778 |  0.142129 |  5.26822 |  6.28987 |  5.52354 |  5.60603 |  5.68203 |          100.0% |
+         | HaskellRuntime-512              | 0.481667 |  0.111685 | 0.362144 |   1.1981 | 0.414668 | 0.439051 | 0.505354 |          100.0% |
+         | Java11Runtime-512               | 0.772083 |  0.123186 | 0.600335 |  1.37585 | 0.685407 | 0.730091 | 0.827395 |          100.0% |
+         | Java8Runtime-512                | 0.600331 |  0.114201 |   0.4552 |  1.22431 | 0.523764 | 0.557859 | 0.652838 |          100.0% |
+         | JavaGraalVM211CE11-512          | 0.889963 |  0.113951 | 0.730355 |  1.56742 | 0.809575 | 0.857611 | 0.944919 |          100.0% |
+         | JavaGraalVM211CE8-512           | 0.772357 |  0.123599 |  0.61833 |  1.48924 | 0.687282 |  0.73164 | 0.828463 |          100.0% |
+         | Nodejs10Runtime-512             | 0.525893 |  0.103414 | 0.396392 |  1.00589 | 0.457495 | 0.487825 |  0.56038 |          100.0% |
+         | Nodejs12Runtime-512             | 0.483178 |  0.101139 | 0.358538 |  1.03742 | 0.420183 | 0.447169 | 0.503185 |          100.0% |
+         | Nodejs14Runtime-512             | 0.489519 |  0.103726 | 0.366926 |  1.10079 |  0.42606 | 0.451866 | 0.509001 |          100.0% |
+         | PythonRuntime27-512             | 0.395011 |  0.101769 | 0.274017 | 0.988364 | 0.335701 | 0.356047 | 0.411183 |          100.0% |
+         | PythonRuntime38-512             |  0.48001 |  0.101996 | 0.357242 |  1.06366 | 0.413972 | 0.443028 |   0.5105 |          100.0% |
+         | RubyRuntime25-512               | 0.464914 |  0.102498 | 0.342065 |  1.06081 | 0.402809 | 0.427066 | 0.486209 |          100.0% |
+         | RubyRuntime27-512               | 0.489463 | 0.0983069 | 0.365415 | 0.995128 | 0.426528 | 0.453523 | 0.514234 |          100.0% |
+         | RustRuntime-512                 | 0.424694 | 0.0977936 | 0.303959 |  1.06127 |  0.36283 | 0.388134 | 0.449551 |          100.0% |
+      2) Box plot
+         #+begin_src python :session pb1 :results none :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-512-cold--yes")
+groups = ds.groupby(by="function_name", group_keys=True)
+boxplots(groups)
+       #+end_src
+
+       #+RESULTS[4d41b0dea9657c779c44c5a152d56d45bea62e3a]:
+       None
+
+        [[./results/img/ClojureClojureJava11Runtime-512cold.png]]
+        [[./results/img/ClojureClojureJava8Runtime-512cold.png]]
+        [[./results/img/ClojureGraalVM211CE11-512cold.png]]
+        [[./results/img/ClojureGraalVM211CE8-512cold.png]]
+        [[./results/img/ClojureOnBabashkaRuntime-512cold.png]]
+        [[./results/img/CsharpRuntime-512cold.png]]
+        [[./results/img/GolangRuntime-512cold.png]]
+        [[./results/img/HaskellRuntime-512cold.png]]
+        [[./results/img/Java11Runtime-512cold.png]]
+        [[./results/img/Java8Runtime-512cold.png]]
+        [[./results/img/JavaGraalVM211CE11-512cold.png]]
+        [[./results/img/JavaGraalVM211CE8-512cold.png]]
+        [[./results/img/Nodejs10Runtime-512cold.png]]
+        [[./results/img/Nodejs12Runtime-512cold.png]]
+        [[./results/img/Nodejs14Runtime-512cold.png]]
+        [[./results/img/PythonRuntime27-512cold.png]]
+        [[./results/img/PythonRuntime38-512cold.png]]
+        [[./results/img/RubyRuntime25-512cold.png]]
+        [[./results/img/RubyRuntime27-512cold.png]]
+        [[./results/img/RustRuntime-512cold.png]]
+   c) Lambda with 1024 MB of memory
+      In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime. Runtimes has been ignored, because the memory size usage exceeds 128MB.
+
+      1) Basic statistics
+         #+begin_src python :session pb1 :results value raw :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-1024-cold--yes")
+ds_describe_table(ds)
+         #+end_src
+
+         #+RESULTS[2af881160c204fb12ce68397030baa70f37ed5c1]:
+         |                                  |     mean |       std |      min |      max |      25% |      50% |      75% | status 200 in % |
+         |----------------------------------+----------+-----------+----------+----------+----------+----------+----------+-----------------|
+         | ClojureClojureJava11Runtime-1024 |   3.4299 |  0.516205 |  2.72929 |  5.52286 |  3.06063 |  3.31898 |  3.60859 |          100.0% |
+         | ClojureClojureJava8Runtime-1024  |  3.28816 |  0.427307 |  2.69686 |  4.96568 |  2.99065 |   3.1744 |  3.42546 |          100.0% |
+         | ClojureGraalVM211CE11-1024       |  0.79567 |  0.105458 | 0.654798 |  1.27405 | 0.722494 | 0.760577 | 0.843481 |          100.0% |
+         | ClojureGraalVM211CE8-1024        |  0.75663 |  0.117296 | 0.598409 |  1.25419 | 0.671662 | 0.721038 | 0.808708 |          100.0% |
+         | ClojureOnBabashkaRuntime-1024    |  1.04816 |  0.110737 | 0.783214 |  1.41588 | 0.963213 |  1.05283 |  1.12168 |          100.0% |
+         | CsharpRuntime-1024               | 0.980764 |  0.110012 | 0.798334 |  1.52851 | 0.899433 | 0.948845 |  1.03312 |          100.0% |
+         | GolangRuntime-1024               |  5.63231 |  0.123809 |  5.31267 |  6.09333 |   5.5484 |   5.6301 |  5.70204 |          100.0% |
+         | HaskellRuntime-1024              | 0.487218 |  0.108925 | 0.367565 |  1.04526 | 0.417187 | 0.448376 |  0.51964 |          100.0% |
+         | Java11Runtime-1024               | 0.768738 |  0.117183 | 0.600235 |  1.32272 | 0.684912 | 0.728411 | 0.823612 |          100.0% |
+         | Java8Runtime-1024                | 0.601121 |  0.107099 | 0.455898 |  1.08001 | 0.525155 | 0.565485 | 0.651792 |          100.0% |
+         | JavaGraalVM211CE11-1024          | 0.899437 |  0.114341 |  0.74397 |  1.42422 | 0.815022 | 0.866759 |  0.95904 |          100.0% |
+         | JavaGraalVM211CE8-1024           |  0.77488 |  0.115719 | 0.613155 |  1.26526 | 0.693472 | 0.735399 | 0.825933 |          100.0% |
+         | Nodejs10Runtime-1024             | 0.523741 |  0.106764 | 0.395034 |  1.02863 | 0.454472 | 0.488308 | 0.552888 |          100.0% |
+         | Nodejs12Runtime-1024             | 0.487226 | 0.0922366 | 0.371258 | 0.835285 | 0.424494 | 0.451495 | 0.522307 |          100.0% |
+         | Nodejs14Runtime-1024             | 0.495293 | 0.0993444 | 0.373809 | 0.914613 | 0.429974 | 0.457192 | 0.526994 |          100.0% |
+         | PythonRuntime27-1024             | 0.393577 | 0.0878113 | 0.285595 | 0.720549 | 0.335537 | 0.359448 | 0.421494 |          100.0% |
+         | PythonRuntime38-1024             | 0.471926 |  0.101753 |  0.35758 |  1.03092 | 0.409528 | 0.435529 | 0.495907 |          100.0% |
+         | RubyRuntime25-1024               | 0.470383 | 0.0959179 | 0.350102 | 0.890789 | 0.407506 | 0.436452 | 0.500903 |          100.0% |
+         | RubyRuntime27-1024               | 0.493324 |  0.106454 | 0.373846 |  1.08042 | 0.427152 | 0.455522 | 0.517483 |          100.0% |
+         | RustRuntime-1024                 | 0.431437 |  0.102973 | 0.309548 | 0.916079 | 0.364791 |  0.39208 | 0.464565 |          100.0% |
+      2) Box plot
+         #+begin_src python :session pb1 :results none :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-1024-cold--yes")
+groups = ds.groupby(by="function_name", group_keys=True)
+boxplots(groups)
+       #+end_src
+
+       #+RESULTS[c68d0905c6da16233ff676e806e7785d17e294a7]:
+       None
+
+        [[./results/img/ClojureClojureJava11Runtime-1024cold.png]]
+        [[./results/img/ClojureClojureJava8Runtime-1024cold.png]]
+        [[./results/img/ClojureGraalVM211CE11-1024cold.png]]
+        [[./results/img/ClojureGraalVM211CE8-1024cold.png]]
+        [[./results/img/ClojureOnBabashkaRuntime-1024cold.png]]
+        [[./results/img/CsharpRuntime-1024cold.png]]
+        [[./results/img/GolangRuntime-1024cold.png]]
+        [[./results/img/HaskellRuntime-1024cold.png]]
+        [[./results/img/Java11Runtime-1024cold.png]]
+        [[./results/img/Java8Runtime-1024cold.png]]
+        [[./results/img/JavaGraalVM211CE11-1024cold.png]]
+        [[./results/img/JavaGraalVM211CE8-1024cold.png]]
+        [[./results/img/Nodejs10Runtime-1024cold.png]]
+        [[./results/img/Nodejs12Runtime-1024cold.png]]
+        [[./results/img/Nodejs14Runtime-1024cold.png]]
+        [[./results/img/PythonRuntime27-1024cold.png]]
+        [[./results/img/PythonRuntime38-1024cold.png]]
+        [[./results/img/RubyRuntime25-1024cold.png]]
+        [[./results/img/RubyRuntime27-1024cold.png]]
+        [[./results/img/RustRuntime-1024cold.png]]
+   d) Lambda with 2048MB of memory
+      All possible runtimes are included.
+
+      1) Basic statistics
+         #+begin_src python :session pb1 :results value raw :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-2048-cold--yes")
+ds_describe_table(ds)
+         #+end_src
+
+         #+RESULTS[86e99abeed6059e3963e12e610bce4e706c1d4c8]:
+         |                                  |     mean |       std |      min |      max |      25% |      50% |      75% | status 200 in % |
+         |----------------------------------+----------+-----------+----------+----------+----------+----------+----------+-----------------|
+         | ClojureClojureJava11Runtime-2048 |  2.92799 |  0.272345 |  2.43928 |  3.83936 |  2.69444 |  2.85116 |  3.14217 |          100.0% |
+         | ClojureClojureJava8Runtime-2048  |  2.73644 |  0.224656 |  2.29793 |  3.54138 |  2.56425 |  2.70357 |  2.89778 |          100.0% |
+         | ClojureGraalVM211CE11-2048       | 0.804898 |  0.118211 | 0.650118 |  1.44274 | 0.722097 | 0.769181 | 0.858055 |          100.0% |
+         | ClojureGraalVM211CE8-2048        |   0.7502 |  0.117493 | 0.585724 |  1.42923 | 0.666288 |  0.70809 | 0.807289 |          100.0% |
+         | ClojureJava11Runtime-2048        |  3.71966 |  0.264577 |  3.21078 |  4.97785 |  3.54606 |  3.66034 |  3.82701 |          100.0% |
+         | ClojureJava8Runtime-2048         |  3.38563 |  0.232172 |  2.91588 |  4.43562 |  3.22424 |  3.34385 |  3.50171 |          100.0% |
+         | ClojureOnBabashkaRuntime-2048    |  1.04305 |  0.123855 |  0.77982 |  1.61031 | 0.951814 |  1.03576 |  1.11987 |          100.0% |
+         | CsharpRuntime-2048               | 0.820751 |  0.120625 | 0.652978 |  1.45015 | 0.736065 | 0.779492 | 0.873494 |          100.0% |
+         | GolangRuntime-2048               |   5.6573 |  0.133507 |  5.31721 |  6.19294 |  5.57006 |  5.66162 |  5.74533 |          100.0% |
+         | HaskellRuntime-2048              | 0.486618 |  0.111626 | 0.354074 |  1.06188 | 0.416465 | 0.444968 | 0.511646 |          100.0% |
+         | Java11Runtime-2048               | 0.770344 |  0.127143 |  0.58766 |  1.37743 | 0.680178 | 0.730112 | 0.828026 |          100.0% |
+         | Java8Runtime-2048                | 0.606067 |  0.113531 | 0.457597 |  1.14565 | 0.531069 | 0.567573 | 0.643435 |          100.0% |
+         | JavaGraalVM211CE11-2048          | 0.902936 |  0.121697 | 0.742646 |  1.60586 | 0.814963 | 0.867508 | 0.960273 |          100.0% |
+         | JavaGraalVM211CE8-2048           |   0.7706 |  0.117491 | 0.605758 |  1.45188 | 0.689058 | 0.733248 |  0.82006 |          100.0% |
+         | Nodejs10Runtime-2048             | 0.523508 |  0.110036 |  0.38714 |  1.03967 |  0.45163 | 0.483639 | 0.556604 |          100.0% |
+         | Nodejs12Runtime-2048             | 0.490053 |  0.108222 | 0.367538 |   1.1863 | 0.422507 | 0.450118 | 0.521201 |          100.0% |
+         | Nodejs14Runtime-2048             | 0.497705 |  0.108624 | 0.372895 |  1.10113 | 0.430261 | 0.456736 | 0.520074 |          100.0% |
+         | PythonRuntime27-2048             | 0.402463 |  0.110973 | 0.286314 |  1.10604 |  0.33556 |  0.35971 | 0.424409 |          100.0% |
+         | PythonRuntime38-2048             | 0.494634 |  0.113815 | 0.360488 |  1.06288 | 0.419299 | 0.454634 | 0.528026 |          100.0% |
+         | RubyRuntime25-2048               | 0.476061 |  0.109684 | 0.348395 |  1.01329 | 0.407704 | 0.434057 | 0.502698 |          100.0% |
+         | RubyRuntime27-2048               | 0.493976 |  0.105726 | 0.375783 |  1.16421 | 0.428802 | 0.456788 | 0.515502 |          100.0% |
+         | RustRuntime-2048                 | 0.426249 | 0.0977116 | 0.315532 | 0.901215 | 0.362562 | 0.389235 | 0.459304 |          100.0% |
+      2) Box plot
+         #+begin_src python :session pb1 :results none :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-2048-cold--yes")
+groups = ds.groupby(by="function_name", group_keys=True)
+boxplots(groups)
+       #+end_src
+
+       #+RESULTS[9a73e8d413dac7129d297ccfdf8056faf963d4de]:
+       None
+
+        [[./results/img/ClojureClojureJava11Runtime-2048cold.png]]
+        [[./results/img/ClojureClojureJava8Runtime-2048cold.png]]
+        [[./results/img/ClojureGraalVM211CE11-2048cold.png]]
+        [[./results/img/ClojureGraalVM211CE8-2048cold.png]]
+        [[./results/img/ClojureOnBabashkaRuntime-2048cold.png]]
+        [[./results/img/CsharpRuntime-2048cold.png]]
+        [[./results/img/GolangRuntime-2048cold.png]]
+        [[./results/img/HaskellRuntime-2048cold.png]]
+        [[./results/img/Java11Runtime-2048cold.png]]
+        [[./results/img/Java8Runtime-2048cold.png]]
+        [[./results/img/JavaGraalVM211CE11-2048cold.png]]
+        [[./results/img/JavaGraalVM211CE8-2048cold.png]]
+        [[./results/img/Nodejs10Runtime-2048cold.png]]
+        [[./results/img/Nodejs12Runtime-2048cold.png]]
+        [[./results/img/Nodejs14Runtime-2048cold.png]]
+        [[./results/img/PythonRuntime27-2048cold.png]]
+        [[./results/img/PythonRuntime38-2048cold.png]]
+        [[./results/img/RubyRuntime25-2048cold.png]]
+        [[./results/img/RubyRuntime27-2048cold.png]]
+        [[./results/img/RustRuntime-2048cold.png]]
+2. Variant 2
+   a) Lambda with 128 MB of memory
+      In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime.
+      Runtimes has been ignored, because the memory size usage exceeds 128MB.
+
+      1) Basic statistics
+         #+begin_src python :session pb1 :results value raw :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-128-cold--no")
+ds_describe_table(ds)
+         #+end_src
+
+         #+RESULTS[0ab342146b2bb3978ea6c56d8d6babe236be842f]:
+         |                                 |     mean |       std |      min |      max |      25% |      50% |      75% | status 200 in % |
+         |---------------------------------+----------+-----------+----------+----------+----------+----------+----------+-----------------|
+         | ClojureClojureJava11Runtime-128 | 0.409623 |  0.131976 | 0.215051 |  1.04838 | 0.308431 | 0.376046 | 0.471229 |          100.0% |
+         | ClojureClojureJava8Runtime-128  | 0.345013 |  0.118742 | 0.186707 | 0.852571 | 0.260016 |  0.31512 | 0.383491 |          100.0% |
+         | ClojureGraalVM211CE11-128       | 0.314592 | 0.0985654 | 0.176572 |  0.67807 |  0.24015 | 0.294578 | 0.350466 |          100.0% |
+         | ClojureGraalVM211CE8-128        | 0.381741 |  0.109926 | 0.209035 | 0.762574 |  0.29564 | 0.347946 | 0.438217 |          100.0% |
+         | ClojureOnBabashkaRuntime-128    | 0.397423 |  0.123888 | 0.230038 | 0.805994 | 0.299951 | 0.355235 |  0.47283 |          100.0% |
+         | CsharpRuntime-128               | 0.373699 |  0.110121 | 0.195871 | 0.760379 | 0.292554 | 0.337778 | 0.428304 |          100.0% |
+         | GolangRuntime-128               | 0.349032 |  0.102157 |  0.18466 | 0.715566 | 0.274439 | 0.323318 | 0.393975 |          100.0% |
+         | HaskellRuntime-128              | 0.391532 |  0.117861 | 0.196142 | 0.818385 | 0.301454 | 0.354134 | 0.458263 |          100.0% |
+         | Java11Runtime-128               | 0.385189 |  0.114567 | 0.220015 | 0.784505 | 0.298269 | 0.351905 | 0.444632 |          100.0% |
+         | Java8Runtime-128                | 0.396991 |  0.125801 | 0.220176 | 0.844481 | 0.300706 |    0.357 | 0.469628 |          100.0% |
+         | JavaGraalVM211CE11-128          | 0.349619 |   0.10046 | 0.168313 | 0.704987 |  0.27676 | 0.322897 | 0.397004 |          100.0% |
+         | JavaGraalVM211CE8-128           | 0.313281 | 0.0978465 | 0.174512 | 0.665003 | 0.239271 | 0.292064 | 0.356829 |          100.0% |
+         | Nodejs10Runtime-128             | 0.376942 |  0.108515 | 0.185385 | 0.738734 |  0.29527 | 0.346398 | 0.437565 |          100.0% |
+         | Nodejs12Runtime-128             | 0.333955 |  0.101126 | 0.173551 | 0.695503 | 0.258111 | 0.310647 | 0.376544 |          100.0% |
+         | Nodejs14Runtime-128             | 0.351089 |  0.105506 | 0.189226 | 0.738632 | 0.274707 | 0.320379 | 0.404915 |          100.0% |
+         | PythonRuntime27-128             | 0.395043 |  0.120682 | 0.220718 | 0.818269 | 0.302052 | 0.357369 | 0.470531 |          100.0% |
+         | PythonRuntime38-128             | 0.308521 | 0.0986438 | 0.172125 | 0.678249 | 0.237116 | 0.283411 | 0.341932 |          100.0% |
+         | RubyRuntime25-128               |  0.35789 |  0.106725 | 0.185749 | 0.719243 |  0.28244 |  0.32592 | 0.414038 |          100.0% |
+         | RubyRuntime27-128               | 0.398041 |  0.124297 | 0.225129 | 0.821187 | 0.302054 | 0.353223 | 0.471031 |          100.0% |
+         | RustRuntime-128                 |  0.34958 | 0.0998513 | 0.186196 | 0.707899 | 0.276292 | 0.321863 | 0.402452 |          100.0% |
+      2) Box plot
+         #+begin_src python :session pb1 :results none :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-128-cold--no")
+groups = ds.groupby(by="function_name", group_keys=True)
+boxplots(groups, False)
+       #+end_src
+
+       #+RESULTS[e546b964720a6264f7aefe26e7168699533f40c6]:
+       None
+
+        [[./results/img/ClojureClojureJava11Runtime-128warm.png]]
+        [[./results/img/ClojureClojureJava8Runtime-128warm.png]]
+        [[./results/img/ClojureGraalVM211CE11-128warm.png]]
+        [[./results/img/ClojureGraalVM211CE8-128warm.png]]
+        [[./results/img/ClojureOnBabashkaRuntime-128warm.png]]
+        [[./results/img/CsharpRuntime-128warm.png]]
+        [[./results/img/GolangRuntime-128warm.png]]
+        [[./results/img/HaskellRuntime-128warm.png]]
+        [[./results/img/Java11Runtime-128warm.png]]
+        [[./results/img/Java8Runtime-128warm.png]]
+        [[./results/img/JavaGraalVM211CE11-128warm.png]]
+        [[./results/img/JavaGraalVM211CE8-128warm.png]]
+        [[./results/img/Nodejs10Runtime-128warm.png]]
+        [[./results/img/Nodejs12Runtime-128warm.png]]
+        [[./results/img/Nodejs14Runtime-128warm.png]]
+        [[./results/img/PythonRuntime27-128warm.png]]
+        [[./results/img/PythonRuntime38-128warm.png]]
+        [[./results/img/RubyRuntime25-128warm.png]]
+        [[./results/img/RubyRuntime27-128warm.png]]
+        [[./results/img/RustRuntime-128warm.png]]
+
+   b) Lambda with 512 MB of memory
+      In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime.
+      Runtimes has been ignored, because the memory size usage exceeds 128MB.
+
+      1) Basic statistics
+         #+begin_src python :session pb1 :results value raw :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-512-cold--no")
+ds_describe_table(ds)
+         #+end_src
+
+         #+RESULTS[83ff0004570faec6f63e3abc1849658632f9e782]:
+         |                                 |     mean |      std |      min |     max |      25% |      50% |      75% | status 200 in % |
+         |---------------------------------+----------+----------+----------+---------+----------+----------+----------+-----------------|
+         | ClojureClojureJava11Runtime-512 | 0.345595 | 0.250042 | 0.168683 | 2.86832 | 0.243969 |  0.29259 | 0.357869 |          100.0% |
+         | ClojureClojureJava8Runtime-512  | 0.377682 | 0.225551 | 0.195085 | 2.77334 | 0.283594 | 0.324421 | 0.398108 |          100.0% |
+         | ClojureGraalVM211CE11-512       | 0.419601 | 0.271388 |  0.19965 | 3.12542 | 0.293992 | 0.335238 | 0.460203 |          100.0% |
+         | ClojureGraalVM211CE8-512        | 0.355002 |  0.21686 | 0.178936 | 2.79573 | 0.259776 | 0.306934 | 0.375495 |          100.0% |
+         | ClojureOnBabashkaRuntime-512    | 0.411181 | 0.271019 | 0.224945 | 3.11854 | 0.294913 | 0.334764 | 0.447194 |          100.0% |
+         | CsharpRuntime-512               | 0.367465 | 0.201332 | 0.171738 | 2.84555 | 0.275246 | 0.319581 | 0.383879 |          100.0% |
+         | GolangRuntime-512               | 0.405272 | 0.262439 | 0.205517 | 3.08258 |   0.2928 | 0.333025 | 0.435553 |          100.0% |
+         | HaskellRuntime-512              | 0.410056 | 0.260333 |  0.21777 | 3.07808 | 0.293731 | 0.335627 | 0.452697 |          100.0% |
+         | Java11Runtime-512               | 0.369097 | 0.212607 | 0.177341 | 2.60142 | 0.275549 | 0.314168 | 0.387015 |          100.0% |
+         | Java8Runtime-512                | 0.403535 | 0.223023 | 0.212648 | 2.74286 | 0.294634 | 0.336083 | 0.439583 |          100.0% |
+         | JavaGraalVM211CE11-512          | 0.412176 | 0.225363 | 0.220867 | 2.77571 | 0.294662 | 0.338276 | 0.468245 |          100.0% |
+         | JavaGraalVM211CE8-512           | 0.343314 | 0.259097 | 0.175806 |  2.9276 | 0.240725 | 0.290447 | 0.357102 |          100.0% |
+         | Nodejs10Runtime-512             | 0.348562 | 0.233213 | 0.177641 | 3.06136 | 0.256168 | 0.295141 | 0.359678 |          100.0% |
+         | Nodejs12Runtime-512             | 0.395855 | 0.253513 | 0.177947 | 2.98196 | 0.291148 | 0.329509 | 0.429247 |          100.0% |
+         | Nodejs14Runtime-512             | 0.415972 | 0.249329 | 0.220293 | 2.98149 | 0.294017 | 0.336998 | 0.471957 |          100.0% |
+         | PythonRuntime27-512             | 0.411323 | 0.235246 | 0.228823 | 2.85051 | 0.295199 | 0.336646 | 0.460445 |          100.0% |
+         | PythonRuntime38-512             | 0.347513 | 0.264469 | 0.185496 | 2.97312 | 0.245702 | 0.287651 | 0.355411 |          100.0% |
+         | RubyRuntime25-512               |  0.38029 | 0.252969 | 0.184142 | 2.95201 | 0.278143 | 0.317401 | 0.398079 |          100.0% |
+         | RubyRuntime27-512               | 0.378392 | 0.232686 | 0.190044 | 2.69756 | 0.282724 | 0.320444 | 0.394092 |          100.0% |
+         | RustRuntime-512                 | 0.387028 | 0.258765 | 0.173775 | 3.09224 | 0.286154 | 0.324395 | 0.407642 |          100.0% |
+      2) Box plot
+         #+begin_src python :session pb1 :results none :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-512-cold--no")
+groups = ds.groupby(by="function_name", group_keys=True)
+boxplots(groups, False)
+       #+end_src
+
+       #+RESULTS[ada74d7f874a767d168f5766af37027a06d1051d]:
+       None
+
+        [[./results/img/ClojureClojureJava11Runtime-512warm.png]]
+        [[./results/img/ClojureClojureJava8Runtime-512warm.png]]
+        [[./results/img/ClojureGraalVM211CE11-512warm.png]]
+        [[./results/img/ClojureGraalVM211CE8-512warm.png]]
+        [[./results/img/ClojureOnBabashkaRuntime-512warm.png]]
+        [[./results/img/CsharpRuntime-512warm.png]]
+        [[./results/img/GolangRuntime-512warm.png]]
+        [[./results/img/HaskellRuntime-512warm.png]]
+        [[./results/img/Java11Runtime-512warm.png]]
+        [[./results/img/Java8Runtime-512warm.png]]
+        [[./results/img/JavaGraalVM211CE11-512warm.png]]
+        [[./results/img/JavaGraalVM211CE8-512warm.png]]
+        [[./results/img/Nodejs10Runtime-512warm.png]]
+        [[./results/img/Nodejs12Runtime-512warm.png]]
+        [[./results/img/Nodejs14Runtime-512warm.png]]
+        [[./results/img/PythonRuntime27-512warm.png]]
+        [[./results/img/PythonRuntime38-512warm.png]]
+        [[./results/img/RubyRuntime25-512warm.png]]
+        [[./results/img/RubyRuntime27-512warm.png]]
+        [[./results/img/RustRuntime-512warm.png]]
+
+   c) Lambda with 1024 MB of memory
+      In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime.
+      Runtimes has been ignored, because the memory size usage exceeds 128MB.
+
+      1) Basic statistics
+         #+begin_src python :session pb1 :results value raw :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-1024-cold--no")
+ds_describe_table(ds)
+         #+end_src
+
+         #+RESULTS[b893eaa89d2d38b6bf465e12d439a396595f817a]:
+         |                                  |     mean |      std |      min |     max |      25% |      50% |      75% | status 200 in % |
+         |----------------------------------+----------+----------+----------+---------+----------+----------+----------+-----------------|
+         | ClojureClojureJava11Runtime-1024 | 0.432127 | 0.285062 | 0.205129 | 3.12507 | 0.300108 | 0.358199 | 0.475639 |          100.0% |
+         | ClojureClojureJava8Runtime-1024  |  0.43599 | 0.269754 |  0.19828 | 2.93968 | 0.301937 | 0.366572 | 0.487283 |          100.0% |
+         | ClojureGraalVM211CE11-1024       | 0.438272 | 0.284175 | 0.210076 | 3.28233 | 0.299686 | 0.362376 | 0.499641 |          100.0% |
+         | ClojureGraalVM211CE8-1024        | 0.417708 | 0.280422 | 0.191196 | 3.07499 | 0.294984 | 0.344799 | 0.445701 |          100.0% |
+         | ClojureOnBabashkaRuntime-1024    | 0.416888 | 0.265451 | 0.215563 | 3.32148 | 0.293608 | 0.350574 | 0.452661 |          100.0% |
+         | CsharpRuntime-1024               | 0.439793 | 0.292734 | 0.216186 | 3.56019 | 0.300652 | 0.364888 | 0.488173 |          100.0% |
+         | GolangRuntime-1024               | 0.387789 | 0.268458 | 0.166632 |  2.8602 |   0.2739 | 0.328098 | 0.401681 |          100.0% |
+         | HaskellRuntime-1024              | 0.370154 | 0.261493 | 0.179338 | 2.90397 | 0.261339 | 0.311896 | 0.384603 |          100.0% |
+         | Java11Runtime-1024               | 0.349385 | 0.266785 | 0.166739 | 2.97486 | 0.237486 |    0.286 | 0.363604 |          100.0% |
+         | Java8Runtime-1024                | 0.387167 | 0.237501 | 0.177014 | 3.10073 | 0.280014 |  0.33039 | 0.417858 |          100.0% |
+         | JavaGraalVM211CE11-1024          | 0.352983 | 0.282517 | 0.165924 | 2.98187 | 0.238749 | 0.292596 | 0.367328 |          100.0% |
+         | JavaGraalVM211CE8-1024           | 0.352259 | 0.232738 | 0.182647 | 2.64087 | 0.244883 | 0.292646 | 0.368703 |          100.0% |
+         | Nodejs10Runtime-1024             | 0.352894 |   0.2855 | 0.177752 | 2.94522 | 0.234733 | 0.281288 | 0.364609 |          100.0% |
+         | Nodejs12Runtime-1024             |  0.42402 | 0.265864 | 0.201416 | 3.07049 | 0.297752 | 0.356238 |   0.4683 |          100.0% |
+         | Nodejs14Runtime-1024             | 0.382717 | 0.256422 | 0.170008 | 3.25043 |  0.27189 | 0.326837 | 0.405751 |          100.0% |
+         | PythonRuntime27-1024             | 0.447556 | 0.309027 | 0.230619 | 3.06274 | 0.300828 | 0.365965 | 0.497362 |          100.0% |
+         | PythonRuntime38-1024             | 0.428233 | 0.271039 | 0.209916 | 2.84926 | 0.296185 |  0.35399 | 0.470179 |          100.0% |
+         | RubyRuntime25-1024               |  0.37339 | 0.221114 | 0.180803 | 2.74568 | 0.274284 | 0.322558 | 0.393941 |          100.0% |
+         | RubyRuntime27-1024               | 0.436283 | 0.283512 | 0.198071 | 3.10114 | 0.299364 | 0.361992 | 0.482593 |          100.0% |
+         | RustRuntime-1024                 |  0.40419 | 0.266298 |  0.16962 | 2.86381 | 0.285565 |  0.33571 | 0.433258 |          100.0% |
+      2) Box plot
+         #+begin_src python :session pb1 :results none :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-1024-cold--no")
+groups = ds.groupby(by="function_name", group_keys=True)
+boxplots(groups, False)
+       #+end_src
+
+       #+RESULTS[8292a6e91ed4638ce77e0bd5eaa7bf23b3832af8]:
+       None
+
+        [[./results/img/ClojureClojureJava11Runtime-1024warm.png]]
+        [[./results/img/ClojureClojureJava8Runtime-1024warm.png]]
+        [[./results/img/ClojureGraalVM211CE11-1024warm.png]]
+        [[./results/img/ClojureGraalVM211CE8-1024warm.png]]
+        [[./results/img/ClojureOnBabashkaRuntime-1024warm.png]]
+        [[./results/img/CsharpRuntime-1024warm.png]]
+        [[./results/img/GolangRuntime-1024warm.png]]
+        [[./results/img/HaskellRuntime-1024warm.png]]
+        [[./results/img/Java11Runtime-1024warm.png]]
+        [[./results/img/Java8Runtime-1024warm.png]]
+        [[./results/img/JavaGraalVM211CE11-1024warm.png]]
+        [[./results/img/JavaGraalVM211CE8-1024warm.png]]
+        [[./results/img/Nodejs10Runtime-1024warm.png]]
+        [[./results/img/Nodejs12Runtime-1024warm.png]]
+        [[./results/img/Nodejs14Runtime-1024warm.png]]
+        [[./results/img/PythonRuntime27-1024warm.png]]
+        [[./results/img/PythonRuntime38-1024warm.png]]
+        [[./results/img/RubyRuntime25-1024warm.png]]
+        [[./results/img/RubyRuntime27-1024warm.png]]
+        [[./results/img/RustRuntime-1024warm.png]]
+
+   d) Lambda with 2048 MB of memory
+      All possible runtimes are included.
+
+      1) Basic statistics
+         #+begin_src python :session pb1 :results value raw :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-2048-cold--no")
+ds_describe_table(ds)
+         #+end_src
+
+         #+RESULTS[47ec51828037974dd6022a71797eea11578d4fc6]:
+         |                                  |     mean |      std |      min |     max |      25% |      50% |      75% | status 200 in % |
+         |----------------------------------+----------+----------+----------+---------+----------+----------+----------+-----------------|
+         | ClojureClojureJava11Runtime-2048 | 0.314254 | 0.173658 | 0.177283 | 1.86213 | 0.229847 | 0.263339 | 0.344907 |          100.0% |
+         | ClojureClojureJava8Runtime-2048  | 0.338547 | 0.178334 | 0.176469 | 1.83561 | 0.246416 | 0.294489 | 0.368763 |          100.0% |
+         | ClojureGraalVM211CE11-2048       | 0.357099 | 0.176687 | 0.184323 | 1.86161 | 0.259428 | 0.313767 | 0.391196 |          100.0% |
+         | ClojureGraalVM211CE8-2048        | 0.422863 | 0.196984 | 0.196153 | 2.08012 | 0.300137 | 0.360929 | 0.503868 |          100.0% |
+         | ClojureJava11Runtime-2048        | 0.410217 | 0.186492 | 0.195789 | 1.70386 | 0.299893 | 0.355002 | 0.470302 |          100.0% |
+         | ClojureJava8Runtime-2048         | 0.325731 | 0.182345 | 0.174838 | 1.75687 | 0.235691 |  0.27608 | 0.350901 |          100.0% |
+         | ClojureOnBabashkaRuntime-2048    | 0.418626 | 0.193175 | 0.205689 | 1.85453 | 0.297013 | 0.359824 | 0.495016 |          100.0% |
+         | CsharpRuntime-2048               | 0.350368 | 0.185161 | 0.175463 | 1.81377 | 0.254414 | 0.311627 | 0.381131 |          100.0% |
+         | GolangRuntime-2048               | 0.417937 | 0.186729 | 0.202071 | 2.30379 | 0.304326 | 0.359023 | 0.491642 |          100.0% |
+         | HaskellRuntime-2048              | 0.374945 | 0.186047 | 0.187635 |  1.8044 | 0.270406 | 0.328359 | 0.415904 |          100.0% |
+         | Java11Runtime-2048               | 0.378447 | 0.156282 | 0.192319 | 1.84507 |  0.28394 |  0.34071 | 0.431422 |          100.0% |
+         | Java8Runtime-2048                | 0.402119 | 0.199303 | 0.199057 | 1.88359 | 0.294693 | 0.345864 | 0.451657 |          100.0% |
+         | JavaGraalVM211CE11-2048          | 0.315651 | 0.165385 | 0.180786 | 1.90322 | 0.232486 | 0.265937 |  0.34716 |          100.0% |
+         | JavaGraalVM211CE8-2048           | 0.420017 | 0.202215 | 0.208138 | 1.93317 | 0.302561 | 0.362854 | 0.495174 |          100.0% |
+         | Nodejs10Runtime-2048             | 0.355216 | 0.156157 | 0.192288 |  1.7426 | 0.262274 | 0.318344 | 0.395808 |          100.0% |
+         | Nodejs12Runtime-2048             | 0.421017 | 0.194478 | 0.182593 | 1.75944 | 0.301289 | 0.364898 | 0.493348 |          100.0% |
+         | Nodejs14Runtime-2048             | 0.419276 | 0.191904 | 0.206474 | 1.79869 | 0.302992 |  0.36056 | 0.497988 |          100.0% |
+         | PythonRuntime27-2048             | 0.410085 | 0.176365 | 0.205783 | 1.70406 | 0.297199 | 0.356469 | 0.484367 |          100.0% |
+         | PythonRuntime38-2048             |  0.31559 | 0.176329 | 0.165965 | 1.80219 |  0.22828 | 0.261798 | 0.346369 |          100.0% |
+         | RubyRuntime25-2048               | 0.380975 |  0.18774 | 0.188393 | 1.79179 | 0.278037 | 0.334998 |  0.42265 |          100.0% |
+         | RubyRuntime27-2048               | 0.408132 |  0.19263 | 0.206305 | 1.81411 | 0.296032 | 0.353133 |  0.47057 |          100.0% |
+         | RustRuntime-2048                 | 0.424372 | 0.193998 | 0.211139 | 1.93719 | 0.302968 | 0.365264 | 0.506106 |          100.0% |
+
+      2) Box plot
+         #+begin_src python :session pb1 :results none :exports results :cache yes
+ds, ds_sub = file_to_dses("memory-2048-cold--no")
+groups = ds.groupby(by="function_name", group_keys=True)
+boxplots(groups, False)
+       #+end_src
+
+        [[./results/img/ClojureClojureJava11Runtime-2048warm.png]]
+        [[./results/img/ClojureClojureJava8Runtime-2048warm.png]]
+        [[./results/img/ClojureGraalVM211CE11-2048warm.png]]
+        [[./results/img/ClojureGraalVM211CE8-2048warm.png]]
+        [[./results/img/ClojureOnBabashkaRuntime-2048warm.png]]
+        [[./results/img/CsharpRuntime-2048warm.png]]
+        [[./results/img/GolangRuntime-2048warm.png]]
+        [[./results/img/HaskellRuntime-2048warm.png]]
+        [[./results/img/Java11Runtime-2048warm.png]]
+        [[./results/img/Java8Runtime-2048warm.png]]
+        [[./results/img/JavaGraalVM211CE11-2048warm.png]]
+        [[./results/img/JavaGraalVM211CE8-2048warm.png]]
+        [[./results/img/Nodejs10Runtime-2048warm.png]]
+        [[./results/img/Nodejs12Runtime-2048warm.png]]
+        [[./results/img/Nodejs14Runtime-2048warm.png]]
+        [[./results/img/PythonRuntime27-2048warm.png]]
+        [[./results/img/PythonRuntime38-2048warm.png]]
+        [[./results/img/RubyRuntime25-2048warm.png]]
+        [[./results/img/RubyRuntime27-2048warm.png]]
+        [[./results/img/RustRuntime-2048warm.png]]

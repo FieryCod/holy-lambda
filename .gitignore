@@ -8,6 +8,9 @@ docker/graalvm-ee*
 clojure8.zip
 clojure11.zip
 packaged-128.yml
+packaged-512.yml
+packaged-1024.yml
+packaged-2048.yml
 .project
 .classpath
 java11.zip

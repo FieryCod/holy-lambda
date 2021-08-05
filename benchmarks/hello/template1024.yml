@@ -1,0 +1,355 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Benchmarking simple hello programs using different runtimes
+
+Parameters:
+  Timeout:
+    Type: Number
+    Default: 40
+  MemorySize:
+    Type: Number
+    Default: 1024
+
+Globals:
+  Function:
+    Timeout: !Ref Timeout
+    MemorySize: !Ref MemorySize
+
+Resources:
+  ClojureClojureJava8Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "ClojureClojureJava8Runtime-${MemorySize}"
+      ImageUri: 443526418261.dkr.ecr.eu-central-1.amazonaws.com/fierycod/clojure-on-clojure:8
+      PackageType: Image
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojure-on-clojure-8
+            Method: get
+
+  ClojureClojureJava11Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "ClojureClojureJava11Runtime-${MemorySize}"
+      ImageUri: 443526418261.dkr.ecr.eu-central-1.amazonaws.com/fierycod/clojure-on-clojure:11
+      PackageType: Image
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojure-on-clojure-11
+            Method: get
+
+  ClojureJava8Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "ClojureJava8Runtime-${MemorySize}"
+      CodeUri: artifacts/clojure-on-java-8.jar
+      Runtime: java8
+      Handler: hello.Hello
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojure-on-java8
+            Method: get
+
+  ClojureJava11Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "ClojureJava11Runtime-${MemorySize}"
+      CodeUri: artifacts/clojure-on-java-11.jar
+      Runtime: java11
+      Handler: hello.Hello
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojure-on-java11
+            Method: get
+
+  ClojureGraalVM211CE8:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "ClojureGraalVM211CE8-${MemorySize}"
+      CodeUri: artifacts/clojure8.zip
+      Runtime: provided
+      Handler: hello.Hello
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojuregraalnative21ce8
+            Method: get
+
+  ClojureGraalVM211CE11:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "ClojureGraalVM211CE11-${MemorySize}"
+      CodeUri: artifacts/clojure11.zip
+      Runtime: provided
+      Handler: hello.Hello
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojuregraalnative21ce11
+            Method: get
+
+  Java8Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "Java8Runtime-${MemorySize}"
+      CodeUri: artifacts/java-8.jar
+      Runtime: java8
+      Handler: fierycod.App::handleRequest
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /java8
+            Method: get
+
+  JavaGraalVM211CE8:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "JavaGraalVM211CE8-${MemorySize}"
+      CodeUri: artifacts/java8.zip
+      Runtime: provided
+      Handler: fierycod.App::handleRequest
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /javagraalnative21ce8
+            Method: get
+
+  JavaGraalVM211CE11:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "JavaGraalVM211CE11-${MemorySize}"
+      CodeUri: artifacts/java11.zip
+      Runtime: provided
+      Handler: fierycod.App::handleRequest
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /javagraalnative21ce11
+            Method: get
+
+  Java11Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "Java11Runtime-${MemorySize}"
+      CodeUri: artifacts/java-11.jar
+      Runtime: java11
+      Handler: fierycod.App
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /java11
+            Method: get
+
+  ClojureOnBabashkaRuntime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "ClojureOnBabashkaRuntime-${MemorySize}"
+      CodeUri: clojure-babashka
+      Runtime: provided
+      Handler: hello.Hello
+      Layers:
+        - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:31
+      Environment:
+        Variables:
+          Entrypoint: hello
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojure-on-babashka
+            Method: get
+
+  Nodejs14Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "Nodejs14Runtime-${MemorySize}"
+      CodeUri: nodejs
+      Runtime: nodejs14.x
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /nodejs-14
+            Method: get
+
+  Nodejs12Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "Nodejs12Runtime-${MemorySize}"
+      CodeUri: nodejs
+      Runtime: nodejs12.x
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /nodejs-12
+            Method: get
+
+  Nodejs10Runtime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "Nodejs10Runtime-${MemorySize}"
+      CodeUri: nodejs
+      Runtime: nodejs10.x
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /nodejs-10
+            Method: get
+
+  PythonRuntime38:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "PythonRuntime38-${MemorySize}"
+      CodeUri: python
+      Runtime: python3.8
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /python-38
+            Method: get
+
+  PythonRuntime27:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "PythonRuntime27-${MemorySize}"
+      CodeUri: python
+      Runtime: python2.7
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /python-27
+            Method: get
+
+  RubyRuntime25:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "RubyRuntime25-${MemorySize}"
+      CodeUri: ruby
+      Runtime: ruby2.5
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /ruby-25
+            Method: get
+
+  RubyRuntime27:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "RubyRuntime27-${MemorySize}"
+      CodeUri: ruby
+      Runtime: ruby2.7
+      Handler: index.handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /ruby-27
+            Method: get
+
+  GolangRuntime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "GolangRuntime-${MemorySize}"
+      CodeUri: artifacts
+      Runtime: go1.x
+      Handler: golang-handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /golang-1x
+            Method: get
+
+  RustRuntime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "RustRuntime-${MemorySize}"
+      CodeUri: artifacts/latest-rust.zip
+      Runtime: provided
+      Handler: provided
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /rust-runtime
+            Method: get
+
+  HaskellRuntime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "HaskellRuntime-${MemorySize}"
+      CodeUri: artifacts/haskell.zip
+      Runtime: provided
+      Handler: src/Lib.handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /haskell-runtime
+            Method: get
+
+  CsharpRuntime:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "CsharpRuntime-${MemorySize}"
+      CodeUri: artifacts/csharp.zip
+      Runtime: dotnetcore2.1
+      Handler: dotnet21::dotnet21.Hello::Handler
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /csharp-runtime
+            Method: get
+
+Outputs:
+  RootApiGateway:
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"

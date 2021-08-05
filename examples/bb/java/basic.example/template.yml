@@ -40,5 +40,5 @@ Resources:
         HelloEvent:
           Type: Api
           Properties:
-            Path: /
-            Method: get
+            Path: /{proxy+}
+            Method: ANY
