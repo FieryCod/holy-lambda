@@ -40,6 +40,8 @@ io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url     "https://github
 
 [Jump here](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
 
+## [Benchmarks](https://github.com/FieryCod/holy-lambda/tree/master/benchmarks/hello/README.md)
+
 ### Quick start
 #### Minimal Code
 ``` clojure
@@ -56,6 +58,7 @@ io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url     "https://github
   
 (h/entrypoint [#'ExampleLambda])
 ```
+
 #### Project scaffolding
 
 ``` clojure
