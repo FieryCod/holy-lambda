@@ -1,8 +1,6 @@
 # Rationale
 Writing Clojure handlers for AWS Lambda is not always as simple as it should be. For many years, Clojure developers used libraries such as `uswitch/lambada` as a glue between Java and Clojure with mediocre results due to the cold starts and high memory usage. 
 
-PS: I don't claim the AWS Lambda or Serverless is superior to traditional servers, and I will never do. AWS Lambda is a viable choice in only a limited of tasks. Still, though, it's worth having Clojure support for low memory, high-performance Clojure handlers on it, and that's why holy-lambda exists.
-
 **Cold starts**
 To understand what causes cold starts, we have to know how Clojure distributes program classes. 
 

@@ -1,0 +1,11 @@
+.DS_Store
+.idea
+*.log
+tmp/
+artifacts/**
+clojure-native.zip
+hello-clojure
+golang-handler
+clojure.jar
+latest-rust.zip
+csharp.zip

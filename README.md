@@ -72,6 +72,9 @@ lein new holy-lambda example ;; <-- Replace `example` with the name of the proje
 
 ``` sh
 
+**Available tasks:**
+
+``` bash
 ❯ bb tasks
 The following tasks are available:
 
