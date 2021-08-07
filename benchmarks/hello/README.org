@@ -24,13 +24,13 @@ alpha = ["A", "B", "C", "D", "E", "F", "G", "H", \
 
 def ds_with_substitute_names(ds):
     dict = {}
-    fn_names = set(ds["function_name"])
+    fn_names = sorted(set(ds["function_name"]))
     replace_dict = into_dict([[fn, alpha[i]] for i, fn in zip(range(len(fn_names)), fn_names)])
     new_column = ds["function_name"].replace(replace_dict)
     ds_new = ds.copy()
     ds_new["function_name"] = new_column
 
-    return ds, ds_new
+    return ds, ds_new, fn_names
 
 def file_to_dses(filename):
     return ds_with_substitute_names(read_csv(filename))
@@ -61,17 +61,32 @@ def groups_to_describe_table(groups):
     return table
 
 def boxplots(groups, coldstarts=True):
-  print(coldstarts)
   for i, [name, group] in zip(range(len(groups)), groups):
       fig = plt.figure(i)
       plt.boxplot(group["time_s"], showfliers=False)
-      plt.title("Boxplot of: " + name)
-      plt.ylabel("Time in seconds")
+      plt.title("Boxplot: " + name + ",v:" + ("cold" if coldstarts else "warm") + ",memory: " + str(group["memory_size"].values[0]) + "MB")
+      plt.ylabel("Time [s]")
+      plt.xlabel(name)
       fig.savefig("results/img/" + name + ("cold" if coldstarts else "warm") + ".png", dpi=100)
       fig.clear()
       fig.clf()
       plt.clf()
       plt.close()
+
+def boxplot_all(filename, title):
+  _, df_new, fn_names = file_to_dses(filename)
+  fig, ax = plt.subplots(figsize=(10,8))
+  df_new.boxplot(column=["time_s"], by='function_name', ax=ax, showfliers=False)
+  ax.set_ylabel("Time [s]")
+  ax.set_xlabel("Function name")
+  plt.title(title)
+  plt.suptitle('')
+  ax.legend([str(alf) + " = " + fn for alf, fn in zip(alpha[:len(fn_names)], fn_names)], handletextpad=0, handlelength=0, framealpha=0.3, fontsize="x-small", loc=1)
+  fig.savefig("./results/img/" + filename + "all.png", dpi=100)
+  fig.clear()
+  fig.clf()
+  plt.clf()
+  plt.close()
 
 def ds_describe_table(ds):
     return tabulate(
@@ -161,7 +176,7 @@ In the test the following parameters are closely studied:
 21. /HaskellRuntime-{MemorySize}/ - Community Haskell runtime (v1.1.1)
 22. /CsharpRuntime-{MemorySize}/ - Official DotnetCore runtime (v2.1)
 
-Function name changes according to dynamic MemorySize parameter, where MemoriSize is one of {128, 512, 1024, 2048}.
+Function name changes according to dynamic MemorySize parameter, where MemorySize is one of {128, 512, 1024, 2048}.
 
 * Results
 1. Variant 1
@@ -171,7 +186,7 @@ Function name changes according to dynamic MemorySize parameter, where MemoriSiz
 
       1) Basic statistics
          #+begin_src python :session pb1 :results value raw :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-128-cold--yes")
+ds, ds_sub,_ = file_to_dses("memory-128-cold--yes")
 ds_describe_table(ds)
          #+end_src
 
@@ -198,15 +213,27 @@ ds_describe_table(ds)
          | RubyRuntime25-128               | 0.475066 | 0.0965885 | 0.351247 |   1.3725 | 0.415409 |  0.44368 | 0.496152 |          100.0% |
          | RubyRuntime27-128               | 0.501787 |  0.101542 | 0.389072 |  1.41724 |  0.44488 | 0.469224 | 0.517396 |          100.0% |
          | RustRuntime-128                 | 0.425008 | 0.0914694 | 0.307065 |   1.3415 | 0.369308 | 0.394492 | 0.442785 |          100.0% |
+         |                                 |          |           |          |          |          |          |          |                 |
       2) Box plot
-         #+begin_src python :session pb1 :results none :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-128-cold--yes")
+         *Boxplot all functions*
+         #+begin_src python :session pb1 :results value :exports none :cache yes
+boxplot_all("memory-128-cold--yes", "Boxplot of all functions M=128MB, Coldstart=yes")
+         #+end_src
+
+         #+RESULTS[dec6bd85475b4864581bf27d7aa1cfb313b60fa3]:
+         : None
+
+         [[./results/img/memory-128-cold--yesall.png]]
+         *Individual boxplots*
+         #+begin_src python :session pb1 :results value :exports none :cache yes
+ds, ds_sub,_ = file_to_dses("memory-128-cold--yes")
 groups = ds.groupby(by="function_name", group_keys=True)
 boxplots(groups)
        #+end_src
 
-       #+RESULTS[2c93d9a558fe011e01347aa9af96ba841f382053]:
-       None
+       #+RESULTS[9bb26b25e9a5b9e35bb2ada8889fb035dd25935b]:
+       : None
+
 
         [[./results/img/ClojureClojureJava11Runtime-128cold.png]]
         [[./results/img/ClojureClojureJava8Runtime-128cold.png]]
@@ -233,7 +260,7 @@ boxplots(groups)
 
       1) Basic statistics
          #+begin_src python :session pb1 :results value raw :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-512-cold--yes")
+ds, ds_sub,_ = file_to_dses("memory-512-cold--yes")
 ds_describe_table(ds)
          #+end_src
 
@@ -261,14 +288,26 @@ ds_describe_table(ds)
          | RubyRuntime27-512               | 0.489463 | 0.0983069 | 0.365415 | 0.995128 | 0.426528 | 0.453523 | 0.514234 |          100.0% |
          | RustRuntime-512                 | 0.424694 | 0.0977936 | 0.303959 |  1.06127 |  0.36283 | 0.388134 | 0.449551 |          100.0% |
       2) Box plot
-         #+begin_src python :session pb1 :results none :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-512-cold--yes")
+         *Boxplot all functions*
+         #+begin_src python :session pb1 :results value :exports none :cache yes
+boxplot_all("memory-512-cold--yes", "Boxplot of all functions M=512MB, Coldstart=yes")
+         #+end_src
+
+         #+RESULTS[be996fc4f703b5e0e93bf8a08e23124ff8dc0b5f]:
+         : None
+
+
+         [[./results/img/memory-512-cold--yesall.png]]
+         *Individual boxplots*
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+ds, ds_sub,_ = file_to_dses("memory-512-cold--yes")
 groups = ds.groupby(by="function_name", group_keys=True)
 boxplots(groups)
        #+end_src
 
-       #+RESULTS[4d41b0dea9657c779c44c5a152d56d45bea62e3a]:
+       #+RESULTS[1b1710aa941ce478e735c71208861fb5fad2207f]:
        None
+
 
         [[./results/img/ClojureClojureJava11Runtime-512cold.png]]
         [[./results/img/ClojureClojureJava8Runtime-512cold.png]]
@@ -295,7 +334,7 @@ boxplots(groups)
 
       1) Basic statistics
          #+begin_src python :session pb1 :results value raw :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-1024-cold--yes")
+ds, ds_sub,_ = file_to_dses("memory-1024-cold--yes")
 ds_describe_table(ds)
          #+end_src
 
@@ -323,14 +362,27 @@ ds_describe_table(ds)
          | RubyRuntime27-1024               | 0.493324 |  0.106454 | 0.373846 |  1.08042 | 0.427152 | 0.455522 | 0.517483 |          100.0% |
          | RustRuntime-1024                 | 0.431437 |  0.102973 | 0.309548 | 0.916079 | 0.364791 |  0.39208 | 0.464565 |          100.0% |
       2) Box plot
-         #+begin_src python :session pb1 :results none :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-1024-cold--yes")
+         *Boxplot all functions*
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+boxplot_all("memory-1024-cold--yes", "Boxplot of all functions M=1024MB, Coldstart=yes")
+         #+end_src
+
+         #+RESULTS[872030bd1bc675d741e9eabd2abe67b4eb3e3035]:
+         None
+
+
+         [[./results/img/memory-1024-cold--yesall.png]]
+
+         *Individual boxplots*
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+ds, ds_sub,_ = file_to_dses("memory-1024-cold--yes")
 groups = ds.groupby(by="function_name", group_keys=True)
 boxplots(groups)
        #+end_src
 
-       #+RESULTS[c68d0905c6da16233ff676e806e7785d17e294a7]:
+       #+RESULTS[a6a2e53f4985713e2686f9203aab7ec3c9037beb]:
        None
+
 
         [[./results/img/ClojureClojureJava11Runtime-1024cold.png]]
         [[./results/img/ClojureClojureJava8Runtime-1024cold.png]]
@@ -357,7 +409,7 @@ boxplots(groups)
 
       1) Basic statistics
          #+begin_src python :session pb1 :results value raw :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-2048-cold--yes")
+ds, ds_sub,_ = file_to_dses("memory-2048-cold--yes")
 ds_describe_table(ds)
          #+end_src
 
@@ -387,13 +439,25 @@ ds_describe_table(ds)
          | RubyRuntime27-2048               | 0.493976 |  0.105726 | 0.375783 |  1.16421 | 0.428802 | 0.456788 | 0.515502 |          100.0% |
          | RustRuntime-2048                 | 0.426249 | 0.0977116 | 0.315532 | 0.901215 | 0.362562 | 0.389235 | 0.459304 |          100.0% |
       2) Box plot
-         #+begin_src python :session pb1 :results none :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-2048-cold--yes")
+         *Boxplot all functions*
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+boxplot_all("memory-2048-cold--yes", "Boxplot of all functions M=2048MB, Coldstart=yes")
+         #+end_src
+
+         #+RESULTS[222e4629d097d27e3b2f55f926994cec8625fc9b]:
+         None
+
+
+         [[./results/img/memory-2048-cold--yesall.png]]
+
+         *Individual boxplots*
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+ds, ds_sub,_ = file_to_dses("memory-2048-cold--yes")
 groups = ds.groupby(by="function_name", group_keys=True)
 boxplots(groups)
        #+end_src
 
-       #+RESULTS[9a73e8d413dac7129d297ccfdf8056faf963d4de]:
+       #+RESULTS[abda9cc671d0b72514a03e03e3e44e499c4c56c8]:
        None
 
         [[./results/img/ClojureClojureJava11Runtime-2048cold.png]]
@@ -423,7 +487,7 @@ boxplots(groups)
 
       1) Basic statistics
          #+begin_src python :session pb1 :results value raw :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-128-cold--no")
+ds, ds_sub,_ = file_to_dses("memory-128-cold--no")
 ds_describe_table(ds)
          #+end_src
 
@@ -451,35 +515,46 @@ ds_describe_table(ds)
          | RubyRuntime27-128               | 0.398041 |  0.124297 | 0.225129 | 0.821187 | 0.302054 | 0.353223 | 0.471031 |          100.0% |
          | RustRuntime-128                 |  0.34958 | 0.0998513 | 0.186196 | 0.707899 | 0.276292 | 0.321863 | 0.402452 |          100.0% |
       2) Box plot
-         #+begin_src python :session pb1 :results none :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-128-cold--no")
+         *Boxplot all functions*
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+boxplot_all("memory-128-cold--no", "Boxplot of all functions M=128MB, Coldstart=no")
+         #+end_src
+
+         #+RESULTS[7ff67c3948f26dc2d73b78a96d677a33c304b57f]:
+         None
+
+         [[./results/img/memory-128-cold--noall.png]]
+
+        *Individual boxplots*
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+ds, ds_sub,_ = file_to_dses("memory-128-cold--no")
 groups = ds.groupby(by="function_name", group_keys=True)
-boxplots(groups, False)
-       #+end_src
+boxplots(groups, coldstarts=False)
+         #+end_src
 
-       #+RESULTS[e546b964720a6264f7aefe26e7168699533f40c6]:
-       None
+         #+RESULTS[2d8ffe8bd53713bae7a05cc7a3ffc66ac76b146a]:
+         None
 
-        [[./results/img/ClojureClojureJava11Runtime-128warm.png]]
-        [[./results/img/ClojureClojureJava8Runtime-128warm.png]]
-        [[./results/img/ClojureGraalVM211CE11-128warm.png]]
-        [[./results/img/ClojureGraalVM211CE8-128warm.png]]
-        [[./results/img/ClojureOnBabashkaRuntime-128warm.png]]
-        [[./results/img/CsharpRuntime-128warm.png]]
-        [[./results/img/GolangRuntime-128warm.png]]
-        [[./results/img/HaskellRuntime-128warm.png]]
-        [[./results/img/Java11Runtime-128warm.png]]
-        [[./results/img/Java8Runtime-128warm.png]]
-        [[./results/img/JavaGraalVM211CE11-128warm.png]]
-        [[./results/img/JavaGraalVM211CE8-128warm.png]]
-        [[./results/img/Nodejs10Runtime-128warm.png]]
-        [[./results/img/Nodejs12Runtime-128warm.png]]
-        [[./results/img/Nodejs14Runtime-128warm.png]]
-        [[./results/img/PythonRuntime27-128warm.png]]
-        [[./results/img/PythonRuntime38-128warm.png]]
-        [[./results/img/RubyRuntime25-128warm.png]]
-        [[./results/img/RubyRuntime27-128warm.png]]
-        [[./results/img/RustRuntime-128warm.png]]
+         [[./results/img/ClojureClojureJava11Runtime-128warm.png]]
+         [[./results/img/ClojureClojureJava8Runtime-128warm.png]]
+         [[./results/img/ClojureGraalVM211CE11-128warm.png]]
+         [[./results/img/ClojureGraalVM211CE8-128warm.png]]
+         [[./results/img/ClojureOnBabashkaRuntime-128warm.png]]
+         [[./results/img/CsharpRuntime-128warm.png]]
+         [[./results/img/GolangRuntime-128warm.png]]
+         [[./results/img/HaskellRuntime-128warm.png]]
+         [[./results/img/Java11Runtime-128warm.png]]
+         [[./results/img/Java8Runtime-128warm.png]]
+         [[./results/img/JavaGraalVM211CE11-128warm.png]]
+         [[./results/img/JavaGraalVM211CE8-128warm.png]]
+         [[./results/img/Nodejs10Runtime-128warm.png]]
+         [[./results/img/Nodejs12Runtime-128warm.png]]
+         [[./results/img/Nodejs14Runtime-128warm.png]]
+         [[./results/img/PythonRuntime27-128warm.png]]
+         [[./results/img/PythonRuntime38-128warm.png]]
+         [[./results/img/RubyRuntime25-128warm.png]]
+         [[./results/img/RubyRuntime27-128warm.png]]
+         [[./results/img/RustRuntime-128warm.png]]
 
    b) Lambda with 512 MB of memory
       In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime.
@@ -487,7 +562,7 @@ boxplots(groups, False)
 
       1) Basic statistics
          #+begin_src python :session pb1 :results value raw :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-512-cold--no")
+ds, ds_sub,_ = file_to_dses("memory-512-cold--no")
 ds_describe_table(ds)
          #+end_src
 
@@ -515,14 +590,24 @@ ds_describe_table(ds)
          | RubyRuntime27-512               | 0.378392 | 0.232686 | 0.190044 | 2.69756 | 0.282724 | 0.320444 | 0.394092 |          100.0% |
          | RustRuntime-512                 | 0.387028 | 0.258765 | 0.173775 | 3.09224 | 0.286154 | 0.324395 | 0.407642 |          100.0% |
       2) Box plot
-         #+begin_src python :session pb1 :results none :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-512-cold--no")
-groups = ds.groupby(by="function_name", group_keys=True)
-boxplots(groups, False)
-       #+end_src
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+boxplot_all("memory-512-cold--no", "Boxplot of all functions M=512MB, Coldstart=no")
+         #+end_src
 
-       #+RESULTS[ada74d7f874a767d168f5766af37027a06d1051d]:
-       None
+         #+RESULTS[160bce74aa47a6e733de08ec42cd9cfafa796063]:
+         None
+
+         [[./results/img/memory-512-cold--noall.png]]
+
+        *Individual boxplots*
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+ds, ds_sub,_ = file_to_dses("memory-512-cold--no")
+groups = ds.groupby(by="function_name", group_keys=True)
+boxplots(groups, coldstarts=False)
+         #+end_src
+
+         #+RESULTS[102860fd2f09c09db40a0e12a607bfa5f836ede2]:
+         None
 
         [[./results/img/ClojureClojureJava11Runtime-512warm.png]]
         [[./results/img/ClojureClojureJava8Runtime-512warm.png]]
@@ -551,7 +636,7 @@ boxplots(groups, False)
 
       1) Basic statistics
          #+begin_src python :session pb1 :results value raw :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-1024-cold--no")
+ds, ds_sub,_ = file_to_dses("memory-1024-cold--no")
 ds_describe_table(ds)
          #+end_src
 
@@ -579,14 +664,24 @@ ds_describe_table(ds)
          | RubyRuntime27-1024               | 0.436283 | 0.283512 | 0.198071 | 3.10114 | 0.299364 | 0.361992 | 0.482593 |          100.0% |
          | RustRuntime-1024                 |  0.40419 | 0.266298 |  0.16962 | 2.86381 | 0.285565 |  0.33571 | 0.433258 |          100.0% |
       2) Box plot
-         #+begin_src python :session pb1 :results none :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-1024-cold--no")
-groups = ds.groupby(by="function_name", group_keys=True)
-boxplots(groups, False)
-       #+end_src
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+boxplot_all("memory-1024-cold--no", "Boxplot of all functions M=1024MB, Coldstart=no")
+         #+end_src
 
-       #+RESULTS[8292a6e91ed4638ce77e0bd5eaa7bf23b3832af8]:
-       None
+         #+RESULTS[ae242f26a4649313eb3fc7646f864d9a18c2be26]:
+         None
+
+         [[./results/img/memory-1024-cold--noall.png]]
+
+        *Individual boxplots*
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+ds, ds_sub,_ = file_to_dses("memory-1024-cold--no")
+groups = ds.groupby(by="function_name", group_keys=True)
+boxplots(groups, coldstarts=False)
+         #+end_src
+
+         #+RESULTS[d20bc90c71d2ac8a8a93a3e83370276a06637a33]:
+         None
 
         [[./results/img/ClojureClojureJava11Runtime-1024warm.png]]
         [[./results/img/ClojureClojureJava8Runtime-1024warm.png]]
@@ -614,7 +709,7 @@ boxplots(groups, False)
 
       1) Basic statistics
          #+begin_src python :session pb1 :results value raw :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-2048-cold--no")
+ds, ds_sub,_ = file_to_dses("memory-2048-cold--no")
 ds_describe_table(ds)
          #+end_src
 
@@ -645,11 +740,24 @@ ds_describe_table(ds)
          | RustRuntime-2048                 | 0.424372 | 0.193998 | 0.211139 | 1.93719 | 0.302968 | 0.365264 | 0.506106 |          100.0% |
 
       2) Box plot
-         #+begin_src python :session pb1 :results none :exports results :cache yes
-ds, ds_sub = file_to_dses("memory-2048-cold--no")
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+boxplot_all("memory-2048-cold--no", "Boxplot of all functions M=2048MB, Coldstart=no")
+         #+end_src
+
+         #+RESULTS[1bdca9cf2a45f197a3d5d6a7200b90ac5b985e41]:
+         None
+
+         [[./results/img/memory-2048-cold--noall.png]]
+
+        *Individual boxplots*
+         #+begin_src python :session pb1 :results raw :exports none :cache yes
+ds, ds_sub,_ = file_to_dses("memory-2048-cold--no")
 groups = ds.groupby(by="function_name", group_keys=True)
-boxplots(groups, False)
-       #+end_src
+boxplots(groups, coldstarts=False)
+         #+end_src
+
+         #+RESULTS[3a1f3a105fa03848d5fadffa867673c321fd2ba3]:
+         None
 
         [[./results/img/ClojureClojureJava11Runtime-2048warm.png]]
         [[./results/img/ClojureClojureJava8Runtime-2048warm.png]]
