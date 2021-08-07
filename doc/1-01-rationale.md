@@ -51,10 +51,14 @@ If you feel overhelmed by holy-lambda ecosystem you can check very [this](https:
 
 ## Runtime comparison
 
-| Runtime   | Cold start | Performance | Artifacts size   | Memory Consumption | Interactive | Compile time | Beginners friendly? |
-|-----------|------------|-------------|------------------|--------------------|-------------|--------------|---------------------|
-| :native   | low        | high        | high     >= 16mb | low                | No          | very long    | no                  |
-| :babashka | low        | moderate    | low      >= 50kb | low                | Yes         | no compile   | yes                 |
-| :java     | high       | high        | moderate >= 12mb | high               | No          | long         | yes                 |
+| Runtime   | Cold start | Performance | Artifacts size    | Memory Consumption | Interactive | Compile time | Beginners friendly? | Orphaned |
+|-----------|------------|-------------|-------------------|--------------------|-------------|--------------|---------------------|----------|
+| :native   | low        | high        | high     >= 16mb  | low                | No          | very long    | no                  | no       |
+| :babashka | low        | moderate    | low      >= 50kb  | low                | Yes         | no compile   | yes                 | no       |
+| :java     | high       | high        | moderate >= 12mb  | high               | No          | long         | yes                 | yes      |
+| :clojure  | high       | high        | moderate >= 500mb | high               | No          | long         | yes                 | no       |
+
+
+For detailed comparison check [benchmarks](https://github.com/FieryCod/holy-lambda/tree/benchmarks/benchmarks/hello/README.md).
 
 PS: I don't claim the AWS Lambda or Serverless is superior to traditional servers, and I will never do. AWS Lambda is a viable choice in only a limited of tasks. Still, though, it's worth having Clojure support for low memory, high-performance Clojure handlers on it, and that's why holy-lambda exists.

@@ -124,13 +124,11 @@ Architecture of every runtime more or less follows the official AWS recommendati
 3. Handler returns a structure ~{"body": "Hello world!", "Content-Type": "plain/text"}~ which is then encoded to valid json string and POST to an API Gateway.
 
 The test is both minimal enough, complete and fair, because we compare only the runtimes work.
-
 * Expectations
 1. Holy Lambda runtimes should be as fast as the others.
 2. Holy Lambda runtimes should be statistically stable.
 3. Holy Lambda runtimes should work without the errors under the same load as other runtimes.
 4. Holy Lambda runtimes should have approximetely same memory usage characteristics as other runtimes.
-
 * Analysed parameters
 In the test the following parameters are closely studied:
 - memory usage of each runtime (mean, max, min, std)
@@ -139,20 +137,8 @@ In the test the following parameters are closely studied:
 - warm start time, processing, and response (mean, max, min, std, 25%, 50%, 75%)
 - cold start time, and processing (without response)
 - warm start time, and processing (without response)
-
-* Test variants
-1. Thousand full curl GET requests to each Lambda representing the runtime with cold start simulation:
-   a) Lambda with 128 MB of memory
-   b) Lambda with 512 MB of memory
-   c) Lambda with 1024 MB of memory
-   d) Lambda with 2048 MB of memory
-2. Thousand full curl GET requests to each Lambda representing the runtime. Warm Lambda execution only:
-   a) Lambda with 128 MB of memory
-   b) Lambda with 512 MB of memory
-   c) Lambda with 1024 MB of memory
-   d) Lambda with 2048 MB of memory
-
-* Lambda functions names
+- artifacts size
+* Lambda functions
 1. /ClojureClojureJava8Runtime-{MemorySize}/ - HL Custom Clojure runtime on Java8
 2. /ClojureClojureJava11Runtime-{MemorySize}/ - HL Custom Clojure runtime on Java11
 3. /ClojureJava8Runtime-{MemorySize}/ - Clojure on official Java runtime. Java8
@@ -177,8 +163,48 @@ In the test the following parameters are closely studied:
 22. /CsharpRuntime-{MemorySize}/ - Official DotnetCore runtime (v2.1)
 
 Function name changes according to dynamic MemorySize parameter, where MemorySize is one of {128, 512, 1024, 2048}.
+* Artifacts size
 
-* Results
+Artifacts size are the same for all of the memory variants.
+
+#+CAPTION: Function to it's artifact size in (KB)
+|-----------------------------+--------------------|
+| Function Name               | Artifact size (KB) |
+|-----------------------------+--------------------|
+| RubyRuntime25               | ~=0.236            |
+| RubyRuntime27               | ~=0.236            |
+| PythonRuntime27             | ~=0.248            |
+| PythonRuntime38             | ~=0.248            |
+| Nodejs10Runtime             | ~=0.263            |
+| Nodejs12Runtime             | ~=0.263            |
+| Nodejs14Runtime             | ~=0.263            |
+| CsharpRuntime-128           | ~=204.6            |
+| GolangRuntime               | ~=67500            |
+| RustRuntime                 | ~=1500             |
+| HaskellRuntime              | ~=2400             |
+| Java8Runtime                | ~=3200             |
+| Java11Runtime               | ~=3200             |
+| JavaGraalVM211CE8           | ~=9500             |
+| JavaGraalVM211CE11          | ~=12700            |
+| ClojureJava8Runtime         | ~=6600             |
+| ClojureJava11Runtime        | ~=6700             |
+| ClojureClojureJava8Runtime  | ~=237000           |
+| ClojureClojureJava11Runtime | ~=340000           |
+| ClojureOnBabashkaRuntime    | ~=0.270            |
+| ClojureGraalVM211CE8        | ~=8900             |
+| ClojureGraalVM211CE11       | ~=10200            |
+* Test variants
+1. Thousand full curl GET requests to each Lambda representing the runtime with cold start simulation:
+   a) Lambda with 128 MB of memory
+   b) Lambda with 512 MB of memory
+   c) Lambda with 1024 MB of memory
+   d) Lambda with 2048 MB of memory
+2. Thousand full curl GET requests to each Lambda representing the runtime. Warm Lambda execution only:
+   a) Lambda with 128 MB of memory
+   b) Lambda with 512 MB of memory
+   c) Lambda with 1024 MB of memory
+   d) Lambda with 2048 MB of memory
+* Raw results
 1. Variant 1
    a) Lambda with 128 MB of memory
       In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime.
@@ -215,26 +241,24 @@ ds_describe_table(ds)
          | RustRuntime-128                 | 0.425008 | 0.0914694 | 0.307065 |   1.3415 | 0.369308 | 0.394492 | 0.442785 |          100.0% |
          |                                 |          |           |          |          |          |          |          |                 |
       2) Box plot
+
          *Boxplot all functions*
-         #+begin_src python :session pb1 :results value :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 boxplot_all("memory-128-cold--yes", "Boxplot of all functions M=128MB, Coldstart=yes")
          #+end_src
 
-         #+RESULTS[dec6bd85475b4864581bf27d7aa1cfb313b60fa3]:
-         : None
-
+         #+BEGIN_CENTER
          [[./results/img/memory-128-cold--yesall.png]]
+         #+END_CENTER
+
          *Individual boxplots*
-         #+begin_src python :session pb1 :results value :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 ds, ds_sub,_ = file_to_dses("memory-128-cold--yes")
 groups = ds.groupby(by="function_name", group_keys=True)
 boxplots(groups)
        #+end_src
 
-       #+RESULTS[9bb26b25e9a5b9e35bb2ada8889fb035dd25935b]:
-       : None
-
-
+        #+BEGIN_CENTER
         [[./results/img/ClojureClojureJava11Runtime-128cold.png]]
         [[./results/img/ClojureClojureJava8Runtime-128cold.png]]
         [[./results/img/ClojureGraalVM211CE11-128cold.png]]
@@ -255,6 +279,8 @@ boxplots(groups)
         [[./results/img/RubyRuntime25-128cold.png]]
         [[./results/img/RubyRuntime27-128cold.png]]
         [[./results/img/RustRuntime-128cold.png]]
+        #+END_CENTER
+
    b) Lambda with 512 MB of memory
       In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime. Runtimes has been ignored, because the memory size usage exceeds 128MB.
 
@@ -288,27 +314,24 @@ ds_describe_table(ds)
          | RubyRuntime27-512               | 0.489463 | 0.0983069 | 0.365415 | 0.995128 | 0.426528 | 0.453523 | 0.514234 |          100.0% |
          | RustRuntime-512                 | 0.424694 | 0.0977936 | 0.303959 |  1.06127 |  0.36283 | 0.388134 | 0.449551 |          100.0% |
       2) Box plot
+
          *Boxplot all functions*
-         #+begin_src python :session pb1 :results value :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 boxplot_all("memory-512-cold--yes", "Boxplot of all functions M=512MB, Coldstart=yes")
          #+end_src
 
-         #+RESULTS[be996fc4f703b5e0e93bf8a08e23124ff8dc0b5f]:
-         : None
-
-
+         #+BEGIN_CENTER
          [[./results/img/memory-512-cold--yesall.png]]
+         #+END_CENTER
+
          *Individual boxplots*
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 ds, ds_sub,_ = file_to_dses("memory-512-cold--yes")
 groups = ds.groupby(by="function_name", group_keys=True)
 boxplots(groups)
        #+end_src
 
-       #+RESULTS[1b1710aa941ce478e735c71208861fb5fad2207f]:
-       None
-
-
+        #+BEGIN_CENTER
         [[./results/img/ClojureClojureJava11Runtime-512cold.png]]
         [[./results/img/ClojureClojureJava8Runtime-512cold.png]]
         [[./results/img/ClojureGraalVM211CE11-512cold.png]]
@@ -329,6 +352,8 @@ boxplots(groups)
         [[./results/img/RubyRuntime25-512cold.png]]
         [[./results/img/RubyRuntime27-512cold.png]]
         [[./results/img/RustRuntime-512cold.png]]
+        #+END_CENTER
+
    c) Lambda with 1024 MB of memory
       In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime. Runtimes has been ignored, because the memory size usage exceeds 128MB.
 
@@ -362,28 +387,24 @@ ds_describe_table(ds)
          | RubyRuntime27-1024               | 0.493324 |  0.106454 | 0.373846 |  1.08042 | 0.427152 | 0.455522 | 0.517483 |          100.0% |
          | RustRuntime-1024                 | 0.431437 |  0.102973 | 0.309548 | 0.916079 | 0.364791 |  0.39208 | 0.464565 |          100.0% |
       2) Box plot
+
          *Boxplot all functions*
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 boxplot_all("memory-1024-cold--yes", "Boxplot of all functions M=1024MB, Coldstart=yes")
          #+end_src
 
-         #+RESULTS[872030bd1bc675d741e9eabd2abe67b4eb3e3035]:
-         None
-
-
+         #+BEGIN_CENTER
          [[./results/img/memory-1024-cold--yesall.png]]
+         #+END_CENTER
 
          *Individual boxplots*
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 ds, ds_sub,_ = file_to_dses("memory-1024-cold--yes")
 groups = ds.groupby(by="function_name", group_keys=True)
 boxplots(groups)
        #+end_src
 
-       #+RESULTS[a6a2e53f4985713e2686f9203aab7ec3c9037beb]:
-       None
-
-
+        #+BEGIN_CENTER
         [[./results/img/ClojureClojureJava11Runtime-1024cold.png]]
         [[./results/img/ClojureClojureJava8Runtime-1024cold.png]]
         [[./results/img/ClojureGraalVM211CE11-1024cold.png]]
@@ -404,6 +425,8 @@ boxplots(groups)
         [[./results/img/RubyRuntime25-1024cold.png]]
         [[./results/img/RubyRuntime27-1024cold.png]]
         [[./results/img/RustRuntime-1024cold.png]]
+        #+END_CENTER
+        
    d) Lambda with 2048MB of memory
       All possible runtimes are included.
 
@@ -439,27 +462,24 @@ ds_describe_table(ds)
          | RubyRuntime27-2048               | 0.493976 |  0.105726 | 0.375783 |  1.16421 | 0.428802 | 0.456788 | 0.515502 |          100.0% |
          | RustRuntime-2048                 | 0.426249 | 0.0977116 | 0.315532 | 0.901215 | 0.362562 | 0.389235 | 0.459304 |          100.0% |
       2) Box plot
+
          *Boxplot all functions*
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 boxplot_all("memory-2048-cold--yes", "Boxplot of all functions M=2048MB, Coldstart=yes")
          #+end_src
 
-         #+RESULTS[222e4629d097d27e3b2f55f926994cec8625fc9b]:
-         None
-
-
+         #+BEGIN_CENTER
          [[./results/img/memory-2048-cold--yesall.png]]
+         #+END_CENTER
 
          *Individual boxplots*
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 ds, ds_sub,_ = file_to_dses("memory-2048-cold--yes")
 groups = ds.groupby(by="function_name", group_keys=True)
 boxplots(groups)
-       #+end_src
-
-       #+RESULTS[abda9cc671d0b72514a03e03e3e44e499c4c56c8]:
-       None
-
+         #+end_src
+       
+        #+BEGIN_CENTER
         [[./results/img/ClojureClojureJava11Runtime-2048cold.png]]
         [[./results/img/ClojureClojureJava8Runtime-2048cold.png]]
         [[./results/img/ClojureGraalVM211CE11-2048cold.png]]
@@ -480,6 +500,8 @@ boxplots(groups)
         [[./results/img/RubyRuntime25-2048cold.png]]
         [[./results/img/RubyRuntime27-2048cold.png]]
         [[./results/img/RustRuntime-2048cold.png]]
+        #+END_CENTER
+        
 2. Variant 2
    a) Lambda with 128 MB of memory
       In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime.
@@ -515,26 +537,24 @@ ds_describe_table(ds)
          | RubyRuntime27-128               | 0.398041 |  0.124297 | 0.225129 | 0.821187 | 0.302054 | 0.353223 | 0.471031 |          100.0% |
          | RustRuntime-128                 |  0.34958 | 0.0998513 | 0.186196 | 0.707899 | 0.276292 | 0.321863 | 0.402452 |          100.0% |
       2) Box plot
+
          *Boxplot all functions*
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 boxplot_all("memory-128-cold--no", "Boxplot of all functions M=128MB, Coldstart=no")
          #+end_src
-
-         #+RESULTS[7ff67c3948f26dc2d73b78a96d677a33c304b57f]:
-         None
-
+         
+         #+BEGIN_CENTER
          [[./results/img/memory-128-cold--noall.png]]
-
+         #+END_CENTER
+         
         *Individual boxplots*
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 ds, ds_sub,_ = file_to_dses("memory-128-cold--no")
 groups = ds.groupby(by="function_name", group_keys=True)
 boxplots(groups, coldstarts=False)
          #+end_src
-
-         #+RESULTS[2d8ffe8bd53713bae7a05cc7a3ffc66ac76b146a]:
-         None
-
+         
+         #+BEGIN_CENTER
          [[./results/img/ClojureClojureJava11Runtime-128warm.png]]
          [[./results/img/ClojureClojureJava8Runtime-128warm.png]]
          [[./results/img/ClojureGraalVM211CE11-128warm.png]]
@@ -555,7 +575,8 @@ boxplots(groups, coldstarts=False)
          [[./results/img/RubyRuntime25-128warm.png]]
          [[./results/img/RubyRuntime27-128warm.png]]
          [[./results/img/RustRuntime-128warm.png]]
-
+         #+END_CENTER
+         
    b) Lambda with 512 MB of memory
       In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime.
       Runtimes has been ignored, because the memory size usage exceeds 128MB.
@@ -590,45 +611,45 @@ ds_describe_table(ds)
          | RubyRuntime27-512               | 0.378392 | 0.232686 | 0.190044 | 2.69756 | 0.282724 | 0.320444 | 0.394092 |          100.0% |
          | RustRuntime-512                 | 0.387028 | 0.258765 | 0.173775 | 3.09224 | 0.286154 | 0.324395 | 0.407642 |          100.0% |
       2) Box plot
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+
+         *Boxplot all functions*
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 boxplot_all("memory-512-cold--no", "Boxplot of all functions M=512MB, Coldstart=no")
          #+end_src
 
-         #+RESULTS[160bce74aa47a6e733de08ec42cd9cfafa796063]:
-         None
-
+         #+BEGIN_CENTER
          [[./results/img/memory-512-cold--noall.png]]
-
+         #+END_CENTER
+         
         *Individual boxplots*
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 ds, ds_sub,_ = file_to_dses("memory-512-cold--no")
 groups = ds.groupby(by="function_name", group_keys=True)
 boxplots(groups, coldstarts=False)
          #+end_src
 
-         #+RESULTS[102860fd2f09c09db40a0e12a607bfa5f836ede2]:
-         None
-
-        [[./results/img/ClojureClojureJava11Runtime-512warm.png]]
-        [[./results/img/ClojureClojureJava8Runtime-512warm.png]]
-        [[./results/img/ClojureGraalVM211CE11-512warm.png]]
-        [[./results/img/ClojureGraalVM211CE8-512warm.png]]
-        [[./results/img/ClojureOnBabashkaRuntime-512warm.png]]
-        [[./results/img/CsharpRuntime-512warm.png]]
-        [[./results/img/GolangRuntime-512warm.png]]
-        [[./results/img/HaskellRuntime-512warm.png]]
-        [[./results/img/Java11Runtime-512warm.png]]
-        [[./results/img/Java8Runtime-512warm.png]]
-        [[./results/img/JavaGraalVM211CE11-512warm.png]]
-        [[./results/img/JavaGraalVM211CE8-512warm.png]]
-        [[./results/img/Nodejs10Runtime-512warm.png]]
-        [[./results/img/Nodejs12Runtime-512warm.png]]
-        [[./results/img/Nodejs14Runtime-512warm.png]]
-        [[./results/img/PythonRuntime27-512warm.png]]
-        [[./results/img/PythonRuntime38-512warm.png]]
-        [[./results/img/RubyRuntime25-512warm.png]]
-        [[./results/img/RubyRuntime27-512warm.png]]
-        [[./results/img/RustRuntime-512warm.png]]
+         #+BEGIN_CENTER
+         [[./results/img/ClojureClojureJava11Runtime-512warm.png]]
+         [[./results/img/ClojureClojureJava8Runtime-512warm.png]]
+         [[./results/img/ClojureGraalVM211CE11-512warm.png]]
+         [[./results/img/ClojureGraalVM211CE8-512warm.png]]
+         [[./results/img/ClojureOnBabashkaRuntime-512warm.png]]
+         [[./results/img/CsharpRuntime-512warm.png]]
+         [[./results/img/GolangRuntime-512warm.png]]
+         [[./results/img/HaskellRuntime-512warm.png]]
+         [[./results/img/Java11Runtime-512warm.png]]
+         [[./results/img/Java8Runtime-512warm.png]]
+         [[./results/img/JavaGraalVM211CE11-512warm.png]]
+         [[./results/img/JavaGraalVM211CE8-512warm.png]]
+         [[./results/img/Nodejs10Runtime-512warm.png]]
+         [[./results/img/Nodejs12Runtime-512warm.png]]
+         [[./results/img/Nodejs14Runtime-512warm.png]]
+         [[./results/img/PythonRuntime27-512warm.png]]
+         [[./results/img/PythonRuntime38-512warm.png]]
+         [[./results/img/RubyRuntime25-512warm.png]]
+         [[./results/img/RubyRuntime27-512warm.png]]
+         [[./results/img/RustRuntime-512warm.png]]
+         #+END_CENTER
 
    c) Lambda with 1024 MB of memory
       In the test two Clojure runtimes has been ignored: ClojureJava8Runtime, ClojureJava11Runtime.
@@ -664,45 +685,45 @@ ds_describe_table(ds)
          | RubyRuntime27-1024               | 0.436283 | 0.283512 | 0.198071 | 3.10114 | 0.299364 | 0.361992 | 0.482593 |          100.0% |
          | RustRuntime-1024                 |  0.40419 | 0.266298 |  0.16962 | 2.86381 | 0.285565 |  0.33571 | 0.433258 |          100.0% |
       2) Box plot
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+
+         *Boxplot all functions*
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 boxplot_all("memory-1024-cold--no", "Boxplot of all functions M=1024MB, Coldstart=no")
          #+end_src
 
-         #+RESULTS[ae242f26a4649313eb3fc7646f864d9a18c2be26]:
-         None
-
+         #+BEGIN_CENTER
          [[./results/img/memory-1024-cold--noall.png]]
+         #+END_CENTER
 
         *Individual boxplots*
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 ds, ds_sub,_ = file_to_dses("memory-1024-cold--no")
 groups = ds.groupby(by="function_name", group_keys=True)
 boxplots(groups, coldstarts=False)
          #+end_src
 
-         #+RESULTS[d20bc90c71d2ac8a8a93a3e83370276a06637a33]:
-         None
-
-        [[./results/img/ClojureClojureJava11Runtime-1024warm.png]]
-        [[./results/img/ClojureClojureJava8Runtime-1024warm.png]]
-        [[./results/img/ClojureGraalVM211CE11-1024warm.png]]
-        [[./results/img/ClojureGraalVM211CE8-1024warm.png]]
-        [[./results/img/ClojureOnBabashkaRuntime-1024warm.png]]
-        [[./results/img/CsharpRuntime-1024warm.png]]
-        [[./results/img/GolangRuntime-1024warm.png]]
-        [[./results/img/HaskellRuntime-1024warm.png]]
-        [[./results/img/Java11Runtime-1024warm.png]]
-        [[./results/img/Java8Runtime-1024warm.png]]
-        [[./results/img/JavaGraalVM211CE11-1024warm.png]]
-        [[./results/img/JavaGraalVM211CE8-1024warm.png]]
-        [[./results/img/Nodejs10Runtime-1024warm.png]]
-        [[./results/img/Nodejs12Runtime-1024warm.png]]
-        [[./results/img/Nodejs14Runtime-1024warm.png]]
-        [[./results/img/PythonRuntime27-1024warm.png]]
-        [[./results/img/PythonRuntime38-1024warm.png]]
-        [[./results/img/RubyRuntime25-1024warm.png]]
-        [[./results/img/RubyRuntime27-1024warm.png]]
-        [[./results/img/RustRuntime-1024warm.png]]
+         #+BEGIN_CENTER
+         [[./results/img/ClojureClojureJava11Runtime-1024warm.png]]
+         [[./results/img/ClojureClojureJava8Runtime-1024warm.png]]
+         [[./results/img/ClojureGraalVM211CE11-1024warm.png]]
+         [[./results/img/ClojureGraalVM211CE8-1024warm.png]]
+         [[./results/img/ClojureOnBabashkaRuntime-1024warm.png]]
+         [[./results/img/CsharpRuntime-1024warm.png]]
+         [[./results/img/GolangRuntime-1024warm.png]]
+         [[./results/img/HaskellRuntime-1024warm.png]]
+         [[./results/img/Java11Runtime-1024warm.png]]
+         [[./results/img/Java8Runtime-1024warm.png]]
+         [[./results/img/JavaGraalVM211CE11-1024warm.png]]
+         [[./results/img/JavaGraalVM211CE8-1024warm.png]]
+         [[./results/img/Nodejs10Runtime-1024warm.png]]
+         [[./results/img/Nodejs12Runtime-1024warm.png]]
+         [[./results/img/Nodejs14Runtime-1024warm.png]]
+         [[./results/img/PythonRuntime27-1024warm.png]]
+         [[./results/img/PythonRuntime38-1024warm.png]]
+         [[./results/img/RubyRuntime25-1024warm.png]]
+         [[./results/img/RubyRuntime27-1024warm.png]]
+         [[./results/img/RustRuntime-1024warm.png]]
+         #+END_CENTER
 
    d) Lambda with 2048 MB of memory
       All possible runtimes are included.
@@ -740,42 +761,42 @@ ds_describe_table(ds)
          | RustRuntime-2048                 | 0.424372 | 0.193998 | 0.211139 | 1.93719 | 0.302968 | 0.365264 | 0.506106 |          100.0% |
 
       2) Box plot
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+
+         *Boxplot all functions*
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 boxplot_all("memory-2048-cold--no", "Boxplot of all functions M=2048MB, Coldstart=no")
          #+end_src
 
-         #+RESULTS[1bdca9cf2a45f197a3d5d6a7200b90ac5b985e41]:
-         None
-
+         #+BEGIN_CENTER
          [[./results/img/memory-2048-cold--noall.png]]
+         #+END_CENTER
 
         *Individual boxplots*
-         #+begin_src python :session pb1 :results raw :exports none :cache yes
+         #+begin_src python :session pb1 :results none :exports none :cache yes
 ds, ds_sub,_ = file_to_dses("memory-2048-cold--no")
 groups = ds.groupby(by="function_name", group_keys=True)
 boxplots(groups, coldstarts=False)
          #+end_src
 
-         #+RESULTS[3a1f3a105fa03848d5fadffa867673c321fd2ba3]:
-         None
-
-        [[./results/img/ClojureClojureJava11Runtime-2048warm.png]]
-        [[./results/img/ClojureClojureJava8Runtime-2048warm.png]]
-        [[./results/img/ClojureGraalVM211CE11-2048warm.png]]
-        [[./results/img/ClojureGraalVM211CE8-2048warm.png]]
-        [[./results/img/ClojureOnBabashkaRuntime-2048warm.png]]
-        [[./results/img/CsharpRuntime-2048warm.png]]
-        [[./results/img/GolangRuntime-2048warm.png]]
-        [[./results/img/HaskellRuntime-2048warm.png]]
-        [[./results/img/Java11Runtime-2048warm.png]]
-        [[./results/img/Java8Runtime-2048warm.png]]
-        [[./results/img/JavaGraalVM211CE11-2048warm.png]]
-        [[./results/img/JavaGraalVM211CE8-2048warm.png]]
-        [[./results/img/Nodejs10Runtime-2048warm.png]]
-        [[./results/img/Nodejs12Runtime-2048warm.png]]
-        [[./results/img/Nodejs14Runtime-2048warm.png]]
-        [[./results/img/PythonRuntime27-2048warm.png]]
-        [[./results/img/PythonRuntime38-2048warm.png]]
-        [[./results/img/RubyRuntime25-2048warm.png]]
-        [[./results/img/RubyRuntime27-2048warm.png]]
-        [[./results/img/RustRuntime-2048warm.png]]
+         #+BEGIN_CENTER
+         [[./results/img/ClojureClojureJava11Runtime-2048warm.png]]
+         [[./results/img/ClojureClojureJava8Runtime-2048warm.png]]
+         [[./results/img/ClojureGraalVM211CE11-2048warm.png]]
+         [[./results/img/ClojureGraalVM211CE8-2048warm.png]]
+         [[./results/img/ClojureOnBabashkaRuntime-2048warm.png]]
+         [[./results/img/CsharpRuntime-2048warm.png]]
+         [[./results/img/GolangRuntime-2048warm.png]]
+         [[./results/img/HaskellRuntime-2048warm.png]]
+         [[./results/img/Java11Runtime-2048warm.png]]
+         [[./results/img/Java8Runtime-2048warm.png]]
+         [[./results/img/JavaGraalVM211CE11-2048warm.png]]
+         [[./results/img/JavaGraalVM211CE8-2048warm.png]]
+         [[./results/img/Nodejs10Runtime-2048warm.png]]
+         [[./results/img/Nodejs12Runtime-2048warm.png]]
+         [[./results/img/Nodejs14Runtime-2048warm.png]]
+         [[./results/img/PythonRuntime27-2048warm.png]]
+         [[./results/img/PythonRuntime38-2048warm.png]]
+         [[./results/img/RubyRuntime25-2048warm.png]]
+         [[./results/img/RubyRuntime27-2048warm.png]]
+         [[./results/img/RustRuntime-2048warm.png]]
+         #+END_CENTER

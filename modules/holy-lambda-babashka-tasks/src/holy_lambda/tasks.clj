@@ -458,7 +458,7 @@
 (defn parameters--java
   []
   {"CodeUri"        OUTPUT_JAR_PATH
-   "Runtime"        "java11"
+   "Runtime"        "java8"
    "Entrypoint"     ENTRYPOINT})
 
 (defn parameters--babashka
