@@ -99,6 +99,9 @@ stack:doctor           > Diagnoses common issues of holy-lambda stack
 stack:purge            > Purges build artifacts
 stack:version          > Outputs holy-lambda babashka tasks version
 ```
+## Who’s using Holy Lambda?
+- [nextdoc.io](https://nextdoc.io) - 6 native lambdas: api-gateway custom authorizer, file access control, openapi data source etc.
+- [scalably.ai](https://scalably.ai) - 14 native lambdas: xml transformations, sftp interactions, message routing, encryption etc.
 
 ## Thanks to
 - Daria - Thank you that you were always beside me, fighting for me when I had no faith and energy.
