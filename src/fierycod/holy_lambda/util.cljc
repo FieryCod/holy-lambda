@@ -83,10 +83,6 @@
   (let [response (retriever/<-wait-for-response ?response)
         bytes-response? #?(:clj (bytes? response)
                            :default false)
-        ;; remove internals
-        response (if-not bytes-response?
-                   (dissoc response :fierycod.holy-lambda.interceptor/interceptors)
-                   response)
         ctype (when-not bytes-response?
                 (content-type response))]
 

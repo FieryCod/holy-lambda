@@ -11,25 +11,24 @@ When Clojure code is compiled and packed to uberjar, every function expands to a
 For only a single Java AWS Lambda handler class, the cold start is around ~1s. For Clojure, the cold start starts from ~8s on a 2GB memory-sized environment. The difference between cold starts comes from the number of classes load upon startup (Clojure > 100, Java > 1). 
 
 **Holy Lambda (HL)**
-HL is a micro-framework for running Clojure on the [AWS Lambda](https://aws.amazon.com/lambda/). HL is a deployment tool independent, although ships with `bb tasks` for convenience.
-HL supports at the time of writing three AWS Lambda runtimes. The first one is Clojure/Java runtime that is good for development, but a bad idea for production due to the cold starts and high memory usage of Java-based lambdas. 
+HL is a micro-framework for running Clojure on the [AWS Lambda](https://aws.amazon.com/lambda/). HL is a deployment tool independent, although ships with `bb tasks` for convenience. HL supports at the time of writing three AWS Lambda runtimes. The first one is Clojure/Java runtime that is good for development, but a bad idea for production due to the cold starts and high memory usage of Java-based lambdas. 
+
 The second one is custom native runtime which utilizes GraalVM native image to provide fast startup and a low memory footprint. The tradeoff in using native runtime is the steep learning curve of GraalVM.
+
 The last one is the `babashka` runtime which is both fast and memory efficient. Babashka supports interactive development, and it's a great fit for beginners. It's fast enough, although it's not as fast as the native runtime. The tradeoff of using babashka is that not all of the Clojure language features are supported.
 
 Holy lambda provides very convenient environment compared to other tools such as [uswitch/lambada](https://github.com/uswitch/lambada) or [babashka-lambda](https://github.com/dainiusjocas/babashka-lambda) via simple, but powerful `bb tasks` recipes eg. deployment is as easy as running `bb stack:sync && bb stack:compile && bb stack:pack && bb stack:deploy`).
 
 **Features**
-- interceptors
 - ring request, response model
 - async handlers
 
-## Java runtime
+## Java runtime (replaced with Clojure runtime)
 Prior work towards targeting Java runtime was done by [uswitch/lambada](https://github.com/uswitch/lambada), but lacked being convenient. Holy lambda in the other hand is very convenient and does things which lambada lacked:
 
 - full class identifier is created during macro expansion of `deflambda` 
 - request is automatically slurped and converted to a map
 - response mimics Ring therefore you don't have to write to `OutputStream`. 
-- supports interceptors
 - converts ctx
 
 ## Native runtime
@@ -45,7 +44,6 @@ I've started experimenting with native runtime around May 2019 inspired by @hjha
 
 **Tradeoffs**
 - you have to generate native-configurations for GraalVM (automated by running `bb native:conf`)
-- GraalVM compilation is long - for development use Java runtime with `sam invoke` or `bb stack:invoke`
 - adding and using new library is not always easy when compiling to native, some extra know-how about GraalVM is needed
 
 ## Babashka runtime
@@ -54,8 +52,9 @@ If you feel overhelmed by holy-lambda ecosystem you can check very [this](https:
 
 ## Runtime comparison
 
-| Runtime   | Cold start | Performance | Artifacts size   | Memory Consumption | Interactive | Compile time | Beginners friendly? |
-|-----------|------------|-------------|------------------|--------------------|-------------|--------------|---------------------|
-| :native   | low        | high        | high     >= 16mb | low                | No          | very long    | no                  |
-| :babashka | low        | moderate    | low      >= 50kb | low                | Yes         | no compile   | yes                 |
-| :java     | high       | high        | moderate >= 12mb | high               | No          | long         | yes                 |
+| Runtime   | Cold start | Performance | Artifacts size         | Memory Consumption | Interactive | Compile time | Beginners friendly? |
+|-----------|------------|-------------|------------------------|--------------------|-------------|--------------|---------------------|
+| :native   | low        | high        | high     >= 16mb       | low                | No          | very long    | no                  |
+| :babashka | low        | moderate    | low      >= 50kb       | low                | Yes         | no compile   | yes                 |
+| :java     | high       | high        | moderate >= 12mb       | high               | No          | long         | yes                 |
+| :clojure  | moderate   | high        | depends on docker img  | low                | No          | long         | yes                 |

@@ -7,6 +7,4 @@
                     ["Native agent"           {:file "doc/1-04-native-agent.md"}]
                     ["Troubleshooting"        {:file "doc/1-05-troubleshooting.md"}]
                     ["GraalVM EE"             {:file "doc/1-06-graalvmee.md"}]
-                    ["FAQ"                    {:file "doc/1-07-FAQ.md"}]]
-                   ["Features"                {:file "doc/2-00-toc.md"}
-                    ["Interceptors"           {:file "doc/2-01-interceptors.md"}]]]}
+                    ["FAQ"                    {:file "doc/1-07-FAQ.md"}]]]}

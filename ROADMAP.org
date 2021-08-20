@@ -23,8 +23,6 @@
 
 ** [ ] 0.2.5
 - Add documentation about using ~initialize-at-build-time~ with the list of packages to initialize. Link to GraalVM documentation,
-- Add full features implementation of interceptors. Same model of execution as in Pedestal (breaking change). Adjust examples
-- Add documentation for interceptors. Link to Pedestal documentation.
 
 ** [ ] 0.3.0
 - Add Node.js runtime support. Add documentation and tutorial.

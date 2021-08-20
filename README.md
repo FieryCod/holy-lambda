@@ -45,8 +45,6 @@ io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url     "https://github
 
 [Jump here](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
 
-**Interceptors namespace is work in progress and subject to change. Consider it as an alpha.**
-
 ### Minimal code example
 
 ``` clojure

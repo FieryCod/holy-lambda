@@ -3,19 +3,12 @@
   (:require
    [fierycod.holy-lambda.retriever :as r]
    [clojure.core.async :as async]
-   [fierycod.holy-lambda.interceptor :as i]
    [fierycod.holy-lambda.agent :as agent]
    [fierycod.holy-lambda.native-runtime :as native]
    [fierycod.holy-lambda.response :as hr]
    [fierycod.holy-lambda.core :as h]))
 
-(i/definterceptor LogIncommingRequest
-  {:enter (fn [request]
-            (println "Log incomming request:" request)
-            (async/go request))})
-
 (h/deflambda HelloLambda <
-  {:interceptors [LogIncommingRequest]}
   [request]
   (hr/json {:message "Hello"
             "it's" "me"
