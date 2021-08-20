@@ -1,7 +1,7 @@
 (ns fierycod.holy-lambda.agent
   "Provides utils for generating native-configurations via GraalVM agent.
-  GraalVM agent is convenient tool for complex project, so that
-  user does not have to put each entry of reflective call to configuration by hand."
+   GraalVM agent is convenient tool for complex project, so that
+   user does not have to put each entry of reflective call to configuration by hand."
   (:require
    [fierycod.holy-lambda.util :as u]
    [clojure.edn :as edn]
@@ -22,13 +22,13 @@
   "Executes body in safe agent context for native configuration generation.
   Useful when it's hard for agent payloads to cover all logic branches.
 
-  *In order to generate native-configuration run:*
+  **In order to generate native-configuration run:**
 
   ```
-  make native-gen-conf
+  bb native:conf
   ```
 
-  *Usage:*
+  **Usage:**
 
   ```
   (in-context
