@@ -75,7 +75,7 @@
 (defn- next-iter
   [maybe-handler routes env-vars]
   (let [runtime (get env-vars "AWS_LAMBDA_RUNTIME_API")
-        handler-name (get env-vars "_HANDLER" maybe-handler)
+        handler-name (or maybe-handler (get env-vars "_HANDLER"))
         aws-event (fetch-aws-event runtime)
         handler (get routes handler-name)
         iid (:invocation-id aws-event)]

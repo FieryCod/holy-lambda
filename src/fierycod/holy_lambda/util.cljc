@@ -15,9 +15,11 @@
 
 (defn x->json-string
   [x]
-  #?(:bb (json/generate-string x)
-     :clj (json/write-value-as-string x)
-     :default (throw (ex-info "Not implemented" {}))))
+  (if (string? x)
+    x
+    #?(:bb (json/generate-string x)
+       :clj (json/write-value-as-string x)
+       :default (throw (ex-info "Not implemented" {})))))
 
 (defn x->json-bytes
   [x]
