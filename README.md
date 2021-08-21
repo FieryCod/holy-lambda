@@ -41,8 +41,8 @@ io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url     "https://github
 
 [Jump here](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
 
-### Minimal code example
-
+### Quick start
+#### Minimal Code
 ``` clojure
 (ns some.ns
   (:gen-class)
@@ -57,10 +57,7 @@ io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url     "https://github
   
 (h/entrypoint [#'ExampleLambda])
 ```
-
-## Quickstart
-
-Generate a new project from template via:
+#### Project scaffolding
 
 ``` clojure
 clojure -M:new -m clj-new.create holy-lambda basic.example && cd basic.example && bb stack:sync
@@ -72,7 +69,7 @@ Alternatively you can use `lein new`:
 lein new holy-lambda example ;; <-- Replace `example` with the name of the project
 ```
 
-## Available helpers
+#### Available helpers
 
 ``` sh
 
