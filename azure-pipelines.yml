@@ -52,7 +52,7 @@ jobs:
 
           # Bucket deletion
           printf "\n------------------------------------------------------\n"
-          printf "                    (3) Doctor check                      "
+          printf "                    (2) Doctor check                      "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:doctor || exit 1
@@ -60,7 +60,7 @@ jobs:
 
           # Stack version test
           printf "\n------------------------------------------------------\n"
-          printf "                   (4) Stack version                      "
+          printf "                   (3) Stack version                      "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:version || exit 1
@@ -68,7 +68,7 @@ jobs:
 
           # Basic stack compilation
           printf "\n------------------------------------------------------\n"
-          printf "                   (5) Stack compilation                  "
+          printf "                   (4) Stack compilation                  "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:compile || exit 1
@@ -76,7 +76,7 @@ jobs:
 
           # Basic stack compilation
           printf "\n------------------------------------------------------\n"
-          printf "              (6) Stack compilation + Force               "
+          printf "              (5) Stack compilation + Force               "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:compile :force || exit 1
@@ -84,7 +84,7 @@ jobs:
 
           # Stack local run test
           printf "\n------------------------------------------------------\n"
-          printf "           (7) In docker:run in local context fail       "
+          printf "           (6) In docker:run in local context fail       "
           printf "\n------------------------------------------------------\n"
           #------------------------
           HL_NO_DOCKER=true bb docker:run "something" && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
@@ -92,7 +92,7 @@ jobs:
 
           # Stack purge test
           printf "\n------------------------------------------------------\n"
-          printf "                 (8) Stack purge                          "
+          printf "                 (7) Stack purge                          "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:purge || exit 1
@@ -130,13 +130,14 @@ jobs:
           bb stack:compile && \
           bb native:executable && \
           output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \
+          echo "$output" && \
           bb -e "(assert (= \"$output\" \"Hello world\"))"
 
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Compilation + Invoke'
 
   # Clojure + Docker runtime tests
-  - job: Clojure_basic_docker_1
+  - job: clojure_basic_docker_1
     displayName: '(3.1)-(Clojure)-(Basic)-(Docker) Clojure runtime test'
     dependsOn:
       - tasks_health_check_1

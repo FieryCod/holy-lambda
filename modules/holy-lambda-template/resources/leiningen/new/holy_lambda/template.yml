@@ -15,10 +15,10 @@ Parameters:
     Default: 2000
   CodeUri:
     Type: String
-    Default: <HOLY_LAMBDA_CODE_URI>
+    Default: ./.holy-lambda/build/latest.zip
   Entrypoint:
     Type: String
-    Default: <HOLY_LAMBDA_ENTRYPOINT>
+    Default: {{main-ns}}.core
 
 Globals:
   Function:

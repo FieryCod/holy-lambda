@@ -48,34 +48,8 @@
                                ;; Might be set via `GRAALVM_HOME` environment variable
                                :graalvm-home        "~/.graalvm"}
 
-                       :stack {
-                               ;; Stack name which will be used in cloudformation
-                               :name                "{{stack-name}}"
-
-                               ;; Default lambda which is triggered on `stack:invoke` or
-                               ;; listen to via `stack:logs`. You can always pass different lambda name via
-                               ;; `:name` parameter. Check `bb tasks`
-                               :default-lambda      "ExampleLambdaFunction"
-
-                               ;; File which is used for providing envs for functions during
-                               ;; `stack:invoke` and `stack:api`
-                               ;; Look at: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-invoke.html#serverless-sam-cli-using-invoke-environment-file
-                               :envs                "envs.json"
-
-                               ;; Template file which should be used
-                               ;; holy-lambda uses AWS SAM under the hood, therefore
-                               ;; https://aws.amazon.com/serverless/sam/
-                               ;; for more template examples search for AWS SAM templates :)
-                               :template            "template.yml"
-
-                               ;; Check https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_CreateStack.html
-                               :capabilities        ["CAPABILITY_IAM"]}
-
-
                        :runtime
                        {
-                        ;; Choose one of the supported runtime `:babashka`, `:native`, `:java`
-                        :name                      :java
 
                         ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
                         ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers
@@ -88,12 +62,8 @@
                         :pods                      {org.babashka/aws "0.0.6"}
 
                         ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
-                        ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
+                        ;; :entrypoint should always point to a namespace with includes (h/entrypoint) call
                         :entrypoint                {{main-ns}}.core
-
-                        ;; Flag which indicates that holy-lambda should auto deploy the applications and layers for the corresponding :runtime
-                        ;; If set to false holy-lambda will guide you through the steps of dependants deployment.
-                        :self-manage-layers?       false
 
                         ;; For `:native` runtime you can provide your own bootstrap file
                         :bootstrap-file            "bootstrap"
@@ -102,12 +72,7 @@
                         ;; Resources are packed as is.
                         :native-deps               "resources"
 
-                        ;; Some of the runtimes are versioned. For instance `:babashka` runtime is a versioned layer which ships it's own version of
-                        ;; clojure, holy-lambda, default-retriever
-                        :version                   "0.1.3"
-
                         ;; Specify custom arguments for native image generation
-                        ;; Works only on `:native` runtime.
                         ;; Check https://www.graalvm.org/reference-manual/native-image/Options/
                         :native-image-args         ["--verbose"
                                                     "--no-fallback"
@@ -116,27 +81,10 @@
                                                     "-H:+AllowIncompleteClasspath"
                                                     "--no-server"
                                                     "--initialize-at-build-time"]}
+                       }
 
-                       ;; Infrastructure properties
-                       :infra
-                       {
-                        ;; Prefix for the bucket. Prefix should group multiple stacks
-                        ;; A good one would be a company name
-                        :bucket-prefix            "{{bucket-prefix}}"
-
-                        ;; Bucket name for the stack
-                        :bucket-name              "{{bucket-name}}"
-
-                        ;; If profile is `nil` then default AWS profile is used
-                        :profile                  "default"
-
-                        ;; Region overrides default region from the AWS profile
-                        :region                   "eu-central-1"}}
 
  :tasks {:requires                                ([holy-lambda.tasks])
-
-         bucket:create                            holy-lambda.tasks/bucket:create
-         bucket:remove                            holy-lambda.tasks/bucket:remove
 
          docker:run                               holy-lambda.tasks/docker:run
 
@@ -145,15 +93,8 @@
 
          stack:sync                               holy-lambda.tasks/stack:sync
          stack:compile                            holy-lambda.tasks/stack:compile
-         stack:invoke                             holy-lambda.tasks/stack:invoke
-         stack:api                                holy-lambda.tasks/stack:api
-         stack:pack                               holy-lambda.tasks/stack:pack
-         stack:deploy                             holy-lambda.tasks/stack:deploy
-         stack:describe                           holy-lambda.tasks/stack:describe
          stack:doctor                             holy-lambda.tasks/stack:doctor
          stack:purge                              holy-lambda.tasks/stack:purge
-         stack:destroy                            holy-lambda.tasks/stack:destroy
-         stack:logs                               holy-lambda.tasks/stack:logs
          stack:version                            holy-lambda.tasks/stack:version
          }
  }

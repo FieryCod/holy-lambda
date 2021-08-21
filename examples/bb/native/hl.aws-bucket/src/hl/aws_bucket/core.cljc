@@ -11,7 +11,6 @@
    [cognitect.aws.protocols.rest-xml]
    [cognitect.aws.client.api :as aws]
    [fierycod.holy-lambda.response :as hr]
-   [fierycod.holy-lambda.native-runtime :as native]
    [fierycod.holy-lambda.agent :as agent]
    [fierycod.holy-lambda.core :as h]))
 
@@ -31,13 +30,13 @@
 ;; (initialize-at-build-time-list)
 (def s3 (delay (aws/client {:api :s3})))
 
-(h/deflambda ExampleLambda
+(defn ExampleLambda
   [{:keys [event ctx] :as request}]
 
   ;; return a successful plain text response. See also, hr/json
   (hr/json (boolean (:Buckets (aws/invoke @s3 {:op :ListBuckets})))))
 
-(native/entrypoint [#'ExampleLambda])
+(h/entrypoint [#'ExampleLambda])
 
 (agent/in-context
  (aws/invoke @s3 {:op :ListBuckets}))

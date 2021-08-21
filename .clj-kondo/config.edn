@@ -1,3 +1,3 @@
-{:hooks   {:analyze-call {fierycod.holy-lambda.core/deflambda  clj-kondo.holy-lambda/deflambda}}
- :lint-as {fierycod.holy-lambda.core/definterceptor clojure.core/defn}
+{:hooks   {:analyze-call {}}
+ :lint-as {}
  :linters {:shadowed-var {:level :warning}}}
