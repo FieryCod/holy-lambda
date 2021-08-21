@@ -12,7 +12,7 @@ Parameters:
     Default: 128
   Entrypoint:
     Type: String
-    Default: <HOLY_LAMBDA_ENTRYPOINT>
+    Default: example.core
 
 Globals:
   Function:
@@ -23,17 +23,9 @@ Globals:
         Entrypoint: !Ref Entrypoint
 
 Resources:
-  BabashkaLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: holy-lambda-babashka-runtime
-      Description: holy-lambda micro framework babashka compatible runtime layer
-      ContentUri: ./holy-lambda-babashka-runtime
-
   ExampleLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      # PackageType: Image
       Runtime: provided
       Handler: example.core.ExampleLambda
       CodeUri: ./.holy-lambda/build/latest.zip
@@ -44,15 +36,12 @@ Resources:
             ApiId: !Ref ServerlessHttpApi
             Path: /
             Method: GET
-    # Metadata:
-    #   DockerTag: new-tag
-    #   DockerContext: .
-    #   Dockerfile: Dockerfile
 
   ExampleLambdaFunctionv2:
     Type: AWS::Serverless::Function
     Properties:
-      PackageType: Image
+      Runtime: provided
+      CodeUri: ./.holy-lambda/build/latest.zip
       Handler: example.core.ExampleLambdav2
       Events:
         HelloEvent:
@@ -61,11 +50,6 @@ Resources:
             ApiId: !Ref ServerlessHttpApi
             Path: /example
             Method: GET
-
-    Metadata:
-      DockerTag: new-tag
-      DockerContext: .
-      Dockerfile: Dockerfile
 
   ServerlessHttpApi:
     Type: AWS::Serverless::HttpApi

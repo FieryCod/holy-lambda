@@ -11,24 +11,11 @@
 
                                 :image "fierycod/graalvm-native-image:ce"}
 
-                       :build {:clj-alias :holy-lambda
+                       :build {:clj-alias    :holy-lambda
                                :graalvm-home "~/.graalvm"}
-
-                       :stack {:name "hl-tasks-test"
-
-                               :default-lambda "ExampleLambdaFunction"
-
-                               :envs "envs.json"
-
-                               :template "template.yml"
-
-                               :capabilities ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"]}
 
                        :runtime
                        {
-                        ;; Choose one of the supported runtime `:babashka`, `:native`, `:clojure`
-                        :name                :native
-
                         ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
                         ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers
                         ;; Check this template https://github.com/aws-samples/aws-lambda-layers-aws-sam-examples/blob/master/aws-sdk-layer/template.yaml
@@ -39,27 +26,14 @@
                         ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
                         :pods                {org.babashka/aws "0.0.6"}
 
-                        ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
-                        ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
+                        ;; :entrypoint should always point to a namespace with includes (core/entrypoint) call
+                        ;; Make sure to include $Entrypoint variable for AWS Lambda function
                         :entrypoint          example.core
-
-                        ;; Flag which indicates that holy-lambda should auto deploy the applications and layers for the corresponding :runtime
-                        ;; If set to false holy-lambda will guide you through the steps of dependants deployment.
-                        :self-manage-layers? false
 
                         ;; For `:native` runtime you can provide your own bootstrap file
                         :bootstrap-file      "bootstrap"
 
-                        ;; For `:native` runtime you can provide some native resources which will be available during lambda execution
-                        ;; Resources are packed as is.
-                        :native-deps         "resources"
-
-                        ;; Some of the runtimes are versioned. For instance `:babashka` runtime is a versioned layer which ships it's own version of
-                        ;; clojure, holy-lambda, default-retriever
-                        :version             "0.1.3"
-
                         ;; Specify custom arguments for native image generation
-                        ;; Works only on `:native` runtime.
                         ;; Check https://www.graalvm.org/reference-manual/native-image/Options/
                         :native-image-args
                         ["--verbose"
@@ -69,22 +43,9 @@
                          "-H:+AllowIncompleteClasspath"
                          "--no-server"
                          "--initialize-at-build-time=com.fasterxml.jackson"
-                         "--initialize-at-build-time=clojure,fierycod.holy_lambda,jsonista,example"]}
-
-                       ;; Infrastructure properties
-                       :infra
-                       {:bucket-prefix       "hl"
-
-                        :bucket-name         "hltaskstest"
-
-                        :profile             "default"
-
-                        :region              "eu-central-1"}}
+                         "--initialize-at-build-time=clojure,fierycod.holy_lambda,jsonista,example"]}}
 
  :tasks {:requires              ([holy-lambda.tasks])
-
-         bucket:create          holy-lambda.tasks/bucket:create
-         bucket:remove          holy-lambda.tasks/bucket:remove
 
          docker:run             holy-lambda.tasks/docker:run
 
@@ -93,14 +54,6 @@
 
          stack:sync             holy-lambda.tasks/stack:sync
          stack:compile          holy-lambda.tasks/stack:compile
-         stack:invoke           holy-lambda.tasks/stack:invoke
-         stack:api              holy-lambda.tasks/stack:api
-         stack:pack             holy-lambda.tasks/stack:pack
-         stack:deploy           holy-lambda.tasks/stack:deploy
-         stack:describe         holy-lambda.tasks/stack:describe
          stack:doctor           holy-lambda.tasks/stack:doctor
          stack:purge            holy-lambda.tasks/stack:purge
-         stack:destroy          holy-lambda.tasks/stack:destroy
-         stack:logs             holy-lambda.tasks/stack:logs
-         stack:version          holy-lambda.tasks/stack:version
-         }}
+         stack:version          holy-lambda.tasks/stack:version}}

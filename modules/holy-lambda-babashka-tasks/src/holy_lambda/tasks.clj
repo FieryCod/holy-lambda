@@ -96,10 +96,6 @@
   [cmd & args]
   (exit-non-zero (p/process (into (p/tokenize cmd) (remove nil? args)) {:inherit true})))
 
-(defn- shell-no-exit-n-inherit
-  [cmd & args]
-  (p/process (into (p/tokenize cmd) (remove nil? args))))
-
 (defn- shell-no-exit
   [cmd & args]
   (p/process (into (p/tokenize cmd) (remove nil? args)) {:inherit true}))
@@ -155,11 +151,7 @@
   (io/make-parents file)
   (clojure.core/spit file content))
 
-(def AVAILABLE_RUNTIMES #{:babashka :native :java})
-(def AVAILABLE_REGIONS #{"us-east-2", "us-east-1", "us-west-1", "us-west-2", "af-south-1", "ap-east-1", "ap-south-1", "ap-northeast-3", "ap-northeast-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ca-central-1", "cn-north-1", "cn-northwest-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-south-1", "eu-west-3", "eu-north-1", "me-south-1", "sa-east-1"})
 (def REMOTE_TASKS "https://raw.githubusercontent.com/FieryCod/holy-lambda/master/modules/holy-lambda-babashka-tasks/STABLE_VERSION")
-(def BUCKET_IN_LS_REGEX #"(?:[0-9- :]+)(.*)")
-(def LAYER_CACHE_DIRECTORY ".holy-lambda/.cache/layers")
 
 (defn bb-edn
   []
@@ -242,12 +234,6 @@
   [task-name]
   (hpr (str "Command " (red "<") (accent task-name) (red ">"))))
 
-(def STACK (:stack OPTIONS))
-(def DEFAULT_ENVS_FILE
-  (if-not (file-exists? (:envs STACK))
-    nil
-    (:envs STACK)))
-
 (def IMAGE_CORDS
   (or
    (System/getenv "HL_DOCKER_IMAGE")
@@ -289,39 +275,22 @@
           DOCKER_VOLUMES_CONF)))
 
 (def DOCKER_NETWORK (:network DOCKER))
-(def INFRA (:infra OPTIONS))
 (def RUNTIME (:runtime OPTIONS))
-(def *RUNTIME_NAME* (:name RUNTIME))
 (def NATIVE_IMAGE_ARGS (if-let [args (seq (:native-image-args RUNTIME))]
                          (s/join " " args)
                          nil))
 
-(def INFRA_AWS_PROFILE (:profile INFRA))
 (def HL_NO_PROFILE? (env-true? "HL_NO_PROFILE"))
 (def AWS_PROFILE
   (when-not HL_NO_PROFILE?
     (or (System/getenv "HL_PROFILE")
         (System/getenv "AWS_PROFILE")
         (System/getenv "AWS_DEFAULT_PROFILE")
-        (:profile INFRA))))
+        "default")))
 
 (when (and (not AWS_PROFILE) (not HL_NO_PROFILE?))
   (hpr (prw "No AWS Profile has been specified. ACCESS, SECRET keys from environment variables will be taken instead!")
        (prw "You can use env variable HL_NO_PROFILE=1 to hide this message!")))
-
-(def BUCKET_PREFIX (or (System/getenv "HL_BUCKET_PREFIX") (:bucket-prefix INFRA)))
-(def BUCKET_NAME (or (System/getenv "HL_BUCKET_NAME") (:bucket-name INFRA)))
-(def REGION_FROM_INFRA (:region INFRA))
-
-(defn override-runtime!
-  [new-runtime]
-  (when new-runtime
-    (let [runtime (keyword (s/replace new-runtime #":" ""))]
-      (if-not (contains? AVAILABLE_RUNTIMES runtime)
-        (do
-          (hpr (pre "Runtime override from") (accent *RUNTIME_NAME*) (pre "to") (accent runtime) (pre "is not possible!"))
-          (hpr (pre "Runtime") (accent runtime) (pre "is not one of") (accent AVAILABLE_RUNTIMES)))
-        (alter-var-root #'*RUNTIME_NAME* (constantly runtime))))))
 
 (defn obtain-from-aws-profile
   [what]
@@ -338,40 +307,25 @@
   (or (System/getenv "HL_REGION")
       (System/getenv "AWS_REGION")
       (System/getenv "AWS_DEFAULT_REGION")
-      (if REGION_FROM_INFRA
-        REGION_FROM_INFRA
-        (if HL_NO_PROFILE?
-          (do
-            (hpr (pre "Unable to get region from any of the sources: envs, credentials file."))
-            (System/exit 1))
-          (try
-            (obtain-from-aws-profile "region")
-            (catch Exception e
-              (hpr (ex-message e))
-              (System/exit 1)))))))
+      (if HL_NO_PROFILE?
+        (do
+          (hpr (pre "Unable to get region from any of the sources: envs, credentials file."))
+          (System/exit 1))
+        (try
+          (obtain-from-aws-profile "region")
+          (catch Exception e
+            (hpr (ex-message e))
+            (System/exit 1))))))
 
-(def DEFAULT_LAMBDA_NAME (:default-lambda STACK))
-(def RUNTIME_VERSION (:version RUNTIME))
 (def ENTRYPOINT (:entrypoint (:runtime OPTIONS)))
 (def OUTPUT_JAR_PATH ".holy-lambda/build/output.jar")
 (def OUTPUT_JAR_PATH_WITH_AGENT ".holy-lambda/build/output-agent.jar")
 (def HOLY_LAMBDA_DEPS_PATH ".holy-lambda/clojure/deps.edn")
-(def STACK_NAME (or (System/getenv "HL_STACK_NAME") (:name STACK)))
-(def TEMPLATE_FILE (:template STACK))
 (def REQUIRED_COMMANDS ["aws" "sam" "bb" "docker" "clojure" "zip" "id" "bash"])
-(def CAPABILITIES (if-let [caps (seq (:capabilities STACK))]
-                    caps
-                    nil))
-(def MODIFIED_TEMPLATE_FILE "template-modified.yml")
-(def PACKAGED_TEMPLATE_FILE "packaged.yml")
-(def BABASHKA_RUNTIME_LAYER_FILE ".holy-lambda/babashka-runtime/template.yml")
-(def SELF_MANAGE_LAYERS? (:self-manage-layers? RUNTIME))
 (def NATIVE_CONFIGURATIONS_PATH "resources/native-configuration")
 (def NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH "resources/native-configuration/resource-config.json")
 (def BOOTSTRAP_FILE (:bootstrap-file RUNTIME))
 (def NATIVE_DEPS_PATH (:native-deps RUNTIME))
-(def BABASHKA_LAYER_INSTANCE (str BUCKET_NAME "-hlbbri-" (s/replace RUNTIME_VERSION #"\." "-")))
-(def OFFICIAL_BABASHKA_LAYER_ARN "arn:aws:serverlessrepo:eu-central-1:443526418261:applications/holy-lambda-babashka-runtime")
 
 (def AWS_ACCESS_KEY_ID (atom (System/getenv "AWS_ACCESS_KEY_ID")))
 (def AWS_SECRET_ACCESS_KEY (atom (System/getenv "AWS_SECRET_ACCESS_KEY")))
@@ -398,33 +352,6 @@
     (hpr (pre "Project has not been synced yet. Run") (accent "stack:sync") (pre "before running this command!"))
     (System/exit 1)))
 
-(defn aws-command-output->str
-  [output]
-  (str (pre "AWS command output:") "\n------------------------------------------\n" (s/trim output)
-       "\n------------------------------------------"))
-
-(defn -create-bucket
-  [& [bucket profile]]
-  (let [bucket (or bucket BUCKET_NAME)
-        result (apply csh/sh
-                      (keep identity
-                            ["aws" "s3" "mb" (str "s3://" bucket)
-                             (when (or profile AWS_PROFILE) "--profile") (or profile AWS_PROFILE)
-                             "--region" REGION]))]
-    (if (not= (:exit result) 0)
-      (do (hpr (pre "Unable to create a bucket")
-               (str (accent bucket) "."))
-          (hpr (aws-command-output->str (:err result)))
-          (hpr (pre "Resolve the error then run the command once again if you have to.")))
-      (hpr (prs "Bucket") (accent bucket) (prs "has been succesfully created!")))))
-
-(defn -remove-bucket
-  [& [bucket profile]]
-  (shsp "aws" "s3" "rb"
-        "--force" (str "s3://" (or bucket BUCKET_NAME))
-        (when (or profile AWS_PROFILE) "--profile") (or profile AWS_PROFILE)
-        "--region" REGION))
-
 (def USER_GID
   (str (s/trim (shs "id -u"))
        ":" (s/trim (shs "id -g"))))
@@ -447,58 +374,6 @@
 (defn edn->pp-sedn
   [edn]
   (with-out-str (pprint/pprint edn)))
-
-(defn map->parameters-inline
-  [m]
-  (s/join " " (mapv (fn [[k v]]
-                      (str "ParameterKey=" (if (keyword? k) (name k) k) ",ParameterValue=" v))
-                    m)))
-
-(defn buckets
-  [& [profile]]
-  (set (mapv (fn [b] (some-> (re-find BUCKET_IN_LS_REGEX b) second))
-             (s/split (shs "aws" (when (or profile AWS_PROFILE) "--profile") (or profile AWS_PROFILE)
-                           "--region" REGION "s3" "ls")
-                      #"\n"))))
-
-(defn bucket-exists?
-  [& [bucket-name aws-profile]]
-  (contains? (buckets aws-profile) (or bucket-name BUCKET_NAME)))
-
-(defn parameters--clojure
-  []
-  {"CodeUri"        ".holy-lambda/build/latest-clojure.zip"
-   "Runtime"        "provided"
-   "Entrypoint"     ENTRYPOINT})
-
-(defn parameters--babashka
-  []
-  {"CodeUri"        "src"
-   "Runtime"        "provided"
-   "Entrypoint"     ENTRYPOINT})
-
-(defn parameters--native
-  []
-  {"CodeUri"        ".holy-lambda/build/latest.zip"
-   "Runtime"        "provided"
-   "Entrypoint"     ENTRYPOINT})
-
-(defn -parameters
-  []
-  (case *RUNTIME_NAME*
-    :clojure (parameters--clojure)
-    :babashka (parameters--babashka)
-    :native   (parameters--native)
-    :java (do (hpr (pre "Java runtime is not longer supported. Use Clojure runtime which is cleaner and faster!"))
-              (System/exit 1))))
-
-(defn parameters
-  [& [opt]]
-  ((if (= opt :toml)
-     (throw (ex-info ":toml not supported for now!" {}))
-    ;; map->parameters-toml
-    map->parameters-inline)
-   (-parameters)))
 
 (defn- docker-run
   [command]
@@ -533,32 +408,13 @@
 
 (defn deps-sync--babashka
   []
-  (when (= *RUNTIME_NAME* :babashka)
-    (when-not (empty? (:pods (:runtime OPTIONS)))
-      (hpr "Babashka pods found! Syncing" (str (accent "babashka pods") ".") "Pods should be distributed via a layer which points to" (accent ".holy-lambda/pods"))
-      (docker-run "download_pods")
-      (when (file-exists? ".holy-lambda/.babashka")
-        (shell "rm -Rf .holy-lambda/pods")
-        (shell "mkdir -p .holy-lambda/pods")
-        (shell "cp -R .holy-lambda/.babashka .holy-lambda/pods/")))))
-
-(def -babashka-runtime-layer-template
-"AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
-Description: >
-  Babashka runtime as an AWS::Serverless::Application
-
-Resources:
-  HolyLambdaBabashkaRuntime:
-    Type: AWS::Serverless::Application
-    Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:eu-central-1:443526418261:applications/holy-lambda-babashka-runtime
-        SemanticVersion: <SEMANTIC_VERSION>")
-
-(defn babashka-runtime-layer-template
-  []
-  (s/replace -babashka-runtime-layer-template #"<SEMANTIC_VERSION>" RUNTIME_VERSION))
+  (when-not (empty? (:pods (:runtime OPTIONS)))
+    (hpr "Babashka pods found! Syncing" (str (accent "babashka pods") ".") "Pods should be distributed via a layer which points to" (accent ".holy-lambda/pods"))
+    (docker-run "download_pods")
+    (when (file-exists? ".holy-lambda/.babashka")
+      (shell "rm -Rf .holy-lambda/pods")
+      (shell "mkdir -p .holy-lambda/pods")
+      (shell "cp -R .holy-lambda/.babashka .holy-lambda/pods/"))))
 
 (def tasks-deps-edn
   {:mvn/local-repo ".holy-lambda/.m2"
@@ -572,134 +428,6 @@ Resources:
   (hpr "Syncing project and holy-lambda" (accent "deps.edn"))
   (docker-run (str "clojure -A:" (and CLJ_ALIAS (str CLJ_ALIAS ":")) "uberjar -P"))
   (deps-sync--babashka))
-
-(defn cloudformation-description
-  [& [silent?]]
-  (let [cloudformation-string (shs "aws" "cloudformation" "describe-stacks" "--region" REGION)
-        cloudformation (if (s/blank? cloudformation-string)
-                         (if silent?
-                           nil
-                           (do (hpr (pre "Unable to get information about stacks. Use AWS UI to get proper ARN for layer"))
-                               (System/exit 1)))
-                         (try
-                           (json/parse-string cloudformation-string true)
-                           (catch Exception err
-                             (if silent?
-                               nil
-                               (do
-                                 (hpr (pre "Unable to parse information about stacks."))
-                                 (println err)
-                                 (System/exit 1))))))]
-    cloudformation))
-
-(defn stack->info
-  [stack]
-  (let [tags (group-by :Key (:Tags stack))
-        get-val-by (fn [sel] (:Value (first (get tags sel))))]
-    {:version       (get-val-by "serverlessrepo:semanticVersion")
-     :arn           (:OutputValue (first (:Outputs stack)))
-     :app-id        (get-val-by "serverlessrepo:applicationId")
-     :status        (:StackStatus stack)
-     :stack-id      (:StackId stack)
-     :stack-name    (:StackName stack)
-     :capabilities  (:Capabilities stack)
-     :description   (:Description stack)
-     :last-updated  (or (:LastUpdatedTime stack) :not-updated)
-     :created-at    (:CreationTime stack)
-     :parent-id     (:ParentId stack)}))
-
-(defn app-id->app-layers
-  [app-id]
-  (if-let [stacks (seq (:Stacks (cloudformation-description)))]
-    (let [layers (->> stacks
-                      (keep
-                       (fn [stack]
-                         (let [info (stack->info stack)]
-                           (when (= app-id (:app-id info))
-                             info))))
-                      vec)
-          layers-id-set (set (mapv :stack-id layers))
-          groupped-stacks  (->> stacks
-                                (filter (complement (fn [s] (contains? layers-id-set (:StackId s)))))
-                                (mapv stack->info)
-                                (group-by :stack-id))
-          layers-by-parents (group-by :parent-id layers)
-          app<->layers (mapv (fn [[parent-stack-id stack]]
-                               (let [parent-of-stack (first (get groupped-stacks parent-stack-id))]
-                                 (assoc parent-of-stack :child stack)))
-                             layers-by-parents)]
-      app<->layers)
-    (hpr "No stacks found in cloudformation definitions.")))
-
-(defn babashka-layer
-  []
-  (let [app<->layers (app-id->app-layers OFFICIAL_BABASHKA_LAYER_ARN)]
-    (first (:child (first app<->layers)))))
-
-(defn publish-babashka-layer
-  []
-  (io/make-parents BABASHKA_RUNTIME_LAYER_FILE)
-  (spit BABASHKA_RUNTIME_LAYER_FILE (babashka-runtime-layer-template))
-
-  (when-not (bucket-exists? BABASHKA_LAYER_INSTANCE)
-    (-create-bucket BABASHKA_LAYER_INSTANCE))
-
-  (apply shell
-         "sam deploy"
-         "--template-file"                     BABASHKA_RUNTIME_LAYER_FILE
-         "--stack-name"                        BABASHKA_LAYER_INSTANCE
-         (when AWS_PROFILE "--profile")        AWS_PROFILE
-         "--s3-bucket"                         BABASHKA_LAYER_INSTANCE
-         "--no-confirm-changeset"
-         "--capabilities"   ["CAPABILITY_IAM" "CAPABILITY_AUTO_EXPAND"])
-
-  (hpr "Waiting 5 seconds for deployment to propagate...")
-  (Thread/sleep 5000)
-  (hpr "Checking the ARN of published layer. This might take a while..")
-  (hpr (prs "Your ARN for babashka runtime layer is:") (accent (:arn (babashka-layer))))
-  (hpr "You should add the provided ARN as a property of a Function in template.yml!\n
----------------" (accent "template.yml") "------------------\n
-      Resources:
-        ExampleLambdaFunction:
-          Type: AWS::Serverless::Function
-          Properties:
-            Handler: example.core.ExampleLambda"
-       (prs "
-            Layers:
-              - PLEASE_ADD_THE_ARN_OF_LAYER_HERE")
-       "
-            Events:
-              HelloEvent:
-                Type: Api
-                Properties:
-                  Path: /
-                  Method: get\n
----------------------------------------------"))
-
-(defn runtime-sync-hook--babashka
-  []
-  (hpr (str "Cloning Clojure deps for " (accent "babashka") ".") "If you're using some extra dependencies provide a layer with CodeUri:" (accent ".holy-lambda/bb-clj-deps"))
-  (shell "bash -c \"mkdir -p .holy-lambda/bb-clj-deps && cp -R .holy-lambda/.m2 .holy-lambda/bb-clj-deps/\"")
-
-  (when-not SELF_MANAGE_LAYERS?
-    (if-let [bb-layer (babashka-layer)]
-      (if (= (:version bb-layer) RUNTIME_VERSION)
-        (hpr "Babashka runtime layer exists. Your layer ARN is:" (accent (:arn bb-layer)) "(deployment skipped)")
-        (do (hpr "Version from bb.edn does not match deployed version of the runtime")
-            (hpr "Updating deployed version from" (accent (:version bb-layer)) "to" (accent RUNTIME_VERSION))
-            (publish-babashka-layer)))
-      (do
-        (hpr "Babashka runtime needs a special layer for both local invocations and deployments.")
-        (hpr "Layer is published here:" "https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime")
-        (println "")
-        (hpr (str "Layer is not published! Trying to deploy layer:\n\n" (babashka-runtime-layer-template) "\n"))
-        (publish-babashka-layer)))))
-
-(defn runtime-sync-hook
-  []
-  (case *RUNTIME_NAME*
-    :babashka (runtime-sync-hook--babashka)
-    nil))
 
 (defn stack:sync
   "     \033[0;31m>\033[0m Syncs project & dependencies from either:
@@ -731,9 +459,6 @@ Resources:
   ;; Sync
   (deps-sync--deps)
 
-  ;; Runtime postprocess hook
-  (runtime-sync-hook)
-
   (hpr "Sync completed!"))
 
 (defn stack-files-check--native
@@ -754,7 +479,7 @@ Resources:
     (hpr (pre "No") (accent ".holy-lambda") (pre "directory! Run") (accent "stack:sync"))
     (System/exit 1))
 
-  (case (or check *RUNTIME_NAME*)
+  (case check
     :native (do
               (stack-files-check--jar)
               (stack-files-check--native))
@@ -764,55 +489,7 @@ Resources:
 
 (defn build-stale?
   []
-  (and
-   (not= *RUNTIME_NAME* :babashka)
-   (boolean (seq (fs/modified-since OUTPUT_JAR_PATH (fs/glob "src" "**/**.{clj,cljc,cljs}"))))))
-
-(defn stack:api
-  "     \033[0;31m>\033[0m Runs local api (check sam local start-api):
-       \t\t        - \033[0;31m:debug\033[0m         - run api in \033[0;31mdebug mode\033[0m
-       \t\t        - \033[0;31m:port\033[0m          - local port number to listen to
-       \t\t        - \033[0;31m:static-dir\033[0m    - assets which should be presented at \033[0;31m/\033[0m
-       \t\t        - \033[0;31m:envs-file\033[0m     - path to \033[0;31menvs file\033[0m
-       \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
-       \t\t        - \033[0;31m:params\033[0m        - map of parameters to override in AWS SAM"
-  [& args]
-  (print-task "stack:api")
-  (exit-if-not-synced!)
-  (let [{:keys [static-dir debug envs-file port params runtime]} (norm-args args)
-        envs-file (or envs-file DEFAULT_ENVS_FILE)]
-    (override-runtime! runtime)
-    (stack-files-check)
-    (when (build-stale?)
-      (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
-
-    (shell (str "sam local start-api"
-                " --parameter-overrides "
-                (if-not params
-                  (parameters)
-                  (str (parameters) " " (map->parameters-inline (edn/read-string params))))
-
-                " --template "
-                TEMPLATE_FILE
-
-                (when AWS_PROFILE " --profile ")
-                AWS_PROFILE
-
-                " -p "
-                (or port 3000)
-
-                (when static-dir " -s ")
-                static-dir
-
-                " --warm-containers LAZY"
-
-                (when envs-file " -n ")
-                envs-file
-
-                " --layer-cache-basedir "
-                LAYER_CACHE_DIRECTORY
-
-                (when debug " --debug")))))
+  (boolean (seq (fs/modified-since OUTPUT_JAR_PATH (fs/glob "src" "**/**.{clj,cljc,cljs}")))))
 
 (defn native:conf
   "     \033[0;31m>\033[0m Provides native configurations for the application
@@ -821,12 +498,6 @@ Resources:
   (print-task "native:conf")
   (exit-if-not-synced!)
   (let [{:keys [runtime]} (norm-args args)]
-    (override-runtime! runtime)
-
-    (when-not (= *RUNTIME_NAME* :native)
-      (hpr (pre "Command") (accent "native:conf") (pre "supports only") (accent ":native") (pre "runtime!"))
-      (System/exit 1))
-
     (stack-files-check :default)
 
     (io/make-parents (str NATIVE_CONFIGURATIONS_PATH "/traces.json"))
@@ -886,17 +557,11 @@ set -e
 
 (defn native:executable
   "     \033[0;31m>\033[0m Provides native executable of the application
-  \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
 \n----------------------------------------------------------------\n"
   [& args]
   (print-task "native:executable")
   (exit-if-not-synced!)
   (let [{:keys [runtime]} (norm-args args)]
-    (override-runtime! runtime)
-    (when-not (= *RUNTIME_NAME* :native)
-      (hpr (pre "Command") (accent "native:executable") (pre "supports only") (accent ":native") (pre "runtime!"))
-      (System/exit 1))
-
     (stack-files-check--jar)
 
     (when (build-stale?)
@@ -924,121 +589,6 @@ set -e
         (shell "bash -c \"cd .holy-lambda/build && rm -Rf output-agent.jar native-configuration resources/native-configuration resources/native-agents-payloads output.build_artifacts.txt\"")
         (shell "bash -c \"cd .holy-lambda/build && zip -r latest.zip . -x 'output.jar'\"")))))
 
-;; (defn modify-template
-;;   []
-;;   (let [buffer (slurp TEMPLATE_FILE)
-;;         {:strs [CodeUri Runtime]} (-parameters)]
-
-;;     (when-not (re-find #"<HOLY_LAMBDA_CODE_URI>" buffer)
-;;       (hpr (pre "<HOLY_LAMBDA_CODE_URI> definition should be available. Check related issue https://github.com/aws/aws-sam-cli/issues/2835"))
-;;       (System/exit 1))
-
-;;     (when-not (re-find #"<HOLY_LAMBDA_RUNTIME>" buffer)
-;;       (hpr (pre "<HOLY_LAMBDA_RUNTIME> definition should be available. Check related issue https://github.com/aws/aws-sam-cli/issues/2835"))
-;;       (System/exit 1))
-
-;;     (spit MODIFIED_TEMPLATE_FILE
-;;           (-> buffer
-;;               (s/replace #"<HOLY_LAMBDA_CODE_URI>" CodeUri)
-;;               (s/replace #"<HOLY_LAMBDA_RUNTIME>" Runtime)
-;;               (s/replace #"\!Ref CodeUri" CodeUri)))))
-
-(defn bucket:create
-  "     \033[0;31m>\033[0m Creates a s3 stack bucket or the one specified by \033[0;31m:infra:bucket-name\033[0m
-  \t\t        - \033[0;31m:bucket-name\033[0m   - overrides \033[0;31m:infra:bucket-name\033[0m
-  \t\t        - \033[0;31m:profile\033[0m       - overrides \033[0;31m:infra:profile\033[0m "
-  [& args]
-  (print-task "bucket:create")
-  (let [{:keys [bucket-name profile]} (norm-args args)
-        bucket-name (or bucket-name BUCKET_NAME)]
-    (if (bucket-exists? bucket-name profile)
-      (do
-        (hpr (prs "Bucket") (accent bucket-name) (prs "already exists!"))
-        (hpr (prw "If you removed the bucket then note that sometimes bucket is not immediately appear to be removed and is still listed in AWS resources."))
-        (when-not name
-          (hpr (prw "In such case change:")
-               (str (accent ":infra:bucket-name") "!"))))
-      (do (hpr (prs "Creating a bucket") (accent bucket-name))
-          (-create-bucket bucket-name profile)))))
-
-(defn check-n-create-bucket
-  [& args]
-  (let [{:keys [bucket-name profile]} (norm-args args)]
-    (when-not (bucket-exists? (or bucket-name BUCKET_NAME) profile)
-      (hpr (prw "Bucket") (accent (or bucket-name BUCKET_NAME)) "does not exists. Creating one!")
-      (apply bucket:create args))))
-
-(defn stack:pack
-  "     \033[0;31m>\033[0m Packs \033[0;31mCloudformation\033[0m stack
-  \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
-  \t\t        - \033[0;31m:bucket-name\033[0m   - overrides \033[0;31m:infra:bucket-name\033[0m
-  \t\t        - \033[0;31m:bucket-prefix\033[0m - overrides \033[0;31m:infra:bucket-prefix\033[0m "
-  [& args]
-  (print-task "stack:pack")
-  (let [{:keys [runtime bucket-name bucket-prefix]} (norm-args args)]
-    (override-runtime! runtime)
-    (exit-if-not-synced!)
-    (stack-files-check)
-    ;; Check https://github.com/aws/aws-sam-cli/issues/2835
-    ;; https://github.com/aws/aws-sam-cli/issues/2836
-    (apply check-n-create-bucket args)
-    ;; (modify-template)
-    (shell "sam" "package"
-           "--template-file"        "template.yml"
-           "--output-template-file" PACKAGED_TEMPLATE_FILE
-           (when AWS_PROFILE
-             "--profile")           AWS_PROFILE
-           "--s3-bucket"            (or bucket-name BUCKET_NAME)
-           "--s3-prefix"            (or bucket-prefix BUCKET_PREFIX)
-           "--region"               REGION)))
-
-(defn bucket:remove
-  "     \033[0;31m>\033[0m Removes a s3 stack bucket or the one specified by \033[0;31m:infra:bucket-name\033[0m
-  \t\t        - \033[0;31m:bucket-name\033[0m   - overrides \033[0;31m:infra:bucket-name\033[0m
-  \t\t        - \033[0;31m:profile\033[0m       - overrides \033[0;31m:infra:profile\033[0m
-  \n----------------------------------------------------------------\n"
-  [& args]
-  (print-task "bucket:remove")
-  (let [{:keys [bucket-name profile]} (norm-args args)
-        bucket-name (or bucket-name BUCKET_NAME)]
-    (if-not (bucket-exists? bucket-name profile)
-      (hpr (pre "Bucket") (accent bucket-name) (pre "does not exists! Nothing to remove!"))
-      (do (hpr (prs "Removing a bucket") (accent bucket-name))
-          (-remove-bucket bucket-name profile)))))
-
-(defn stack:deploy
-  "     \033[0;31m>\033[0m Deploys \033[0;31mCloudformation\033[0m stack
-  \t\t        - \033[0;31m:guided\033[0m        - guide the deployment
-  \t\t        - \033[0;31m:dry\033[0m           - execute changeset?
-  \t\t        - \033[0;31m:params\033[0m        - map of parameters to override in AWS SAM
-  \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
-  \t\t        - \033[0;31m:stack\033[0m         - overrides \033[0;31m:stack:name\033[0m
-  \t\t        - \033[0;31m:bucket-name\033[0m   - overrides \033[0;31m:infra:bucket-name\033[0m
-  \t\t        - \033[0;31m:bucket-prefix\033[0m - overrides \033[0;31m:infra:bucket-prefix\033[0m "
-  [& args]
-  (print-task "stack:deploy")
-  (let [{:keys [guided dry params runtime stack bucket-name bucket-prefix]} (norm-args args)]
-    (override-runtime! runtime)
-    (exit-if-not-synced!)
-    (if-not (file-exists? PACKAGED_TEMPLATE_FILE)
-      (hpr (pre "No") (accent PACKAGED_TEMPLATE_FILE) (pre "found. Run") (accent "stack:pack"))
-      (do
-        (when-not dry (apply check-n-create-bucket args))
-        (apply shell "sam" "deploy"
-               "--template-file"                    PACKAGED_TEMPLATE_FILE
-               "--parameter-overrides"
-               (if-not params
-                 (parameters)
-                 (str (parameters) " " (map->parameters-inline (edn/read-string params))))
-               "--stack-name"                       (or stack STACK_NAME)
-               "--s3-prefix"                        (or bucket-prefix BUCKET_PREFIX)
-               "--s3-bucket"                        (or bucket-name BUCKET_NAME)
-               (when AWS_PROFILE "--profile")       AWS_PROFILE
-               "--region"                           REGION
-               (when dry "--no-execute-changeset")
-               (when guided "--guided")
-               (when CAPABILITIES "--capabilities") CAPABILITIES)))))
-
 (defn stack:compile
   "     \033[0;31m>\033[0m Compiles sources if necessary
   \t\t        - \033[0;31m:force\033[0m         - force compilation even if sources did not change"
@@ -1046,86 +596,10 @@ set -e
   (print-task "stack:compile")
   (exit-if-not-synced!)
   (let [{:keys [force]} (norm-args args)])
-  (when (= *RUNTIME_NAME* :babashka)
-    (hpr "Nothing to compile. Sources are provided as is to" (accent "babashka") "runtime")
-    (System/exit 0))
   (when (and (not (build-stale?)) (not force))
     (hpr "Nothing to compile. Sources did not change!")
     (System/exit 0))
   (docker-run (str "clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
-
-(defn- normalize-headers
-  [headers]
-  (into {} (keep (fn [[k v]] (when k [(.toLowerCase (name k)) v]))) headers))
-
-(defn response-event->normalized-event
-  [event]
-  (cond-> event
-    (seq (:headers event))
-    (update :headers normalize-headers)
-
-    (seq (:multiValueHeaders event))
-    (update :multiValueHeaders normalize-headers)))
-
-(defn stack:invoke
-  "     \033[0;31m>\033[0m Invokes lambda fn (check sam local invoke --help):
-       \t\t        - \033[0;31m:name\033[0m          - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
-       \t\t        - \033[0;31m:event-file\033[0m    - path to \033[0;31mevent file\033[0m
-       \t\t        - \033[0;31m:envs-file\033[0m     - path to \033[0;31menvs file\033[0m
-       \t\t        - \033[0;31m:params\033[0m        - map of parameters to override in AWS SAM
-       \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime
-       \t\t        - \033[0;31m:debug\033[0m         - run invoke in \033[0;31mdebug mode\033[0m
-       \t\t        - \033[0;31m:validation-fn\033[0m - useful for fast CI tests (e.g. \033[0;31mbb stack:invoke \"(fn [request] (= request {:body nil :headers nil}))\"\033[0m)
-       \t\t        - \033[0;31m:logs\033[0m          - logfile to runtime logs to"
-  [& args]
-  (print-task "stack:invoke")
-  (let [{:keys [name event-file envs-file logs params debug runtime validation-fn]} (norm-args args)
-        envs-file (or envs-file DEFAULT_ENVS_FILE)]
-    (override-runtime! runtime)
-    (exit-if-not-synced!)
-    (stack-files-check)
-    (when (build-stale?)
-      (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
-    (let [{:keys [err out exit]}
-          @(shell-no-exit-n-inherit
-            "sam" "local" "invoke"          (or name DEFAULT_LAMBDA_NAME)
-            "--parameter-overrides"         (if-not params
-                                              (parameters)
-                                              (str (parameters) " " (map->parameters-inline (edn/read-string params))))
-            (when AWS_PROFILE "--profile")  AWS_PROFILE
-            (when debug      "--debug")
-            (when logs       "-l")          logs
-            (when event-file "-e")          event-file
-            (when envs-file  "-n")          envs-file)
-          err (slurp err)
-          out (slurp out)
-          out-json (try
-                     (let [parsed (json/parse-string (s/trim out) true)]
-                       (response-event->normalized-event parsed))
-                     (catch Exception _
-                       nil))]
-      (if (and (= exit 0) validation-fn)
-        (if ((eval (read-string validation-fn)) out-json)
-          (do
-            (hpr (prs "Validation fn") (accent validation-fn) (prs "succeed for input") (accent out-json))
-            (hpr (prs "Test passed!"))
-            (System/exit 0))
-          (do
-            (hpr (pre "Validation fn") (accent validation-fn) (pre "failed for input") (accent out-json))
-            (hpr (pre "Test failed!"))
-            (System/exit 1)))
-        (do 
-          (hpr "-----------------------------" (accent "Runtime Output:") "----------------------------")
-          (hpr err)
-          (hpr "-------------------------------------------------------------------------")
-          (println "")
-          (if (s/blank? out)
-            (hpr (prw "No function output!"))
-            (do
-              (hpr "-----------------------------" (accent "Function Output:") "--------------------------")
-              (println out)))
-          (hpr "-------------------------------------------------------------------------")))
-      (System/exit exit))))
 
 (defn mvn-local-test
   [file]
@@ -1153,14 +627,8 @@ set -e
       (hpr " Babashka tasks sha:      " (accent (or (:sha (get (:deps BB_EDN) 'io.github.FieryCod/holy-lambda-babashka-tasks)) "LOCAL")))
       (hpr " Babashka tasks version:  " (accent TASKS_VERSION))
       (hpr " Babashka version:        " (accent (or (s/trim (shs-no-err "bb" "version")) "UNKNOWN")))
-      (hpr " Runtime:                 " (accent *RUNTIME_NAME*))
-      (hpr " Runtime version:         " (accent (or RUNTIME_VERSION "UNKNOWN")))
       (hpr " TTY:                     " (accent TTY?))
-      (hpr " Runtime entrypoint:      " (accent ENTRYPOINT))
-      (hpr " Stack name:              " (accent STACK_NAME))
-      (hpr " S3 Bucket name:          " (accent BUCKET_NAME))
-      (hpr " S3 Bucket prefix:        " (accent BUCKET_PREFIX))
-      (hpr " S3 Bucket exists?:       " (accent (bucket-exists?)))
+      (hpr " Entrypoint:              " (accent ENTRYPOINT))
       (hpr "---------------------------------------\n"))
 
     (when-not (file-exists? AWS_DIR)
@@ -1171,49 +639,9 @@ set -e
       (hpr (pre "File deps.edn does not exists!"))
       (exit-code-err!))
 
-    (if-not (contains? AVAILABLE_RUNTIMES *RUNTIME_NAME*)
-      (do
-        (hpr (str (pre ":runtime ") (accent *RUNTIME_NAME*) (pre " is not supported!")))
-        (hpr (str "Choose one of supported build tools: " AVAILABLE_RUNTIMES)))
-      (hpr (prs ":runtime looks good")))
-
     (if-not ENTRYPOINT
       (hpr (pre ":runtime:entrypoint is required!"))
       (hpr (prs ":runtime:entrypoint looks good")))
-
-    (if-not CAPABILITIES
-      (hpr (pre ":stack:capabilities is required!"))
-      (hpr (prs ":stack:capabilities looks good")))
-
-    (when-not INFRA_AWS_PROFILE
-      (hpr (prw ":infra:profile which should point to AWS Profile is not declared, therefore") (accent "default") (prw "profile will be used instead")))
-
-    (when (and (not (contains? #{:native :clojure} *RUNTIME_NAME*)) BOOTSTRAP_FILE)
-      (hpr (prw ":runtime:bootstrap-file is supported in") (accent ":native") (prw "and") (accent ":clojure") (prw "runtimes!")))
-
-    (when (and (not (contains? #{:native :clojure} *RUNTIME_NAME*)) BOOTSTRAP_FILE (not (file-exists? BOOTSTRAP_FILE)))
-      (hpr (prw ":runtime:bootstrap-file:") (accent BOOTSTRAP_FILE) (prw "does not exists!")))
-
-    (when (and (not= *RUNTIME_NAME* :native) NATIVE_DEPS_PATH)
-      (hpr (prw ":runtime:native-deps is supported only for") (accent ":native") (prw "runtime")))
-
-    (when (and (= *RUNTIME_NAME* :native)
-               NATIVE_DEPS_PATH
-               (not (file-exists? NATIVE_DEPS_PATH)))
-      (hpr (prw ":runtime:native-deps folder does not exists") (accent ":native:executable") (prw "will not include any extra deps!")))
-
-    (when (and RUNTIME_VERSION (not= *RUNTIME_NAME* :babashka))
-      (hpr (prw ":runtime:version is supported only for") (accent ":babashka") (prw "runtime")))
-
-    (when (and (:pods RUNTIME) (not= *RUNTIME_NAME* :babashka))
-      (hpr (prw ":runtime:pods are supported only for") (accent ":babashka") (prw "runtime")))
-
-    (when (and NATIVE_IMAGE_ARGS (not= *RUNTIME_NAME* :native))
-      (hpr (prw ":runtime:native-image-args are supported only for") (accent ":native") (prw "runtime")))
-
-    (if-not STACK_NAME
-      (hpr (pre ":stack:name is required!"))
-      (hpr (prs ":stack:name looks good")))
 
     (mvn-local-test "deps.edn")
     (mvn-local-test "bb.edn")
@@ -1224,59 +652,13 @@ set -e
         (hpr (pre "Stack is not synced! Run:") (accent "stack:sync"))
         (exit-code-err!)))
 
-    (if-not (contains? AVAILABLE_REGIONS REGION)
-      (do
-        (hpr (str (pre "Region ") (accent REGION) (pre " is not supported!")))
-        (hpr (str "Choose one of supported regions:\n" (with-out-str (pprint/pprint AVAILABLE_REGIONS)))))
-      (hpr (prs ":infra:region definition looks good")))
-
-    (if (s/includes? BUCKET_PREFIX "_")
-      (hpr (pre ":infra:bucket-prefix should not contain any of _ characters"))
-      (hpr (prs ":infra:bucket-prefix looks good")))
-
-    (if-not TEMPLATE_FILE
-      (hpr (pre ":stack:template is required!"))
-      (hpr (prs ":stack:template looks good")))
-
-    (if (s/includes? BUCKET_NAME "_")
-      (do
-        (hpr (pre ":infra:bucket-name should not contain any of _ characters"))
-        (exit-code-err!))
-      (hpr (str (prs ":infra:bucket-name looks good,")
-                (when-not (bucket-exists?)
-                  (str (prw " but ") (accent BUCKET_NAME) (prw " does not exists (use ")
-                       (accent "bb :bucket:create") (prw " to create a bucket!)"))))))
-
     (if-let [cmds-not-found (seq (filter (comp not command-exists?) REQUIRED_COMMANDS))]
       (do
         (hpr (str (pre (str "Commands " cmds-not-found " not found. Install all then run: ")) (underline "bb doctor")))
         (exit-code-err!))
       (do
-        (hpr (prs "Required commands") (accent (str REQUIRED_COMMANDS)) (prs "installed!"))
-        (println)
-        (when-not (env-true? "HL_SAM_NO_VALIDATE")
-          (stat-file TEMPLATE_FILE)
-          (hpr "Validating" (accent TEMPLATE_FILE))
-          (shell "sam validate"))))
+        (hpr (prs "Required commands") (accent (str REQUIRED_COMMANDS)) (prs "installed!"))))
     (System/exit @exit-code)))
-
-(defn stack:logs
-  "     \033[0;31m>\033[0m Possible arguments (check sam logs --help):
-       \t\t        - \033[0;31m:name\033[0m          - either \033[0;31m:name\033[0m or \033[0;31m:stack:default-lambda\033[0m
-       \t\t        - \033[0;31m:e\033[0m             - fetch logs up to this time
-       \t\t        - \033[0;31m:s\033[0m             - fetch logs starting at this time
-       \t\t        - \033[0;31m:tail\033[0m          - fetch logs in tail mode
-       \t\t        - \033[0;31m:filter\033[0m        - find logs that match terms "
-  [& args]
-  (print-task "stack:logs")
-  (let [{:keys [name tail s e filter]} (norm-args args)]
-    (shell "sam" "logs"
-           (when AWS_PROFILE "--profile")  AWS_PROFILE
-           "-n" (or name DEFAULT_LAMBDA_NAME)
-           (when s "-s") (when s s)
-           (when e "-e") (when e e)
-           (when filter "--filter") (when filter filter)
-           (when tail "-t"))))
 
 (defn stack:version
   "     \033[0;31m>\033[0m Outputs holy-lambda babashka tasks version"
@@ -1301,32 +683,3 @@ set -e
       (shell (str "rm -rf " art)))
 
     (hpr  (prs "Build artifacts purged"))))
-
-(defn stack:describe
-  "     \033[0;31m>\033[0m Describes \033[0;31mCloudformation\033[0m stack
-  \t\t        - \033[0;31m:stack\033[0m         - overrides \033[0;31m:stack:name\033[0m "
-  [& args]
-  (let [{:keys [stack]} (norm-args args)]
-    (print-task "stack:describe")
-    (shell "aws" "cloudformation" "describe-stacks"
-           (when AWS_PROFILE "--profile")    AWS_PROFILE
-            "--region"     REGION
-            "--stack-name" (or stack STACK_NAME))))
-
-(defn stack:destroy
-  "     \033[0;31m>\033[0m Destroys \033[0;31mCloudformation\033[0m stack & removes bucket
-  \t\t        - \033[0;31m:bucket-name\033[0m   - overrides \033[0;31m:infra:bucket-name\033[0m "
-  [& args]
-  (let [{:keys [stack]} (norm-args args)]
-    (print-task "stack:destroy")
-    (hpr (prw "Automatic cloudformation") (accent "stack:destroy") (prw "operation might not be always successful."))
-    (shell "aws" "cloudformation" "delete-stack"
-           (when AWS_PROFILE
-             "--profile") AWS_PROFILE
-           "--region"     REGION
-           "--stack-name" (or stack STACK_NAME))
-    (apply bucket:remove args)
-    (hpr "Waiting 30 seconds for partial/complete cloudformation deletion status...")
-    (Thread/sleep 30000)
-    (hpr "If you see an error regarding not being able to describe not existent stack then destroy was successful!")
-    (apply stack:describe args)))
