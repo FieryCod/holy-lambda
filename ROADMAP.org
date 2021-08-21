@@ -1,11 +1,8 @@
-
 * Upstream bugs
   - Slow docker emulation on M1: https://github.com/oracle/graal/issues/2666
-  - Unable to use java11 (:java runtime) https://github.com/aws/aws-sam-cli/issues/2787
-  - Hack for switching runtime anytime  https://github.com/aws/aws-sam-cli/issues/2836
 
 * Roadmap
-** [ ] 0.2.4
+** [ ] 0.3.1
 - Tasks, Environment variables documentation
 - Native agent, native-runtime documentation
   - What are native-agents-payloads?
@@ -21,15 +18,9 @@
 
   - propose a PR to jsonista with args: "--initialize-at-build-time=com.fasterxml.jackson,jsonista"
 
-** [ ] 0.2.5
-- Add documentation about using ~initialize-at-build-time~ with the list of packages to initialize. Link to GraalVM documentation,
-
-** [ ] 0.3.0
-- Add Node.js runtime support. Add documentation and tutorial.
-- Fix tasks args parsing, so that single arguments like :debug | --debug are not required on tail position
-
 ** [ ] 0.4.0
-- Add optional babashka build to docker image for the applications which exceed 250 MB limit. Add documentation
+- Add documentation about using ~initialize-at-build-time~ with the list of packages to initialize. Link to GraalVM documentation,
+- Add Node.js runtime support. Add documentation and tutorial.
 
 ** [ ] 0.5.0
 - Add fully functional live development environment, but Clojure style :)
@@ -41,6 +32,3 @@
 - Investigate how to support step functions in a more Clojure'y way
 - Investigate whether it's worth to make runtime fully asynchronous + thread pool. If yes make it optional via ~HL_USE_ASYNC_RUNTIME=1~.
 
-** [ ] 0.7.0
-- Add support for PGO GraalVM optimizations. Provide benchmarks.
-  Use ~-XX:ProfilesDumpFile=YourFileName~ on instrumented image to save profile file somewhere else. Use Amazon EFS to catch the ~.iprof~ file when runtime is being destroyed.
