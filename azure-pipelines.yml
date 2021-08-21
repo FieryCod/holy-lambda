@@ -58,27 +58,9 @@ jobs:
           bb stack:doctor || exit 1
           echo "------------------------------------------------------"
 
-          # Bucket creation
-          printf "\n------------------------------------------------------\n"
-          printf "                    (4) Bucket creation test              "
-          printf "\n------------------------------------------------------\n"
-          #------------------------
-          bb bucket:create || exit 1
-          bb bucket:create :bucket-name hlhlnativetestzxcqwedsasd1 || exit 1
-          echo "------------------------------------------------------"
-
-          # Bucket deletion
-          printf "\n------------------------------------------------------\n"
-          printf "                    (5) Bucket deletion test              "
-          printf "\n------------------------------------------------------\n"
-          #------------------------
-          bb bucket:remove || exit 1
-          bb bucket:remove :bucket-name hlhlnativetestzxcqwedsasd1 || exit 1
-          echo "------------------------------------------------------"
-
           # Stack version test
           printf "\n------------------------------------------------------\n"
-          printf "                   (6) Stack version                      "
+          printf "                   (4) Stack version                      "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:version || exit 1
@@ -86,7 +68,7 @@ jobs:
 
           # Basic stack compilation
           printf "\n------------------------------------------------------\n"
-          printf "                   (7) Stack compilation                  "
+          printf "                   (5) Stack compilation                  "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:compile || exit 1
@@ -94,71 +76,23 @@ jobs:
 
           # Basic stack compilation
           printf "\n------------------------------------------------------\n"
-          printf "              (8) Stack compilation + Force               "
+          printf "              (6) Stack compilation + Force               "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:compile :force || exit 1
           echo "------------------------------------------------------"
 
-          # Basic stack pack
-          printf "\n------------------------------------------------------\n"
-          printf "            (9) Stack pack + RT overwrite                 "
-          printf "\n------------------------------------------------------\n"
-          #------------------------
-          bb stack:pack :runtime :java || exit 1
-          echo "------------------------------------------------------"
-
-          # Deploy stack dry
-          printf "\n------------------------------------------------------\n"
-          printf "            (10) Stack deploy dry + RT overwrite          "
-          printf "\n------------------------------------------------------\n"
-          #------------------------
-          bb stack:deploy :runtime :java :dry || exit 1
-          echo "------------------------------------------------------"
-
-          # Deploy stack
-          printf "\n------------------------------------------------------\n"
-          printf "             (11) Stack deploy + RT overwrite             "
-          printf "\n------------------------------------------------------\n"
-          #------------------------
-          bb stack:deploy :runtime :java || exit 1
-          echo "------------------------------------------------------"
-
-          # Describe full stack
-          printf "\n------------------------------------------------------\n"
-          printf "                 (12) Stack describe                      "
-          printf "\n------------------------------------------------------\n"
-          #------------------------
-          bb stack:describe || exit 1
-          echo "------------------------------------------------------"
-
-          # Destroy stack
-          printf "\n------------------------------------------------------\n"
-          printf "                  (13) Stack destroy                      "
-          printf "\n------------------------------------------------------\n"
-          #------------------------
-          bb stack:destroy && printf "Not yet removed!\n" || printf "Already removed!\n"
-          echo "------------------------------------------------------"
-
           # Stack local run test
           printf "\n------------------------------------------------------\n"
-          printf "           (14) In docker:run in local context fail       "
+          printf "           (7) In docker:run in local context fail       "
           printf "\n------------------------------------------------------\n"
           #------------------------
           HL_NO_DOCKER=true bb docker:run "something" && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
           echo "------------------------------------------------------"
 
-          # Stack deletion confirmation
-          printf "\n------------------------------------------------------\n"
-          printf "                 (15) Stack removed check                 "
-          printf "\n------------------------------------------------------\n"
-          #------------------------
-          sleep 5 && bb stack:describe && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
-          echo "------------------------------------------------------"
-
           # Stack purge test
           printf "\n------------------------------------------------------\n"
-          printf "                 (16) Stack purge                         "
+          printf "                 (8) Stack purge                          "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb stack:purge || exit 1
@@ -195,15 +129,15 @@ jobs:
           # Regular test tasks
           bb stack:compile && \
           bb native:executable && \
-          bb stack:invoke :validation-fn "(fn [{:keys [body]}] (= body \"Hello world\"))"
+          output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \
+          bb -e "(assert (= \"$output\" \"Hello world\"))"
 
-          bb stack:invoke --validation-fn "(fn [{:keys [body]}] (= body \"Hello world\"))"
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Compilation + Invoke'
 
-  # Java + Docker runtime tests
-  - job: java_basic_docker_1
-    displayName: '(3.1)-(Java)-(Basic)-(Docker) Java runtime test'
+  # Clojure + Docker runtime tests
+  - job: Clojure_basic_docker_1
+    displayName: '(3.1)-(Clojure)-(Basic)-(Docker) Clojure runtime test'
     dependsOn:
       - tasks_health_check_1
     condition: succeeded()

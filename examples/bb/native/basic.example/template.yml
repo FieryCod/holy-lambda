@@ -4,9 +4,6 @@ Description: >
   Example basic lambda using `holy-lambda` micro library
 
 Parameters:
-  Runtime:
-    Type: String
-    Default: <HOLY_LAMBDA_RUNTIME>
   Timeout:
     Type: Number
     Default: 40
@@ -15,10 +12,13 @@ Parameters:
     Default: 2000
   CodeUri:
     Type: String
-    Default: <HOLY_LAMBDA_CODE_URI>
+    Default: ./.holy-lambda/build/latest.zip
+  Runtime:
+    Type: String
+    Default: provided
   Entrypoint:
     Type: String
-    Default: <HOLY_LAMBDA_ENTRYPOINT>
+    Default: basic.example.core
 
 Globals:
   Function:

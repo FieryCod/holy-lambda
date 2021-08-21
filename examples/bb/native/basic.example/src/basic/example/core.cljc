@@ -5,17 +5,16 @@
       [fierycod.holy-lambda.response :as hr]
       :bb
       [fierycod.holy-lambda.response :as hr])
-   [fierycod.holy-lambda.native-runtime :as native]
    [fierycod.holy-lambda.agent :as agent]
    [fierycod.holy-lambda.core :as h]))
 
-(h/deflambda ExampleLambda <
+(defn ExampleLambda
   [_]
   #?(:bb
      (hr/text (str "Hello world. Babashka is sweet friend of mine! Babashka version: " (System/getProperty "babashka.version")))
      :clj (hr/text "Hello world")))
 
-(native/entrypoint [#'ExampleLambda])
+(h/entrypoint [#'ExampleLambda])
 
 (agent/in-context
  (println "I will help in generation of native-configurations"))

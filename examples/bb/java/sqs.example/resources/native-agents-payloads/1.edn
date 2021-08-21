@@ -1,4 +1,0 @@
-{:name "sqs.example.core.SubscribeLambda",
- :request {:event {:pathParameters {:message "Hello world"}},
-           :context {}},
- :propagate true}
