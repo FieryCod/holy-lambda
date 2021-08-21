@@ -4,60 +4,45 @@
    - Native Provided Runtime,
    - Babashka runtime.
 
-   See the docs for more info.")
+   See the docs for more info."
+  (:require
+   [fierycod.holy-lambda.custom-runtime]
+   [fierycod.holy-lambda.agent]))
 
-(defn- wrap-lambda
-  [lname mixin lambda]
-  `(defn ~lname
-     [request#]
-     (~lambda request#)))
+(defmacro entrypoint
+  "Generates the entrypoint function which has the two roles:
+  1. The `-main` might be then launched by AWS in the lambda runtime.
+     Lambda runtime tries to proxy the payloads from AWS to corresponding handlers.
 
-(defn- fn-body?
-  [form]
-  (when (vector? (first form))
-    (if (= '< (second form))
-      (throw (ex-info "Mixin must be given before argument list" {}))
-      true)))
+  2. The `-main` might be used to generate the configuration necessary to compile
+     the project to native.
 
-(defn- >parse-deflambda
-  ":name  :doc?  <? :mixin* :body+
-   symbol string <  expr   fn-body"
-  [attrs]
-  (when-not (symbol? (first attrs))
-    (throw (ex-info "First argument to deflambda must be a symbol" {})))
-  (loop [res  {}
-         xs   attrs
-         mode nil]
-    (let [x    (first xs)
-          anext (next xs)]
-      (cond
-        (and (empty? res)    (symbol? x)) (recur {:lname x} anext nil)
-        (fn-body? xs)        (do
-                               (when (or (not (nil? (second (first xs))))
-                                         (nil? (ffirst xs)))
-                                 (throw (ex-info "Incorrect deflambda definition. Lambda takes only one argument [request] that consist of {event, ctx}" {})))
-                               (assoc res :bodies (list xs)))
-        (string? x)          (recur (assoc res :doc x) anext nil)
-        (= '< x)             (recur res anext :mixin)
-        (= mode :mixin)      (recur (assoc res :mixin x) anext nil)
-        :else                (throw (ex-info (str "Syntax error at " xs) {}))))))
+     *For more info take a look into the corresponding links:*
+     1. https://github.com/oracle/graal/issues/1367
+     2. https://github.com/oracle/graal/blob/master/substratevm/CONFIGURE.md
+     3. https://github.com/oracle/graal/blob/master/substratevm/REFLECTION.md
 
-(defmacro deflambda
-  "Convenience macro for generating defn alike lambdas.
+     According to the comment of the @cstancu with the help of the agent we can find the majority
+     of the reflective calls and generate the configuration. Generated configuration might then be used
+     by `native-image` tool.
 
-  **Usage**:
+  Usage:
   ```
-  (h/deflambda ExampleLambda
-    [{:keys [event ctx]}]
-    (hr/text \"Hello world\"))
+   (entrypoint [#'ExampleLambda1 #'ExampleLambda2 #'ExampleLambda3])
   ```"
-  {:arglists '([name doc-string? <mixin-sign? mixin? [request] fn-body])
-   :added "0.0.1"}
-  [& attrs]
-  (let [{:keys [mixin lname bodies doc]} (>parse-deflambda attrs)
-        arglist (mapv (fn [[arglist & _body]] arglist) bodies)
-        lname (with-meta lname {:doc doc
-                                :arglists `(quote ~arglist)})
-        lambda `(fn ~@bodies)]
-    (wrap-lambda lname mixin lambda)))
+  {:added "0.0.1"}
+  [lambdas]
+  `(do
+     (def ~'PRVL_ROUTES (into {} (mapv (fn [l#] [(str (str (:ns (meta l#)) "." (str (:name (meta l#))))) l#]) ~lambdas)))
+     (defn ~'-main [& attrs#]
+       ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image`
+       ;;                               will be generated via the agent.
+       ;;
+       ;; executor = anything else   -- Run provided runtime loop
+       (if (= (System/getProperty "executor") @#'fierycod.holy-lambda.agent/AGENT_EXECUTOR)
+         ;; Generate the native configuration for the lambdas
+         (#'fierycod.holy-lambda.agent/routes->reflective-call! ~'PRVL_ROUTES)
 
+         ;; Start custom runtime loop
+         (while true
+           (#'fierycod.holy-lambda.custom-runtime/next-iter (first attrs#) ~'PRVL_ROUTES (into {} (System/getenv))))))))

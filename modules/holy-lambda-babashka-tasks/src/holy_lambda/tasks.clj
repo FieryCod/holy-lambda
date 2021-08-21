@@ -431,7 +431,6 @@
 
 (defn stack:sync
   "     \033[0;31m>\033[0m Syncs project & dependencies from either:
-       \t\t        - \033[0;31m<Clojure>\033[0m  project.clj
        \t\t        - \033[0;31m<Clojure>\033[0m  deps.edn
        \t\t        - \033[0;31m<Babashka>\033[0m bb.edn:runtime:pods"
   []
@@ -492,54 +491,52 @@
   (boolean (seq (fs/modified-since OUTPUT_JAR_PATH (fs/glob "src" "**/**.{clj,cljc,cljs}")))))
 
 (defn native:conf
-  "     \033[0;31m>\033[0m Provides native configurations for the application
-       \t\t        - \033[0;31m:runtime\033[0m       - overrides \033[0;31m:runtime:name\033[0m and run Lambda in specified runtime "
-  [& args]
+  "     \033[0;31m>\033[0m Provides native configurations for the application"
+  []
   (print-task "native:conf")
   (exit-if-not-synced!)
-  (let [{:keys [runtime]} (norm-args args)]
-    (stack-files-check :default)
+  (stack-files-check :default)
 
-    (io/make-parents (str NATIVE_CONFIGURATIONS_PATH "/traces.json"))
+  (io/make-parents (str NATIVE_CONFIGURATIONS_PATH "/traces.json"))
 
-    (hpr "Compiling with agent support!")
-    (shell "rm -Rf .cpcache .holy-lambda/build/output-agent.jar")
-    (docker-run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
+  (hpr "Compiling with agent support!")
+  (shell "rm -Rf .cpcache .holy-lambda/build/output-agent.jar")
+  (docker-run (str "USE_AGENT_CONTEXT=true clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH_WITH_AGENT " :main-class " (str ENTRYPOINT)))
 
-    (hpr "Generating traces to ignore unnecessary reflection entries!")
-    (docker-run (str JAVA_COMMAND
-                     " -agentlib:native-image-agent="
-                     "trace-output=" (str NATIVE_CONFIGURATIONS_PATH "/traces.json")
-                     " "
-                     "-Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))
+  (hpr "Generating traces to ignore unnecessary reflection entries!")
+  (docker-run (str JAVA_COMMAND
+                   " -agentlib:native-image-agent="
+                   "trace-output=" (str NATIVE_CONFIGURATIONS_PATH "/traces.json")
+                   " "
+                   "-Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))
 
-    (hpr "Generating native-configurations!")
-    (docker-run (str JAVA_COMMAND
-                     " -agentlib:native-image-agent="
-                     "config-merge-dir=" NATIVE_CONFIGURATIONS_PATH
-                     " "
-                     "-Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))
+  (hpr "Generating native-configurations!")
+  (docker-run (str JAVA_COMMAND
+                   " -agentlib:native-image-agent="
+                   "config-merge-dir=" NATIVE_CONFIGURATIONS_PATH
+                   " "
+                   "-Dexecutor=native-agent -jar " OUTPUT_JAR_PATH_WITH_AGENT))
 
-    (hpr "Cleaning up reflection-config.json!")
-    (refl/clean-reflection-config!)
+  (hpr "Cleaning up reflection-config.json!")
+  (refl/clean-reflection-config!)
 
-    (if-not (file-exists? NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH)
-      (hpr (pre "Native configurations generation failed!"))
-      (let [resource-config (json/parse-string (slurp (io/file NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH)))]
-        (hpr "Cleaning up resource-config.json!")
-        (spit NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH
-              (json/generate-string
-               (update-in resource-config
-                          ["resources" "includes"]
-                          (fn [patterns]
-                            (filterv
-                             (fn [p]
-                               (let [patternv (get p "pattern")]
-                                 (not (or (s/includes? patternv ".class")
-                                          (s/includes? patternv ".clj")
-                                          (s/includes? patternv "native-agents-payloads")))))
-                             patterns)))
-               {:pretty true}))))))
+  (if-not (file-exists? NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH)
+    (hpr (pre "Native configurations generation failed!"))
+    (let [resource-config (json/parse-string (slurp (io/file NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH)))]
+      (hpr "Cleaning up resource-config.json!")
+      (spit NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH
+            (json/generate-string
+             (update-in resource-config
+                        ["resources" "includes"]
+                        (fn [patterns]
+                          (filterv
+                           (fn [p]
+                             (let [patternv (get p "pattern")]
+                               (not (or (s/includes? patternv ".class")
+                                        (s/includes? patternv ".clj")
+                                        (s/includes? patternv "native-agents-payloads")))))
+                           patterns)))
+             {:pretty true})))))
 
 (def -bootstrap-file
 "#!/bin/sh
@@ -561,33 +558,32 @@ set -e
   [& args]
   (print-task "native:executable")
   (exit-if-not-synced!)
-  (let [{:keys [runtime]} (norm-args args)]
-    (stack-files-check--jar)
+  (stack-files-check--jar)
 
-    (when (build-stale?)
-      (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
+  (when (build-stale?)
+    (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
 
-    (when-not (file-exists? NATIVE_CONFIGURATIONS_PATH)
-      (hpr (prw "No native configurations has been generated. Native image build may fail. Run") (accent "native:conf") (prw "to generate native configurations.")))
+  (when-not (file-exists? NATIVE_CONFIGURATIONS_PATH)
+    (hpr (prw "No native configurations has been generated. Native image build may fail. Run") (accent "native:conf") (prw "to generate native configurations.")))
 
-    ;; Copy then build
-    (shell-no-exit "bash -c \"[ -d resources/native-configuration ] && cp -rf resources/native-configuration .holy-lambda/build/\"")
+  ;; Copy then build
+  (shell-no-exit "bash -c \"[ -d resources/native-configuration ] && cp -rf resources/native-configuration .holy-lambda/build/\"")
 
-    (docker-run (str "cd .holy-lambda/build/ && " NATIVE_IMAGE_COMMAND " -jar output.jar -H:ConfigurationFileDirectories=native-configuration"
-                     (when NATIVE_IMAGE_ARGS
-                       (str " " NATIVE_IMAGE_ARGS))))
+  (docker-run (str "cd .holy-lambda/build/ && " NATIVE_IMAGE_COMMAND " -jar output.jar -H:ConfigurationFileDirectories=native-configuration"
+                   (when NATIVE_IMAGE_ARGS
+                     (str " " NATIVE_IMAGE_ARGS))))
 
-    (if-not (file-exists? ".holy-lambda/build/output")
-      (hpr (pre "Native image failed to create executable. Fix your build! Skipping next steps"))
-      (do
-        (spit ".holy-lambda/build/bootstrap" (bootstrap-file))
-        (when (and NATIVE_DEPS_PATH (file-exists? NATIVE_DEPS_PATH))
-          (hpr "Copying" (accent ":runtime:native-deps"))
-          (shell (str "cp -R " NATIVE_DEPS_PATH " .holy-lambda/build/")))
-        (hpr "Bundling artifacts...")
-        (shell "bash -c \"cd .holy-lambda/build && chmod +x bootstrap\"" )
-        (shell "bash -c \"cd .holy-lambda/build && rm -Rf output-agent.jar native-configuration resources/native-configuration resources/native-agents-payloads output.build_artifacts.txt\"")
-        (shell "bash -c \"cd .holy-lambda/build && zip -r latest.zip . -x 'output.jar'\"")))))
+  (if-not (file-exists? ".holy-lambda/build/output")
+    (hpr (pre "Native image failed to create executable. Fix your build! Skipping next steps"))
+    (do
+      (spit ".holy-lambda/build/bootstrap" (bootstrap-file))
+      (when (and NATIVE_DEPS_PATH (file-exists? NATIVE_DEPS_PATH))
+        (hpr "Copying" (accent ":runtime:native-deps"))
+        (shell (str "cp -R " NATIVE_DEPS_PATH " .holy-lambda/build/")))
+      (hpr "Bundling artifacts...")
+      (shell "bash -c \"cd .holy-lambda/build && chmod +x bootstrap\"" )
+      (shell "bash -c \"cd .holy-lambda/build && rm -Rf output-agent.jar native-configuration resources/native-configuration resources/native-agents-payloads output.build_artifacts.txt\"")
+      (shell "bash -c \"cd .holy-lambda/build && zip -r latest.zip . -x 'output.jar'\""))))
 
 (defn stack:compile
   "     \033[0;31m>\033[0m Compiles sources if necessary
@@ -642,6 +638,10 @@ set -e
     (if-not ENTRYPOINT
       (hpr (pre ":runtime:entrypoint is required!"))
       (hpr (prs ":runtime:entrypoint looks good")))
+
+    (when (and NATIVE_DEPS_PATH
+               (not (file-exists? NATIVE_DEPS_PATH)))
+      (hpr (prw ":runtime:native-deps folder does not exists") (accent ":native:executable") (prw "will not include any extra deps!")))
 
     (mvn-local-test "deps.edn")
     (mvn-local-test "bb.edn")

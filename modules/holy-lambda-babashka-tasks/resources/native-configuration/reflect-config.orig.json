@@ -183,14 +183,6 @@
 }, {
   "name" : "clojure.walk__init"
 }, {
-  "name" : "com.amazonaws.services.lambda.runtime.Client"
-}, {
-  "name" : "com.amazonaws.services.lambda.runtime.ClientContext"
-}, {
-  "name" : "com.amazonaws.services.lambda.runtime.CognitoIdentity"
-}, {
-  "name" : "com.amazonaws.services.lambda.runtime.Context"
-}, {
   "name" : "com.fasterxml.jackson.core.JsonFactory"
 }, {
   "name" : "com.fasterxml.jackson.core.JsonGenerator$Feature"
@@ -231,11 +223,7 @@
 }, {
   "name" : "fierycod.holy_lambda.core__init"
 }, {
-  "name" : "fierycod.holy_lambda.interceptor__init"
-}, {
-  "name" : "fierycod.holy_lambda.java_runtime__init"
-}, {
-  "name" : "fierycod.holy_lambda.native_runtime__init"
+  "name" : "fierycod.holy_lambda.custom_runtime__init"
 }, {
   "name" : "fierycod.holy_lambda.response__init"
 }, {

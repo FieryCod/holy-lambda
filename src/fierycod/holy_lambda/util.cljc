@@ -142,37 +142,10 @@
         :status status
         :body (response-event->normalized-event (in->edn-event (retrieve-body http-conn status)))})))
 
-(defn call
-  ([afn-sym]
-   (partial call afn-sym))
-  ([afn-sym request]
-   (afn-sym request)))
-
-#?(:clj
-   (defn envs
-     []
-     (into {} (System/getenv))))
-
 (defn getf-header
   [headers prop]
   (cond-> (get headers prop)
     (seq (get headers prop)) first))
-
-(defn ctx
-  [envs* rem-time-fn fn-name fn-version fn-invoked-arn memory-limit
-   aws-request-id log-group-name log-stream-name cognito-identity
-   client-context]
-  {:getRemainingTimeInMs rem-time-fn
-   :fnName fn-name
-   :fnVersion fn-version
-   :fnInvokedArn fn-invoked-arn
-   :memoryLimitInMb memory-limit
-   :awsRequestId aws-request-id
-   :logGroupName log-group-name
-   :logStreamName log-stream-name
-   :identity cognito-identity
-   :clientContext client-context
-   :envs envs*})
 
 (defn exit!
   []

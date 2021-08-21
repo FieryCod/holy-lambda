@@ -5,11 +5,11 @@
    [fierycod.holy-lambda.util]
    [clojure.test :as t]))
 
-(h/deflambda HolyLambda
+(defn HolyLambda
   [request]
   (println request))
 
-(h/deflambda NewLambda
+(defn NewLambda
   [request]
   (println request))
 

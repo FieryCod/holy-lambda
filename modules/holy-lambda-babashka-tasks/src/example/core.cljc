@@ -3,8 +3,6 @@
   (:require
    [fierycod.holy-lambda.agent :as agent]
    [clojure.string :as str]
-   [fierycod.holy-lambda.util :as u]
-   [fierycod.holy-lambda.native-runtime :as native]
    [fierycod.holy-lambda.response :as hr]
    [fierycod.holy-lambda.core :as h]))
 
@@ -17,7 +15,7 @@
   [request]
   (hr/text "Test another invocation"))
 
-(native/entrypoint [#'ExampleLambda #'ExampleLambdav2])
+(h/entrypoint [#'ExampleLambda #'ExampleLambdav2])
 
 (agent/in-context
  (println "In agent context"))

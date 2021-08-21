@@ -3,10 +3,10 @@
    GraalVM agent is convenient tool for complex project, so that
    user does not have to put each entry of reflective call to configuration by hand."
   (:require
-   [fierycod.holy-lambda.util :as u]
    [clojure.edn :as edn]
    [clojure.string :as s]
-   [clojure.java.io :as io])
+   [clojure.java.io :as io]
+   [fierycod.holy-lambda.util :as u])
   (:import
    [java.io File]))
 
@@ -53,7 +53,7 @@
        (mapv #(-> % slurp edn/read-string (assoc :path (.toString ^File %))))
        (sort-by :path)))
 
-(defn- routes->reflective-call!
+(defn routes->reflective-call!
   [routes]
   (doseq [{:keys [request path propagate] :as invoke-map} (agents-payloads->invoke-map)
           :let [callable-var (routes (:name invoke-map))]]
@@ -65,9 +65,9 @@
       (do
         (println "[holy-lambda] Calling lambda" (:name invoke-map) "with payloads from" (re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" path))
         (if propagate
-          (u/call callable-var request)
+          (callable-var request)
           (try
-            (u/call callable-var request)
+            (callable-var request)
             (catch Exception _err nil)))
         (println "[holy-lambda] Succesfully called" (:name invoke-map) "with payloads from" (re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" path)))))
   (println "[holy-lambda] Succesfully called all the lambdas"))

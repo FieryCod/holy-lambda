@@ -1,4 +1,4 @@
-(ns fierycod.holy-lambda.native-runtime
+(ns fierycod.holy-lambda.custom-runtime
   (:require
    [fierycod.holy-lambda.agent]
    [fierycod.holy-lambda.util :as u]))
@@ -15,22 +15,21 @@
   [headers event env-vars]
   (let [get-env (partial get env-vars)
         request-context (:requestContext event)]
-
-    (u/ctx env-vars
-           (fn []
-             (- (Long/parseLong (u/getf-header headers "Lambda-Runtime-Deadline-Ms"))
-                (System/currentTimeMillis)))
-           (get-env "AWS_LAMBDA_FUNCTION_NAME")
-           (get-env "AWS_LAMBDA_FUNCTION_VERSION")
-           (str "arn:aws:lambda:" (get-env "AWS_REGION")
-                ":" (or (:accountId request-context) "0000000")
-                ":function:" (get-env "AWS_LAMBDA_FUNCTION_NAME"))
-           (get-env "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
-           (:requestId request-context)
-           (get-env "AWS_LAMBDA_LOG_GROUP_NAME")
-           (get-env "AWS_LAMBDA_LOG_STREAM_NAME")
-           (:identity request-context)
-           (:clientContext request-context))))
+    {:getRemainingTimeInMs  (fn []
+                              (- (Long/parseLong (u/getf-header headers "Lambda-Runtime-Deadline-Ms"))
+                                 (System/currentTimeMillis)))
+     :fnName                (get-env "AWS_LAMBDA_FUNCTION_NAME")
+     :fnVersion             (get-env "AWS_LAMBDA_FUNCTION_VERSION")
+     :fnInvokedArn          (str "arn:aws:lambda:" (get-env "AWS_REGION")
+                                 ":" (or (:accountId request-context) "0000000")
+                                 ":function:" (get-env "AWS_LAMBDA_FUNCTION_NAME"))
+     :memoryLimitInMb       (get-env "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
+     :awsRequestId          (:requestId request-context)
+     :logGroupName          (get-env "AWS_LAMBDA_LOG_GROUP_NAME")
+     :logStreamName         (get-env "AWS_LAMBDA_LOG_STREAM_NAME")
+     :identity              (:identity request-context)
+     :clientContext         (:clientContext request-context)
+     :envs                  env-vars}))
 
 (defn- send-runtime-error
   [runtime iid ^Exception err]
@@ -72,7 +71,7 @@
       (catch Exception err
         (send-runtime-error runtime iid err)))))
 
-(defn- next-iter
+(defn next-iter
   [maybe-handler routes env-vars]
   (let [runtime (get env-vars "AWS_LAMBDA_RUNTIME_API")
         handler-name (or maybe-handler (get env-vars "_HANDLER"))
@@ -93,44 +92,4 @@
       (System/exit 1))
 
     (when (and (:invocation-id aws-event) (u/success-code? (:status aws-event)))
-      (process-event runtime iid aws-event env-vars (u/call handler)))))
-
-(defmacro entrypoint
-  "Generates the entrypoint function which has the two roles:
-  1. The `-main` might be then launched by AWS in the lambda runtime.
-     Lambda runtime tries to proxy the payloads from AWS to corresponding handlers
-     defined in `native-template.yml`.
-
-  2. The `-main` might be used to generate the configuration necessary to compile
-     the project to native.
-
-     *For more info take a look into the corresponding links:*
-     1. https://github.com/oracle/graal/issues/1367
-     2. https://github.com/oracle/graal/blob/master/substratevm/CONFIGURE.md
-     3. https://github.com/oracle/graal/blob/master/substratevm/REFLECTION.md
-
-     According to the comment of the @cstancu with the help of the agent we can find the majority
-     of the reflective calls and generate the configuration. Generated configuration might then be used
-     by `native-image` tool.
-
-  Usage:
-  ```
-   (entrypoint [#'ExampleLambda1 #'ExampleLambda2 #'ExampleLambda3])
-  ```"
-  {:added "0.0.1"}
-  [lambdas]
-  `(do
-     (def ~'PRVL_ROUTES (into {} (mapv (fn [l#] [(str (str (:ns (meta l#)) "." (str (:name (meta l#))))) l#]) ~lambdas)))
-     (defn ~'-main [& attrs#]
-       ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image`
-       ;;                               will be generated via the agent.
-       ;;                               Example in: `examples/sqs-example/Makefile` at `gen-native-configuration` command
-       ;;
-       ;; executor = anything else   -- Run provided runtime loop
-       (if (= (System/getProperty "executor") @#'fierycod.holy-lambda.agent/AGENT_EXECUTOR)
-         ;; Generate the native configuration for the lambdas
-         (#'fierycod.holy-lambda.agent/routes->reflective-call! ~'PRVL_ROUTES)
-
-         ;; Start native runtime loop
-         (while true
-           (#'fierycod.holy-lambda.native-runtime/next-iter (first attrs#) ~'PRVL_ROUTES (#'fierycod.holy-lambda.util/envs)))))))
+      (process-event runtime iid aws-event env-vars handler))))
