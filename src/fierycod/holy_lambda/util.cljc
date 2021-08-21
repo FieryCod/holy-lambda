@@ -144,8 +144,7 @@
 
 (defn getf-header
   [headers prop]
-  (cond-> (get headers prop)
-    (seq (get headers prop)) first))
+  (some-> (get headers prop) seq first))
 
 (defn exit!
   []

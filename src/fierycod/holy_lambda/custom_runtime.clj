@@ -13,20 +13,19 @@
 
 (defn- ->aws-context
   [headers event env-vars]
-  (let [get-env (partial get env-vars)
-        request-context (:requestContext event)]
+  (let [request-context (:requestContext event)]
     {:getRemainingTimeInMs  (fn []
                               (- (Long/parseLong (u/getf-header headers "Lambda-Runtime-Deadline-Ms"))
                                  (System/currentTimeMillis)))
-     :fnName                (get-env "AWS_LAMBDA_FUNCTION_NAME")
-     :fnVersion             (get-env "AWS_LAMBDA_FUNCTION_VERSION")
-     :fnInvokedArn          (str "arn:aws:lambda:" (get-env "AWS_REGION")
+     :fnName                (.valAt env-vars "AWS_LAMBDA_FUNCTION_NAME")
+     :fnVersion             (.valAt env-vars "AWS_LAMBDA_FUNCTION_VERSION")
+     :fnInvokedArn          (str "arn:aws:lambda:" (.valAt env-vars "AWS_REGION")
                                  ":" (or (:accountId request-context) "0000000")
-                                 ":function:" (get-env "AWS_LAMBDA_FUNCTION_NAME"))
-     :memoryLimitInMb       (get-env "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
+                                 ":function:" (.valAt env-vars "AWS_LAMBDA_FUNCTION_NAME"))
+     :memoryLimitInMb       (.valAt env-vars "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
      :awsRequestId          (:requestId request-context)
-     :logGroupName          (get-env "AWS_LAMBDA_LOG_GROUP_NAME")
-     :logStreamName         (get-env "AWS_LAMBDA_LOG_STREAM_NAME")
+     :logGroupName          (.valAt env-vars "AWS_LAMBDA_LOG_GROUP_NAME")
+     :logStreamName         (.valAt env-vars "AWS_LAMBDA_LOG_STREAM_NAME")
      :identity              (:identity request-context)
      :clientContext         (:clientContext request-context)
      :envs                  env-vars}))
