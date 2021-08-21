@@ -16,21 +16,9 @@
                        :build {:clj-alias nil
                                :graalvm-hoke nil}
 
-                       :stack {:name "holy-lambda-template-stack-java-basic"
-
-                               :default-lambda "ExampleLambdaFunction"
-
-                               :envs "envs.json"
-
-                               :template "template.yml"
-
-                               :capabilities ["CAPABILITY_IAM"]}
-
 
                        :runtime
                        {
-                        ;; Choose one of the supported runtime `:babashka`, `:native`, `:java`
-                        :name                :babashka
 
                         ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
                         ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers
@@ -46,20 +34,12 @@
                         ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
                         :entrypoint          basic.example.core
 
-                        ;; Flag which indicates that holy-lambda should auto deploy the applications and layers for the corresponding :runtime
-                        ;; If set to false holy-lambda will guide you through the steps of dependants deployment.
-                        :self-manage-layers? true
-
                         ;; For `:native` runtime you can provide your own bootstrap file
                         :bootstrap-file      "bootstrap"
 
                         ;; For `:native` runtime you can provide some native resources which will be available during lambda execution
                         ;; Resources are packed as is.
                         :native-deps         "resources"
-
-                        ;; Some of the runtimes are versioned. For instance `:babashka` runtime is a versioned layer which ships it's own version of
-                        ;; clojure, holy-lambda, default-retriever
-                        :version             "0.1.1"
 
                         ;; Specify custom arguments for native image generation
                         ;; Works only on `:native` runtime.
@@ -85,9 +65,6 @@
 
  :tasks {:requires              ([holy-lambda.tasks])
 
-         bucket:create          holy-lambda.tasks/bucket:create
-         bucket:remove          holy-lambda.tasks/bucket:remove
-
          docker:run             holy-lambda.tasks/docker:run
 
          native:conf            holy-lambda.tasks/native:conf
@@ -95,15 +72,8 @@
 
          stack:sync             holy-lambda.tasks/stack:sync
          stack:compile          holy-lambda.tasks/stack:compile
-         stack:invoke           holy-lambda.tasks/stack:invoke
-         stack:api              holy-lambda.tasks/stack:api
-         stack:pack             holy-lambda.tasks/stack:pack
-         stack:deploy           holy-lambda.tasks/stack:deploy
-         stack:describe         holy-lambda.tasks/stack:describe
          stack:doctor           holy-lambda.tasks/stack:doctor
          stack:purge            holy-lambda.tasks/stack:purge
-         stack:destroy          holy-lambda.tasks/stack:destroy
-         stack:logs             holy-lambda.tasks/stack:logs
          stack:version          holy-lambda.tasks/stack:version
          }
  }

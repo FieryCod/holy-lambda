@@ -215,42 +215,43 @@ jobs:
          cp ~/azure-agent/local_cache/holy-lambda-babashka-runtime.zip . && unzip -qq holy-lambda-babashka-runtime.zip -d holy-lambda-babashka-runtime
 
          # Test
-         bb stack:invoke :validation-fn '(fn [{:keys [body]}] (= "Hello world. Babashka is sweet friend of mine! Babashka version: 0.4.6" body))'
+          output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \
+          echo "$output" && \
+          bb -e "(assert (= \"$output\" \"Hello world. Babashka is sweet friend of mine! Babashka version: 0.4.6\"))"
 
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Basic babashka invoke'
 
+  # # Native + Docker runtime tests
+  # - job: native_no_list_docker_1
+  #   displayName: '(2.1)-(Native built-time-no-list)-(S3)-(Docker) GraalVM Native Image Custom Runtime compilation test'
+  #   dependsOn:
+  #     - tasks_health_check_1
+  #   condition: succeeded()
+  #   strategy:
+  #     matrix:
+  #       DOCKER_GRAALVM_CE_LATEST_JAVA_8:
+  #         GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
 
-  # Native + Docker runtime tests
-  - job: native_no_list_docker_1
-    displayName: '(2.1)-(Native built-time-no-list)-(S3)-(Docker) GraalVM Native Image Custom Runtime compilation test'
-    dependsOn:
-      - tasks_health_check_1
-    condition: succeeded()
-    strategy:
-      matrix:
-        DOCKER_GRAALVM_CE_LATEST_JAVA_8:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
+  #       DOCKER_GRAALVM_CE_DEV_JAVA_8:
+  #         GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
 
-        DOCKER_GRAALVM_CE_DEV_JAVA_8:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
+  #       # DOCKER_GRAALVM_EE_LATEST:
+  #       #   GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
+  #   variables:
+  #     HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
+  #     WORKING_DIRECTORY: examples/bb/native/hl.aws-bucket
+  #     HL_CLJ_ALIAS: holy-lambda
+  #   steps:
+  #     - script: |
+  #         # Regenerate partial cache
+  #         bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
 
-        # DOCKER_GRAALVM_EE_LATEST:
-        #   GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
-    variables:
-      HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
-      WORKING_DIRECTORY: examples/bb/native/hl.aws-bucket
-      HL_CLJ_ALIAS: holy-lambda
-    steps:
-      - script: |
-          # Regenerate partial cache
-          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
+  #         # Regular test tasks
+  #         bb stack:compile && \
+  #         bb native:conf && \
+  #         bb native:executable && \
+  #         bb stack:invoke --validation-fn '(fn [response] (= (:body response) "true"))'
 
-          # Regular test tasks
-          bb stack:compile && \
-          bb native:conf && \
-          bb native:executable && \
-          bb stack:invoke --validation-fn '(fn [response] (= (:body response) "true"))'
-
-        workingDirectory: ${{variables.WORKING_DIRECTORY}}
-        displayName: 'Compilation + Invoke'
+  #       workingDirectory: ${{variables.WORKING_DIRECTORY}}
+  #       displayName: 'Compilation + Invoke'

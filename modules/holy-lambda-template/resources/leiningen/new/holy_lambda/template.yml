@@ -12,7 +12,7 @@ Parameters:
     Default: 40
   MemorySize:
     Type: Number
-    Default: 2000
+    Default: 128
   CodeUri:
     Type: String
     Default: ./.holy-lambda/build/latest.zip

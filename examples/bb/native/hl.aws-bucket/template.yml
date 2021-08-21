@@ -4,9 +4,6 @@ Description: >
   Example basic lambda using `holy-lambda` micro library
 
 Parameters:
-  Runtime:
-    Type: String
-    Default: <HOLY_LAMBDA_RUNTIME>
   Timeout:
     Type: Number
     Default: 40
@@ -15,10 +12,13 @@ Parameters:
     Default: 2000
   CodeUri:
     Type: String
-    Default: <HOLY_LAMBDA_CODE_URI>
+    Default: ./.holy-lambda/build/latest.zip
+  Runtime:
+    Type: String
+    Default: provided
   Entrypoint:
     Type: String
-    Default: <HOLY_LAMBDA_ENTRYPOINT>
+    Default: hl.aws-bucket.core
 
 Globals:
   Function:
@@ -35,23 +35,10 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: ExampleLambdaFunction
-      Handler: hl.aws-bucket.core.ExampleLambda
+      Handler: basic.example.core.ExampleLambda
       Events:
         HelloEvent:
-          Type: HttpApi
+          Type: Api
           Properties:
-            ApiId: !Ref ServerlessHttpApi
             Path: /
-            Method: GET
-
-  ServerlessHttpApi:
-    Type: AWS::Serverless::HttpApi
-    DeletionPolicy: Retain
-    Properties:
-      StageName: Prod
-
-Outputs:
-  ExampleLambdaEndpoint:
-    Description: Endpoint for ExampleLambdaFunction
-    Value:
-      Fn::Sub: https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com
+            Method: get
