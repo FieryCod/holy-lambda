@@ -154,7 +154,7 @@ jobs:
           GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
     variables:
       HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
-      WORKING_DIRECTORY: examples/bb/java/basic.example
+      WORKING_DIRECTORY: examples/bb/clojure/basic.example
       HL_CLJ_ALIAS: holy-lambda
     steps:
       - script: |
@@ -163,7 +163,10 @@ jobs:
 
           # Regular test tasks
           bb stack:compile && \
-          bb stack:invoke :validation-fn "(fn [{:keys [body]}] (= body \"Hello world\"))"
+          sam build && \
+          output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \
+          echo "$output" && \
+          bb -e "(assert (= \"$output\" \"Hello world\"))"
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Compilation + Invoke'
 

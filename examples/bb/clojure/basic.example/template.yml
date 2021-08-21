@@ -13,19 +13,14 @@ Parameters:
   MemorySize:
     Type: Number
     Default: 2000
-  CodeUri:
-    Type: String
-    Default: ./.holy-lambda/build/latest.zip
   Entrypoint:
     Type: String
-    Default: {{main-ns}}.core
+    Default: basic.example.core
 
 Globals:
   Function:
-    Runtime: !Ref Runtime
     Timeout: !Ref Timeout
     MemorySize: !Ref MemorySize
-    CodeUri: !Ref CodeUri
     Environment:
       Variables:
         Entrypoint: !Ref Entrypoint
@@ -35,9 +30,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: ExampleLambdaFunction
-      Handler: {{main-ns}}.core.ExampleLambda
-      # For docker based deployments
-      # PackageType: Image
+      PackageType: Image
       Events:
         HelloEvent:
           Type: HttpApi
@@ -45,11 +38,10 @@ Resources:
             ApiId: !Ref ServerlessHttpApi
             Path: /
             Method: GET
-    # For docker based deployments
-    # Metadata:
-    #   Dockerfile: Dockerfile
-    #   DockerContext: .
-    #   DockerTag: v1
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: .
+      DockerTag: v1
 
   ServerlessHttpApi:
     Type: AWS::Serverless::HttpApi
