@@ -6,7 +6,7 @@ Description: >
 Parameters:
   Runtime:
     Type: String
-    Default: <HOLY_LAMBDA_RUNTIME>
+    Default: provided
   Timeout:
     Type: Number
     Default: 40
@@ -15,10 +15,10 @@ Parameters:
     Default: 2000
   CodeUri:
     Type: String
-    Default: <HOLY_LAMBDA_CODE_URI>
+    Default: ./src
   Entrypoint:
     Type: String
-    Default: <HOLY_LAMBDA_ENTRYPOINT>
+    Default: basic.core
 
 Globals:
   Function:
