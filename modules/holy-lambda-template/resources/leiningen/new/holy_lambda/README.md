@@ -1,10 +1,12 @@
 # {{name}}
 
-## First steps
+## Sync & validate the stack
   1. Run `bb stack:sync` to download dependencies
   2. Run `bb stack:doctor` to validate if current state of application is fine
   
-## Run
+<!-- ## Development -->
+
+
 
 ### Java runtime
 ``` sh
