@@ -14,7 +14,7 @@
                                 :image "fierycod/graalvm-native-image:ce"}
 
                        :build {:clj-alias nil
-                               :graalvm-hoke nil}
+                               :graalvm-home nil}
 
 
                        :runtime
@@ -51,17 +51,7 @@
                          "--report-unsupported-elements-at-runtime"
                          "-H:+AllowIncompleteClasspath"
                          "--no-server"
-                         "--initialize-at-build-time"]}
-
-                       ;; Infrastructure properties
-                       :infra
-                       {:bucket-prefix       "holy-lambda"
-
-                        :profile             "default"
-
-                        :bucket-name         "holy-lambda-template-bucket-basic-java"
-
-                        :region              "eu-central-1"}}
+                         "--initialize-at-build-time"]}}
 
  :tasks {:requires              ([holy-lambda.tasks])
 
