@@ -1,7 +1,5 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
-        {:git/url                                   "https://github.com/FieryCod/holy-lambda"
-         :deps/root                                 "./modules/holy-lambda-babashka-tasks"
-         :sha                                       "c25a6d2052d2705ada3943c1bf538a4237ae0114"}}
+        {:local/root "../../../../modules/holy-lambda-babashka-tasks"}}
 
  ;; Local repositories should be downloaded to `.holy-lambda` directory
  ;; This way project artifacts are separated from global ~/.m2 and only project artifacts
@@ -60,7 +58,7 @@
                         ;; For now pods should be declared in `bb.edn`. See: https://github.com/babashka/babashka/issues/768#issuecomment-825016317
                         ;;
                         ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
-                        :pods                      {org.babashka/aws "0.0.6"}
+                        :pods                      {}
 
                         ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
                         ;; :entrypoint should always point to a namespace with includes (h/entrypoint) call
