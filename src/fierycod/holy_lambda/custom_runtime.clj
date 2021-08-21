@@ -12,7 +12,7 @@
   (str "http://" runtime "/2018-06-01/runtime/invocation/" iid path))
 
 (defn- ->aws-context
-  [headers event env-vars]
+  [headers event ^clojure.lang.PersistentHashMap env-vars]
   (let [request-context (:requestContext event)]
     {:getRemainingTimeInMs  (fn []
                               (- (Long/parseLong (u/getf-header headers "Lambda-Runtime-Deadline-Ms"))

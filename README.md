@@ -10,7 +10,7 @@
 
 ---
 
-The micro framework that integrates Clojure with AWS Lambda on either Java, Clojure Native, or Babashka runtime. 
+The extraordinary simple, performant, and extensible micro framework that integrates Clojure with AWS Lambda on either Java, Clojure Native, or Babashka runtime. 
 
 **Supported runtimes**
   - Babashka
