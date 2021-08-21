@@ -15,7 +15,7 @@ The micro framework that integrates Clojure with AWS Lambda on either Java, Cloj
 **Supported runtimes**
   - Babashka
   - Native Clojure runtime
-  - Java based Clojure runtime
+  - Clojure custom runtime that is faster for Clojure, than the offical Java runtime
   - (incoming) Node.js runtime for Clojurescript
 
 **Stable releases**
