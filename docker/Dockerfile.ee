@@ -19,8 +19,8 @@ ENV GITLIBS=/project/.holy-lambda/.gitlibs/
 
 # --------------- UPDATE ------------------
 # -----------------------------------------
-ARG BABASHKA_VERSION=0.4.6
-ARG CLOJURE_VERSION=1.10.3.849
+ARG BABASHKA_VERSION=0.5.1
+ARG CLOJURE_VERSION=1.10.3.933
 # -----------------------------------------
 
 ARG GRAALVM_VERSION=21.1.0
@@ -92,3 +92,5 @@ RUN alias clojure="`which clojure` -J-Duser.home=\"/project/.holy-lambda\""
 RUN alias deps="`which deps` -J-Duser.home=/project/.holy-lambda"
 
 WORKDIR /project
+
+RUN mkdir -p .holy-lambda && cd .holy-lambda && clojure -P && cp -R ../../usr/local/lib/clojure/libexec/** .

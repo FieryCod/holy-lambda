@@ -15,7 +15,7 @@ ENV GITLIBS=/project/.holy-lambda/.gitlibs/
 # --------------- UPDATE ------------------
 # -----------------------------------------
 ARG BABASHKA_VERSION=0.5.1
-ARG CLOJURE_VERSION=1.10.3.849
+ARG CLOJURE_VERSION=1.10.3.933
 # -----------------------------------------
 
 # Provide download_pods command
@@ -81,3 +81,4 @@ RUN gu install native-image
 
 WORKDIR /project
 
+RUN mkdir -p .holy-lambda && cd .holy-lambda && clojure -P && cp -R ../../usr/local/lib/clojure/libexec/** .

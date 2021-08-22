@@ -14,7 +14,7 @@
    [holy-lambda.refl :as refl])
   (:refer-clojure :exclude [spit]))
 
-(def TASKS_VERSION "0.2.3")
+(def TASKS_VERSION "0.5.0")
 
 (deps/add-deps {:deps {'clojure-term-colors/clojure-term-colors {:mvn/version "0.1.0"}}})
 
@@ -335,7 +335,7 @@
   []
   (when (and (not HL_NO_DOCKER?)
              (not (file-exists? ".holy-lambda/clojure/deps.edn")))
-    (hpr (pre "Project has not been synced yet. Run") (accent "stack:sync") (pre "before running this command!"))
+    (hpr (pre "Project has not been synced yet. Run") (accent "hl:sync") (pre "before running this command!"))
     (System/exit 1)))
 
 (def USER_GID
@@ -388,7 +388,7 @@
   [command]
   (if HL_NO_DOCKER?
     (do
-      (hpr (pre "Command") (accent "docker:run") (pre "is not available when environment variable") (accent "HL_NO_DOCKER") (pre "is set to true!"))
+      (hpr (pre "Command") (accent "hl:docker:run") (pre "is not available when environment variable") (accent "HL_NO_DOCKER") (pre "is set to true!"))
       (System/exit 1))
     (docker-run command)))
 
@@ -425,24 +425,23 @@
              (not (file-exists? ".holy-lambda/clojure/deps.edn")))
     (hpr "Project not synced yet. Syncing with docker image!")
     (let [cid (gensym "holy-lambda")]
-      (shs "docker" "create" "--user" USER_GID "-ti" "--name" (str cid)  IMAGE_CORDS "bash")
+      (shs "docker" "create" "--user" USER_GID "-ti" "--name" (str cid) IMAGE_CORDS "bash")
       (shs "docker" "cp" (str cid ":/project/.holy-lambda") ".")
       (shs "docker" "rm" "-f" (str cid))))
 
   (if HL_NO_DOCKER?
     (shell "mkdir -p .holy-lambda")
-    (do
-      (when-not (file-exists? ".holy-lambda")
-        (hpr (pre "Unable to sync docker image content with") (accent ".holy-lambda") (pre "project directory!")))
-
-      (when-not (file-exists? ".holy-lambda/clojure")
-        (hpr (pre "Project did not sync properly. Remove .holy-lambda directory and run") (accent "stack:sync")))
-
-      ;; Correct holy-lambda deps.edn
-      (spit HOLY_LAMBDA_DEPS_PATH (edn->pp-sedn tasks-deps-edn))))
+    ;; Correct holy-lambda deps.edn
+    (spit HOLY_LAMBDA_DEPS_PATH (edn->pp-sedn tasks-deps-edn)))
 
   ;; Sync
   (deps-sync--deps)
+
+  (when-not (file-exists? ".holy-lambda")
+    (hpr (pre "Unable to sync docker image content with") (accent ".holy-lambda") (pre "project directory!")))
+
+  (when-not (file-exists? ".holy-lambda/clojure")
+    (hpr (pre "Project did not sync properly. Remove .holy-lambda directory and run") (accent "hl:sync")))
 
   (hpr "Sync completed!"))
 
@@ -455,13 +454,13 @@
 (defn stack-files-check--jar
   []
   (when-not (file-exists? OUTPUT_JAR_PATH)
-    (hpr (pre "No") (accent OUTPUT_JAR_PATH) (pre "found! Run") (accent "stack:compile"))
+    (hpr (pre "No") (accent OUTPUT_JAR_PATH) (pre "found! Run") (accent "hl:compile"))
     (System/exit 1)))
 
 (defn stack-files-check
   [& [check]]
   (when-not (file-exists? ".holy-lambda")
-    (hpr (pre "No") (accent ".holy-lambda") (pre "directory! Run") (accent "stack:sync"))
+    (hpr (pre "No") (accent ".holy-lambda") (pre "directory! Run") (accent "hl:sync"))
     (System/exit 1))
 
   (case check
@@ -538,16 +537,16 @@ set -e
        (slurp BOOTSTRAP_FILE))
       -bootstrap-file))
 
-(defn hl:executable
+(defn hl:native:executable
   "     \033[0;31m>\033[0m Provides native executable of the application
 \n----------------------------------------------------------------\n"
   [& args]
-  (print-task "hl:executable")
+  (print-task "hl:native:executable")
   (exit-if-not-synced!)
   (stack-files-check--jar)
 
   (when (build-stale?)
-    (hpr (prw "Build is stale. Consider recompilation via") (accent "stack:compile")))
+    (hpr (prw "Build is stale. Consider recompilation via") (accent "hl:compile")))
 
   (when-not (file-exists? NATIVE_CONFIGURATIONS_PATH)
     (hpr (prw "No native configurations has been generated. Native image build may fail. Run") (accent "native:conf") (prw "to generate native configurations.")))
@@ -569,7 +568,10 @@ set -e
       (hpr "Bundling artifacts...")
       (shell "bash -c \"cd .holy-lambda/build && chmod +x bootstrap\"" )
       (shell "bash -c \"cd .holy-lambda/build && rm -Rf output-agent.jar native-configuration resources/native-configuration resources/native-agents-payloads output.build_artifacts.txt\"")
-      (shell "bash -c \"cd .holy-lambda/build && zip -r latest.zip . -x 'output.jar'\""))))
+      (shell "bash -c \"cd .holy-lambda/build && zip -r latest.zip . -x 'output.jar'\"")
+      (hpr "Native artifact of the project is available at" (accent ".holy-lambda/build/latest.zip"))
+      (hpr "Binary:" (accent ".holy-lambda/build/output"))
+      (hpr "Bootstrap:" (accent ".holy-lambda/build/bootstrap")))))
 
 (defn hl:compile
   "     \033[0;31m>\033[0m Compiles sources if necessary
@@ -581,7 +583,8 @@ set -e
   (when (and (not (build-stale?)) (not force))
     (hpr "Nothing to compile. Sources did not change!")
     (System/exit 0))
-  (docker-run (str "clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT))))
+  (docker-run (str "clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT)))
+  (hpr "Uberjar artifact of the project is available at" (accent ".holy-lambda/build/output.jar")))
 
 (defn mvn-local-test
   [file]
@@ -635,12 +638,12 @@ set -e
     (if (file-exists? HOLY_LAMBDA_DEPS_PATH)
       (hpr (prs "Syncing stack is not required"))
       (do
-        (hpr (pre "Stack is not synced! Run:") (accent "stack:sync"))
+        (hpr (pre "Stack is not synced! Run:") (accent "hl:sync"))
         (exit-code-err!)))
 
     (if-let [cmds-not-found (seq (filter (comp not command-exists?) REQUIRED_COMMANDS))]
       (do
-        (hpr (str (pre (str "Commands " cmds-not-found " not found. Install all then run: ")) (underline "bb doctor")))
+        (hpr (str (pre (str "Commands " cmds-not-found " not found. Install all then run: ")) (underline "bb hl:doctor")))
         (exit-code-err!))
       (do
         (hpr (prs "Required commands") (accent (str REQUIRED_COMMANDS)) (prs "installed!"))))
@@ -658,7 +661,7 @@ set -e
 (defn hl:clean
   "     \033[0;31m>\033[0m Cleanes build artifacts"
   []
-  (print-task "hl:purge")
+  (print-task "hl:clean")
   (let [artifacts [".holy-lambda"
                    ".cpcache"
                    "node_modules"]]
