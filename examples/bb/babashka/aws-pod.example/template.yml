@@ -6,7 +6,7 @@ Description: >
 Parameters:
   Runtime:
     Type: String
-    Default: <HOLY_LAMBDA_RUNTIME>
+    Default: provided
   Timeout:
     Type: Number
     Default: 40
@@ -15,10 +15,10 @@ Parameters:
     Default: 2000
   CodeUri:
     Type: String
-    Default: <HOLY_LAMBDA_CODE_URI>
+    Default: ./src
   Entrypoint:
     Type: String
-    Default: <HOLY_LAMBDA_ENTRYPOINT>
+    Default: aws-pod.example.core
 
 Globals:
   Function:
@@ -31,28 +31,12 @@ Globals:
         Entrypoint: !Ref Entrypoint
 
 Resources:
-  ExampleLambdaFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: ExampleLambdaFunction
-      Handler: aws-pod.example.core.ExampleLambda
-      Layers:
-        - !Ref SharedClojureBabashkaDepsLayer
-        - !Ref SharedBabashkaDepsLayer
-        - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:21 # Use your own layer ARN
-      Events:
-        HelloEvent:
-          Type: Api
-          Properties:
-            Path: /
-            Method: get
-
-  SharedClojureBabashkaDepsLayer:
+  HLBabashkaLocalRuntime:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: SharedClojureBabashkaDepsLayer
+      LayerName: HLBabashkaLocalRuntime
       Description: Shared dependencies for stack.
-      ContentUri: ./.holy-lambda/bb-clj-deps
+      ContentUri: ./holy-lambda-babashka-runtime
       CompatibleRuntimes:
         - provided
 
@@ -64,3 +48,18 @@ Resources:
       ContentUri: ./.holy-lambda/pods
       CompatibleRuntimes:
         - provided
+
+  ExampleLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ExampleLambdaFunction
+      Handler: aws-pod.example.core.ExampleLambda
+      Layers:
+        - !Ref SharedBabashkaDepsLayer
+        - !Ref HLBabashkaLocalRuntime
+      Events:
+        HelloEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get

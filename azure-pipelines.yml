@@ -215,12 +215,49 @@ jobs:
          cp ~/azure-agent/local_cache/holy-lambda-babashka-runtime.zip . && unzip -qq holy-lambda-babashka-runtime.zip -d holy-lambda-babashka-runtime
 
          # Test
-          output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \
-          echo "$output" && \
-          bb -e "(assert (= \"$output\" \"Hello world. Babashka is sweet friend of mine! Babashka version: 0.4.6\"))"
+         output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \
+         echo "$output" && \
+         bb -e "(assert (= \"$output\" \"Hello world. Babashka is sweet friend of mine! Babashka version: 0.5.1\"))"
 
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Basic babashka invoke'
+
+  # Babashka based tests
+  - job: babashka_basic_docker_2
+    displayName: '(5.2)-(Babashka)-(Basic)-(Docker) Babashka runtime test v2'
+    strategy:
+      matrix:
+        DOCKER_GRAALVM_CE_LATEST_JAVA_8:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
+
+        DOCKER_GRAALVM_CE_DEV_JAVA_8:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
+
+        DOCKER_GRAALVM_EE_LATEST:
+          GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
+    dependsOn:
+      - tasks_health_check_1
+      - babashka_basic_build_1
+    condition: succeeded()
+    variables:
+      HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
+      WORKING_DIRECTORY: examples/bb/babashka/aws-pod.example
+      HL_CLJ_ALIAS: holy-lambda
+    steps:
+      - script: |
+         # Regenerate partial cache
+         bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb hl:sync
+
+         # Copy freshly build babashka runtime
+         cp ~/azure-agent/local_cache/holy-lambda-babashka-runtime.zip . && unzip -qq holy-lambda-babashka-runtime.zip -d holy-lambda-babashka-runtime
+
+         # Test
+         output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \
+         echo "$output" && \
+         bb -e "(assert (= \"$output\" \"true\"))"
+
+        workingDirectory: ${{variables.WORKING_DIRECTORY}}
+        displayName: 'Basic babashka invoke v2'
 
   # # Native + Docker runtime tests
   # - job: native_no_list_docker_1
