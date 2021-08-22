@@ -1,4 +1,4 @@
-FROM ghcr.io/graalvm/graalvm-ce:ol8-java8-21.1.0
+FROM ghcr.io/graalvm/graalvm-ce:java8-21.2.0
 MAINTAINER Karol Wójcik <Karol Wójcik>
 
 RUN microdnf install unzip curl make wget git zip
@@ -14,7 +14,7 @@ ENV GITLIBS=/project/.holy-lambda/.gitlibs/
 
 # --------------- UPDATE ------------------
 # -----------------------------------------
-ARG BABASHKA_VERSION=0.4.6
+ARG BABASHKA_VERSION=0.5.1
 ARG CLOJURE_VERSION=1.10.3.849
 # -----------------------------------------
 

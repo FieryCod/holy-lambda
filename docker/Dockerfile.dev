@@ -22,13 +22,13 @@ ENV GITLIBS=/project/.holy-lambda/.gitlibs/
 
 # --------------- UPDATE ------------------
 # -----------------------------------------
-ARG BABASHKA_VERSION=0.4.6
+ARG BABASHKA_VERSION=0.5.1
 ARG CLOJURE_VERSION=1.10.3.849
 # -----------------------------------------
 
 ARG JAVA_VERSION=java8
 ARG GRAALVM_VERSION=21.3.0-dev
-ARG GRAALVM_VERSION_POSTFIX=20210706_1943
+ARG GRAALVM_VERSION_POSTFIX=20210817_2030
 
 ENV LANG=en_US.UTF-8 \
     JAVA_HOME=/opt/graalvm-ce-$JAVA_VERSION-$GRAALVM_VERSION

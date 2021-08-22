@@ -30,8 +30,8 @@ io.github.FieryCod/holy-lambda-default-retriever   {:mvn/version "0.0.7"}
 io.github.FieryCod/holy-lambda-async-retriever     {:mvn/version "0.0.7"}
 
 ;; Babashka tasks docker images
-fierycod/graalvm-native-image:ce                   ;; GraalVM CE 21.1.0
-fierycod/graalvm-native-image:dev                  ;; GraalVM CE-dev 21.3.0-dev-20210706_1943 (https://github.com/graalvm/graalvm-ce-dev-builds/releases/)
+fierycod/graalvm-native-image:ce                   ;; GraalVM CE 21.2.0
+fierycod/graalvm-native-image:dev                  ;; GraalVM CE-dev 21.3.0-dev_20210817_2030 (https://github.com/graalvm/graalvm-ce-dev-builds/releases/)
 
 ;; In bb.edn :deps
 io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url     "https://github.com/FieryCod/holy-lambda"
