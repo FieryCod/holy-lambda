@@ -655,8 +655,7 @@ set -e
   (print-task "hl:version")
   (hpr (str (prs "Current tasks version is: ") (accent TASKS_VERSION)))
   (when-not (= (s/trim (:body (curl/get REMOTE_TASKS))) TASKS_VERSION)
-    (hpr (pre "Local version of tasks does not match stable tasks version. Update tasks sha!"))
-    (System/exit 1)))
+    (hpr (prw "Local version of tasks does not match stable tasks version. Update tasks sha!"))))
 
 (defn hl:clean
   "     \033[0;31m>\033[0m Cleanes build artifacts"

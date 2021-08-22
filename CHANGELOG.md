@@ -33,6 +33,7 @@ https://github.com/FieryCod/holy-lambda/discussions/68
   - :dev - GraalVM DEV 21.3.0-dev_20210817_2030
 - [bb layer] Layer version matches the holy-lambda version. New release 0.5.0 includes the latest babashka 0.5.1. Layer should be deployed via serverless repository deploy button:
   https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime
+- Fix Clojure tools warnings, about not existing `.jar` file
 
 ## 0.2.3 (14-07-2021)
 - [bb tasks] Add support for passing arguments to commands in `--` style.
