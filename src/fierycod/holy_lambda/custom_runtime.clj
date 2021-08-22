@@ -12,22 +12,22 @@
   (str "http://" runtime "/2018-06-01/runtime/invocation/" iid path))
 
 (defn- ->aws-context
-  [headers event ^clojure.lang.PersistentHashMap env-vars]
-  (let [request-context (:requestContext event)]
+  [headers event env-vars]
+  (let [request-context (get event :requestContext nil)]
     {:getRemainingTimeInMs  (fn []
                               (- (Long/parseLong (u/getf-header headers "Lambda-Runtime-Deadline-Ms"))
                                  (System/currentTimeMillis)))
-     :fnName                (.valAt env-vars "AWS_LAMBDA_FUNCTION_NAME")
-     :fnVersion             (.valAt env-vars "AWS_LAMBDA_FUNCTION_VERSION")
-     :fnInvokedArn          (str "arn:aws:lambda:" (.valAt env-vars "AWS_REGION")
-                                 ":" (or (:accountId request-context) "0000000")
-                                 ":function:" (.valAt env-vars "AWS_LAMBDA_FUNCTION_NAME"))
-     :memoryLimitInMb       (.valAt env-vars "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
-     :awsRequestId          (:requestId request-context)
-     :logGroupName          (.valAt env-vars "AWS_LAMBDA_LOG_GROUP_NAME")
-     :logStreamName         (.valAt env-vars "AWS_LAMBDA_LOG_STREAM_NAME")
-     :identity              (:identity request-context)
-     :clientContext         (:clientContext request-context)
+     :fnName                (get env-vars "AWS_LAMBDA_FUNCTION_NAME" nil)
+     :fnVersion             (get env-vars "AWS_LAMBDA_FUNCTION_VERSION" nil)
+     :fnInvokedArn          (str "arn:aws:lambda:" (get env-vars "AWS_REGION" nil)
+                                 ":" (get request-context :accountId "0000000")
+                                 ":function:" (get env-vars "AWS_LAMBDA_FUNCTION_NAME" nil))
+     :memoryLimitInMb       (get env-vars "AWS_LAMBDA_FUNCTION_MEMORY_SIZE" nil)
+     :awsRequestId          (get request-context :requestId nil)
+     :logGroupName          (get env-vars "AWS_LAMBDA_LOG_GROUP_NAME" nil)
+     :logStreamName         (get env-vars "AWS_LAMBDA_LOG_STREAM_NAME" nil)
+     :identity              (get request-context :identity nil)
+     :clientContext         (get request-context :clientContext nil)
      :envs                  env-vars}))
 
 (defn- send-runtime-error
@@ -41,14 +41,14 @@
                           :body {:runtime-error true
                                  :err (Throwable->map err)}})]
     (when-not (u/success-code? (:status response))
-      (u/println-err! (str "[holy-lambda] Runtime error failed sent to AWS.\n" (:body response)))
+      (u/println-err! (str "[holy-lambda] Runtime error failed sent to AWS.\n" (get response :body)))
       (System/exit 1))))
 
 (defn- fetch-aws-event
   [runtime]
   (let [aws-event (u/http "GET" (url {:runtime runtime
                                       :path "next"}))]
-    (assoc aws-event :invocation-id (u/getf-header (:headers aws-event) "Lambda-Runtime-Aws-Request-Id"))))
+    (assoc aws-event :invocation-id (u/getf-header (get aws-event :headers) "Lambda-Runtime-Aws-Request-Id"))))
 
 (defn- send-response
   [runtime iid response]
@@ -62,8 +62,8 @@
 
 (defn- process-event
   [runtime iid aws-event env-vars handler]
-  (let [event (-> aws-event :body)
-        context (->aws-context (:headers aws-event) event env-vars)]
+  (let [event (get aws-event :body)
+        context (->aws-context (get aws-event :headers) event env-vars)]
     (try
       (send-response runtime iid (handler {:event event
                                            :ctx context}))
@@ -76,10 +76,10 @@
         handler-name (or maybe-handler (get env-vars "_HANDLER"))
         aws-event (fetch-aws-event runtime)
         handler (get routes handler-name)
-        iid (:invocation-id aws-event)]
+        iid (get aws-event :invocation-id)]
 
     ;; https://github.com/aws/aws-xray-sdk-java/blob/master/aws-xray-recorder-sdk-core/src/main/java/com/amazonaws/xray/contexts/LambdaSegmentContext.java#L40
-    (when-let [trace-id (u/getf-header (:headers aws-event) "Lambda-Runtime-Trace-Id")]
+    (when-let [trace-id (u/getf-header (get aws-event :headers) "Lambda-Runtime-Trace-Id")]
       (System/setProperty "com.amazonaws.xray.traceHeader" trace-id))
 
     (when-not handler
@@ -90,5 +90,5 @@
       (send-runtime-error runtime iid (->ex (str "Failed to determine new invocation-id. Invocation id is:" iid)))
       (System/exit 1))
 
-    (when (and (:invocation-id aws-event) (u/success-code? (:status aws-event)))
+    (when (and iid (u/success-code? (get aws-event :status)))
       (process-event runtime iid aws-event env-vars handler))))

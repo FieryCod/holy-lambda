@@ -2,7 +2,7 @@
   - Slow docker emulation on M1: https://github.com/oracle/graal/issues/2666
 
 * Roadmap
-** [ ] 0.3.1
+** [ ] 0.5.1
 - Tasks, Environment variables documentation
 - Native agent, native-runtime documentation
   - What are native-agents-payloads?
@@ -18,17 +18,17 @@
 
   - propose a PR to jsonista with args: "--initialize-at-build-time=com.fasterxml.jackson,jsonista"
 
-** [ ] 0.4.0
+** [ ] 0.5.2
 - Add documentation about using ~initialize-at-build-time~ with the list of packages to initialize. Link to GraalVM documentation,
 - Add Node.js runtime support. Add documentation and tutorial.
 
-** [ ] 0.5.0
+** [ ] 0.6.0
 - Add fully functional live development environment, but Clojure style :)
   https://docs.serverless-stack.com/live-lambda-development
 
   Discussion?!
 
-** [ ] 0.6.0
+** [ ] 0.7.0
 - Investigate how to support step functions in a more Clojure'y way
 - Investigate whether it's worth to make runtime fully asynchronous + thread pool. If yes make it optional via ~HL_USE_ASYNC_RUNTIME=1~.
 

@@ -1,7 +1,6 @@
 (ns fierycod.holy-lambda.response
   "Response helpers adapted from ring-core/util/response.clj"
   (:require
-   [fierycod.holy-lambda.util :as u]
    [clojure.string :as s]))
 
 (def redirect-status-codes
@@ -60,21 +59,21 @@
    :body    body})
 
 (defn json
-  "Returns a skeletal response with the given body, status of 200, and `Content-Type` set to `application/json`."
+  "Returns a skeletal response with the given body, status of 200, and `content-type` set to `application/json`."
   [body]
   {:statusCode  200
    :headers {"content-type" "application/json"}
    :body    body})
 
 (defn text
-  "Returns a skeletal response with the given msg, status of 200, and `Content-Type` set to `text/plain`."
+  "Returns a skeletal response with the given msg, status of 200, and `content-type` set to `text/plain`."
   [?msg]
   {:statusCode  200
    :headers {"content-type" "text/plain; charset=utf-8"}
    :body    ?msg})
 
 (defn html
-  "Returns a skeletal response with the given body, status of 200, and `Content-Type` set to `text/html`."
+  "Returns a skeletal response with the given body, status of 200, and `content-type` set to `text/html`."
   [?body]
   {:statusCode  200
    :headers {"content-type" "text/html; charset=utf-8"}
@@ -95,7 +94,7 @@
   (assoc-in resp [:headers ?name] (str value)))
 
 (defn content-type
-  "Returns an updated response with the a Content-Type header corresponding
+  "Returns an updated response with the a content-type header corresponding
   to the given content-type."
   [resp ?content-type]
   (header resp "content-type" ?content-type))
@@ -124,7 +123,7 @@
 
 (defn charset
   "Returns an updated response with the supplied charset added to the
-  Content-Type header."
+  content-type header."
   [resp ?charset]
   (update-header resp "content-type"
                  (fn [?content-type]
