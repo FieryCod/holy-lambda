@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.5.0 unreleased
+**Rationale**
+https://github.com/FieryCod/holy-lambda/discussions/68
+
+- [bb tasks] Remove some of the bb tasks:
+  - bucket:create
+  - bucket:remove
+  - stack:invoke 
+  - stack:api
+  - stack:pack
+  - stack:deploy 
+  - stack:describe
+  - stack:destroy
+  - stack:logs
+- [holy-lambda] Renamed tasks:
+  - bb hl:sync (renamed from bb stack:sync)
+  - bb hl:compile (renamed from bb stack:compile)
+  - bb hl:native:conf (renamed from bb native:conf)
+  - bb hl:native:executable (renamed from bb native:executable)
+  - bb hl:clean (renamed from bb stack:purge)
+  - bb hl:version (renamed from bb stack:version)
+  - bb hl:doctor (renamed from bb stack:doctor)
+- [holy-lambda] Performance improvements
+- [holy-lambda] Remove deflambda macro, merge mixins. Use plain `defn` for lambda definition.
+  Holy Lambda exposes a single macro from the core namespace `entrypoint`. native-runtime namespace has been renamed to 
+  custom-runtime.
+- [holy-lambda] Remove interceptors support. For API's user can easily integrate Holy Lambda with ring or pedestal. The adapters for the mentioned libraries will be published soon.
+
 ## 0.2.3 (14-07-2021)
 - [bb tasks] Add support for passing arguments to commands in `--` style.
 
