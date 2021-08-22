@@ -303,20 +303,6 @@
                       {}))
       (s/trim (:out result)))))
 
-(def REGION
-  (or (System/getenv "HL_REGION")
-      (System/getenv "AWS_REGION")
-      (System/getenv "AWS_DEFAULT_REGION")
-      (if HL_NO_PROFILE?
-        (do
-          (hpr (pre "Unable to get region from any of the sources: envs, credentials file."))
-          (System/exit 1))
-        (try
-          (obtain-from-aws-profile "region")
-          (catch Exception e
-            (hpr (ex-message e))
-            (System/exit 1))))))
-
 (def ENTRYPOINT (:entrypoint (:runtime OPTIONS)))
 (def OUTPUT_JAR_PATH ".holy-lambda/build/output.jar")
 (def OUTPUT_JAR_PATH_WITH_AGENT ".holy-lambda/build/output-agent.jar")
@@ -397,7 +383,7 @@
              "/bin/bash" "-c" command]))
     (shell "bash" "-c" command)))
 
-(defn docker:run
+(defn hl:docker:run
   "     \033[0;31m>\033[0m Run command in \033[0;31mfierycod/graalvm-native-image\033[0m docker context \n\n----------------------------------------------------------------\n"
   [command]
   (if HL_NO_DOCKER?
@@ -429,12 +415,12 @@
   (docker-run (str "clojure -A:" (and CLJ_ALIAS (str CLJ_ALIAS ":")) "uberjar -P"))
   (deps-sync--babashka))
 
-(defn stack:sync
+(defn hl:sync
   "     \033[0;31m>\033[0m Syncs project & dependencies from either:
        \t\t        - \033[0;31m<Clojure>\033[0m  deps.edn
        \t\t        - \033[0;31m<Babashka>\033[0m bb.edn:runtime:pods"
   []
-  (print-task "stack:sync")
+  (print-task "hl:sync")
   (when (and (not HL_NO_DOCKER?)
              (not (file-exists? ".holy-lambda/clojure/deps.edn")))
     (hpr "Project not synced yet. Syncing with docker image!")
@@ -490,10 +476,10 @@
   []
   (boolean (seq (fs/modified-since OUTPUT_JAR_PATH (fs/glob "src" "**/**.{clj,cljc,cljs}")))))
 
-(defn native:conf
+(defn hl:native:conf
   "     \033[0;31m>\033[0m Provides native configurations for the application"
   []
-  (print-task "native:conf")
+  (print-task "hl:native:conf")
   (exit-if-not-synced!)
   (stack-files-check :default)
 
@@ -552,11 +538,11 @@ set -e
        (slurp BOOTSTRAP_FILE))
       -bootstrap-file))
 
-(defn native:executable
+(defn hl:executable
   "     \033[0;31m>\033[0m Provides native executable of the application
 \n----------------------------------------------------------------\n"
   [& args]
-  (print-task "native:executable")
+  (print-task "hl:executable")
   (exit-if-not-synced!)
   (stack-files-check--jar)
 
@@ -585,11 +571,11 @@ set -e
       (shell "bash -c \"cd .holy-lambda/build && rm -Rf output-agent.jar native-configuration resources/native-configuration resources/native-agents-payloads output.build_artifacts.txt\"")
       (shell "bash -c \"cd .holy-lambda/build && zip -r latest.zip . -x 'output.jar'\""))))
 
-(defn stack:compile
+(defn hl:compile
   "     \033[0;31m>\033[0m Compiles sources if necessary
   \t\t        - \033[0;31m:force\033[0m         - force compilation even if sources did not change"
   [& args]
-  (print-task "stack:compile")
+  (print-task "hl:compile")
   (exit-if-not-synced!)
   (let [{:keys [force]} (norm-args args)])
   (when (and (not (build-stale?)) (not force))
@@ -603,12 +589,12 @@ set -e
     (hpr (pre "property") (accent ":mvn/local-repo") (pre "in file") (accent file) (pre "should be set to") (accent ".holy-lambda/.m2"))
     (hpr (prs "property") (accent ":mvn/local-repo") (prs "in file") (accent file) (prs "is correct"))))
 
-(defn stack:doctor
-  "     \033[0;31m>\033[0m Diagnoses common issues of holy-lambda stack"
+(defn hl:doctor
+  "     \033[0;31m>\033[0m Diagnoses common issues of holy-lambda project"
   []
   (let [exit-code (atom 0)
         exit-code-err! #(reset! exit-code 1)]
-    (print-task "stack:doctor")
+    (print-task "hl:doctor")
     (do
       (println "")
       (hpr "---------------------------------------")
@@ -660,26 +646,26 @@ set -e
         (hpr (prs "Required commands") (accent (str REQUIRED_COMMANDS)) (prs "installed!"))))
     (System/exit @exit-code)))
 
-(defn stack:version
+(defn hl:version
   "     \033[0;31m>\033[0m Outputs holy-lambda babashka tasks version"
   []
-  (print-task "stack:version")
+  (print-task "hl:version")
   (hpr (str (prs "Current tasks version is: ") (accent TASKS_VERSION)))
   (when-not (= (s/trim (:body (curl/get REMOTE_TASKS))) TASKS_VERSION)
     (hpr (pre "Local version of tasks does not match stable tasks version. Update tasks sha!"))
     (System/exit 1)))
 
-(defn stack:purge
-  "     \033[0;31m>\033[0m Purges build artifacts"
+(defn hl:clean
+  "     \033[0;31m>\033[0m Cleanes build artifacts"
   []
-  (print-task "stack:purge")
+  (print-task "hl:purge")
   (let [artifacts [".holy-lambda"
                    ".cpcache"
                    "node_modules"]]
 
-    (hpr  (str "Purging build artifacts:" "\n\n" (plist artifacts)))
+    (hpr  (str "Cleaning build artifacts:" "\n\n" (plist artifacts)))
 
     (doseq [art artifacts]
       (shell (str "rm -rf " art)))
 
-    (hpr  (prs "Build artifacts purged"))))
+    (hpr  (prs "Build artifacts cleaned"))))

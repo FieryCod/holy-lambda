@@ -47,7 +47,7 @@ jobs:
           printf "                    (1) Sync check                        "
           printf "\n------------------------------------------------------\n"
           #------------------------
-          bb stack:sync || exit 1
+          bb hl:sync || exit 1
           echo "------------------------------------------------------"
 
           # Bucket deletion
@@ -55,7 +55,7 @@ jobs:
           printf "                    (2) Doctor check                      "
           printf "\n------------------------------------------------------\n"
           #------------------------
-          bb stack:doctor || exit 1
+          bb hl:doctor || exit 1
           echo "------------------------------------------------------"
 
           # Stack version test
@@ -63,7 +63,7 @@ jobs:
           printf "                   (3) Stack version                      "
           printf "\n------------------------------------------------------\n"
           #------------------------
-          bb stack:version || exit 1
+          bb hl:version || exit 1
           echo "------------------------------------------------------"
 
           # Basic stack compilation
@@ -71,7 +71,7 @@ jobs:
           printf "                   (4) Stack compilation                  "
           printf "\n------------------------------------------------------\n"
           #------------------------
-          bb stack:compile || exit 1
+          bb hl:compile || exit 1
           echo "------------------------------------------------------"
 
           # Basic stack compilation
@@ -79,7 +79,7 @@ jobs:
           printf "              (5) Stack compilation + Force               "
           printf "\n------------------------------------------------------\n"
           #------------------------
-          bb stack:compile :force || exit 1
+          bb hl:compile :force || exit 1
           echo "------------------------------------------------------"
 
           # Stack local run test
@@ -87,15 +87,15 @@ jobs:
           printf "           (6) In docker:run in local context fail       "
           printf "\n------------------------------------------------------\n"
           #------------------------
-          HL_NO_DOCKER=true bb docker:run "something" && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
+          HL_NO_DOCKER=true bb hl:docker:run "something" && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
           echo "------------------------------------------------------"
 
           # Stack purge test
           printf "\n------------------------------------------------------\n"
-          printf "                 (7) Stack purge                          "
+          printf "                 (7) Build clean                          "
           printf "\n------------------------------------------------------\n"
           #------------------------
-          bb stack:purge || exit 1
+          bb hl:clean || exit 1
           echo "------------------------------------------------------"
 
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
@@ -124,11 +124,11 @@ jobs:
     steps:
       - script: |
           # Regenerate partial cache
-          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
+          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb hl:sync && \
 
           # Regular test tasks
-          bb stack:compile && \
-          bb native:executable && \
+          bb hl:compile && \
+          bb hl:native:executable && \
           output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \
           echo "$output" && \
           bb -e "(assert (= \"$output\" \"Hello world\"))"
@@ -159,10 +159,10 @@ jobs:
     steps:
       - script: |
           # Regenerate partial cache
-          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
+          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb hl:sync && \
 
           # Regular test tasks
-          bb stack:compile && \
+          bb hl:compile && \
           sam build && \
           output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \
           echo "$output" && \
@@ -209,7 +209,7 @@ jobs:
     steps:
       - script: |
          # Regenerate partial cache
-         bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync
+         bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb hl:sync
 
          # Copy freshly build babashka runtime
          cp ~/azure-agent/local_cache/holy-lambda-babashka-runtime.zip . && unzip -qq holy-lambda-babashka-runtime.zip -d holy-lambda-babashka-runtime
@@ -245,12 +245,12 @@ jobs:
   #   steps:
   #     - script: |
   #         # Regenerate partial cache
-  #         bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb stack:sync && \
+  #         bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb hl:sync && \
 
   #         # Regular test tasks
-  #         bb stack:compile && \
-  #         bb native:conf && \
-  #         bb native:executable && \
+  #         bb hl:compile && \
+  #         bb hl:native:conf && \
+  #         bb hl:native:executable && \
   #         bb stack:invoke --validation-fn '(fn [response] (= (:body response) "true"))'
 
   #       workingDirectory: ${{variables.WORKING_DIRECTORY}}

@@ -55,15 +55,15 @@
 
  :tasks {:requires              ([holy-lambda.tasks])
 
-         docker:run             holy-lambda.tasks/docker:run
+         hl:docker:run             holy-lambda.tasks/hl:docker:run
 
-         native:conf            holy-lambda.tasks/native:conf
-         native:executable      holy-lambda.tasks/native:executable
+         hl:native:conf            holy-lambda.tasks/hl:native:conf
+         hl:native:executable      holy-lambda.tasks/hl:native:executable
 
-         stack:sync             holy-lambda.tasks/stack:sync
-         stack:compile          holy-lambda.tasks/stack:compile
-         stack:doctor           holy-lambda.tasks/stack:doctor
-         stack:purge            holy-lambda.tasks/stack:purge
-         stack:version          holy-lambda.tasks/stack:version
+         hl:sync                   holy-lambda.tasks/hl:sync
+         hl:compile                holy-lambda.tasks/hl:compile
+         hl:doctor                 holy-lambda.tasks/hl:doctor
+         hl:clean                  holy-lambda.tasks/hl:clean
+         hl:version                holy-lambda.tasks/hl:version
          }
  }
