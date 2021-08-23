@@ -26,7 +26,7 @@
 If you're using AWS Vault make sure to set `HL_NO_PROFILE=1` environment variable.
 
 First steps in new project:
-- 1. Run bb stack:sync to sync the project with dockerized version of holy-lambda
+- 1. Run bb hl:sync to sync the project with dockerized version of holy-lambda
 - 2. Run bb tasks to get full list of tasks")
 
     (->files data

@@ -26,7 +26,7 @@ https://github.com/FieryCod/holy-lambda/discussions/68
 - [holy-lambda] Performance improvements
 - [holy-lambda] Remove deflambda macro, merge mixins. Use plain `defn` for lambda definition.
   Holy Lambda exposes a single macro from the core namespace `entrypoint`. native-runtime namespace has been renamed to 
-  custom-runtime.
+  custom-runtime. custom-runtime namespace is internal, not for public consumption.
 - [holy-lambda] Remove interceptors support. For API's user can easily integrate Holy Lambda with ring or pedestal. The adapters for the mentioned libraries will be published soon.
 - [docker] New compatible `fierycod/graalvm-native-image` images:
   - :ce - GraalVM CE 21.2.0
@@ -34,6 +34,7 @@ https://github.com/FieryCod/holy-lambda/discussions/68
 - [bb layer] Layer version matches the holy-lambda version. New release 0.5.0 includes the latest babashka 0.5.1. Layer should be deployed via serverless repository deploy button:
   https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime
 - Fix Clojure tools warnings, about not existing `.jar` file
+- Don't re-download HL tasks in CI environments
 
 ## 0.2.3 (14-07-2021)
 - [bb tasks] Add support for passing arguments to commands in `--` style.

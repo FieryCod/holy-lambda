@@ -1,4 +1,4 @@
-(defproject holy-lambda/lein-template   "0.2.0"
+(defproject holy-lambda/lein-template   "0.5.0"
 
   :description "Template for holy lambda micro framework"
 

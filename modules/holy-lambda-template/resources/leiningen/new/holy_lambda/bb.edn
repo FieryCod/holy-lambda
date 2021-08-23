@@ -1,7 +1,7 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:git/url                                   "https://github.com/FieryCod/holy-lambda"
          :deps/root                                 "./modules/holy-lambda-babashka-tasks"
-         :sha                                       "8b948be359f3556523a0b553050a20569af0224d"}}
+         :sha                                       "d0ae0bdedc8e4862cd013dd68fa6c598b02ecfe8"}}
 
  ;; Local repositories should be downloaded to `.holy-lambda` directory
  ;; This way project artifacts are separated from global ~/.m2 and only project artifacts

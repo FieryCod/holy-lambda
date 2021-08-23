@@ -32,7 +32,7 @@
 
                         ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
                         ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
-                        :entrypoint          basic.example.core
+                        :entrypoint          hl.aws-bucket.core
 
 
                         ;; For `:native` runtime you can provide your own bootstrap file
@@ -56,13 +56,16 @@
 
  :tasks {:requires              ([holy-lambda.tasks])
 
-         docker:run             holy-lambda.tasks/docker:run
 
-         native:conf            holy-lambda.tasks/native:conf
-         native:executable      holy-lambda.tasks/native:executable
+         hl:docker:run             holy-lambda.tasks/hl:docker:run
 
-         stack:sync             holy-lambda.tasks/stack:sync
-         stack:compile          holy-lambda.tasks/stack:compile
-         stack:doctor           holy-lambda.tasks/stack:doctor
-         stack:purge            holy-lambda.tasks/stack:purge
-         stack:version          holy-lambda.tasks/stack:version}}
+         hl:native:conf            holy-lambda.tasks/hl:native:conf
+         hl:native:executable      holy-lambda.tasks/hl:native:executable
+
+         hl:sync                   holy-lambda.tasks/hl:sync
+         hl:compile                holy-lambda.tasks/hl:compile
+         hl:doctor                 holy-lambda.tasks/hl:doctor
+         hl:clean                  holy-lambda.tasks/hl:clean
+         hl:version                holy-lambda.tasks/hl:version
+         }
+ }

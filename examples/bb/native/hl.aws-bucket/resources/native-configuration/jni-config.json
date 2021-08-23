@@ -1,0 +1,32 @@
+[
+{
+  "name":"hl.aws_bucket.core",
+  "methods":[{"name":"main","parameterTypes":["java.lang.String[]"] }]
+},
+{
+  "name":"java.lang.ClassLoader",
+  "methods":[{"name":"loadClass","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"java.net.FactoryURLClassLoader"
+},
+{
+  "name":"org.graalvm.nativebridge.jni.JNIExceptionWrapperEntryPoints",
+  "methods":[{"name":"getClassName","parameterTypes":["java.lang.Class"] }]
+},
+{
+  "name":"sun.management.VMManagementImpl",
+  "fields":[
+    {"name":"bootClassPathSupport"}, 
+    {"name":"compTimeMonitoringSupport"}, 
+    {"name":"currentThreadCpuTimeSupport"}, 
+    {"name":"gcNotificationSupport"}, 
+    {"name":"objectMonitorUsageSupport"}, 
+    {"name":"otherThreadCpuTimeSupport"}, 
+    {"name":"remoteDiagnosticCommandsSupport"}, 
+    {"name":"synchronizerUsageSupport"}, 
+    {"name":"threadAllocatedMemorySupport"}, 
+    {"name":"threadContentionMonitoringSupport"}
+  ]
+}
+]
