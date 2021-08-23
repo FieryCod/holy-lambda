@@ -396,7 +396,7 @@
   []
   (when-not (empty? (:pods (:runtime OPTIONS)))
     (hpr "Babashka pods found! Syncing" (str (accent "babashka pods") ".") "Pods should be distributed via a layer which points to" (accent ".holy-lambda/pods"))
-    (docker-run "download_pods")
+    (docker-run "cd / && download_pods")
     (when (file-exists? ".holy-lambda/.babashka")
       (shell "rm -Rf .holy-lambda/pods")
       (shell "mkdir -p .holy-lambda/pods")
