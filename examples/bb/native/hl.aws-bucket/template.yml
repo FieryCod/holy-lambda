@@ -35,7 +35,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: ExampleLambdaFunction
-      Handler: basic.example.core.ExampleLambda
+      Handler: hl.aws-bucket.core.ExampleLambda
       Events:
         HelloEvent:
           Type: Api
