@@ -384,7 +384,7 @@
     (shell "bash" "-c" command)))
 
 (defn hl:docker:run
-  "     \033[0;31m>\033[0m Run command in \033[0;31mfierycod/graalvm-native-image\033[0m docker context \n\n----------------------------------------------------------------\n"
+  "     \033[0;31m>\033[0m Run command docker context \n\n----------------------------------------------------------------\n"
   [command]
   (if HL_NO_DOCKER?
     (do
@@ -417,8 +417,8 @@
 
 (defn hl:sync
   "     \033[0;31m>\033[0m Syncs project & dependencies from either:
-       \t\t        - \033[0;31m<Clojure>\033[0m  deps.edn
-       \t\t        - \033[0;31m<Babashka>\033[0m bb.edn:runtime:pods"
+       \t\t            - \033[0;31m<Clojure>\033[0m  deps.edn
+       \t\t            - \033[0;31m<Babashka>\033[0m bb.edn:runtime:pods"
   []
   (print-task "hl:sync")
   (when (and (not HL_NO_DOCKER?)
@@ -575,7 +575,7 @@ set -e
 
 (defn hl:compile
   "     \033[0;31m>\033[0m Compiles sources if necessary
-  \t\t        - \033[0;31m:force\033[0m         - force compilation even if sources did not change"
+  \t\t            - \033[0;31m:force\033[0m - force compilation even if sources did not change"
   [& args]
   (print-task "hl:compile")
   (exit-if-not-synced!)

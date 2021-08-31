@@ -40,7 +40,7 @@ io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url     "https://github
 
 [Jump here](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
 
-## [Benchmarks](https://github.com/FieryCod/holy-lambda/tree/master/benchmarks/hello/README.md)
+## [Benchmarks](https://github.com/FieryCod/holy-lambda/tree/master/benchmarks/)
 
 ### Quick start
 #### Minimal Code
@@ -74,31 +74,28 @@ lein new holy-lambda example ;; <-- Replace `example` with the name of the proje
 #### Available helpers
 
 ``` sh
-
-**Available tasks:**
-
-``` bash
 ❯ bb tasks
 The following tasks are available:
 
-docker:run             > Run command in fierycod/graalvm-native-image docker context 
+hl:docker:run             > Run command docker context 
 
 ----------------------------------------------------------------
 
-native:conf            > Provides native configurations for the application
-native:executable      > Provides native executable of the application
+hl:native:conf            > Provides native configurations for the application
+hl:native:executable      > Provides native executable of the application
 
 ----------------------------------------------------------------
 
-stack:sync             > Syncs project & dependencies from either:
-                        - <Clojure>  deps.edn
-                        - <Babashka> bb.edn:runtime:pods
-stack:compile          > Compiles sources if necessary
-                        - :force         - force compilation even if sources did not change
-stack:doctor           > Diagnoses common issues of holy-lambda stack
-stack:purge            > Purges build artifacts
-stack:version          > Outputs holy-lambda babashka tasks version
+hl:sync                   > Syncs project & dependencies from either:
+                            - <Clojure>  deps.edn
+                            - <Babashka> bb.edn:runtime:pods
+hl:compile                > Compiles sources if necessary
+                            - :force - force compilation even if sources did not change
+hl:doctor                 > Diagnoses common issues of holy-lambda project
+hl:clean                  > Cleanes build artifacts
+hl:version                > Outputs holy-lambda babashka tasks version
 ```
+
 ## Who’s using Holy Lambda?
 - [nextdoc.io](https://nextdoc.io) - 6 native lambdas: api-gateway custom authorizer, file access control, openapi data source etc.
 - [scalably.ai](https://scalably.ai) - 14 native lambdas: xml transformations, sftp interactions, message routing, encryption etc.
