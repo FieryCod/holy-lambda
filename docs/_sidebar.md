@@ -1,1 +1,2 @@
 - [Core libraries releases](core-libs.md)
+- [Troubleshooting](troubleshooting.md)
