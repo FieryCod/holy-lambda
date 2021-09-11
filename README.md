@@ -11,7 +11,7 @@
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green.svg"></a>
 </p>
 
-The extraordinary simple, performant, and extensible custom AWS Lambda runtime.
+The extraordinary simple, performant, and extensible custom AWS Lambda runtime for Clojure.
 
 **Holy Lambda supports multiple backends**
   - Babashka
