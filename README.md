@@ -39,7 +39,6 @@ The holy-lambda documentation is available [here](https://fierycod.github.io/hol
 - @KrzysztofTucholski - Thank you for boosting my ego
 - @uswitch - Thank you for interests in AWS Lambda Functions and providing us the `lambada`
 - @hjhamala - Thank you for sharing [post](https://dev.solita.fi/2018/12/07/fast-starting-clojure-lambdas-using-graalvm.html) about native lambda functions. You have inspired me to write `holy-lambda`.
-- Rum - deflambda parse mechanism is adapted from rum.
 - Ring - code from fierycod.holy-lambda.response is adapted from ring-core. 
 - re-frame - README of the project is heavily inspired by re-frame
 
