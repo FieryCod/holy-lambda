@@ -4,6 +4,7 @@ STACK_NAME:=hl-hello-benches-v1
 
 build: artifacts/clojure8.zip artifacts/clojure11.zip artifacts/clojure-on-java-8.jar artifacts/clojure-on-java-11.jar artifacts/golang-handler artifacts/latest-rust.zip artifacts/haskell.zip artifacts/csharp.zip artifacts/java-8.jar artifacts/java-11.jar artifacts/java8.zip artifacts/java11.zip
 	@cd clojure-on-clojure && make build
+	@cd clojure-on-clojure-tiered && make build
 	@echo "All deployable artifacts has been build!"
 
 artifacts/clojure-on-java-8.jar artifacts/clojure-on-java-11.jar:
@@ -35,7 +36,7 @@ ifeq ($(BUCKET_NAME), none)
 	make BUCKET_NAME=hl-hellobench-128v1 deploy-128
 else
 	@aws s3 ls s3://$(BUCKET_NAME) || aws s3 mb s3://$(BUCKET_NAME)
-	@sam package --template-file template128.yml --output-template-file packaged-128.yml --s3-bucket $(BUCKET_NAME) --image-repository 443526418261.dkr.ecr.eu-central-1.amazonaws.com/fierycod/clojure-on-clojure
+	@sam package --template-file template128.yml --output-template-file packaged-128.yml --s3-bucket $(BUCKET_NAME) --image-repository 443526418261.dkr.ecr.eu-central-1.amazonaws.com/fierycod/clojure-on-clojure --image-repository 443526418261.dkr.ecr.eu-central-1.amazonaws.com/fierycod/clojure-on-clojure-tiered
 	@sam deploy  --template-file packaged-128.yml --stack-name $(STACK_NAME) --capabilities CAPABILITY_IAM --region eu-central-1 --s3-bucket $(BUCKET_NAME) --image-repository 443526418261.dkr.ecr.eu-central-1.amazonaws.com/fierycod/clojure-on-clojure
 endif
 

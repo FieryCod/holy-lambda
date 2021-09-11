@@ -35,5 +35,5 @@ If you're not interested in trying holy-lambda out then you can check very minim
 
 # More info
 - [Examples](https://github.com/FieryCod/holy-lambda/tree/master/examples/bb)
-- [Documentation](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURRENT/doc/readme)
+<!-- - [Documentation](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURRENT/doc/readme) -->
 - [AWS Serverless Repository](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime)

@@ -42,10 +42,13 @@
 ```
 "
   {:added "0.0.1"}
-  [lambdas]
+  [lambdas & [{:keys [init-hook] :or {init-hook identity}}]]
   `(do
      (def ~'PRVL_ROUTES (into {} (mapv (fn [l#] [(str (str (:ns (meta l#)) "." (str (:name (meta l#))))) l#]) ~lambdas)))
      (defn ~'-main [& attrs#]
+       (when (fn? ~init-hook)
+         (~init-hook))
+
        ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image`
        ;;                               will be generated via the agent.
        ;;

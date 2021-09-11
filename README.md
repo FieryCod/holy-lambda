@@ -6,8 +6,6 @@
 [![DockerHub](https://img.shields.io/docker/pulls/fierycod/graalvm-native-image.svg?logo=docker)](https://hub.docker.com/r/fierycod/graalvm-native-image)
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
 
----
-
 The extraordinary simple, performant, and extensible micro framework that integrates Clojure with AWS Lambda on either Java, Clojure Native, or Babashka runtime. 
 
 **Supported runtimes**
@@ -36,8 +34,6 @@ io.github.FieryCod/holy-lambda-babashka-tasks      {:git/url     "https://github
                                                     :deps/root   "./modules/holy-lambda-babashka-tasks"
                                                     :sha         "8b948be359f3556523a0b553050a20569af0224d"}
 ```
-
-[Jump here](https://cljdoc.org/d/io.github.FieryCod/holy-lambda/CURRENT/doc/tutorial) to learn more and start the journey with the Holy Lambda.
 
 ## [Benchmarks](https://github.com/FieryCod/holy-lambda/tree/master/benchmarks/)
 

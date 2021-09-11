@@ -45,6 +45,35 @@ Resources:
             Path: /clojure-on-clojure-11
             Method: get
 
+
+  ClojureClojureJava8RuntimeTiered:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "ClojureClojureJava8RuntimeTiered-${MemorySize}"
+      ImageUri: 443526418261.dkr.ecr.eu-central-1.amazonaws.com/fierycod/clojure-on-clojure-tiered:8
+      PackageType: Image
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojure-on-clojure-8-tiered
+            Method: get
+
+  ClojureClojureJava11RuntimeTiered:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tracing: Active
+      FunctionName: !Sub "ClojureClojureJava11RuntimeTiered-${MemorySize}"
+      ImageUri: 443526418261.dkr.ecr.eu-central-1.amazonaws.com/fierycod/clojure-on-clojure-tiered:11
+      PackageType: Image
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            Path: /clojure-on-clojure-11-tiered
+            Method: get
+
   ClojureJava8Runtime:
     Type: AWS::Serverless::Function
     Properties:

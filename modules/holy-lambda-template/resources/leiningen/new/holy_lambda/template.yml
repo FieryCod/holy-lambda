@@ -6,7 +6,7 @@ Description: >
 Parameters:
   Runtime:
     Type: String
-    Default: <HOLY_LAMBDA_RUNTIME>
+    Default: provided
   Timeout:
     Type: Number
     Default: 40
@@ -36,8 +36,9 @@ Resources:
     Properties:
       FunctionName: ExampleLambdaFunction
       Handler: {{main-ns}}.core.ExampleLambda
-      # For docker based deployments
+      # For docker based deployments use:
       # PackageType: Image
+      # and remove Runtime parameter
       Events:
         HelloEvent:
           Type: HttpApi

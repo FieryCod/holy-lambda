@@ -8,7 +8,7 @@ USE_DEV:=false
 ifeq ($(USE_DEV), true)
 	IMAGE_CORD=$(IMAGE_CORD_PART):dev
 else ifeq ($(USE_EE), false)
-	IMAGE_CORD=$(IMAGE_CORD_PART):ce
+	IMAGE_CORD=$(IMAGE_CORD_PART):ce-11
 else ifeq ($(USE_M1), false)
 	IMAGE_CORD=$(IMAGE_CORD_PART):m1
 else
