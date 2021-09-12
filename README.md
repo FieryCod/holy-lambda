@@ -14,12 +14,15 @@
 The extraordinary simple, performant, and extensible custom AWS Lambda runtime for Clojure.
 
 **Holy Lambda supports multiple backends**
-  - Babashka
-  - Native Clojure runtime
-  - Clojure custom runtime (much faster than official AWS Java runtime)
-  - (incoming) Node.js runtime for Clojurescript
+  - [Babashka](https://github.com/babashka/babashka),
+  - Native Clojure (GraalVM compiled), 
+  - Clojure (much faster than official AWS Java runtime),
 
-## Who’s using Holy Lambda?
+**Incoming**
+  - [nbb](https://github.com/borkdude/nbb)
+  - ClojureScript
+
+## Companies & Inviduals using Holy Lambda?
 - [nextdoc.io](https://nextdoc.io) - 6 native lambdas: api-gateway custom authorizer, file access control, openapi data source etc.
 - [scalably.ai](https://scalably.ai) - 14 native lambdas: xml transformations, sftp interactions, message routing, encryption etc.
 

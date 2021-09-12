@@ -5,7 +5,6 @@
     <title>Holy Lambda Microframework Documentation</title>
     <link rel="preload" as="image" href="media/logo.png">
     <meta name="Author" content="Karol Wójcik" />
-
     <link rel="apple-touch-icon" sizes="180x180" href="media/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="media/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="media/favicon-16x16.png">
@@ -58,14 +57,37 @@
         box-shadow: none !important;
         width: auto !important;
       }
+
+      @media (max-width: 667px) {
+        .sidebar > h1  {
+          margin-top: 20px;
+        }
+        .markdown-section {
+          padding: 30px 8px 40px;
+          max-width: 100%;
+        }
+        .cover-main img {
+          margin-top: 20px;
+          width: 240px;
+        }
+      }
     </style>
   </head>
 
   <body>
     <div id="app">Loading ...</div>
-    <script src="//cdn.jsdelivr.net/npm/docsify-plugin-carbon@1/index.js"></script>
-    <script>
 
+    <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/docsify-edit-on-github"></script>
+    <script src="//cdn.jsdelivr.net/npm/docsify-copy-code"></script>
+    <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-clojure.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-markdown.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
+    <script>
       // Docsify configuration
       window.$docsify = {
         search: 'auto',
@@ -77,30 +99,18 @@
         mergeNavbar: true,
         maxLevel: 4,
         subMaxLevel: 2,
-        name: 'Holy Lambda 0.5.0',
-        plugins: [],
+        name: '<img style="width:40px;height:40px;vertical-align:middle;margin-right:10px;" src="media/logo.png"></img>Holy Lambda',
+        plugins: [
+          EditOnGithubPlugin.create(
+            'https://github.com/fierycod/holy-lambda/blob/master/docs/',
+            null,
+            function(file) {
+              return 'Edit on Github'
+            }
+          )
+
+        ],
       };
     </script>
-    <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-clojure.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-markdown.min.js"></script>
-    <script>
-      (function() {
-        function loadJS(src, attrs) {
-          document.write(
-            '<script src="' + src + '" ' + (attrs || '') + '><\/script>'
-          );
-        }
-
-        // Public site only
-        if (/docsify/.test(location.host)) {
-          loadJS('//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/ga.min.js');
-          loadJS('//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/matomo.min.js');
-        }
-      })();
-    </script>
-    <script src="//cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
   </body>
 </html>
