@@ -26,13 +26,12 @@ HL supports at the time of writing three Clojure backends.
    
    A great fit for beginners. It's fast enough, although it's not as fast as the native runtime. The tradeoff of using babashka is that not all of the Clojure language features are supported.
 
-## Runtimes/Backends summary
+## Backends quick comparison
 <div align="center">
 
-| Runtime   | Cold start | Performance | Artifacts size         | Memory Consumption | Interactive | Compile time | Beginners friendly? |
-|-----------|------------|-------------|------------------------|--------------------|-------------|--------------|---------------------|
-| :native   | low        | high        | high     >= 16mb       | low                | No          | very long    | no                  |
-| :babashka | low        | moderate    | low      >= 50kb       | low                | Yes         | no compile   | yes                 |
-| :java     | high       | high        | moderate >= 12mb       | high               | No          | long         | yes                 |
-| :clojure  | moderate   | high        | depends on docker img  | low                | No          | long         | yes                 |
+| Runtime   | Cold start | Performance | Artifacts size         | Memory Consumption | Interactive | Compile time | Beginners friendly? | Package Type  |
+|-----------|------------|-------------|------------------------|--------------------|-------------|--------------|---------------------|---------------|
+| :native   | low        | high        | high     >= 16mb       | low                | No          | very long    | no                  | Zip/Docker    |
+| :babashka | low        | moderate    | low      >= 50kb       | low                | Yes         | no compile   | yes                 | Zip/Docker    |
+| :clojure  | moderate   | high        | depends on docker img  | low                | No          | long         | yes                 | Docker        |
 </div>

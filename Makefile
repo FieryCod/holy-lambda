@@ -2,15 +2,12 @@ USE_EE:=false
 IMAGE_CORD_PART:=fierycod/graalvm-native-image
 IMAGE_BUILD:=ce
 IMAGE_BUILD_POSTFIX:=""
-VERSION_BUMP=patch
 USE_DEV:=false
 
 ifeq ($(USE_DEV), true)
 	IMAGE_CORD=$(IMAGE_CORD_PART):dev
 else ifeq ($(USE_EE), false)
-	IMAGE_CORD=$(IMAGE_CORD_PART):ce-11
-else ifeq ($(USE_M1), false)
-	IMAGE_CORD=$(IMAGE_CORD_PART):m1
+	IMAGE_CORD=$(IMAGE_CORD_PART):ce
 else
 	IMAGE_CORD=$(IMAGE_CORD_PART):ee
 endif
@@ -21,13 +18,6 @@ else ifeq ($(USE_EE), false)
 	IMAGE_BUILD=ce
 else
 	IMAGE_BUILD=ee
-endif
-
-
-ifeq ($(USE_M1), true)
-	IMAGE_BUILD_POSTFIX=".m1"
-else
-	IMAGE_BUILD_POSTFIX=""
 endif
 
 build-docker:

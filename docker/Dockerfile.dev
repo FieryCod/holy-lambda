@@ -1,4 +1,4 @@
-# https://github.com/graalvm/graalvm-ce-dev-builds/releases/download/21.3.0-dev-20210630_2126/graalvm-ce-java8-linux-amd64-dev.tar.gz
+# https://github.com/graalvm/graalvm-ce-dev-builds/releases/download/21.3.0-dev-20210910_2147/graalvm-ce-java8-linux-amd64-dev.tar.gz
 # New versions
 # https://github.com/graalvm/graalvm-ce-dev-builds/releases/
 FROM oraclelinux:8-slim
@@ -22,13 +22,13 @@ ENV GITLIBS=/project/.holy-lambda/.gitlibs/
 
 # --------------- UPDATE ------------------
 # -----------------------------------------
-ARG BABASHKA_VERSION=0.5.1
+ARG BABASHKA_VERSION=0.6.0
 ARG CLOJURE_VERSION=1.10.3.933
 # -----------------------------------------
 
 ARG JAVA_VERSION=java8
 ARG GRAALVM_VERSION=21.3.0-dev
-ARG GRAALVM_VERSION_POSTFIX=20210817_2030
+ARG GRAALVM_VERSION_POSTFIX=20210910_2147
 
 ENV LANG=en_US.UTF-8 \
     JAVA_HOME=/opt/graalvm-ce-$JAVA_VERSION-$GRAALVM_VERSION

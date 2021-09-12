@@ -1,3 +1,3 @@
-- [Core libraries releases](core-libs.md)
+- [Stable releases](stable-releases.md)
 - [FAQ](faq.md)
 - [Troubleshooting guide](troubleshooting.md)

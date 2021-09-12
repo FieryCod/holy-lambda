@@ -16,7 +16,7 @@
   
    **Solution**:
    ```bash
-   bb hl:clean && bb 
+   bb hl:clean && bb hl:doctor
    ```
       
   Fix all errors reported by the `hl:doctor`. If you still experience any issue please report it at [Github](https://github.com/FieryCod/holy-lambda/issues).

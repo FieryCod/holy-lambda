@@ -1,5 +1,4 @@
 (ns holy-lambda.tasks
-  "holy-lambda cmd application"
   (:require
    [clojure.string :as s]
    [clojure.pprint :as pprint]
@@ -372,10 +371,10 @@
              "-e" "AWS_SHARED_CREDENTIALS_FILE=/.aws/credentials"
              "-v" (str (.getAbsolutePath (io/file "")) ":/project")
              "-v" (str AWS_DIR ":" "/.aws:ro")]
-             (when-let [aws-access-key @AWS_ACCESS_KEY_ID]
-               ["-e" (str "AWS_ACCESS_KEY_ID=" aws-access-key)])
-             (when-let [aws-secret-access-key @AWS_SECRET_ACCESS_KEY]
-               ["-e" (str "AWS_SECRET_ACCESS_KEY=" aws-secret-access-key)])
+            (when-let [aws-access-key @AWS_ACCESS_KEY_ID]
+              ["-e" (str "AWS_ACCESS_KEY_ID=" aws-access-key)])
+            (when-let [aws-secret-access-key @AWS_SECRET_ACCESS_KEY]
+              ["-e" (str "AWS_SECRET_ACCESS_KEY=" aws-secret-access-key)])
             (when DOCKER_NETWORK [(str "--network=" DOCKER_NETWORK)])
             (vec (flatten (mapv (fn [path] ["-v" path]) DOCKER_VOLUMES)))
             ["--user" USER_GID
@@ -524,7 +523,7 @@
              {:pretty true})))))
 
 (def -bootstrap-file
-"#!/bin/sh
+ "#!/bin/sh
 
 export DISABLE_SIGNAL_HANDLERS=\"true\"
 set -e
@@ -566,7 +565,7 @@ set -e
         (hpr "Copying" (accent ":runtime:native-deps"))
         (shell (str "cp -R " NATIVE_DEPS_PATH " .holy-lambda/build/")))
       (hpr "Bundling artifacts...")
-      (shell "bash -c \"cd .holy-lambda/build && chmod +x bootstrap\"" )
+      (shell "bash -c \"cd .holy-lambda/build && chmod +x bootstrap\"")
       (shell "bash -c \"cd .holy-lambda/build && rm -Rf output-agent.jar native-configuration resources/native-configuration resources/native-agents-payloads output.build_artifacts.txt\"")
       (shell "bash -c \"cd .holy-lambda/build && zip -r latest.zip . -x 'output.jar'\"")
       (hpr "Native artifact of the project is available at" (accent ".holy-lambda/build/latest.zip"))
