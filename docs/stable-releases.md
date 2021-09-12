@@ -3,16 +3,17 @@
 |--------------------------------------------------|---------|--------------------------------------------------------|
 | io.github.FieryCod/holy-lambda                   | 0.5.0   | Core library / Custom runtime implementation           |
 | io.github.FieryCod/holy-lambda-default-retriever | 0.5.0   | Built in library supporting regular responses*         |
-| io.github.FieryCod/holy-lambda-async-retriever   | 0.5.0   | Additional support for `Channel<Map\|String\|ByteArray>` |
+| io.github.FieryCod/holy-lambda-async-retriever   | 0.5.0   | Additional support for `Channel<Map\|String\|ByteArray\|nil>` |
 
 > :information_source: Regular valid responses*
 > - `Map`
+> - `nil`
 > - `String`
 > - `ByteArray`
-> - `Future<Map|String|ByteArray>`
-> - `Promise<Map|String|ByteArray>`
+> - `Future<Map|String|ByteArray|nil>`
+> - `Promise<Map|String|ByteArray|nil>`
 
-### Installing
+### Using library with `deps.edn`
 Add to `deps.edn` an additional tuple at `:deps` property
  ```clojure deps.edn
  {:deps 
@@ -31,7 +32,6 @@ Add to `deps.edn` an additional tuple at `:deps` property
   | Stable release `:sha`                      |
   |--------------------------------------------|
   | `99fb7c975498945551e1ed8651f9017532be0a58` |
-  
   ```clojure bb.edn
   {:deps 
    {io.github.FieryCod/holy-lambda-babashka-tasks
@@ -51,3 +51,8 @@ Add to `deps.edn` an additional tuple at `:deps` property
    {:docker 
     {:image "<IMAGE_PLUS_TAG>"}}}
   ```
+  
+## AWS Lambda Layers
+  | Name                         | Backend  | Source                                                                                         | Serverless Repo                                                                                                   | Version |
+  |------------------------------|----------|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|---------|
+  | holy-lambda-babashka-runtime | Babashka | [link](https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-layer) | [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime) | 0.5.0   |

@@ -1,3 +1,4 @@
 - [Stable releases](stable-releases.md)
 - [FAQ](faq.md)
-- [Troubleshooting guide](troubleshooting.md)
+- [Troubleshooting](troubleshooting.md)
+- [Resources](resources.md)

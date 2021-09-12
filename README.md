@@ -22,9 +22,17 @@ The extraordinary simple, performant, and extensible custom AWS Lambda runtime f
   - [nbb](https://github.com/borkdude/nbb)
   - ClojureScript
 
+## Goals
+  - **Low cold starts** - Clojure goes fast on AWS Lambda!
+  - **Multiple backends support** - Unified runtime for Clojure/script!
+  - **Minimal API** - Just stuff that gets the job done!
+
+## Non-Goals
+  - **Tight integration with deployment tools** - I don't want to do this!
+
 ## Companies & Inviduals using Holy Lambda?
-- [nextdoc.io](https://nextdoc.io) - 6 native lambdas: api-gateway custom authorizer, file access control, openapi data source etc.
-- [scalably.ai](https://scalably.ai) - 14 native lambdas: xml transformations, sftp interactions, message routing, encryption etc.
+  - [nextdoc.io](https://nextdoc.io) - 6 native lambdas: api-gateway custom authorizer, file access control, openapi data source etc.
+  - [scalably.ai](https://scalably.ai) - 14 native lambdas: xml transformations, sftp interactions, message routing, encryption etc.
 
 ## Documentation
 The holy-lambda documentation is available [here](https://fierycod.github.io/holy-lambda).
@@ -36,14 +44,6 @@ The holy-lambda documentation is available [here](https://fierycod.github.io/hol
 ## Getting Help 
 
 [![Get help on Slack](http://img.shields.io/badge/slack-clojurians%20%23holy--lambda-97C93C?labelColor=283C67&logo=slack&style=for-the-badge)](https://clojurians.slack.com/channels/holy-lambda)
-
-## Thanks to
-- Daria - Thank you that you were always beside me, fighting for me when I had no faith and energy.
-- @KrzysztofTucholski - Thank you for boosting my ego
-- @uswitch - Thank you for interests in AWS Lambda Functions and providing us the `lambada`
-- @hjhamala - Thank you for sharing [post](https://dev.solita.fi/2018/12/07/fast-starting-clojure-lambdas-using-graalvm.html) about native lambda functions. You have inspired me to write `holy-lambda`.
-- Ring - code from fierycod.holy-lambda.response is adapted from ring-core. 
-- re-frame - README of the project is heavily inspired by re-frame
 
 ## License
 Copyright © 2021 Karol Wojcik aka Fierycod

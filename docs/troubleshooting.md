@@ -1,4 +1,4 @@
-# Troubleshooting guide
+# Troubleshooting 
 
 ## Project did not sync properly
   Running `bb stack:sync` results in:
@@ -77,91 +77,105 @@
   
   ```
 ## Unable to use `:local/root` (deps.edn)
-**Solution**:
+  **Solution**:
 
-Holy lambda uses docker context for reproducible builds and GraalVM native-image compilation, therefore local libraries referenced in `deps.edn` will not work out of the box. However it's fairly simple to support local libraries via `:docker:volumes` + custom clojure alias.
-
-
-**Example**
-
-Let's assume the following project structure
-
-```bash
-.
-├── deps.edn
-├── modules
-│   ├── holy-lambda-babashka-tasks
-│       ├── bb.edn
-│       ├── deps.edn
-│       ├── envs.json
-│       ├── src
-│       │   ├── example
-│       │   │   └── core.cljc
-│       │   └── holy_lambda
-│       │       └── tasks.clj
-│       └── template.yml
-├── project.clj
-├── src
-│   └── fierycod
-│       └── holy_lambda
-│           ├── agent.clj
-│           ├── core.cljc
-│           ├── custom_runtime.clj
-│           ├── response.clj
-│           └── util.cljc
-```
-
-where:
-
-- `modules/holy-lambda-babashka-tasks` - is a project which that reference local library `holy-lambda` from the root path. 
-
-  > :information_source: This module is both testing environment for `bb tasks` and the holy-lambda tasks source which is distributed via `:git/url` + `:sha` to end user projects.
-
-- `holy-lambda` - Project that provides the custom runtime. 
-
-  > :information_source: We want to test new features of the runtime in special tasks environment, before we ship the new release of the runtime to the end users.
+  Holy lambda uses docker context for reproducible builds and GraalVM native-image compilation, therefore local libraries referenced in `deps.edn` will not work out of the box. However it's fairly simple to support local libraries via `:docker:volumes` + custom clojure alias.
 
 
-In order to let `holy-lambda-babashka-tasks` use local `holy-lambda` library we have to change it's `bb.edn`:
+  **Example**
 
-1. Navigate to `:holy-lambda/options:docker:volumes`
-2. Reference local library relative path and mount the local library in docker 
+  Let's assume the following project structure
 
-  ```clojure bb.edn
-  {:holy-lambda/options 
-    {:docker {:volumes [{:docker     "/holy-lambda"
-                       :host       "../../"}]}
-    ...
-    }
-    ...
-  }
-  ```
-3. We can check if volume has been succesfully mounted by running:
-  ```clojure
-  bb hl:docker:run:run "ls -la /holy-lambda"
-  ```
-  
-4. As a last step we have to use create and a reference a special alias in `bb.edn` that uses declared above `docker` mount paths.
-
-  ```clojure modules/holy-lambda-babashka-tasks/deps.edn
-  ;; As you can see the root path of the local library corresponds to the :docker mount directory.
-  :aliases {:holy-lambda
-            {:replace-deps {org.clojure/clojure {:mvn/version "1.10.3"}
-                           io.github.FieryCod/holy-lambda {:local/root "/holy-lambda"}}}}
+  ```bash
+  .
+  ├── deps.edn
+  ├── modules
+  │   ├── holy-lambda-babashka-tasks
+  │       ├── bb.edn
+  │       ├── deps.edn
+  │       ├── envs.json
+  │       ├── src
+  │       │   ├── example
+  │       │   │   └── core.cljc
+  │       │   └── holy_lambda
+  │       │       └── tasks.clj
+  │       └── template.yml
+  ├── project.clj
+  ├── src
+  │   └── fierycod
+  │       └── holy_lambda
+  │           ├── agent.clj
+  │           ├── core.cljc
+  │           ├── custom_runtime.clj
+  │           ├── response.clj
+  │           └── util.cljc
   ```
 
-  ```clojure modules/holy-lambda-babashka-tasks/bb.edn
-  :holy-lambda/options {...
+  where:
 
-                       :build {:clj-alias :holy-lambda} ;; <-- reference alias from deps.edn
-                       ...
-                       }
+  - `modules/holy-lambda-babashka-tasks` - is a project which that reference local library `holy-lambda` from the root path. 
+
+    > :information_source: This module is both testing environment for `bb tasks` and the holy-lambda tasks source which is distributed via `:git/url` + `:sha` to end user projects.
+
+  - `holy-lambda` - Project that provides the custom runtime. 
+
+    > :information_source: We want to test new features of the runtime in special tasks environment, before we ship the new release of the runtime to the end users.
+
+    In order to let `holy-lambda-babashka-tasks` use local `holy-lambda` library we have to change it's `bb.edn`:
+
+    1. Navigate to `:holy-lambda/options:docker:volumes`
+    2. Reference local library relative path and mount the local library in docker 
+
+      ```clojure bb.edn
+      {:holy-lambda/options 
+        {:docker {:volumes [{:docker     "/holy-lambda"
+                            :host       "../../"}]}
+        ...
+        }
+        ...
+      }
+      ```
+  3. We can check if volume has been succesfully mounted by running:
+    ```clojure
+    bb hl:docker:run:run "ls -la /holy-lambda"
+    ```
+
+  4. As a last step we have to use create and a reference a special alias in `bb.edn` that uses declared above `docker` mount paths.
+
+    ```clojure modules/holy-lambda-babashka-tasks/deps.edn
+    ;; As you can see the root path of the local library corresponds to the :docker mount directory.
+    :aliases {:holy-lambda
+              {:replace-deps {org.clojure/clojure {:mvn/version "1.10.3"}
+                            io.github.FieryCod/holy-lambda {:local/root "/holy-lambda"}}}}
+    ```
+
+    ```clojure modules/holy-lambda-babashka-tasks/bb.edn
+    :holy-lambda/options {...
+
+                        :build {:clj-alias :holy-lambda} ;; <-- reference alias from deps.edn
+                        ...
+                        }
+    ```
+
+  Now your local library should work well with `holy-lambda`! :)
+
+## Fatal oracle$VMError$HostedError
+   
+  Error message after using `bb hl:native:executable`
+
+  ```
+  error:com.oracle.svm.core.util.VMError$HostedError: SomeClassDefinition has no code offset set
   ```
 
-Now your local library should work well with `holy-lambda`! :)
+  From my experience this issue occurs when GraalVM is unable to find the definition of the class or when the class on runtime mismatches the compiled one class.
+
+  **Common scenarios in which the error occurs are**
+  - using eval with quote instead of using `defmacro`
+  - using local library which is packed by `lein uberjar` (bb hl:compile instead or depstar)
+  - full aot compilation of the whole library (only main class should be aot compiled)
+  - code which tries to `produce` the class on both compilation and run phase
 
 ## HL CLI hangs on M1 
-  
   **Solution**:
   None!
 
@@ -170,20 +184,3 @@ Now your local library should work well with `holy-lambda`! :)
   **Related issues & workarounds**
   - https://github.com/oracle/graal/issues/2666
   - https://github.com/FieryCod/holy-lambda/issues/61
-  
-## Fatal oracle$VMError$HostedError
-   
-Error message after using `bb hl:native:executable`
-
-```
-error:com.oracle.svm.core.util.VMError$HostedError: SomeClassDefinition has no code offset set
-```
-
-From my experience this issue occurs when GraalVM is unable to find the definition of the class or when the class on runtime mismatches the compiled one class.
-
-**Common scenarios in which the error occurs are**
-- using eval with quote instead of using `defmacro`
-- using local library which is packed by `lein uberjar` (bb hl:compile instead or depstar)
-- full aot compilation of the whole library (only main class should be aot compiled)
-- code which tries to `produce` the class on both compilation and run phase
-

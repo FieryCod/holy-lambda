@@ -42,13 +42,11 @@
 ## Is HL runtime asynchronous?
    Nope! Native, Babashka and Java runtimes are synchronous, but handlers can be asynchronous for convenience and return either:
    
-     - `Channel<Map>`
-     - `Future<Map>`
-     - `Promise<Map>`
+     - `Channel<Map|String|ByteArray|nil>`
+     - `Future<Map|String|ByteArray|nil>`
+     - `Promise<Map|String|ByteArray|nil>`
    
-   Still though the runtime will wait for the result of asynchronous handler, before taking a new task to process.
-   
-   Scaling lambdas should be achieved via concurrency option. More info [here](https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html)
+   Still though the runtime will wait for the result of asynchronous handler, before taking a new task to process. Scaling lambdas should be achieved via concurrency option. More info [here](https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html)
    
    
    
