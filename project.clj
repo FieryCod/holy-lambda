@@ -12,7 +12,7 @@
 
   :dependencies [[org.clojure/clojure                              "1.10.3" :scope "provided"]
                  [metosin/jsonista                                 "0.3.3"]
-                 [io.github.FieryCod/holy-lambda-default-retriever "0.0.7"]]
+                 [io.github.FieryCod/holy-lambda-default-retriever "0.5.0-SNAPSHOT"]]
 
   :eftest {:thread-count 4}
 

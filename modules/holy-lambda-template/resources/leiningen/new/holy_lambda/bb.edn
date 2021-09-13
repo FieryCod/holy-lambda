@@ -1,7 +1,7 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:git/url                                   "https://github.com/FieryCod/holy-lambda"
          :deps/root                                 "./modules/holy-lambda-babashka-tasks"
-         :sha                                       "d0ae0bdedc8e4862cd013dd68fa6c598b02ecfe8"}}
+         :sha                                       "99fb7c975498945551e1ed8651f9017532be0a58"}}
 
  ;; Local repositories should be downloaded to `.holy-lambda` directory
  ;; This way project artifacts are separated from global ~/.m2 and only project artifacts
@@ -51,8 +51,7 @@
                        :runtime
                        {
 
-                        ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
-                        ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers
+                        ;; Babashka pods should be shipped using AWS Lambda Layer
                         ;; Check this template https://github.com/aws-samples/aws-lambda-layers-aws-sam-examples/blob/master/aws-sdk-layer/template.yaml
                         ;; and official docs https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-layers.html
                         ;; CodeUri should be `.holy-lambda/pods`
@@ -80,8 +79,8 @@
                                                     "--report-unsupported-elements-at-runtime"
                                                     "-H:+AllowIncompleteClasspath"
                                                     "--no-server"
-                                                    "--initialize-at-build-time"]}
-                       }
+                                                    "--initialize-at-build-time"]}}
+                       
 
 
  :tasks {:requires                 ([holy-lambda.tasks])
@@ -95,7 +94,7 @@
          hl:compile                holy-lambda.tasks/hl:compile
          hl:doctor                 holy-lambda.tasks/hl:doctor
          hl:clean                  holy-lambda.tasks/hl:clean
-         hl:version                holy-lambda.tasks/hl:version
+         hl:version                holy-lambda.tasks/hl:version}}
 
-         }
- }
+         
+ 

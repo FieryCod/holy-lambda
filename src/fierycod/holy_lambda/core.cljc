@@ -1,22 +1,15 @@
 (ns fierycod.holy-lambda.core
-  "Integrates the Clojure functions with supported runtimes:
-   - Clojure Lambda Runtime,
-   - Native Provided Runtime,
-   - Babashka runtime.
-
-   See the docs for more info."
   (:require
    [fierycod.holy-lambda.custom-runtime]
    [fierycod.holy-lambda.agent]))
 
 (defmacro entrypoint
-"Generates the entrypoint function which has the two roles:
+ "Generates the entrypoint function which has the two roles:
 
 1. The `-main` might be then launched by AWS in the lambda runtime.
-    Lambda runtime tries to proxy the payloads from AWS to corresponding handlers.
+   Lambda runtime tries to proxy the payloads from AWS to corresponding handlers.
 
-2. The `-main` might be used to generate the configuration necessary to compile
-    the project to native.
+2. The `-main` might be used to generate the configuration necessary to compile the project to native.
 
     **For more info take a look into the corresponding links:**
     1. https://github.com/oracle/graal/issues/1367
@@ -42,7 +35,7 @@
 ```
 "
   {:added "0.0.1"}
-  [lambdas & [{:keys [init-hook] :or {init-hook identity}}]]
+  [lambdas & [{:keys [init-hook] :or {init-hook (fn [] nil)}}]]
   `(do
      (def ~'PRVL_ROUTES (into {} (mapv (fn [l#] [(str (str (:ns (meta l#)) "." (str (:name (meta l#))))) l#]) ~lambdas)))
      (defn ~'-main [& attrs#]
