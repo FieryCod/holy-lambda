@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Example basic lambda using `holy-lambda` micro library
+
+Parameters:
+  Timeout:
+    Type: Number
+    Default: 40
+  MemorySize:
+    Type: Number
+    Default: 512
+  Entrypoint:
+    Type: String
+    Default: com.company.example-lambda.core
+
+Globals:
+  Function:
+    Timeout: !Ref Timeout
+    MemorySize: !Ref MemorySize
+    Environment:
+      Variables:
+        Entrypoint: !Ref Entrypoint
+
+Resources:
+  ExampleLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ExampleLambdaFunction
+      PackageType: Image
+      Events:
+        HelloEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ServerlessHttpApi
+            Path: /
+            Method: GET
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: .
+      DockerTag: v1
+
+  ServerlessHttpApi:
+    Type: AWS::Serverless::HttpApi
+    DeletionPolicy: Retain
+    Properties:
+      StageName: Prod
+
+Outputs:
+  ExampleLambdaEndpoint:
+    Description: Endpoint for ExampleLambdaFunction
+    Value:
+      Fn::Sub: https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com
