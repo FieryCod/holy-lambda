@@ -2,6 +2,7 @@
 - [Getting Started](getting-started.md)
 - [API](api.md)
 - [CLI](cli.md)
+- [Deployment tools](deployment-tools.md)
 - [Stable releases](stable-releases.md)
 - [FAQ](faq.md)
 - [Troubleshooting](troubleshooting.md)

@@ -54,6 +54,6 @@ Add to `deps.edn` an additional tuple at `:deps` property
   ```
   
 ## AWS Lambda Layers
-  | Name                         | Backend  | Source                                                                                         | Serverless Repo                                                                                                   | Version |
-  |------------------------------|----------|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|---------|
-  | holy-lambda-babashka-runtime | Babashka | [link](https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-layer) | [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime) | 0.5.0   |
+  | Name                         | Backend         | Source                                                                                         | Serverless Repo                                                                                                   | Version |
+  |------------------------------|-----------------|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|---------|
+  | holy-lambda-babashka-runtime | Babashka v0.6.0 | [link](https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-layer) | [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime) | 0.5.1   |

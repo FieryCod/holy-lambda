@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  Holy-lambda micro framework babashka compatible runtime layer
+  Holy-lambda micro framework babashka compatible runtime/backend layer
 
 Resources:
   BabashkaLayer:
@@ -28,7 +28,7 @@ Metadata:
     Labels: ['holy-lambda', 'layer', 'babashka', 'lambda', 'clojure']
     SpdxLicenseId: MIT
     Description: >
-      Holy-lambda micro framework babashka compatible runtime layer. For more info check https://github.com/FieryCod/holy-lambda
+      Holy-lambda micro framework babashka compatible runtime/backend layer. For more info check https://github.com/FieryCod/holy-lambda
 
     LicenseUrl: LICENSE
 
