@@ -285,7 +285,7 @@ Let's try out interactive Clojure editing from the AWS Lambda code editor. We're
 
 Select `code.cljc` and replace the existing `say-hello` and `ExampleLambda` functions with the following:
 
-```
+```clojure
 (defn say-hello
   []
   #?(:bb  (str "Wow. Live edits :O"))

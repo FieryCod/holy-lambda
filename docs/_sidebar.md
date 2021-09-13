@@ -1,5 +1,7 @@
 - [Prerequisites](prerequisites.md)
 - [Getting Started](getting-started.md)
+- [Deep dive into Backends](deep-dive-backends.md)
+  - [Native Backend](native-backend.md)
 - [API](api.md)
 - [CLI](cli.md)
 - [Deployment tools](deployment-tools.md)

@@ -36,9 +36,9 @@ HL supports at the time of writing three Clojure backends.
 ## Backends quick comparison
 <div align="center">
 
-| Backend/Runtime   | Cold start | Performance | Artifacts size         | Memory Consumption | Interactive | Compile time | Beginners friendly? | Package Type  |
-|-----------|------------|-------------|------------------------|--------------------|-------------|--------------|---------------------|---------------|
-| :native   | low        | high        | high     >= 16mb       | low                | No          | very long    | no                  | Zip/Docker    |
-| :babashka | low        | moderate    | low      >= 50kb       | low                | Yes         | no compile   | yes                 | Zip/Docker    |
-| :clojure  | moderate   | high        | depends on docker img  | low                | No          | long         | yes                 | Docker        |
+| Backend/Runtime | Cold start | Performance | Artifacts size        | Memory Consumption | Interactive | Compile time | Beginners friendly? | Package Type |
+|-----------------|------------|-------------|-----------------------|--------------------|-------------|--------------|---------------------|--------------|
+| Native          | low        | high        | high     >= 16mb      | low                | No          | very long    | no                  | Zip/Docker   |
+| Babashka        | low        | moderate    | low      >= 50kb      | low                | Yes         | no compile   | yes                 | Zip/Docker   |
+| Clojure         | moderate   | high        | depends on docker img | low                | No          | long         | yes                 | Docker       |
 </div>

@@ -21,6 +21,7 @@
     :body       nil}))
 
 (defn png-image
+  "Creates a png image out of base64 encoded string"
   [base64-str]
   {:isBase64Encoded true
    :body            base64-str
@@ -29,7 +30,6 @@
 
 (defn created
   "Returns a response for a HTTP 201 created response."
-  {:added "1.2"}
   ([url] (created url nil))
   ([url body]
    {:statusCode 201
@@ -132,6 +132,7 @@
                        (str "; charset=" ?charset)))))
 
 (defn- cookie
+  "Creates a cookie string representation"
   [k v {:keys [domain expires]}]
   (s/replace
    (cond-> (str k "=" v)
@@ -147,9 +148,11 @@
                (vec (conj xv (cookie k v (dissoc opts :k :v)))))))
 
 (defn origin
+  "Sets `access-control-allow-origin` header"
   [resp ?origin]
   (header resp "access-control-allow-origin" ?origin))
 
 (defn credentials
+  "Sets `access-control-allow-credentials` header"
   [resp ?creds]
   (header resp "access-control-allow-credentials" ?creds))
