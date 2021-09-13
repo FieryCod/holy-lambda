@@ -38,11 +38,9 @@ The extraordinary simple, performant, and extensible custom AWS Lambda runtime f
 The holy-lambda documentation is available [here](https://fierycod.github.io/holy-lambda).
 
 ## Current Version 
-
 [![Clojars Project](https://img.shields.io/clojars/v/io.github.FieryCod/holy-lambda?labelColor=283C67&color=729AD1&style=for-the-badge&logo=clojure&logoColor=fff)](https://clojars.org/io.github.FieryCod/holy-lambda)
 
 ## Getting Help 
-
 [![Get help on Slack](http://img.shields.io/badge/slack-clojurians%20%23holy--lambda-97C93C?labelColor=283C67&logo=slack&style=for-the-badge)](https://clojurians.slack.com/channels/holy-lambda)
 
 ## License

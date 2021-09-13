@@ -30,9 +30,6 @@
                         ;; Make sure to include $Entrypoint variable for AWS Lambda function
                         :entrypoint          example.core
 
-                        ;; For `:native` runtime you can provide your own bootstrap file
-                        :bootstrap-file      "bootstrap"
-
                         ;; Specify custom arguments for native image generation
                         ;; Check https://www.graalvm.org/reference-manual/native-image/Options/
                         :native-image-args

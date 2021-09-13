@@ -1,9 +1,9 @@
 # Troubleshooting 
 
 ## Project did not sync properly
-  Running `bb stack:sync` results in:
+  Running `bb hl:sync` results in:
   
-  ```
+  ```bash
   [holy-lambda] Project did not sync properly. Remove .holy-lambda directory and run hl:sync
   ```
 
@@ -163,7 +163,7 @@
    
   Error message after using `bb hl:native:executable`
 
-  ```
+  ```bash
   error:com.oracle.svm.core.util.VMError$HostedError: SomeClassDefinition has no code offset set
   ```
 

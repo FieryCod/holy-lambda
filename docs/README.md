@@ -11,6 +11,13 @@ For only a single Java AWS Lambda handler class, the cold start is around ~1s. F
 
 *As a remedy for the said issue the new library has been developed called **Holy Lambda***.
 
+**Project Goals**
+  - **Low cold starts** - Clojure goes fast on AWS Lambda!
+  - **Multiple backends support** - Unified runtime for Clojure/script!
+  - **Minimal API** - Just stuff that gets the job done!
+
+**Project Non-Goals**
+  - **Tight integration with deployment tools** - I don't want to do this!
 ----
 
 **Holy Lambda (HL)**
@@ -18,7 +25,7 @@ HL is a micro-framework for running Clojure on the [AWS Lambda](https://aws.amaz
 
 HL supports at the time of writing three Clojure backends. 
 
-1. Java/Clojure with [Tiered](https://aws.amazon.com/blogs/compute/increasing-performance-of-java-aws-lambda-functions-using-tiered-compilation/) compilation distributed as a Docker image,
+1. Java/Clojure with [tiered](https://aws.amazon.com/blogs/compute/increasing-performance-of-java-aws-lambda-functions-using-tiered-compilation/) compilation distributed as a Docker image,
 
 2. GraalVM native Clojure. Utilizes GraalVM native image to provide fast startup and a low memory footprint. The tradeoff in using native runtime is the steep learning curve of GraalVM.
 
@@ -29,7 +36,7 @@ HL supports at the time of writing three Clojure backends.
 ## Backends quick comparison
 <div align="center">
 
-| Runtime   | Cold start | Performance | Artifacts size         | Memory Consumption | Interactive | Compile time | Beginners friendly? | Package Type  |
+| Backend/Runtime   | Cold start | Performance | Artifacts size         | Memory Consumption | Interactive | Compile time | Beginners friendly? | Package Type  |
 |-----------|------------|-------------|------------------------|--------------------|-------------|--------------|---------------------|---------------|
 | :native   | low        | high        | high     >= 16mb       | low                | No          | very long    | no                  | Zip/Docker    |
 | :babashka | low        | moderate    | low      >= 50kb       | low                | Yes         | no compile   | yes                 | Zip/Docker    |

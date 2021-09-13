@@ -1,7 +1,7 @@
 # (FAQ) Frequently Asked Questions 
 
 ## What is native backend?
-   Native runtime is GraalVM native-image compiled version of AWS Custom Runtime. Native runtime is entirely written in Clojure and upon `hl:native:executable` packed with the user code. 
+   Native backend/runtime is GraalVM native-image compiled version of AWS Custom Runtime. Native runtime is entirely written in Clojure and upon `hl:native:executable` packed with the user code. 
    
    The output artifact of this operation is `zip` which can be deployed with any of the available deployment tools. 
    

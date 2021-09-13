@@ -5,11 +5,11 @@
 > Clojure meets Serverless
 
 - Simple Custom AWS Lambda runtime
-- Minimal CLI actions to boost your productivity
+- Minimal CLI to boost your productivity
 - Blazing fast thanks to GraalVM
 
 [GitHub](https://github.com/FieryCod/holy-lambda)
-[Getting Started](#docsify)
+[Getting Started](/getting-started)
 
 <!-- background color -->
 

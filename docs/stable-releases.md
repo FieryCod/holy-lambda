@@ -1,9 +1,10 @@
+# Stable releases
 ## Libraries
-| Artifact name                                    | Version | Purpose                                                |
-|--------------------------------------------------|---------|--------------------------------------------------------|
-| io.github.FieryCod/holy-lambda                   | 0.5.0   | Core library / Custom runtime implementation           |
-| io.github.FieryCod/holy-lambda-default-retriever | 0.5.0   | Built in library supporting regular responses*         |
-| io.github.FieryCod/holy-lambda-async-retriever   | 0.5.0   | Additional support for `Channel<Map\|String\|ByteArray\|nil>` |
+| Artifact name                                    | Version | Purpose                                                                |
+|--------------------------------------------------|---------|------------------------------------------------------------------------|
+| io.github.FieryCod/holy-lambda                   | 0.5.0   | Core library / Custom runtime implementation                           |
+| io.github.FieryCod/holy-lambda-default-retriever | 0.5.0   | Built in library supporting regular responses*                         |
+| io.github.FieryCod/holy-lambda-async-retriever   | 0.5.0   | Additional support for `Channel<Map\|String\|ByteArray\|nil>` response |
 
 > :information_source: Regular valid responses*
 > - `Map`
@@ -45,7 +46,7 @@ Add to `deps.edn` an additional tuple at `:deps` property
   | fierycod/graalvm-native-image | ce  | *21.2.0*                   | [link](https://github.com/FieryCod/holy-lambda/blob/master/docker/Dockerfile.ce)  |
   | fierycod/graalvm-native-image | dev | *21.3.0-dev-20210910_2147* | [link](https://github.com/FieryCod/holy-lambda/blob/master/docker/Dockerfile.dev) |
 
-### Using different Docker image in CLI
+#### Using different Docker image in CLI
   ```clojure bb.edn
   {:holy-lambda/options 
    {:docker 

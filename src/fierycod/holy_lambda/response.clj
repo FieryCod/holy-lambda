@@ -5,9 +5,9 @@
 
 (def redirect-status-codes
   "Map a keyword to a redirect status code."
-  {:moved-permanently 301
-   :found 302
-   :see-other 303
+  {:moved-permanently  301
+   :found              302
+   :see-other          303
    :temporary-redirect 307
    :permanent-redirect 308})
 
@@ -16,75 +16,75 @@
    a key in redirect-status-codes or a numeric code. Defaults to 302"
   ([url] (redirect url :found))
   ([url status]
-   {:statusCode  (redirect-status-codes status status)
-    :headers {"location" url}
-    :body    nil}))
+   {:statusCode (redirect-status-codes status status)
+    :headers    {"location" url}
+    :body       nil}))
 
 (defn png-image
   [base64-str]
   {:isBase64Encoded true
-   :body base64-str
-   :statusCode 200
-   :headers {"content-type" "image/png"}})
+   :body            base64-str
+   :statusCode      200
+   :headers         {"content-type" "image/png"}})
 
 (defn created
   "Returns a response for a HTTP 201 created response."
   {:added "1.2"}
   ([url] (created url nil))
   ([url body]
-   {:statusCode  201
-    :headers {"location" url}
-    :body    body}))
+   {:statusCode 201
+    :headers    {"location" url}
+    :body       body}))
 
 (defn bad-request
   "Returns a 400 'bad request' response."
   [body]
-  {:statusCode  400
-   :headers {}
-   :body    body})
+  {:statusCode 400
+   :headers    {}
+   :body       body})
 
 (defn not-found
   "Returns a 404 'not found' response."
   [body]
-  {:statusCode  404
-   :headers {}
-   :body    body})
+  {:statusCode 404
+   :headers    {}
+   :body       body})
 
 (defn response
   "Returns a skeletal response with the given body, status of 200, and no
   headers."
   [body]
-  {:statusCode  200
-   :headers {}
-   :body    body})
+  {:statusCode 200
+   :headers    {}
+   :body       body})
 
 (defn json
   "Returns a skeletal response with the given body, status of 200, and `content-type` set to `application/json`."
   [body]
-  {:statusCode  200
-   :headers {"content-type" "application/json"}
-   :body    body})
+  {:statusCode 200
+   :headers    {"content-type" "application/json"}
+   :body       body})
 
 (defn text
   "Returns a skeletal response with the given msg, status of 200, and `content-type` set to `text/plain`."
   [?msg]
-  {:statusCode  200
-   :headers {"content-type" "text/plain; charset=utf-8"}
-   :body    ?msg})
+  {:statusCode 200
+   :headers    {"content-type" "text/plain; charset=utf-8"}
+   :body       ?msg})
 
 (defn html
   "Returns a skeletal response with the given body, status of 200, and `content-type` set to `text/html`."
   [?body]
-  {:statusCode  200
-   :headers {"content-type" "text/html; charset=utf-8"}
-   :body    ?body})
+  {:statusCode 200
+   :headers    {"content-type" "text/html; charset=utf-8"}
+   :body       ?body})
 
 (defn status
   "Returns an updated response with the given status."
   ([?status]
    {:statusCode ?status
-    :headers {}
-    :body    {}})
+    :headers    {}
+    :body       {}})
   ([resp ?status]
    (assoc resp :statusCode ?status)))
 
@@ -135,8 +135,8 @@
   [k v {:keys [domain expires]}]
   (s/replace
    (cond-> (str k "=" v)
-      domain (str "; domain=" domain ";")
-      expires (str "; expires=" expires ";"))
+     domain  (str "; domain=" domain ";")
+     expires (str "; expires=" expires ";"))
    ";;" ";"))
 
 (defn set-cookie

@@ -28,7 +28,7 @@ jobs:
       WORKING_DIRECTORY: examples/bb/native/basic.example
       HL_CLJ_ALIAS: holy-lambda
     steps:
-      - script: |
+      - bash: |
           # Regenerate partial cache
           bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip"
 
@@ -112,10 +112,11 @@ jobs:
       WORKING_DIRECTORY: examples/bb/native/basic.example
       HL_CLJ_ALIAS: holy-lambda
     steps:
-      - script: |
+      - bash: |
           # Regenerate partial cache
-          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb hl:sync && \
-
+          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip"
+          # Sync
+          bb hl:sync && \
           # Regular test tasks
           bb hl:compile && \
           bb hl:native:executable && \

@@ -309,7 +309,6 @@
 (def REQUIRED_COMMANDS ["aws" "sam" "bb" "docker" "clojure" "zip" "id" "bash"])
 (def NATIVE_CONFIGURATIONS_PATH "resources/native-configuration")
 (def NATIVE_CONFIGURATIONS_RESOURCE_CONFIG_FILE_PATH "resources/native-configuration/resource-config.json")
-(def BOOTSTRAP_FILE (:bootstrap-file RUNTIME))
 (def NATIVE_DEPS_PATH (:native-deps RUNTIME))
 
 (def AWS_ACCESS_KEY_ID (atom (System/getenv "AWS_ACCESS_KEY_ID")))
@@ -532,9 +531,7 @@ set -e
 
 (defn bootstrap-file
   []
-  (or (when (file-exists? BOOTSTRAP_FILE)
-       (slurp BOOTSTRAP_FILE))
-      -bootstrap-file))
+  -bootstrap-file)
 
 (defn hl:native:executable
   "     \033[0;31m>\033[0m Provides native executable of the application
@@ -592,7 +589,7 @@ set -e
     (hpr (prs "property") (accent ":mvn/local-repo") (prs "in file") (accent file) (prs "is correct"))))
 
 (defn hl:doctor
-  "     \033[0;31m>\033[0m Diagnoses common issues of holy-lambda project"
+  "     \033[0;31m>\033[0m Diagnoses common issues in the project"
   []
   (let [exit-code (atom 0)
         exit-code-err! #(reset! exit-code 1)]

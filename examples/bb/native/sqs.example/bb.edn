@@ -40,7 +40,7 @@
                         :pods                {org.babashka/aws "0.0.5"}
 
                         ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
-                        ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
+                        ;; :entrypoint should always point to a namespace with includes (h/entrypoint) call
                         :entrypoint          sqs.example.core
 
                         ;; Flag which indicates that holy-lambda should auto deploy the applications and layers for the corresponding :runtime
@@ -101,6 +101,6 @@
          stack:purge            holy-lambda.tasks/stack:purge
          stack:destroy          holy-lambda.tasks/stack:destroy
          stack:logs             holy-lambda.tasks/stack:logs
-         stack:version          holy-lambda.tasks/stack:version
-         }
- }
+         stack:version          holy-lambda.tasks/stack:version}}
+         
+ 
