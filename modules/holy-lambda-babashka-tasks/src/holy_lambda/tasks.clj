@@ -471,7 +471,9 @@
 
 (defn build-stale?
   []
-  (boolean (seq (fs/modified-since OUTPUT_JAR_PATH (fs/glob "src" "**/**.{clj,cljc,cljs}")))))
+  (if-not (file-exists? "src")
+    true
+    (boolean (seq (fs/modified-since OUTPUT_JAR_PATH (fs/glob "src" "**/**.{clj,cljc,cljs}"))))))
 
 (defn hl:native:conf
   "     \033[0;31m>\033[0m Provides native configurations for the application"
