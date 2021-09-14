@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0 unreleased
+## 0.5.0 
 
 **Rationale**
 https://github.com/FieryCod/holy-lambda/discussions/68
@@ -30,11 +30,12 @@ https://github.com/FieryCod/holy-lambda/discussions/68
 - [holy-lambda] Remove interceptors support. For API's user can easily integrate Holy Lambda with ring or pedestal. The adapters for the mentioned libraries will be published soon.
 - [docker] New compatible `fierycod/graalvm-native-image` images:
   - :ce - GraalVM CE 21.2.0
-  - :dev - GraalVM DEV 21.3.0-dev_20210817_2030
-- [bb layer] Layer version matches the holy-lambda version. New release 0.5.0 includes the latest babashka 0.5.1. Layer should be deployed via serverless repository deploy button:
+  - :dev - GraalVM DEV 21.3.0-dev-20210910_2147
+- [bb layer] Layer version matches the holy-lambda version. New release 0.5.1 includes the latest babashka 0.6.1. Layer should be deployed via serverless repository deploy button:
   https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime
 - Fix Clojure tools warnings, about not existing `.jar` file
 - Don't re-download HL tasks in CI environments
+- New documentation
 
 ## 0.2.3 (14-07-2021)
 - [bb tasks] Add support for passing arguments to commands in `--` style.
