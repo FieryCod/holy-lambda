@@ -5,6 +5,15 @@
 Handler<HLEvent, HLContext> => HLResponse 
 ```
 
+**Basic handler**
+```clojure
+(defn BasicHandler
+  [{:keys [event ctx]}]
+  {:statusCode 200
+   :headers {"content-type" "application/json"}
+   :body {:hello "world"})
+```
+
 **[Runtime/Backend initialization](/api)**
 
 ```clojure
