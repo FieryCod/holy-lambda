@@ -1,12 +1,12 @@
-# Clojure backend
-This section will take you through the basics of Clojure backend. 
+# Native backend
+This section will take you through the basics of Native backend. 
 
 **You will**
 - Generate a scaffold project for your code
 - Locally test the code 
 - Deploy the project to AWS
 
-> :information_source: Full project source can be find [here](https://github.com/FieryCod/holy-lambda/tree/master/docs/examples/getting-started/clojure-backend/holy-lambda-example)
+> :information_source: Full project source can be find [here](https://github.com/FieryCod/holy-lambda/tree/master/docs/examples/getting-started/native-backend/holy-lambda-example)
 
 1. We'll generate our first project using the `holy-lambda` project template. This will create a project tree with all the necessary resources to get us started.
 
@@ -40,137 +40,33 @@ This section will take you through the basics of Clojure backend.
 
     6 directories, 7 files
     ```
-3. (Optional, but recommended) If you willing to use [tiered](https://aws.amazon.com/blogs/compute/increasing-performance-of-java-aws-lambda-functions-using-tiered-compilation/) compilation modify your `Dockerfile`, and add the following options before `-jar` argument.
-
-   ```bash
-   -XX:+TieredCompilation -XX:TieredStopAtLevel=1 
-   ```
-   **Example**
-   ```Dockerfile
-   CMD java -jar output.jar "com.company.example-lambda.core.ExampleLambda"
-   ```
-4. Modify `template.yml`
-   1. Remove `CodeUri` from `Parameters`. Remove it from `Globals` as well.
-   2. Remove `Runtime` entry from `Globals`. You can remove it from `Parameters` as well.
-   3. Tune `MemorySize` parameter to `512`.
-   4. Remove `Handler` from the function properties.
-   5. Replace `ExampleLambdaFunction` block in the resources with following.
-      ```yml
-      ExampleLambdaFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-          FunctionName: ExampleLambdaFunction
-          PackageType: Image
-          Events:
-            HelloEvent:
-              Type: HttpApi
-              Properties:
-                ApiId: !Ref ServerlessHttpApi
-                Path: /
-                Method: GET
-        Metadata:
-          Dockerfile: Dockerfile
-          DockerContext: .
-          DockerTag: v1
-      ```
-      
-      **This is how your template.yml should look like**
-      ```yml
-      AWSTemplateFormatVersion: '2010-09-09'
-      Transform: AWS::Serverless-2016-10-31
-      Description: >
-        Example basic lambda using `holy-lambda` micro library
-
-      Parameters:
-        Timeout:
-          Type: Number
-          Default: 40
-        MemorySize:
-          Type: Number
-          Default: 512
-        Entrypoint:
-          Type: String
-          Default: com.company.example-lambda.core
-
-      Globals:
-        Function:
-          Timeout: !Ref Timeout
-          MemorySize: !Ref MemorySize
-          Environment:
-            Variables:
-              Entrypoint: !Ref Entrypoint
-
-      Resources:
-        ExampleLambdaFunction:
-          Type: AWS::Serverless::Function
-          Properties:
-            FunctionName: ExampleLambdaFunction
-            PackageType: Image
-            Events:
-              HelloEvent:
-                Type: HttpApi
-                Properties:
-                  ApiId: !Ref ServerlessHttpApi
-                  Path: /
-                  Method: GET
-          Metadata:
-            Dockerfile: Dockerfile
-            DockerContext: .
-            DockerTag: v1
-
-        ServerlessHttpApi:
-          Type: AWS::Serverless::HttpApi
-          DeletionPolicy: Retain
-          Properties:
-            StageName: Prod
-
-      Outputs:
-        ExampleLambdaEndpoint:
-          Description: Endpoint for ExampleLambdaFunction
-          Value:
-            Fn::Sub: https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com
-
-      ```
-5. Sync & Compile
+3. Add following dependencies to the `deps.edn`
   ```
+  com.github.clj-easy/graal-build-time {:mvn/version "0.1.0"}
+  ```
+  
+  The library should populate `--initialize-at-built-time` argument with all the necessary Clojure namespaces. You can read about it [here](https://github.com/clj-easy/graal-build-time).
+  
+4. Provide the additional `--initialize-at-build-time` option for jsonista.
+
+   > :information_source: With the `holy-lambda` >= 0.5.2 this step will not be neccessary. See this [PR](https://github.com/metosin/jsonista/pull/58/files)
+   
+   ```clojure
+   :native-image-args [
+    ...,
+    "--initialize-at-build-time=com.fasterxml.jackson"
+   ]
+   ```
+  
+5. Sync & Compile
+  ```bash
   bb hl:sync && bb hl:compile
   ```
   
-6. Build a docker image using:
+6. Generate a native executable
   ```bash
-  sam build
+  bb hl:native:executable
   ```
-  
-    **Build should be successful at this point**
-    ```bash
-    Building codeuri: /home/fierycod/Workspace/Personal/Clojure/holy-lambda/docs/examples/getting-started/clojure-backend/holy-lambda-example runtime: Runtime metadata: {'Dockerfile': 'Dockerfile', 'DockerContext': '/home/fierycod/Workspace/Personal/Clojure/holy-lambda/docs/examples/getting-started/clojure-backend/holy-lambda-example', 'DockerTag': 'v1'} functions: ['ExampleLambdaFunction']
-    Building image for ExampleLambdaFunction function
-    Setting DockerBuildArgs: {} for ExampleLambdaFunction function
-    Step 1/4 : FROM openjdk:latest
-    ---> f4489eef8885
-    Step 2/4 : MAINTAINER Karol Wójcik <karol.wojcik@tuta.io>
-    ---> Using cache
-    ---> 4501e45849c4
-    Step 3/4 : ADD .holy-lambda/build/output.jar output.jar
-    ---> Using cache
-    ---> f8b49bf1a118
-    Step 4/4 : CMD java -jar output.jar "com.company.example-lambda.core.ExampleLambda"
-    ---> Using cache
-    ---> a892a69f1800
-    Successfully built a892a69f1800
-    Successfully tagged examplelambdafunction:v1
-
-    Build Succeeded
-
-    Built Artifacts  : .aws-sam/build
-    Built Template   : .aws-sam/build/template.yaml
-
-    Commands you can use next
-    =========================
-    [*] Invoke Function: sam local invoke
-    [*] Deploy: sam deploy --guided
-    ```
-
 7. Try to invoke the function using `AWS SAM CLI`
 
   ```bash
@@ -181,25 +77,25 @@ This section will take you through the basics of Clojure backend.
 
     **After some time you should see the following output**
     ```bash
-    Invoking Container created from examplelambdafunction:v1
-    Skip pulling image and use local one: examplelambdafunction:rapid-1.31.0.
+    Invoking com.company.example-lambda.core.ExampleLambda (provided)
+    Decompressing /home/fierycod/Workspace/Personal/Clojure/holy-lambda/docs/examples/getting-started/native-backend/holy-lambda-example/.holy-lambda/build/latest.zip
+    Skip pulling image and use local one: public.ecr.aws/sam/emulation-provided:rapid-1.31.0.
 
-    START RequestId: fb6472ed-dc42-4654-b385-d8c7f3ad834f Version: $LATEST
-    {"statusCode":200,"headers":{"content-type":"text/plain; charset=utf-8"},"body":"Hello world"}
-    
-    END RequestId: fb6472ed-dc42-4654-b385-d8c7f3ad834f
-    REPORT RequestId: fb6472ed-dc42-4654-b385-d8c7f3ad834f Init Duration: 0.06 ms Duration: 767.78 ms Billed Duration: 800 ms Memory Size: 512 MB Max Memory Used: 512 MB
+    Mounting /tmp/tmp86nnqcb7 as /var/task:ro,delegated inside runtime container
+    START RequestId: 9a7c74a8-21f6-42a2-8c40-f104a6d470f3 Version: $LATEST
+    {"statusCode":200,"headers":{"content-type":"text/plain; charset=utf-8"},"body":"Hello world"}END RequestId: 9a7c74a8-21f6-42a2-8c40-f104a6d470f3
+    REPORT RequestId: 9a7c74a8-21f6-42a2-8c40-f104a6d470f3 Init Duration: 0.44 ms Duration: 22.20 ms Billed Duration: 100 ms Memory Size: 128 MB Max Memory Used: 128 MB
     ```
 
     > :information_source: Highly recommend to check the official AWS SAM docs and play with other commands e.g. `sam local start-api`
 
 #### Deployment
-Having successfully run the Lambda locally, we can now deploy to AWS. Since we're using `Image` as a `PackageType` the `sam deploy --guided` will create a managed `ECR registry` for us and push the new Docker image to the registry.
+  Having successfully run the Lambda locally, we can now deploy to AWS. Application code will be uploaded to S3 as a `zip`.
 
-**Run the following command:**
-```
-sam deploy --guided
-```
+  **Run the following command:**
+  ```
+  sam deploy --guided
+  ```
 
 **Default settings should be sufficient. Press enter for parameters and answer the questions as provided below**
 
@@ -207,18 +103,17 @@ sam deploy --guided
 Configuring SAM deploy
 ======================
 
-        Looking for config file [samconfig.toml] :  Found
-        Reading default arguments  :  Success
+        Looking for config file [samconfig.toml] :  Not found
 
         Setting default arguments for 'sam deploy'
         =========================================
         Stack Name [sam-app]: 
         AWS Region [eu-central-1]: 
         Parameter Timeout [40]: 
-        Parameter MemorySize [512]: 
+        Parameter MemorySize [128]: 
         Parameter Entrypoint [com.company.example-lambda.core]: 
         #Shows you resources changes to be deployed and require a 'Y' to initiate deploy
-        Confirm changes before deploy [Y/n]: y
+        Confirm changes before deploy [y/N]: y
         #SAM needs permission to be able to create roles to connect to the resources in your template
         Allow SAM CLI IAM role creation [Y/n]: y
         ExampleLambdaFunction may not have authorization defined, Is this okay? [y/N]: y
@@ -227,7 +122,8 @@ Configuring SAM deploy
         SAM configuration environment [default]: 
 
         Looking for resources needed for deployment:
-        ExampleLambdaFunction: <CLIENT_ID>.dkr.ecr.eu-central-1.amazonaws.com/<MANAGED>
+        Managed S3 bucket: <S3_BUCKET>
+        A different default S3 bucket can be set in samconfig.toml
 
         Saved arguments to config file
         Running 'sam deploy' for future deployments will use the parameters saved above.
@@ -235,44 +131,43 @@ Configuring SAM deploy
         Learn more about samconfig.toml syntax at 
         https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html
 
-        The push refers to repository [<CLIENT_ID>.dkr.ecr.eu-central-1.amazonaws.com/<MANAGED>]
-
+        Uploading to sam-app/<OBJECT_KEY>  9073191 / 9073191  (100.00%)
 
         Deploying with following values
         ===============================
         Stack name                   : sam-app
         Region                       : eu-central-1
         Confirm changeset            : True
-        Deployment image repository  : 
-                                       {
-                                           "ExampleLambdaFunction": "<ECR_IMAGE>"
-                                       }
         Deployment s3 bucket         : <S3_BUCKET>
         Capabilities                 : ["CAPABILITY_IAM"]
-        Parameter overrides          : {"Timeout": "40", "MemorySize": "512", "Entrypoint": "com.company.example-lambda.core"}
+        Parameter overrides          : {"Timeout": "40", "MemorySize": "128", "Entrypoint": "com.company.example-lambda.core"}
         Signing Profiles             : {}
 
 Initiating deployment
 =====================
-Uploading to sam-app/915c620d2e4b41b6a5e7cffa11db018f.template  1377 / 1377  (100.00%)
+Uploading to sam-app/<OBJECT_KEY>.template  1321 / 1321  (100.00%)
 
 Waiting for changeset to be created..
 
 CloudFormation stack changeset
--------------------------------------------------------------------------------------------------
-Operation                LogicalResourceId        ResourceType             Replacement            
--------------------------------------------------------------------------------------------------
-+ Add                    ExampleLambdaFunctionH   AWS::Lambda::Permissio   N/A                    
-                         elloEventPermission      n                                               
-+ Add                    ExampleLambdaFunctionR   AWS::IAM::Role           N/A                    
-                         ole                                                                      
-+ Add                    ExampleLambdaFunction    AWS::Lambda::Function    N/A                    
-+ Add                    ServerlessHttpApiApiGa   AWS::ApiGatewayV2::Sta   N/A                    
-                         tewayDefaultStage        ge                                              
-+ Add                    ServerlessHttpApi        AWS::ApiGatewayV2::Api   N/A                    
--------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+Operation                              LogicalResourceId                      ResourceType                           Replacement                          
+---------------------------------------------------------------------------------------------------------------------------------------------------------
++ Add                                  ExampleLambdaFunctionHelloEventPermi   AWS::Lambda::Permission                N/A                                  
+                                       ssion                                                                                                              
++ Add                                  ExampleLambdaFunctionRole              AWS::IAM::Role                         N/A                                  
++ Add                                  ExampleLambdaFunction                  AWS::Lambda::Function                  N/A                                  
++ Add                                  ServerlessHttpApiApiGatewayDefaultSt   AWS::ApiGatewayV2::Stage               N/A                                  
+                                       age                                                                                                                
++ Add                                  ServerlessHttpApi                      AWS::ApiGatewayV2::Api                 N/A                                  
+---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Changeset created successfully. <DEPLOYMENT_ARN>
+Changeset created successfully. <ARN>
+
+
+Previewing CloudFormation changeset before deployment
+======================================================
+Deploy this changeset? [y/N]: y
 ```
 
 Now `AWS SAM` will deploy the application!
@@ -336,7 +231,7 @@ Congratulations. You can now check your API running by clicking on `Serverless H
 
 In this guide, we've covered many of the basics with `holy-lambda`. We've covered quite a lot actually, so well done for getting this far!
 
-We created a `holy-lambda` project based on the Clojure backend and deployed it to `AWS Lambda`. 
+We created a `holy-lambda` project based on the Native backend and deployed it to `AWS Lambda`. 
  
 We hope you enjoy using Clojure in AWS Lambdas using `holy-lambda`
 
@@ -354,15 +249,14 @@ sam delete
 ```
 Are you sure you want to delete the stack sam-app in the region eu-central-1 ? [y/N]: y
 Are you sure you want to delete the folder sam-app in S3 which contains the artifacts? [y/N]: y
-Found ECR Companion Stack <STACK_NAME>
-Do you you want to delete the ECR companion stack <STACK_NAME> in the region eu-central-1 ? [y/N]: y
-ECR repository <STACK_NAME> may not be empty. Do you want to delete the repository and all the images in it ? [y/N]: y
-- Deleting ECR repository <STACK_NAME_ECR_REPOSITORY>
-- Deleting ECR Companion Stack sam-app-7427b055-CompanionStack
-- Deleting S3 object with key <OBJECT_KEY>.template
+- Deleting S3 object with key sam-app/408a4e133d83dbe223b5fe9322c58f7c
+- Deleting S3 object with key sam-app/bf87f9eb6f91574945d3bb1bb473567d.template
+- Deleting S3 object with key sam-app/e328fd57ea8768066cce90a5225df86e.template
+- Deleting S3 object with key sam-app/fd4a54bbd77c97428e6ebbaaa12d2a69.template
 - Deleting Cloudformation stack sam-app
 
 Deleted successfully
 ```
+
 
 

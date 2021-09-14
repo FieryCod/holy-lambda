@@ -4,15 +4,14 @@
 |--------------------------------------------------|---------|------------------------------------------------------------------------|
 | io.github.FieryCod/holy-lambda                   | 0.5.0   | Core library / Custom runtime implementation                           |
 | io.github.FieryCod/holy-lambda-default-retriever | 0.5.0   | Built in library supporting regular responses*                         |
-| io.github.FieryCod/holy-lambda-async-retriever   | 0.5.0   | Additional support for `Channel<Map\|String\|ByteArray\|nil>` response |
+| io.github.FieryCod/holy-lambda-async-retriever   | 0.5.0   | Additional support for `Channel<Map\|ByteArray\|nil>` response |
 
 > :information_source: Regular valid responses*
 > - `Map`
 > - `nil`
-> - `String`
 > - `ByteArray`
-> - `Future<Map|String|ByteArray|nil>`
-> - `Promise<Map|String|ByteArray|nil>`
+> - `Future<Map|ByteArray|nil>`
+> - `ClojurePromise<Map|ByteArray|nil>`
 
 ### Using library with `deps.edn`
 Add to `deps.edn` an additional tuple at `:deps` property

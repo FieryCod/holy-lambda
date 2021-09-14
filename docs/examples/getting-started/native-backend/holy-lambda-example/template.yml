@@ -12,7 +12,7 @@ Parameters:
     Default: 128
   Entrypoint:
     Type: String
-    Default: {{main-ns}}.core
+    Default: com.company.example-lambda.core
 
 Globals:
   Function:
@@ -26,13 +26,13 @@ Resources:
   ExampleLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ExampleLambdaFunction
       Runtime: provided
-      Handler: {{main-ns}}.core.ExampleLambda
+      FunctionName: ExampleLambdaFunction
+      Handler: com.company.example-lambda.core.ExampleLambda
       CodeUri: .holy-lambda/build/latest.zip
       # For docker based deployments use:
       # PackageType: Image
-      # and remove Runtime + CodeUri + Handler
+      # and remove Runtime parameter
       Events:
         HelloEvent:
           Type: HttpApi

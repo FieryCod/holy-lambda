@@ -52,9 +52,6 @@ This section will take you through the basics of Babashka backend.
 
     ```yml 
     Parameters:
-      Runtime:
-        Type: String
-        Default: provided
       Timeout:
         Type: Number
         Default: 40
@@ -67,7 +64,6 @@ This section will take you through the basics of Babashka backend.
 
     Globals:
       Function:
-        Runtime: !Ref Runtime
         Timeout: !Ref Timeout
         MemorySize: !Ref MemorySize
         Environment:
@@ -78,6 +74,7 @@ This section will take you through the basics of Babashka backend.
       ExampleLambdaFunction:
         Type: AWS::Serverless::Function
         Properties:
+          Runtime: provided
           FunctionName: ExampleLambdaFunction
           CodeUri: src
           Events:
@@ -135,7 +132,6 @@ Configuring SAM deploy
         =========================================
         Stack Name [sam-app]: 
         AWS Region [eu-central-1]: 
-        Parameter Runtime [provided]: 
         Parameter Timeout [40]: 
         Parameter MemorySize [128]: 
         Parameter Entrypoint [com.company.example-lambda.core]: 
