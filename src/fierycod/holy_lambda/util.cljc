@@ -2,10 +2,11 @@
   (:require
    [fierycod.holy-lambda.retriever :as retriever]
    #?(:bb [cheshire.core :as json]
-      :clj [jsonista.core :as json]))
+      :clj [jsonista.core :as json])
+   [fierycod.holy-lambda.util :as u])
   #?(:clj
      (:import
-      [java.util List]
+      [java.util List HashMap]
       [clojure.lang PersistentHashMap]
       [java.net URL HttpURLConnection]
       [java.io InputStream InputStreamReader])))
@@ -52,7 +53,7 @@
        :default (throw (->ex "Not implemented")))))
 
 (defn adopt-map
-  [m]
+  [^HashMap m]
   #?(:clj (PersistentHashMap/create m)
      :bb (PersistentHashMap/create m)
      :cljs (into {} m)))
@@ -153,7 +154,7 @@
            (if (bytes? response-bytes)
              (.write output-stream ^"[B" response-bytes)
              (do (println "[holy-lambda] Response has not beed parsed to bytes array:" response-bytes)
-                 (throw (->ex "Failed to parse response to byte array. Response type:" (type response-bytes)))))
+                 (throw (->ex "Failed to parse response to byte array. Response type:" (str (type response-bytes))))))
            (.flush output-stream)
            (.close output-stream)))
        ;; It's not necessary to normalize the response headers for runtimes since

@@ -5,7 +5,7 @@
 
 (defn- url
   [runtime iid path]
-  (u/->str "http://" runtime "/2018-06-01/runtime/invocation/" iid path))
+  (u/->str "http://" ^String runtime "/2018-06-01/runtime/invocation/" ^String iid ^String path))
 
 (defn- ->aws-context
   [iid headers event env-vars]
@@ -15,9 +15,9 @@
                                  (System/currentTimeMillis)))
      :fnName                (env-vars "AWS_LAMBDA_FUNCTION_NAME")
      :fnVersion             (env-vars "AWS_LAMBDA_FUNCTION_VERSION")
-     :fnInvokedArn          (u/->str "arn:aws:lambda:" (env-vars "AWS_REGION")
-                                     ":" (or (request-context :accountId) "0000000")
-                                     ":function:" (env-vars "AWS_LAMBDA_FUNCTION_NAME"))
+     :fnInvokedArn          (u/->str "arn:aws:lambda:" ^String (env-vars "AWS_REGION")
+                                     ":" (or ^String (request-context :accountId) "0000000")
+                                     ":function:" ^String (env-vars "AWS_LAMBDA_FUNCTION_NAME"))
      :memoryLimitInMb       (env-vars "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
      :awsRequestId          iid
      :logGroupName          (env-vars "AWS_LAMBDA_LOG_GROUP_NAME")
@@ -35,7 +35,7 @@
                           :body {:runtime-error true
                                  :err (Throwable->map err)}})]
     (when-not (response :success?)
-      (u/println-err! (u/->str "[holy-lambda] Runtime error failed sent to AWS.\n" (response :body)))
+      (u/println-err! (u/->str "[holy-lambda] Runtime error failed sent to AWS.\n" (str (response :body))))
       (System/exit 1))))
 
 (defn- send-response
@@ -48,7 +48,7 @@
   [maybe-handler routes env-vars]
   (let [runtime (env-vars "AWS_LAMBDA_RUNTIME_API")
         handler-name (or maybe-handler (env-vars "_HANDLER"))
-        aws-event (u/http "GET" (url runtime nil "next"))
+        aws-event (u/http "GET" (url runtime "" "next"))
         headers (aws-event :headers)
         iid (u/getf-header headers "Lambda-Runtime-Aws-Request-Id")
         handler (routes handler-name)
@@ -59,11 +59,11 @@
       (System/setProperty "com.amazonaws.xray.traceHeader" trace-id))
 
     (when-not handler
-      (send-runtime-error runtime iid (u/->ex "Handler " handler-name " not found!"))
+      (send-runtime-error runtime iid (u/->ex "Handler " ^String handler-name " not found!"))
       (System/exit 1))
 
     (when-not iid
-      (send-runtime-error runtime iid (u/->ex "Failed to determine new invocation-id:" iid))
+      (send-runtime-error runtime iid (u/->ex "Failed to determine new invocation-id"))
       (System/exit 1))
 
     (when (and iid (aws-event :success?))

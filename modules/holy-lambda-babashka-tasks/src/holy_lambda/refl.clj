@@ -71,6 +71,7 @@
   (when-not (and (= 1 (count m))
                  (contains? @ignored-by-arg name)
                  (not (contains? @unignored-by-arg name)))
+
     ;; fix bug(?) in automated generated config
     (if (= "java.lang.reflect.Method" name)
       (assoc m :name "java.lang.reflect.AccessibleObject")
