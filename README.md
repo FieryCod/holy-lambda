@@ -1,6 +1,6 @@
 
 <p align="center">
-  <a href="https://day8.github.io/re-frame" target="_blank" rel="noopener noreferrer">
+  <a href="https://fierycod.github.io/holy-lambda" target="_blank" rel="noopener noreferrer">
     <img src="docs/media/logo.png?raw=true" alt="re-frame logo">
   </a>
 </p>
