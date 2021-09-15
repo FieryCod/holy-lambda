@@ -12,7 +12,7 @@
   (str "http://" runtime "/2018-06-01/runtime/invocation/" iid path))
 
 (defn- ->aws-context
-  [headers event env-vars]
+  [iid headers event env-vars]
   (let [request-context (get event :requestContext nil)]
     {:getRemainingTimeInMs  (fn []
                               (- (Long/parseLong (u/getf-header headers "Lambda-Runtime-Deadline-Ms"))
@@ -23,7 +23,7 @@
                                  ":" (get request-context :accountId "0000000")
                                  ":function:" (get env-vars "AWS_LAMBDA_FUNCTION_NAME" nil))
      :memoryLimitInMb       (get env-vars "AWS_LAMBDA_FUNCTION_MEMORY_SIZE" nil)
-     :awsRequestId          (get request-context :requestId nil)
+     :awsRequestId          iid
      :logGroupName          (get env-vars "AWS_LAMBDA_LOG_GROUP_NAME" nil)
      :logStreamName         (get env-vars "AWS_LAMBDA_LOG_STREAM_NAME" nil)
      :identity              (get request-context :identity nil)
@@ -63,7 +63,7 @@
 (defn- process-event
   [runtime iid aws-event env-vars handler]
   (let [event (get aws-event :body)
-        context (->aws-context (get aws-event :headers) event env-vars)]
+        context (->aws-context iid (get aws-event :headers) event env-vars)]
     (try
       (send-response runtime iid (handler {:event event
                                            :ctx context}))
