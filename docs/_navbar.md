@@ -1,2 +1,3 @@
 - <a href="https://clojurians.slack.com/channels/holy-lambda" style="font-size: 24px;"><i class="fab fa-slack" style="padding-right:2px;"></i> Slack</a>
 - <a href="https://twitter.com/fierycoddev" style="font-size: 24px;"><i class="fab fa-twitter" style="padding-right:2px;"></i> Twitter</a>
+- <a href="https://github.com/FieryCod/holy-lambda" style="font-size: 24px;"><i class="fab fa-github" style="padding-right:2px;"></i> Github</a>

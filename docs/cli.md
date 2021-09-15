@@ -47,7 +47,19 @@ CLI depends on the following programs:
     - `:entrypoint` - used in `uberjar` generation. Entrypoint should point to main namespace with `(h/entrypoint)`.
     - `:native-image-args []` - vector of arguments that should be passed to GraalVM `native-image` tool. For more information click [here](https://www.graalvm.org/reference-manual/native-image/).
 
-## Environment variables
+## CLI Paths
+  - `.holy-lambda` 
+  
+     HL artifacts/cache/pods store
+   - `.holy-lambda/pods`
+   
+      Set of Babashka pods, that are downloaded upon `bb hl:sync` from the `bb.edn:holy-lambda/options:runtime:pods` entry. 
+   
+      > :information_source: Babashka pods should be packed as a separate layer.
+      
+   - `holy-lambda/build` - Base output path for the built artifacts for the backends
+
+## Environment Variables
   | Name                | Possible values       | Description                                                                                 |
   |---------------------|-----------------------|---------------------------------------------------------------------------------------------|
   | **HL_DEBUG**        | `(1/0)\|(true/false)` | Run tasks in debug mode                                                                     |

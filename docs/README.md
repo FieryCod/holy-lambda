@@ -7,7 +7,7 @@ To understand what causes cold starts, we have to know how Clojure distributes p
 
 When Clojure code is compiled and packed to uberjar, every function expands to a class. Imagine that you have the `main` function in your namespace, which you then uberjar for later execution. In standalone uberjar, you will find all Clojure core functions and your `main` function compiled to classes. Upon `java -jar` execution, both your `main` class, and Clojure core classes are load. Loading the classes is mostly what makes high cold start times.
 
-For only a single Java AWS Lambda handler class, the cold start is around ~1s. For Clojure on official AWS Lambda Java runtime  the cold start is between 8-12on a 2GB memory-sized environment. The difference between cold starts comes from the number of classes load upon startup (Clojure > 100, Java > 1). 
+For only a single Java AWS Lambda handler class, the cold start is around ~1s. For Clojure on official AWS Lambda Java runtime  the cold start is between 8-12s on a 2GB memory-sized environment. The difference between cold starts comes from the number of classes load upon startup (Clojure > 100, Java > 1). 
 
 *As a remedy for the said issue the new library has been developed called **Holy Lambda***.
 

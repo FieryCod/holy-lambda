@@ -77,7 +77,7 @@ Handler<HLEvent, HLContext> => HLResponse
      | `:headers`           | `ClojureMap<string,string>`                    |
      | `:multiValueHeaders` | `ClojureMap<string,vector<string>`             |
      | `:body`              | `string\|nil\|boolean\|vector<any>\|list<any>` |
-     | `isBase64Encoded`    | `boolean`                                      |
+     | `:isBase64Encoded`   | `boolean`                                      |
  
  3. `ByteArray` OR
      

@@ -81,6 +81,7 @@
   - `json [body]` - Returns a skeletal response with the given body, status of 200, and `content-type` set to `application/json`.
   - `text [body]` - Returns a skeletal response with the given msg, status of 200, and `content-type` set to `text/plain`.
   - `html [body]` - Returns a skeletal response with the given body, status of 200, and `content-type` set to `text/html`.
+  - `edn [body]` - Returns a skeletal response with the given body, status of 200, and `content-type` set to `application/edn`.
   - `html [status] [resp status]` - Returns an updated response with the given status..
   - `header [resp name v]` - Returns an updated response with the specified header added.
   - `content-type [resp ctype]` - Returns an updated response with the a content-type header corresponding to the given content-type.
