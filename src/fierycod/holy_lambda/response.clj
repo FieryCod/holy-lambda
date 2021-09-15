@@ -28,6 +28,12 @@
    :statusCode      200
    :headers         {"content-type" "image/png"}})
 
+(defn edn
+  [body]
+  {:body (pr-str body)
+   :statusCode 200
+   :headers {"content-type" "application/edn"}})
+
 (defn created
   "Returns a response for a HTTP 201 created response."
   ([url] (created url nil))
