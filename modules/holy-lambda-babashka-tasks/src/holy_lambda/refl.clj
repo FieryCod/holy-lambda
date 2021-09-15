@@ -43,6 +43,7 @@
                            "clojure.lang.Compiler$ObjExpr"
                            "clojure.lang.Compiler$NewInstanceExpr"}
                          caller_class)
+              (and class (str/includes? class "holy_lambda"))
               (and class (str/starts-with? class "clojure.lang")))
       (swap! ignored-by-class conj class))))
 
@@ -77,7 +78,8 @@
 
 (defn keep-by-class!
   [{:keys [name] :as m}]
-  (when-not (contains? @ignored-by-class name)
+  (when (and (not (contains? @ignored-by-class name))
+             (not (str/includes? name "holy_lambda")))
     m))
 
 (def keep!
@@ -105,14 +107,13 @@
 
   (do
     (reset! ignored-by-arg #{})
-    (reset! ignored-by-class #{})
-    )
-
+    (reset! ignored-by-class #{}))
+    
   (run! ignore! traces1)
   @unignored-by-arg
   @ignored-by-arg
   @ignored-by-class
 
-  (keep keep! reflects1)
+  (keep keep! reflects1))
 
-  )
+  
