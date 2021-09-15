@@ -2,11 +2,32 @@
   (:require
    [fierycod.holy-lambda.retriever :as retriever]
    #?(:bb [cheshire.core :as json]
-      :clj [jsonista.core :as json]))
+      :clj [jsonista.core :as json])
+   [fierycod.holy-lambda.util :as u])
   #?(:clj
      (:import
+      [java.util List]
+      [clojure.lang PersistentHashMap]
       [java.net URL HttpURLConnection]
       [java.io InputStream InputStreamReader])))
+
+(defmacro ->str
+  [& args]
+  (if (== 1 (count args))
+    `(.toString ~(first args))
+    (let [sb (gensym "sb__")
+          appends (for [arg args
+                        :when arg]
+                    (if (string? arg)
+                      `(.append ~sb ~arg)
+                      `(.append ~sb (.toString ~arg))))]
+      `(let [~sb (StringBuilder.)]
+         ~@appends
+         (.toString ~sb)))))
+
+(defmacro ->ex
+  [& args]
+  `(Exception. (u/->str "[holy-lambda]: " ~@args)))
 
 (defn println-err!
   [msg]
@@ -19,13 +40,19 @@
     x
     #?(:bb (json/generate-string x)
        :clj (json/write-value-as-string x)
-       :default (throw (ex-info "Not implemented" {})))))
+       :default (throw (->ex "Not implemented")))))
+
+(defn adopt-map
+  [m]
+  #?(:clj (PersistentHashMap/create m)
+     :bb (PersistentHashMap/create m)
+     :cljs (into {} m)))
 
 (defn x->json-bytes
   [x]
   #?(:bb (.getBytes (json/generate-string x))
      :clj (json/write-value-as-bytes x)
-     :default (throw (ex-info "Not implemented" {}))))
+     :default (throw (->ex "Not implemented"))))
 
 (defn json-stream->x
   [^InputStream s]
@@ -33,19 +60,19 @@
      (json/parse-string (slurp (InputStreamReader. s "UTF-8")) true)
      :clj
      (json/read-value
-      (slurp (InputStreamReader. s "UTF-8"))
-      (json/object-mapper {:decode-key-fn true}))
+      (InputStreamReader. s "UTF-8")
+      json/keyword-keys-object-mapper)
      :default
-     (throw (ex-info "Not implemented" {}))))
+     (throw (->ex "Not implemented"))))
 
 (defn json-string->x
   [^String s]
   #?(:bb
      (json/parse-string s true)
      :clj
-     (json/read-value s (json/object-mapper {:decode-key-fn true}))
+     (json/read-value s json/keyword-keys-object-mapper)
      :default
-     (throw (ex-info "Not implemented" {}))))
+     (throw (->ex "Not implemented"))))
 
 (defn- normalize-headers
   [headers]
@@ -62,7 +89,7 @@
 
 (defn- content-type
   [x]
-  (get (:headers x) "content-type"))
+  (get (get x :headers) "content-type"))
 
 (defn- json-content-type?
   [ctype]
@@ -72,7 +99,7 @@
   [^InputStream event-stream]
   (let [event (-> event-stream json-stream->x)
         ctype (content-type event)
-        body (:body event)]
+        body (event :body)]
     (cond-> event
       (and (string? body)
            (json-content-type? ctype))
@@ -103,20 +130,6 @@
       (x->json-bytes response))))
 
 #?(:clj
-   (def ^:private success-codes #{200 202 201}))
-
-(defn success-code?
-  [code]
-  (success-codes code))
-
-#?(:clj
-   (defn- retrieve-body
-     [^HttpURLConnection http-conn status]
-     (if-not (success-codes status)
-       (.getErrorStream http-conn)
-       (.getInputStream http-conn))))
-
-#?(:clj
    (defn http
      [method url-s & [response]]
      (let [push? (= method "POST")
@@ -130,21 +143,29 @@
                (let [output-stream (.getOutputStream http-conn)]
                  (if-not (bytes? response-bytes)
                    (do (println "[holy-lambda] Response has not beed parsed to bytes array:" response-bytes)
-                       (throw (ex-info (str "[holy-lambda] Failed to parse response to byte array. Response type:" (type response-bytes)) {})))
+                       (throw (->ex "Failed to parse response to byte array. Response type:" (type response-bytes))))
                    (.write output-stream ^"[B" response-bytes))
                  (.flush output-stream)
                  (.close output-stream)))
            ;; It's not necessary to normalize the response headers for runtimes since
            ;; we only rely on Lambda-Runtime-Deadline-Ms and Lambda-Runtime-Aws-Request-Id headers
-           headers (into {} (.getHeaderFields http-conn))
-           status (.getResponseCode http-conn)]
+           headers (u/adopt-map (.getHeaderFields http-conn))
+           status (.getResponseCode http-conn)
+           success? (case status (200 201 202) true false)]
        {:headers headers
+        :success? success?
         :status status
-        :body (response-event->normalized-event (in->edn-event (retrieve-body http-conn status)))})))
+        :body (response-event->normalized-event
+               (in->edn-event
+                (if-not success?
+                  (.getErrorStream http-conn)
+                  (.getInputStream http-conn))))})))
 
 (defn getf-header
   [headers prop]
-  (some-> (get headers prop) seq first))
+  #?(:clj (when-let [^List l (get headers prop)] (.get l 0))
+     :bb (some-> (get headers prop) seq first)
+     :cljs (some-> (get headers prop) seq first)))
 
 (defn exit!
   []

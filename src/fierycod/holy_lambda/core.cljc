@@ -1,5 +1,6 @@
 (ns fierycod.holy-lambda.core
   (:require
+   [fierycod.holy-lambda.util]
    [fierycod.holy-lambda.custom-runtime]
    [fierycod.holy-lambda.agent]))
 
@@ -23,4 +24,7 @@
 
          ;; Start custom runtime loop
          (while true
-           (#'fierycod.holy-lambda.custom-runtime/next-iter (first attrs#) ~'PRVL_ROUTES (into {} (System/getenv))))))))
+           (#'fierycod.holy-lambda.custom-runtime/next-iter
+            (first attrs#)
+            ~'PRVL_ROUTES
+            (#'fierycod.holy-lambda.util/adopt-map (System/getenv))))))))
