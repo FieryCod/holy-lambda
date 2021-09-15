@@ -11,20 +11,19 @@
   `(do
      (def ~'PRVL_ROUTES (into {} (mapv (fn [l#] [(str (str (:ns (meta l#)) "." (str (:name (meta l#))))) l#]) ~lambdas)))
      (defn ~'-main [& attrs#]
-       (when (fn? ~init-hook)
-         (~init-hook))
+       (let [maybe-handler-name# (first attrs#)
+             envs# (#'fierycod.holy-lambda.util/adopt-map (System/getenv))]
+         (when (fn? ~init-hook)
+           (~init-hook))
 
-       ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image`
-       ;;                               will be generated via the agent.
-       ;;
-       ;; executor = anything else   -- Run provided runtime loop
-       (if (= (System/getProperty "executor") @#'fierycod.holy-lambda.agent/AGENT_EXECUTOR)
-         ;; Generate the native configuration for the lambdas
-         (#'fierycod.holy-lambda.agent/routes->reflective-call! ~'PRVL_ROUTES)
+         ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image`
+         ;;                               will be generated via the agent.
+         ;;
+         ;; executor = anything else   -- Run provided runtime loop
+         (if (= (System/getProperty "executor") @#'fierycod.holy-lambda.agent/AGENT_EXECUTOR)
+           ;; Generate the native configuration for the lambdas
+           (#'fierycod.holy-lambda.agent/routes->reflective-call! ~'PRVL_ROUTES)
 
-         ;; Start custom runtime loop
-         (while true
-           (#'fierycod.holy-lambda.custom-runtime/next-iter
-            (first attrs#)
-            ~'PRVL_ROUTES
-            (#'fierycod.holy-lambda.util/adopt-map (System/getenv))))))))
+           ;; Start custom runtime loop
+           (while true
+             (#'fierycod.holy-lambda.custom-runtime/next-iter maybe-handler-name# ~'PRVL_ROUTES envs#)))))))

@@ -2,8 +2,7 @@
   (:require
    [fierycod.holy-lambda.retriever :as retriever]
    #?(:bb [cheshire.core :as json]
-      :clj [jsonista.core :as json])
-   [fierycod.holy-lambda.util :as u])
+      :clj [jsonista.core :as json]))
   #?(:clj
      (:import
       [java.util List]
@@ -11,23 +10,33 @@
       [java.net URL HttpURLConnection]
       [java.io InputStream InputStreamReader])))
 
+(defn- compress-strings
+  [args]
+  (into
+   []
+   (comp
+    (partition-by string?)
+    (mapcat (fn [p] (if (string? (first p)) [(apply str p)] p))))
+   args))
+
 (defmacro ->str
   [& args]
-  (if (== 1 (count args))
-    `(.toString ~(first args))
-    (let [sb (gensym "sb__")
-          appends (for [arg args
-                        :when arg]
-                    (if (string? arg)
-                      `(.append ~sb ~arg)
-                      `(.append ~sb (.toString ~arg))))]
-      `(let [~sb (StringBuilder.)]
-         ~@appends
-         (.toString ~sb)))))
+  (let [args (compress-strings args)]
+    (if (== 1 (count args))
+      `(.toString ~(first args))
+      (let [sb (gensym "sb__")
+            appends (for [arg args
+                          :when arg]
+                      (if (string? arg)
+                        `(.append ~sb ~arg)
+                        `(.append ~sb (.toString ~arg))))]
+        `(let [~sb (StringBuilder.)]
+           ~@appends
+           (.toString ~sb))))))
 
 (defmacro ->ex
   [& args]
-  `(Exception. (u/->str "[holy-lambda]: " ~@args)))
+  `(Exception. (->str "[holy-lambda]: " ~@args)))
 
 (defn println-err!
   [msg]
@@ -132,34 +141,34 @@
 #?(:clj
    (defn http
      [method url-s & [response]]
-     (let [push? (= method "POST")
+     (let [push? (.equals "POST" method)
            response-bytes (when push? (response->bytes (response-event->normalized-event response)))
-           ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))
-           _ (doto ^HttpURLConnection http-conn
-               (.setDoOutput push?)
-               (.setRequestProperty "content-type" "application/json")
-               (.setRequestMethod method))
-           _ (when push?
-               (let [output-stream (.getOutputStream http-conn)]
-                 (if-not (bytes? response-bytes)
-                   (do (println "[holy-lambda] Response has not beed parsed to bytes array:" response-bytes)
-                       (throw (->ex "Failed to parse response to byte array. Response type:" (type response-bytes))))
-                   (.write output-stream ^"[B" response-bytes))
-                 (.flush output-stream)
-                 (.close output-stream)))
-           ;; It's not necessary to normalize the response headers for runtimes since
-           ;; we only rely on Lambda-Runtime-Deadline-Ms and Lambda-Runtime-Aws-Request-Id headers
-           headers (u/adopt-map (.getHeaderFields http-conn))
-           status (.getResponseCode http-conn)
-           success? (case status (200 201 202) true false)]
-       {:headers headers
-        :success? success?
-        :status status
-        :body (response-event->normalized-event
-               (in->edn-event
-                (if-not success?
-                  (.getErrorStream http-conn)
-                  (.getInputStream http-conn))))})))
+           ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))]
+       (doto ^HttpURLConnection http-conn
+         (.setDoOutput push?)
+         (.setRequestProperty "content-type" "application/json")
+         (.setRequestMethod method))
+       (when push?
+         (let [output-stream (.getOutputStream http-conn)]
+           (if (bytes? response-bytes)
+             (.write output-stream ^"[B" response-bytes)
+             (do (println "[holy-lambda] Response has not beed parsed to bytes array:" response-bytes)
+                 (throw (->ex "Failed to parse response to byte array. Response type:" (type response-bytes)))))
+           (.flush output-stream)
+           (.close output-stream)))
+       ;; It's not necessary to normalize the response headers for runtimes since
+       ;; we only rely on Lambda-Runtime-Deadline-Ms and Lambda-Runtime-Aws-Request-Id headers
+       (let [headers (adopt-map (.getHeaderFields http-conn))
+             status (.getResponseCode http-conn)
+             success? (case status (200 201 202) true false)]
+         {:headers headers
+          :success? success?
+          :status status
+          :body (response-event->normalized-event
+                 (in->edn-event
+                  (if success?
+                    (.getInputStream http-conn)
+                    (.getErrorStream http-conn))))}))))
 
 (defn getf-header
   [headers prop]
