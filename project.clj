@@ -11,7 +11,7 @@
   :global-vars {*warn-on-reflection* true}
 
   :dependencies [[org.clojure/clojure                              "1.10.3" :scope "provided"]
-                 [metosin/jsonista                                 "0.3.3"]
+                 [metosin/jsonista                                 "0.3.4"]
                  [io.github.FieryCod/holy-lambda-default-retriever "0.5.0"]]
 
   :eftest {:thread-count 4}
