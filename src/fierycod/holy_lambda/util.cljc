@@ -3,7 +3,11 @@
    [fierycod.holy-lambda.retriever :as retriever]
    #?(:bb [cheshire.core :as json]
       :clj [jsonista.core :as json]))
-  #?(:clj
+  #?(:bb
+     (:import
+      [java.net URL HttpURLConnection]
+      [java.io InputStream InputStreamReader])
+     :clj
      (:import
       [java.util List HashMap]
       [clojure.lang PersistentHashMap]
@@ -24,8 +28,8 @@
   (let [args (compress-strings args)]
     (if (== 1 (count args))
       `(.toString ~(first args))
-      (let [sb (gensym "sb__")
-            appends (for [arg args
+      (let [sb      (gensym "sb__")
+            appends (for [arg   args
                           :when arg]
                       (if (string? arg)
                         `(.append ~sb ~arg)
@@ -51,11 +55,18 @@
        :clj (json/write-value-as-string x)
        :default (throw (->ex "Not implemented")))))
 
-(defn adopt-map
-  [^HashMap m]
-  #?(:clj (PersistentHashMap/create m)
-     :bb (PersistentHashMap/create m)
-     :cljs (into {} m)))
+#?(:bb
+   (defn adopt-map
+     [m]
+     (into {} m))
+   :clj
+   (defn adopt-map
+     [^HashMap m]
+     (PersistentHashMap/create m))
+   :cljs
+   (defn adopt-map
+     [m]
+     (into {} m)))
 
 (defn x->json-bytes
   [x]
@@ -108,7 +119,7 @@
   [^InputStream event-stream]
   (let [event (-> event-stream json-stream->x)
         ctype (content-type event)
-        body (event :body)]
+        body  (event :body)]
     (cond-> event
       (and (string? body)
            (json-content-type? ctype))
@@ -116,11 +127,11 @@
 
 (defn response->bytes
   [?response]
-  (let [response (retriever/<-wait-for-response ?response)
+  (let [response        (retriever/<-wait-for-response ?response)
         bytes-response? #?(:clj (bytes? response)
                            :default false)
-        ctype (when-not bytes-response?
-                (content-type response))]
+        ctype           (when-not bytes-response?
+                          (content-type response))]
 
     (cond
       bytes-response?
@@ -132,7 +143,7 @@
 
       ;; Ack event
       (nil? response)
-      (x->json-bytes {:body nil
+      (x->json-bytes {:body       nil
                       :statusCode 200})
 
       :else 
@@ -141,8 +152,8 @@
 #?(:clj
    (defn http
      [method url-s & [response]]
-     (let [push? (.equals "POST" method)
-           response-bytes (when push? (response->bytes (response-event->normalized-event response)))
+     (let [push?                        (.equals "POST" method)
+           response-bytes               (when push? (response->bytes (response-event->normalized-event response)))
            ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))]
        (doto ^HttpURLConnection http-conn
          (.setDoOutput push?)
@@ -158,22 +169,22 @@
            (.close output-stream)))
        ;; It's not necessary to normalize the response headers for runtimes since
        ;; we only rely on Lambda-Runtime-Deadline-Ms and Lambda-Runtime-Aws-Request-Id headers
-       (let [headers (adopt-map (.getHeaderFields http-conn))
-             status (.getResponseCode http-conn)
+       (let [headers  (adopt-map (.getHeaderFields http-conn))
+             status   (.getResponseCode http-conn)
              success? (case status (200 201 202) true false)]
-         {:headers headers
+         {:headers  headers
           :success? success?
-          :status status
-          :body (response-event->normalized-event
-                 (in->edn-event
-                  (if success?
-                    (.getInputStream http-conn)
-                    (.getErrorStream http-conn))))}))))
+          :status   status
+          :body     (response-event->normalized-event
+                     (in->edn-event
+                      (if success?
+                        (.getInputStream http-conn)
+                        (.getErrorStream http-conn))))}))))
 
 (defn getf-header
   [headers prop]
-  #?(:clj (when-let [^List l (get headers prop)] (.get l 0))
-     :bb (some-> (get headers prop) seq first)
+  #?(:bb (some-> (get headers prop) seq first)
+     :clj (when-let [^List l (get headers prop)] (.get l 0))
      :cljs (some-> (get headers prop) seq first)))
 
 (defn exit!

@@ -38,7 +38,7 @@
 (defn- routes->reflective-call!
   [routes]
   (doseq [{:keys [request path propagate] :as invoke-map} (agents-payloads->invoke-map)
-          :let [callable-var (routes (:name invoke-map))]]
+          :let                                            [callable-var (routes (:name invoke-map))]]
     (if-not callable-var
       (do
         (println "[holy-lambda] Lambda" (:name invoke-map) "does not exists in classpath. Incorrect name?")
