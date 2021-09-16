@@ -16,14 +16,14 @@
      :fnName                (env-vars "AWS_LAMBDA_FUNCTION_NAME")
      :fnVersion             (env-vars "AWS_LAMBDA_FUNCTION_VERSION")
      :fnInvokedArn          (u/->str "arn:aws:lambda:" ^String (env-vars "AWS_REGION")
-                                     ":" (or ^String (request-context :accountId) "0000000")
+                                     ":" (or ^String (get request-context :accountId) "0000000")
                                      ":function:" ^String (env-vars "AWS_LAMBDA_FUNCTION_NAME"))
      :memoryLimitInMb       (env-vars "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
      :awsRequestId          iid
      :logGroupName          (env-vars "AWS_LAMBDA_LOG_GROUP_NAME")
      :logStreamName         (env-vars "AWS_LAMBDA_LOG_STREAM_NAME")
-     :identity              (request-context :identity)
-     :clientContext         (request-context :clientContext)
+     :identity              (get request-context :identity)
+     :clientContext         (get request-context :clientContext)
      :envs                  env-vars}))
 
 (defn- send-runtime-error
