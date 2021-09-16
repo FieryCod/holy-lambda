@@ -2,8 +2,7 @@
   (:require
    [fierycod.holy-lambda.retriever :as retriever]
    #?(:bb [cheshire.core :as json]
-      :clj [jsonista.core :as json])
-   [fierycod.holy-lambda.util :as u])
+      :clj [jsonista.core :as json]))
   #?(:clj
      (:import
       [java.util List HashMap]
