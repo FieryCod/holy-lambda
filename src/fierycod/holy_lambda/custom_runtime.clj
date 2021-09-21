@@ -41,7 +41,7 @@
   [runtime iid response]
   (let [{:keys [success? body]} (u/http "POST" (url runtime iid "/response") response)]
     (when-not success?
-      (send-runtime-error runtime iid (u/->ex "AWS did not accept your lambda payload:\n" body)))))
+      (send-runtime-error runtime iid (u/->ex "AWS did not accept your lambda payload:\n" (pr-str body))))))
 
 (defn next-iter
   [maybe-handler routes env-vars]
