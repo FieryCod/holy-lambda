@@ -45,20 +45,29 @@
 
 (defn norm-args
   [args]
-  (into {}
-        (mapv
-            (fn [[k v]]
-              [(cond-> k
-                 (s/includes? k "--")
-                 (subs 2)
+  (let [part-args (partition-all 2 args)
+        args (mapcat (fn [[k v]]
+                       (if (and (and k (or (s/includes? k "--")
+                                           (s/includes? k ":")))
+                                (and v (or (s/includes? v "--")
+                                           (s/includes? v ":"))))
+                         [k true v true]
+                         [k v]))
+                     part-args)]
+    (into {}
+          (mapv
+           (fn [[k v]]
+             [(cond-> k
+                (s/includes? k "--")
+                (subs 2)
 
-                 (s/includes? k ":")
-                 (subs 1)
+                (s/includes? k ":")
+                (subs 1)
 
-                 true
-                 keyword)
-               (or v true)])
-            (partition-all 2 args))))
+                true
+                keyword)
+              (or v true)])
+           (partition-all 2 args)))))
 
 (defn accent
   [s]
@@ -175,7 +184,7 @@
 (def TTY? (= (:exit @(shell-no-exit "test" "-t" "1")) 0))
 (def DOCKER (:docker OPTIONS))
 (def BUILD (:build OPTIONS))
-(def HL_NO_DOCKER?
+(def ^:dynamic HL_NO_DOCKER?
   (boolean (or (nil? DOCKER)
                (env-true? "HL_NO_DOCKER"))))
 
@@ -398,7 +407,8 @@
     (when (file-exists? ".holy-lambda/.babashka")
       (shell "rm -Rf .holy-lambda/pods")
       (shell "mkdir -p .holy-lambda/pods")
-      (shell "cp -R .holy-lambda/.babashka .holy-lambda/pods/"))))
+      (shell "cp -R .holy-lambda/.babashka .holy-lambda/pods/")))
+  (shell "bash -c \"mkdir -p .holy-lambda/bb-clj-deps && cp -R .holy-lambda/.m2 .holy-lambda/bb-clj-deps/\""))
 
 (def tasks-deps-edn
   {:mvn/local-repo ".holy-lambda/.m2"
@@ -573,16 +583,18 @@ set -e
 
 (defn hl:compile
   "     \033[0;31m>\033[0m Compiles sources if necessary
-  \t\t            - \033[0;31m:force\033[0m - force compilation even if sources did not change"
+  \t\t            - \033[0;31m:force\033[0m - force compilation even if sources did not change
+  \t\t            - \033[0;31m:local\033[0m - force compilation even if sources did not change"
   [& args]
   (print-task "hl:compile")
   (exit-if-not-synced!)
-  (let [{:keys [force]} (norm-args args)])
-  (when (and (not (build-stale?)) (not force))
-    (hpr "Nothing to compile. Sources did not change!")
-    (System/exit 0))
-  (docker-run (str "clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT)))
-  (hpr "Uberjar artifact of the project is available at" (accent ".holy-lambda/build/output.jar")))
+  (let [{:keys [force local]} (norm-args args)]
+    (when (and (not (build-stale?)) (not force))
+        (hpr "Nothing to compile. Sources did not change!")
+        (System/exit 0))
+    (binding [HL_NO_DOCKER? local]
+      (docker-run (str "clojure -X:uberjar :aliases '" (str [CLJ_ALIAS_KEY]) "' :aot '[\"" (str ENTRYPOINT) "\"]' " ":jvm-opts '[\"-Dclojure.compiler.direct-linking=true\", \"-Dclojure.spec.skip-macros=true\"]' :jar " OUTPUT_JAR_PATH " :main-class " (str ENTRYPOINT)))
+      (hpr "Uberjar artifact of the project is available at" (accent ".holy-lambda/build/output.jar")))))
 
 (defn mvn-local-test
   [file]

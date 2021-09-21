@@ -1,4 +1,5 @@
 # CLI
+
 A CLI of HL is distributed as a set of [babashka tasks](https://book.babashka.org/#tasks), that allows HL to run on different platforms, namely:
 - Windows WSL
 - Linux
@@ -19,14 +20,14 @@ CLI depends on the following programs:
   
   `bb <command-name> <args>`
   
-  | Command name    | Description                                                                                                                    |
-  |-----------------|--------------------------------------------------------------------------------------------------------------------------------|
-  | `hl:sync`       | Syncs project & dependencies. Creates `.holy-lambda` directory.                                                                |
-  | `hl:compile`    | Compiles a project to `uberjar` via depstar. Only Clojure and Native backend. Argument `--force\|:force` forces recompilation. |
-  | `hl:doctor`     | Diagnoses common issues in the project.                                                                                        |
-  | `hl:clean`      | Removes HL dependencies. Cleans `.holy-lambda` directory.                                                                      |
-  | `hl:version`    | Prints the current version of the tasks.                                                                                       |
-  | `hl:docker:run` | Runs a command specified as a string argument in the docker environment.                                                       |
+  | Command name    | Description                                                                                                                                                                                     |
+  |-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  | `hl:sync`       | Syncs project & dependencies. Creates `.holy-lambda` directory.                                                                                                                                 |
+  | `hl:compile`    | Compiles a project to `uberjar` via depstar. Only Clojure and Native backend. Argument `--force\|:force` forces recompilation. `--local\|:local` compiles project in local rather in docker env |
+  | `hl:doctor`     | Diagnoses common issues in the project.                                                                                                                                                         |
+  | `hl:clean`      | Removes HL dependencies. Cleans `.holy-lambda` directory.                                                                                                                                       |
+  | `hl:version`    | Prints the current version of the tasks.                                                                                                                                                        |
+  | `hl:docker:run` | Runs a command specified as a string argument in the docker environment.                                                                                                                        |
 
 #### Backend specific tasks
 ##### Native
@@ -41,7 +42,7 @@ CLI depends on the following programs:
       - `:host` - Path to local directory/file relative to the root of the project.
   - `:build {:clj-alias, :graalvm-home}` - Group for build related options.
     - `clj-alias` - An alias from `deps.edn` that should be passed to HL commands.
-    - `graalvm-home` - GraalVM home directory. Available only when `HL_NO_DOCKER` environment is set to `1\|true`.
+    - `graalvm-home` - GraalVM home directory. Available only when `HL_NO_DOCKER` environment is set to `1|true`.
   - `:runtime {:pods, :entrypoint, :bootstrap-file, :native-image-args}` - runtime/backend related group of options.
     - `:pods {<pod-cord> <pod-version>}` - upon `bb hl:sync` downloads all the Amazon Linux compatible Babashka pods to `.holy-lambda/pods`.
     - `:entrypoint` - used in `uberjar` generation. Entrypoint should point to main namespace with `(h/entrypoint)`.
@@ -50,15 +51,23 @@ CLI depends on the following programs:
 ## CLI Paths
   - `.holy-lambda` 
   
-     HL artifacts/cache/pods store
+     HL `artifacts/cache/pods` store
+     
    - `.holy-lambda/pods`
    
-      Set of Babashka pods, that are downloaded upon `bb hl:sync` from the `bb.edn:holy-lambda/options:runtime:pods` entry. 
+      Directory of downloaded Babashka pods, that are downloaded upon `bb hl:sync` from the `bb.edn:holy-lambda/options:runtime:pods` entry. 
    
       > :information_source: Babashka pods should be packed as a separate layer.
+  - `.holy-lambda/bb-clj-deps`
+      
+      Directory of downloaded Babashka Clojure deps.
+      
+      > :information_source: Babashka deps should be packed as a separate layer.
       
    - `holy-lambda/build` - Base output path for the built artifacts for the backends
-
+      - `holy-lambda/build/output.jar` - Deployable artifact of Clojure backend that should be packed in Dockerfile
+      - `holy-lambda/build/latest.zip` - Deployable artifact of Native backend built from `holy-lambda/build/output.jar`
+     
 ## Environment Variables
   | Name                | Possible values       | Description                                                                                 |
   |---------------------|-----------------------|---------------------------------------------------------------------------------------------|
