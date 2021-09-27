@@ -37,7 +37,9 @@
                        :path path
                        :image-uri (:ImageUri props)
                        :bucket-key bk}]))
-                 resources)))
+                 (filter (fn [[k _v]]
+                           (not (s/includes? (s/lower-case (str k)) "local")))
+                         resources))))
 
 (defn api-call
   [{:keys [path fn bucket-key bucket-name]} cold]

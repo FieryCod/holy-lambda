@@ -45,7 +45,6 @@ Resources:
             Path: /clojure-on-clojure-11
             Method: get
 
-
   ClojureClojureJava8RuntimeTiered:
     Type: AWS::Serverless::Function
     Properties:
@@ -194,6 +193,15 @@ Resources:
             Path: /java11
             Method: get
 
+  HLBabashkaLocalRuntime:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: HLBabashkaLocalRuntime
+      Description: Shared dependencies for stack.
+      ContentUri: ./holy-lambda-babashka-runtime
+      CompatibleRuntimes:
+        - provided
+
   ClojureOnBabashkaRuntime:
     Type: AWS::Serverless::Function
     Properties:
@@ -203,7 +211,7 @@ Resources:
       Runtime: provided
       Handler: hello.Hello
       Layers:
-        - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime:31
+        - !Ref HLBabashkaLocalRuntime
       Environment:
         Variables:
           Entrypoint: hello

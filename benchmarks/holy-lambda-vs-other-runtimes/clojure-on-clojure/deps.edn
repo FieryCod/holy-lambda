@@ -1,5 +1,5 @@
 {:deps {org.clojure/clojure                              {:mvn/version "1.10.3"}
-        io.github.FieryCod/holy-lambda                   {:mvn/version "0.3.0-SNAPSHOT"}}
+        io.github.FieryCod/holy-lambda                   {:mvn/version "0.5.1-SNAPSHOT"}}
  :paths ["."]
  :aliases {:uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
                      :exec-fn hf.depstar/uberjar
