@@ -1,4 +1,4 @@
 {:name "fierycod.holy-lambda.impl.agent-test.HolyLambda",
  :request {:event {:lambda2 2},
-           :context {}}
+           :ctx {}}
  :propagate false}
