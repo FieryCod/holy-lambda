@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.1 (UNRELEASED)
+- [holy-lambda] Improved performance of the runtime
+- [bb layer] Renamed the Entrypoint environment variable in AWS Lambda to HL_ENTRYPOINT.
+- [bb tasks] Rename `hl:sync` to `hl:babashka-sync`. Sync downloads only `pods` and Babashka deps. Dependencies for babashka should be specified in bb.edn.
+- [bb tasks] Remove `:mvn/local-repo` from `deps.edn`. Dependencies for Clojure & Native backend are not downloaded to a local directory. 
+- [bb tasks] Java compilation happens without Docker now.
+- [bb tasks] HL reverts allowance for not specifying the backend name. 
+- [bb tasks] Rename `:runtime` in `bb.edn` to `backend` to match the documentation. 
+
 ## 0.5.0 
 
 **Rationale**

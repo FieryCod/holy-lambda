@@ -423,12 +423,12 @@
   (docker-run (str "clojure -A:" (and CLJ_ALIAS (str CLJ_ALIAS ":")) "uberjar -P"))
   (deps-sync--babashka))
 
-(defn hl:sync
+(defn hl:babashka-sync
   "     \033[0;31m>\033[0m Syncs project & dependencies from either:
        \t\t            - \033[0;31m<Clojure>\033[0m  deps.edn
        \t\t            - \033[0;31m<Babashka>\033[0m bb.edn:runtime:pods"
   []
-  (print-task "hl:sync")
+  (print-task "hl:babashka-sync")
   (when (and (not HL_NO_DOCKER?)
              (not (file-exists? ".holy-lambda/clojure/deps.edn")))
     (hpr "Project not synced yet. Syncing with docker image!")

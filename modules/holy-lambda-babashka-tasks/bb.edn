@@ -4,8 +4,8 @@
 
  :min-bb-version "0.3.7"
 
- :holy-lambda/options {:docker {:volumes [{:docker     "/holy-lambda"
-                                           :host       "../../"}]
+ :holy-lambda/options {:docker {:volumes [{:docker "/holy-lambda"
+                                           :host   "../../"}]
 
                                 :network "host"
 
@@ -14,8 +14,9 @@
                        :build {:clj-alias    :holy-lambda
                                :graalvm-home "~/.graalvm"}
 
-                       :runtime
+                       :backend
                        {
+                        :name :native
                         ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
                         ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers
                         ;; Check this template https://github.com/aws-samples/aws-lambda-layers-aws-sam-examples/blob/master/aws-sdk-layer/template.yaml
@@ -24,11 +25,7 @@
                         ;; For now pods should be declared in `bb.edn`. See: https://github.com/babashka/babashka/issues/768#issuecomment-825016317
                         ;;
                         ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
-                        :pods                {org.babashka/aws "0.0.6"}
-
-                        ;; :entrypoint should always point to a namespace with includes (core/entrypoint) call
-                        ;; Make sure to include $Entrypoint variable for AWS Lambda function
-                        :entrypoint          example.core
+                        :pods {org.babashka/aws "0.0.6"}
 
                         ;; Specify custom arguments for native image generation
                         ;; Check https://www.graalvm.org/reference-manual/native-image/Options/
@@ -42,15 +39,12 @@
                          "--initialize-at-build-time=com.fasterxml.jackson"
                          "--initialize-at-build-time=clojure,fierycod.holy_lambda,jsonista,example"]}}
 
- :tasks {:requires                 ([holy-lambda.tasks])
-
-         hl:docker:run             holy-lambda.tasks/hl:docker:run
-
-         hl:native:conf            holy-lambda.tasks/hl:native:conf
-         hl:native:executable      holy-lambda.tasks/hl:native:executable
-
-         hl:sync                   holy-lambda.tasks/hl:sync
-         hl:compile                holy-lambda.tasks/hl:compile
-         hl:doctor                 holy-lambda.tasks/hl:doctor
-         hl:clean                  holy-lambda.tasks/hl:clean
-         hl:version                holy-lambda.tasks/hl:version}}
+ :tasks {:requires            ([holy-lambda.tasks])
+         hl:docker:run        holy-lambda.tasks/hl:docker:run
+         hl:native:conf       holy-lambda.tasks/hl:native:conf
+         hl:native:executable holy-lambda.tasks/hl:native:executable
+         hl:sync              holy-lambda.tasks/hl:sync
+         hl:compile           holy-lambda.tasks/hl:compile
+         hl:doctor            holy-lambda.tasks/hl:doctor
+         hl:clean             holy-lambda.tasks/hl:clean
+         hl:version           holy-lambda.tasks/hl:version}}
