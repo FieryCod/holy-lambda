@@ -34,7 +34,7 @@ CLI depends on the following programs:
   | Command name           | Description                                                                                                                        |
   |------------------------|------------------------------------------------------------------------------------------------------------------------------------|
   | `hl:native:conf`       | Provides native configurations for the application. Uses GraalVM `java -agentlib` and generates `resources/native-configurations.` |
-  | `hl:native:executable` | Provides native executable of the application, by using `native-image` under the hood.                                             |
+  | `hl:native:executable` | Provides native executable of the application, by using `native-image` under the hood. Generates `.holy-lambda/build/latest.zip`                                             |
 ## Possible options in `bb.edn` tasks
   - `:docker {:volumes, :network, :image}` - Docker execution environment configuration.
     - `:volumes [{:docker <pathA> :host <pathB>}]` - Expose local directories/files in Docker context.
@@ -90,7 +90,6 @@ CLI depends on the following programs:
       - `AWS_SECRET_ACCESS_KEY`
   3) Takes precedence over `:holy-lambda/options:build:clj-alias`. Especially useful in CI environment, where builder is based on official HL docker image.
   4) Takes precedence over `bb.edn:holy-lambda/options:build:graalvm-home`
-
 
 ## GraalVM EE Docker Image for CLI
 
