@@ -19,34 +19,24 @@ ENV XDG_CACHE_HOME=/project/.holy-lambda
 ENV XDG_CONFIG_HOME=/project/.holy-lambda
 ENV XDG_DATA_HOME=/project/.holy-lambda
 ENV GITLIBS=/project/.holy-lambda/.gitlibs/
+ENV LANG=en_US.UTF-8 
+ENV JAVA_HOME=/opt/graalvm-dev
 
 # --------------- UPDATE ------------------
 # -----------------------------------------
-ARG BABASHKA_VERSION=0.6.0
-ARG CLOJURE_VERSION=1.10.3.933
-# -----------------------------------------
-
-ARG JAVA_VERSION=java8
-ARG GRAALVM_VERSION=21.3.0-dev
-ARG GRAALVM_VERSION_POSTFIX=20210910_2147
-
-ENV LANG=en_US.UTF-8 \
-    JAVA_HOME=/opt/graalvm-ce-$JAVA_VERSION-$GRAALVM_VERSION
-
-# Install gu
-RUN curl https://raw.githubusercontent.com/graalvm/container/master/community/gu-wrapper.sh > gu-wrapper.sh
-RUN mv gu-wrapper.sh /usr/local/bin/gu
-
-ARG GRAALVM_JAVA_URL=https://github.com/graalvm/graalvm-ce-dev-builds/releases/download/$GRAALVM_VERSION-$GRAALVM_VERSION_POSTFIX/graalvm-ce-java8-linux-amd64-dev.tar.gz
-ARG GRAALVM_NATIVE_IMAGE_URL=https://github.com/graalvm/graalvm-ce-dev-builds/releases/download/$GRAALVM_VERSION-$GRAALVM_VERSION_POSTFIX/native-image-installable-svm-java8-linux-amd64-dev.jar
-
+ARG BABASHKA_VERSION=0.6.1
+ARG GRAALVM_JAVA_URL={{java-version-url}}
+ARG GRAALVM_NATIVE_IMAGE_URL={{native-image-url}}
 ARG GRAALVM_JAVA_CORD=graalvm-ce-linux.tar.gz
 ARG GRAALVM_NATIVE_IMAGE_CORD=native-image.jar
+# -----------------------------------------
+
+RUN curl https://raw.githubusercontent.com/graalvm/container/master/community/gu-wrapper.sh > gu-wrapper.sh
+RUN mv gu-wrapper.sh /usr/local/bin/gu
 
 RUN curl -L $GRAALVM_JAVA_URL > $GRAALVM_JAVA_CORD
 RUN curl -L $GRAALVM_NATIVE_IMAGE_URL > $GRAALVM_NATIVE_IMAGE_CORD
 
-# Install EE Java edition
 RUN set -eux && gunzip -dc $GRAALVM_JAVA_CORD | tar x -C /opt/ \
     # Set alternative links
     && mkdir -p "/usr/java" \
@@ -73,28 +63,5 @@ RUN chmod +x download_pods && mv download_pods /bin/download_pods
 RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-amd64.tar.gz -O - | tar -xz \
     && chmod +x bb \
     && mv bb /bin/bb
-
-# Install Clojure toolbox for babashka
-RUN curl https://raw.githubusercontent.com/borkdude/deps.clj/master/install | bash && deps -P
-
-# Install clojure
-RUN curl https://download.clojure.org/install/linux-install-$CLOJURE_VERSION.sh | bash
-
-# Install aws command
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
-    && unzip awscliv2.zip -d aws \
-    && ./aws/aws/install \
-    && rm -Rf awscliv2.zip aws
-
-# # Install aws-sam command
-RUN curl -L "https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip" -o "aws-sam.zip" \
- && unzip aws-sam.zip -d aws-sam \
- && ./aws-sam/install \
- && rm -Rf aws-sam aws-sam.zip
-
-RUN alias java="`which java` -Duser.home=/project/.holy-lambda"
-RUN alias bb="`which bb` -Duser.home=/project/.holy-lambda"
-RUN alias clojure="`which clojure` -J-Duser.home=\"/project/.holy-lambda\""
-RUN alias deps="`which deps` -J-Duser.home=/project/.holy-lambda"
 
 WORKDIR /project

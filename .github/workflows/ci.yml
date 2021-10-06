@@ -26,11 +26,6 @@ jobs:
         with:
           lein: 2.9.1
 
-      - name: Setup Babashka
-        uses: turtlequeue/setup-babashka@v1.3.0
-        with:
-          babashka-version: 0.6.1
-
       - name: Cache Maven
         uses: actions/cache@v2
         with:
@@ -41,9 +36,26 @@ jobs:
       - name: Test the core
         run: lein with-profile eftest eftest
 
+  build-images:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Login to Container Registry
         run: echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u FieryCod --password-stdin
 
-      - name: Build all images
+      - name: Setup Babashka
+        uses: turtlequeue/setup-babashka@v1.3.0
+        with:
+          babashka-version: 0.6.1
+
+      - name: Build images for amd64
         run: |
-          cd docker && bb registry.clj
+          cd docker && bb registry.clj "amd64"

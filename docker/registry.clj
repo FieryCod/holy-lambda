@@ -11,22 +11,31 @@
   [cmd]
   (exit-non-zero (p/process (p/tokenize cmd) {:inherit true})))
 
-(def VERSIONS
-  {"amd64" {"ce" ["java8-21.2.0"
-                  "java11-21.2.0"]}})
+(def CE_IMAGES
+  [{:version ["21.2.0" "21.1.0"]
+    :java ["8", "11"]
+    :arch ["amd64", "aarch64"]}])
 
 (defn build-pub-ce!
-  [arch variant version]
-  (let [dockerfile          (str "Dockerfile" "." arch "." variant)
+  [{:keys [java version arch] :as spec}]
+  (let [variant             "ce"
+        dockerfile          (str "Dockerfile" "." variant)
         dockerfile-template (str dockerfile ".template")
-        dockerfile-content  (selm/render (slurp dockerfile-template) {:version version})
-        image-uri (str "ghcr.io/fierycod/holy-lambda-builder:" arch "-" variant "-" version)]
+        dockerfile-content  (selm/render (slurp dockerfile-template) (assoc spec :image-prefix (if-not (= arch "aarch64") "" "arm64v8/")))
+        image-uri           (str "ghcr.io/fierycod/holy-lambda-builder:" arch "-java" java "-" version)]
     (spit dockerfile dockerfile-content)
     (println "> Building:" image-uri)
     (shell (str "docker build . -f " dockerfile " -t " image-uri))
     (println "> Publishing:" image-uri)
     (shell (str "docker push " image-uri))))
 
-(println "Building & Publishing AMD64 CE Images")
-(doseq [version (get-in VERSIONS ["amd64" "ce"])]
-  (build-pub-ce! "amd64" "ce" version))
+(def requested-arch (first *command-line-args*))
+
+(doseq [{:keys [version java arch]} CE_IMAGES]
+  (doseq [version version]
+    (doseq [java java]
+      (doseq [arch arch]
+        (when (= requested-arch arch)
+          (build-pub-ce! {:version version
+                          :java    java
+                          :arch    arch}))))))

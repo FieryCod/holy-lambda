@@ -1,0 +1,55 @@
+FROM {{image-prefix}}amazonlinux
+MAINTAINER Karol Wójcik <Karol Wójcik>
+
+RUN yum install -y unzip curl make wget git zip tar
+
+ENV CLJ_CACHE=/project/.holy-lambda/clojure
+ENV CLJ_COFIG=/project/.holy-lambda/clojure
+ENV CLOJURE_TOOLS_DIR=/project/.holy-lambda
+ENV HOME=/project/.holy-lambda
+ENV XDG_CACHE_HOME=/project/.holy-lambda
+ENV XDG_CONFIG_HOME=/project/.holy-lambda
+ENV XDG_DATA_HOME=/project/.holy-lambda
+ENV GITLIBS=/project/.holy-lambda/.gitlibs/
+ENV LANG=en_US.UTF-8 
+ENV JAVA_HOME=/opt/graalvm-ce-java{{java}}-{{version}}
+
+# --------------- UPDATE ------------------
+# -----------------------------------------
+ARG BABASHKA_VERSION=0.6.1
+ARG GRAALVM_JAVA_URL=https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-{{version}}/graalvm-ce-java{{java}}-linux-{{arch}}-{{version}}.tar.gz
+ARG GRAALVM_JAVA_CORD=graalvm-ce-linux.tar.gz
+# -----------------------------------------
+
+RUN curl https://raw.githubusercontent.com/graalvm/container/master/community/gu-wrapper.sh > gu-wrapper.sh
+RUN mv gu-wrapper.sh /usr/local/bin/gu && chmod +x /usr/local/bin/gu
+
+RUN curl -L $GRAALVM_JAVA_URL > $GRAALVM_JAVA_CORD
+
+RUN set -eux && gunzip -dc $GRAALVM_JAVA_CORD | tar x -C /opt/ \
+    # Set alternative links
+    && mkdir -p "/usr/java" \
+    && ln -sfT "$JAVA_HOME" /usr/java/default \
+    && ln -sfT "$JAVA_HOME" /usr/java/latest \
+    && for bin in "$JAVA_HOME/bin/"*; do \
+    base="$(basename "$bin")"; \
+    [ ! -e "/usr/bin/$base" ]; \
+    alternatives --install "/usr/bin/$base" "$base" "$bin" 20000; \
+    done \
+    && chmod +x /usr/local/bin/gu
+
+# Cleanup
+RUN rm -Rf $GRAALVM_JAVA_CORD
+
+# Provide download_pods command
+COPY download_pods download_pods.clj /
+RUN chmod +x download_pods && mv download_pods /bin/download_pods
+
+# Install babashka
+RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-{{arch}}.tar.gz -O - | tar -xz \
+    && chmod +x bb \
+    && mv bb /bin/bb
+
+RUN gu install native-image
+
+WORKDIR /project
