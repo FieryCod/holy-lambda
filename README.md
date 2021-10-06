@@ -6,6 +6,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/FieryCod/holy-lambda/actions/workflows/ci.yml"><img src="https://github.com/FieryCod/holy-lambda/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://dev.azure.com/VetHelpAssistant/holy-lambda/_build/latest?definitionId=2&branchName=master"><img src="https://dev.azure.com/VetHelpAssistant/holy-lambda/_apis/build/status/FieryCod.holy-lambda?branchName=master"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green.svg"></a>
 </p>

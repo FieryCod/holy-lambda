@@ -1,6 +1,6 @@
 name: Holy Lambda Pipeline
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   test:
