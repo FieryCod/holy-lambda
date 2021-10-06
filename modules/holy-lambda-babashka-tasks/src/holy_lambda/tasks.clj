@@ -301,7 +301,7 @@
 
 (when-not (docker-image-exists? IMAGE_CORDS)
   (hpr (prw "Docker image") (accent IMAGE_CORDS) (prw "for") (accent "holy-lambda") (prw "microframework has not been yet downloaded!"))
-  (hpr "Pulling the image" (accent IMAGE_CORDS) "from" (str (accent "DockerHub") "!"))
+  (hpr "Pulling the image" (accent IMAGE_CORDS) "from" (str (accent "Container Registry") "!"))
   (shell "docker" "pull" IMAGE_CORDS)
   (println ""))
 

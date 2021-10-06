@@ -14,6 +14,8 @@
                  [metosin/jsonista                                 "0.3.4"]
                  [io.github.FieryCod/holy-lambda-default-retriever "0.5.0"]]
 
+  :resources ["resources"]
+
   :eftest {:thread-count 4}
 
   :plugins [[lein-cloverage "1.1.1"]]

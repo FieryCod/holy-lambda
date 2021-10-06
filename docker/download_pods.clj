@@ -6,5 +6,5 @@
 
 (doseq [[s v] (:pods (or (:runtime (:holy-lambda/options OPTIONS))
                          (:backend (:holy-lambda/options OPTIONS))))]
-  (println "[holy-lambda] Downloading pod =" s "v =" v)
+  (println "[holy-lambda] Downloading pod =" s "; version =" v)
   (pods/load-pod s v))
