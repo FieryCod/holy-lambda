@@ -1,8 +1,8 @@
 FROM {{image-prefix}}amazonlinux
 MAINTAINER Karol Wójcik <Karol Wójcik>
 
-RUN yum install -y unzip curl make wget git zip tar
-RUN yum group install -y Development Tools
+RUN yum install -y -q unzip curl make wget git zip tar
+RUN yum group install -y -q Development Tools
 
 ENV CLJ_CACHE=/project/.holy-lambda/clojure
 ENV CLJ_COFIG=/project/.holy-lambda/clojure
@@ -25,7 +25,7 @@ ARG GRAALVM_JAVA_CORD=graalvm-ce-linux.tar.gz
 RUN curl https://raw.githubusercontent.com/graalvm/container/master/community/gu-wrapper.sh > gu-wrapper.sh
 RUN mv gu-wrapper.sh /usr/local/bin/gu && chmod +x /usr/local/bin/gu
 
-RUN curl -L $GRAALVM_JAVA_URL > $GRAALVM_JAVA_CORD
+RUN curl -sL $GRAALVM_JAVA_URL > $GRAALVM_JAVA_CORD
 
 RUN set -eux && gunzip -dc $GRAALVM_JAVA_CORD | tar x -C /opt/ \
     # Set alternative links
@@ -47,10 +47,10 @@ COPY download_pods download_pods.clj /
 RUN chmod +x download_pods && mv download_pods /bin/download_pods
 
 # Install babashka
-RUN wget -c https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-{{arch}}.tar.gz -O - | tar -xz \
+RUN wget -cq https://github.com/babashka/babashka/releases/download/v$BABASHKA_VERSION/babashka-$BABASHKA_VERSION-linux-{{arch}}.tar.gz -O - | tar -xz \
     && chmod +x bb \
     && mv bb /bin/bb
 
-RUN gu install native-image nodejs python ruby R
+RUN gu install -n native-image nodejs python ruby R
 
 WORKDIR /project

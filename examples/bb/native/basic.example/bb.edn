@@ -6,41 +6,28 @@
  :min-bb-version "0.3.7"
 
  :holy-lambda/options {
-                       :docker {:volumes [{:docker     "/holy-lambda"
-                                           :host       "../../../../"}]
+                       :docker {:volumes [{:docker "/holy-lambda"
+                                           :host   "../../../../"}]
 
                                 :network "host"
 
                                 :image "fierycod/graalvm-native-image:ce"}
 
-                       :build {:clj-alias nil
+                       :build {:compile-cmd "clojure -X:uberjar"
 
                                :graalvm-home nil}
 
                        :runtime
                        {
 
-                        ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
-                        ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers
-                        ;; Check this template https://github.com/aws-samples/aws-lambda-layers-aws-sam-examples/blob/master/aws-sdk-layer/template.yaml
-                        ;; and official docs https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-layers.html
-                        ;; CodeUri should be `.holy-lambda/pods`
-                        ;; For now pods should be declared in `bb.edn`. See: https://github.com/babashka/babashka/issues/768#issuecomment-825016317
-                        ;;
-                        ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
                         ;; :pods                {org.babashka/aws "0.0.5"}
 
-                        ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
-                        ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
-                        :entrypoint          basic.example.core
-
-
                         ;; For `:native` runtime you can provide your own bootstrap file
-                        :bootstrap-file      "bootstrap"
+                        :bootstrap-file "bootstrap"
 
                         ;; For `:native` runtime you can provide some native resources which will be available during lambda execution
                         ;; Resources are packed as is.
-                        :native-deps         "resources"
+                        :native-deps "resources"
 
                         ;; Specify custom arguments for native image generation
                         ;; Works only on `:native` runtime.
@@ -54,17 +41,14 @@
                          "--no-server"
                          "--initialize-at-build-time"]}}
 
- :tasks {:requires                 ([holy-lambda.tasks])
-
-         hl:docker:run             holy-lambda.tasks/hl:docker:run
-
-         hl:native:conf            holy-lambda.tasks/hl:native:conf
-         hl:native:executable      holy-lambda.tasks/hl:native:executable
-
-         hl:sync                   holy-lambda.tasks/hl:sync
-         hl:compile                holy-lambda.tasks/hl:compile
-         hl:doctor                 holy-lambda.tasks/hl:doctor
-         hl:clean                  holy-lambda.tasks/hl:clean
-         hl:version                holy-lambda.tasks/hl:version
+ :tasks {:requires            ([holy-lambda.tasks])
+         hl:docker:run        holy-lambda.tasks/hl:docker:run
+         hl:native:conf       holy-lambda.tasks/hl:native:conf
+         hl:native:executable holy-lambda.tasks/hl:native:executable
+         hl:babashka:sync     holy-lambda.tasks/hl:babashka:sync
+         hl:compile           holy-lambda.tasks/hl:compile
+         hl:doctor            holy-lambda.tasks/hl:doctor
+         hl:clean             holy-lambda.tasks/hl:clean
+         hl:version           holy-lambda.tasks/hl:version
          }
  }
