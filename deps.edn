@@ -1,4 +1,4 @@
 {:deps {org.clojure/clojure                              {:mvn/version "1.10.3"}
-        metosin/jsonista                                 {:mvn/version "0.3.3"}
+        metosin/jsonista                                 {:mvn/version "0.3.4"}
         io.github.FieryCod/holy-lambda-default-retriever {:mvn/version "0.0.7"}}
  :paths ["src"]}

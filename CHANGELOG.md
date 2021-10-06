@@ -7,7 +7,8 @@
 - [bb tasks] Remove `:mvn/local-repo` from `deps.edn`. Dependencies for Clojure & Native backend are not downloaded to a local directory. 
 - [bb tasks] Java compilation happens without Docker now.
 - [bb tasks] HL reverts allowance for not specifying the backend name. 
-- [bb tasks] Rename `:runtime` in `bb.edn` to `backend` to match the documentation. 
+- [bb tasks] Rename `:runtime` in `bb.edn` to `:backend` to match the documentation. 
+- [bb tasks] Remove `:entrypoint` and `:clj-alias` support. Use `:compile-cmd` in `:build` instead!
 
 ## 0.5.0 
 

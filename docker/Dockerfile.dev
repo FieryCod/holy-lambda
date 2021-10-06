@@ -98,5 +98,3 @@ RUN alias clojure="`which clojure` -J-Duser.home=\"/project/.holy-lambda\""
 RUN alias deps="`which deps` -J-Duser.home=/project/.holy-lambda"
 
 WORKDIR /project
-
-RUN mkdir -p .holy-lambda && cd .holy-lambda && clojure -P && cp -R ../../usr/local/lib/clojure/libexec/** .

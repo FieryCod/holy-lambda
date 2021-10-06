@@ -221,6 +221,9 @@
 }, {
   "name" : "fierycod.holy_lambda.agent__init"
 }, {
+  "name" : "fierycod.holy_lambda.core$entrypoint$fn__279",
+  "allPublicConstructors" : true
+}, {
   "name" : "fierycod.holy_lambda.core__init"
 }, {
   "name" : "fierycod.holy_lambda.custom_runtime__init"
@@ -365,6 +368,8 @@
   "name" : "java.util.Date"
 }, {
   "name" : "java.util.GregorianCalendar"
+}, {
+  "name" : "java.util.HashMap"
 }, {
   "name" : "java.util.List"
 }, {

@@ -1,15 +1,19 @@
-{:deps    {}
+{:deps {org.clojure/clojure                  {:mvn/version "1.10.3"}
+        io.github.FieryCod/holy-lambda       {:local/root "../../"}
+        com.github.clj-easy/graal-build-time {:mvn/version "0.1.4"}}
+
+ :paths ["src" "resources"]
+
  :aliases {:holy-lambda
            {:replace-deps {org.clojure/clojure            {:mvn/version "1.10.3"}
                            io.github.FieryCod/holy-lambda {:local/root "/holy-lambda"}}}
            :holy-lambda-local
            {:replace-deps {org.clojure/clojure            {:mvn/version "1.10.3"}
                            io.github.FieryCod/holy-lambda {:local/root "../../"}}}
-
            :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
                      :exec-fn      hf.depstar/uberjar
-                     :exec-args    {:aot        [example.core]
-                                    :main-class example.core
+                     :exec-args    {:aot        ["example.core"]
+                                    :main-class "example.core"
+                                    :jar        ".holy-lambda/build/output.jar"
                                     :jvm-opts   ["-Dclojure.compiler.direct-linking=true"
-                                                 "-Dclojure.spec.skip-macros=true"]}}}
- :paths ["src" "resources"]}
+                                                 "-Dclojure.spec.skip-macros=true"]}}}}
