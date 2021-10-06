@@ -131,6 +131,7 @@ jobs:
           curl -Ls https://github.com/docker/buildx/releases/download/v0.6.3/buildx-v0.6.3.linux-amd64 > buildx
           mkdir -p ~/.docker/cli-plugins && mv buildx ~/.docker/cli-plugins/docker-buildx
           docker run --privileged --rm tonistiigi/binfmt --install all
+          chmod a+x ~/.docker/cli-plugins/docker-buildx
           docker buildx install
 
       - name: Build images for aarch64
