@@ -65,6 +65,7 @@ jobs:
           curl -s https://github.com/docker/buildx/releases/download/v0.6.3/buildx-v0.6.3.linux-amd64 > buildx
           mkdir -p ~/.docker/cli-plugins && mv buildx ~/.docker/cli-plugins/docker-buildx
           docker run --privileged --rm tonistiigi/binfmt --install all
-      - name: Build mmages for aarch64
+          docker buildx install
+      - name: Build images for aarch64
         run: |
           cd docker && bb registry.clj "aarch64"
