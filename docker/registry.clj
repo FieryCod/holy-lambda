@@ -13,8 +13,11 @@
 
 (def CE_IMAGES
   [{:version ["21.2.0" "21.1.0"]
-    :java ["8", "11"]
-    :arch ["amd64", "aarch64"]}])
+    :java ["11"]
+    :arch ["amd64", "aarch64"]}
+   {:version ["21.2.0" "21.1.0"]
+    :java ["8"]
+    :arch ["amd64"]}])
 
 (defn build-pub-ce!
   [{:keys [java version arch] :as spec}]

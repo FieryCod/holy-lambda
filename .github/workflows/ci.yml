@@ -56,6 +56,13 @@ jobs:
         with:
           babashka-version: 0.6.1
 
-      - name: Build images for amd64
+      # - name: Build images for amd64
+      #   run: |
+      #     cd docker && bb registry.clj "amd64"
+
+      - name: Install buildx
         run: |
-          cd docker && bb registry.clj "amd64"
+          curl -s https://github.com/docker/buildx/releases/download/v0.6.3/buildx-v0.6.3.linux-amd64 > buildx
+          mkdir -p ~/.docker/cli-plugins && mv buildx ~/.docker/cli-plugins/docker-buildx
+          docker run --privileged --rm tonistiigi/binfmt --install all
+          cd docker && bb registry.clj "aarch64"
