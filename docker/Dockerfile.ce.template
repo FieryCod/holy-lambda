@@ -2,6 +2,7 @@ FROM {{image-prefix}}amazonlinux
 MAINTAINER Karol Wójcik <Karol Wójcik>
 
 RUN yum install -y unzip curl make wget git zip tar
+RUN yum group install -y Development Tools
 
 ENV CLJ_CACHE=/project/.holy-lambda/clojure
 ENV CLJ_COFIG=/project/.holy-lambda/clojure
