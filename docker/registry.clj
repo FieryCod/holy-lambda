@@ -24,9 +24,8 @@
 (def DEV_IMAGES
   [{:version         "21.3.0-dev-20211006_0800"
     :partial-version "21.3.0-dev"
-    :java            ["11"]
+    :java            ["11" "17"]
     :arch            ["amd64", "aarch64"]}])
-
 
 (defn dev-image-url
   [{:keys [version java arch]}]
@@ -51,10 +50,8 @@
                                                                          " python ruby R")))
         image-uri           (str "ghcr.io/fierycod/holy-lambda-builder:" arch "-java" java "-" version)]
     (spit dockerfile dockerfile-content)
-    (println "> Pulling to speedup the build:" image-uri)
-    @(p/process (p/tokenize (str "docker pull " image-uri)) {:inherit true})
     (println "> Building:" image-uri)
-    (shell (str "docker build . -f " dockerfile " -t " image-uri (when (= arch "aarch64") " --platform linux/aarch64")))
+    (shell (str "docker build . -f " dockerfile " -t " image-uri (when (= arch "aarch64") " --platform linux/aarch64 --pull")))
     (println "> Publishing:" image-uri)
     (shell (str "docker push " image-uri))))
 
@@ -74,10 +71,8 @@
                                                                          " python ruby R")))
         image-uri           (str "ghcr.io/fierycod/holy-lambda-builder:" arch "-java" java "-" version)]
     (spit dockerfile dockerfile-content)
-    (println "> Pulling to speedup the build:" image-uri)
-    @(p/process (p/tokenize (str "docker pull " image-uri)) {:inherit true})
     (println "> Building:" image-uri)
-    (shell (str "docker build . -f " dockerfile " -t " image-uri (when (= arch "aarch64") " --platform linux/aarch64")))
+    (shell (str "docker build . -f " dockerfile " -t " image-uri (when (= arch "aarch64") " --platform linux/aarch64 --pull")))
     (println "> Publishing:" image-uri)
     (shell (str "docker push " image-uri))))
 

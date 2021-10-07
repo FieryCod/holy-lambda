@@ -26,9 +26,11 @@ Resources:
   ExampleLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Runtime: provided
+      Runtime: provided.al2
       Handler: example.core.ExampleLambda
       CodeUri: ./.holy-lambda/build/latest.zip
+      Architectures:
+        - arm64
       Events:
         HelloEvent:
           Type: HttpApi

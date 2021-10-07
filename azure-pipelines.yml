@@ -26,23 +26,14 @@ jobs:
     variables:
       HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/native/basic.example
-      HL_CLJ_ALIAS: holy-lambda
     steps:
       - bash: |
           # Regenerate partial cache
           bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip"
 
-          # Sync
-          printf "\n------------------------------------------------------\n"
-          printf "                    (1) Sync check                        "
-          printf "\n------------------------------------------------------\n"
-          #------------------------
-          bb hl:sync || exit 1
-          echo "------------------------------------------------------"
-
           # Bucket deletion
           printf "\n------------------------------------------------------\n"
-          printf "                    (2) Doctor check                      "
+          printf "                    (1) Doctor check                      "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb hl:doctor || exit 1
@@ -50,7 +41,7 @@ jobs:
 
           # Stack version test
           printf "\n------------------------------------------------------\n"
-          printf "                   (3) Stack version                      "
+          printf "                   (2) Stack version                      "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb hl:version || exit 1
@@ -58,7 +49,7 @@ jobs:
 
           # Basic stack compilation
           printf "\n------------------------------------------------------\n"
-          printf "                   (4) Stack compilation                  "
+          printf "                   (3) Stack compilation                  "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb hl:compile || exit 1
@@ -66,7 +57,7 @@ jobs:
 
           # Basic stack compilation
           printf "\n------------------------------------------------------\n"
-          printf "              (5) Stack compilation + Force               "
+          printf "              (4) Stack compilation + Force               "
           printf "\n------------------------------------------------------\n"
           #------------------------
           bb hl:compile :force || exit 1
@@ -74,7 +65,7 @@ jobs:
 
           # Stack local run test
           printf "\n------------------------------------------------------\n"
-          printf "           (6) In docker:run in local context fail       "
+          printf "           (5) In docker:run in local context fail       "
           printf "\n------------------------------------------------------\n"
           #------------------------
           HL_NO_DOCKER=true bb hl:docker:run "something" && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
@@ -110,7 +101,6 @@ jobs:
     variables:
       HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/native/basic.example
-      HL_CLJ_ALIAS: holy-lambda
     steps:
       - bash: |
           # Regenerate partial cache
@@ -146,7 +136,6 @@ jobs:
     variables:
       HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/clojure/basic.example
-      HL_CLJ_ALIAS: holy-lambda
     steps:
       - script: |
           # Regenerate partial cache
@@ -196,7 +185,6 @@ jobs:
     variables:
       HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/babashka/basic.example
-      HL_CLJ_ALIAS: holy-lambda
     steps:
       - script: |
          # Regenerate partial cache
@@ -233,7 +221,6 @@ jobs:
     variables:
       HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/babashka/aws-pod.example
-      HL_CLJ_ALIAS: holy-lambda
     steps:
       - script: |
          # Regenerate partial cache
@@ -269,7 +256,6 @@ jobs:
     variables:
       HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/native/hl.aws-bucket
-      HL_CLJ_ALIAS: holy-lambda
     steps:
       - script: |
           # Regenerate partial cache
