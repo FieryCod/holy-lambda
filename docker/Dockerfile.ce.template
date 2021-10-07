@@ -51,6 +51,6 @@ RUN wget -cq https://github.com/babashka/babashka/releases/download/v$BABASHKA_V
     && chmod +x bb \
     && mv bb /bin/bb
 
-RUN gu install -n native-image nodejs python ruby R
+RUN gu install -n native-image nodejs{{additional-components}}
 
 WORKDIR /project

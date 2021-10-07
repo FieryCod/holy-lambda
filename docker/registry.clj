@@ -24,7 +24,11 @@
   (let [variant             "ce"
         dockerfile          (str "Dockerfile" "." variant)
         dockerfile-template (str dockerfile ".template")
-        dockerfile-content  (selm/render (slurp dockerfile-template) (assoc spec :image-prefix (if-not (= arch "aarch64") "" "arm64v8/")))
+        dockerfile-content  (selm/render (slurp dockerfile-template) (assoc spec
+                                                                            :image-prefix (if-not (= arch "aarch64") "" "arm64v8/")
+                                                                            :additional-components (if-not (= arch "aarch64")
+                                                                                                     ""
+                                                                                                     " python ruby R")))
         image-uri           (str "ghcr.io/fierycod/holy-lambda-builder:" arch "-java" java "-" version)]
     (spit dockerfile dockerfile-content)
     (println "> Building:" image-uri)
