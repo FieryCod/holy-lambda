@@ -105,7 +105,7 @@ jobs:
 
       - name: Build images for amd64
         run: |
-          cd docker && bb registry.clj "amd64"
+          cd docker && bb registry.clj "amd64" "CE"
 
   build-images-aarch64:
     runs-on: ${{ matrix.os }}
@@ -136,4 +136,4 @@ jobs:
 
       - name: Build images for aarch64
         run: |
-          cd docker && bb registry.clj "aarch64"
+          cd docker && bb registry.clj "aarch64" "CE"

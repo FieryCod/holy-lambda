@@ -10,6 +10,7 @@
 - [bb tasks] Rename `:runtime` in `bb.edn` to `:backend` to match the documentation. 
 - [bb tasks] Remove `:entrypoint` and `:clj-alias` support. Use `:compile-cmd` in `:build` instead!
 - [docker] Holy Lambda images are now available at ghcr. Please use the new `ghcr.io/fierycod/holy-lambda-builder` instead of `fierycod/graalvm-native-image`. Images don't include `aws`, `aws sam`, and `clojure`.
+- [docker] Holy Lambda now supports aarch64 for all of the runtimes.
 
 ## 0.5.0 
 
