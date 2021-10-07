@@ -37,52 +37,6 @@ jobs:
       - name: Test the core
         run: lein with-profile eftest eftest
 
-  # integration-tests:
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     fail-fast: true
-  #     matrix:
-  #       os:
-  #         - ubuntu-latest
-
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-
-  #     - name: Prepare java
-  #       uses: actions/setup-java@v2
-  #       with:
-  #         distribution: 'temurin'
-  #         java-version: '11'
-
-  #     - name: Setup Babashka
-  #       uses: turtlequeue/setup-babashka@v1.3.0
-  #       with:
-  #         babashka-version: 0.6.1
-
-  #     - name: Install clojure tools
-  #       uses: DeLaGuardo/setup-clojure@3.5
-  #       with:
-  #         cli: 1.10.3.849
-  #         lein: 2.9.1
-
-  #     - name: Cache Maven
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: |
-  #           ~/.m2/repository
-  #         key: ${{ runner.os }}-maven-${{ hashFiles('project.clj') }}
-
-  #     - name: Commands test
-  #       run: |
-  #         cd examples/bb/native/basic.example
-  #         bb hl:doctor || exit 1
-  #         bb hl:version || exit 1
-  #         bb hl:compile || exit 1
-  #         bb hl:compile :force || exit 1
-  #         HL_NO_DOCKER=true bb hl:docker:run "something" && exit 1 || printf "\033[0;32mTest passed!\033[0m\n"
-  #         bb hl:clean || exit 1
-
   build-images-amd64:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -106,6 +60,10 @@ jobs:
       - name: Build images for amd64
         run: |
           cd docker && bb registry.clj "amd64" "CE"
+
+      - name: Build images for amd64 DEV
+        run: |
+          cd docker && bb registry.clj "amd64" "DEV"
 
   build-images-aarch64:
     runs-on: ${{ matrix.os }}
@@ -134,6 +92,10 @@ jobs:
           chmod a+x ~/.docker/cli-plugins/docker-buildx
           docker buildx install
 
-      - name: Build images for aarch64
+      - name: Build images for aarch64 CE
         run: |
           cd docker && bb registry.clj "aarch64" "CE"
+
+      - name: Build images for aarch64 DEV
+        run: |
+          cd docker && bb registry.clj "aarch64" "DEV"

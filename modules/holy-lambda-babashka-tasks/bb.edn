@@ -7,7 +7,7 @@
 
                                 :network "host"
 
-                                :image "ghcr.io/fierycod/holy-lambda-builder:amd64-ce-java11-21.2.0"}
+                                :image "ghcr.io/fierycod/holy-lambda-builder:aarch64-java11-21.2.0"}
 
                        :build {:compile-cmd  "clojure -X:uberjar"
                                :graalvm-home "~/.graalvm"}

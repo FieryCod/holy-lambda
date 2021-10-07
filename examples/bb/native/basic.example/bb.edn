@@ -1,8 +1,6 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:local/root "../../../../modules/holy-lambda-babashka-tasks"}}
 
- :mvn/local-repo ".holy-lambda/.m2"
-
  :min-bb-version "0.3.7"
 
  :holy-lambda/options {
