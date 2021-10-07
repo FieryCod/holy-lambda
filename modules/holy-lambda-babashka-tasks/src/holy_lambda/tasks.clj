@@ -616,15 +616,15 @@ set -e
         (exit-code-err!))
       (do
         (hpr (prs "Required commands") (accent (str REQUIRED_COMMANDS)) (prs "installed!"))))
-    (System/exit @exit-code))
+    (System/exit @exit-code)))
 
-  (defn hl:version
-    "     \033[0;31m>\033[0m Outputs holy-lambda babashka tasks version"
-    []
-    (print-task "hl:version")
-    (hpr (str (prs "Current tasks version is: ") (accent TASKS_VERSION)))
-    (when-not (= (s/trim (:body (curl/get REMOTE_TASKS))) TASKS_VERSION)
-      (hpr (prw "Local version of tasks does not match stable tasks version. Update tasks sha!")))))
+(defn hl:version
+  "     \033[0;31m>\033[0m Outputs holy-lambda babashka tasks version"
+  []
+  (print-task "hl:version")
+  (hpr (str (prs "Current tasks version is: ") (accent TASKS_VERSION)))
+  (when-not (= (s/trim (:body (curl/get REMOTE_TASKS))) TASKS_VERSION)
+    (hpr (prw "Local version of tasks does not match stable tasks version. Update tasks sha!"))))
 
 (defn hl:sync
   "     \033[0;31m>\033[0m DEPRECATED! See HL changelog"
