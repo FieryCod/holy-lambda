@@ -2,7 +2,7 @@ FROM {{image-prefix}}amazonlinux
 MAINTAINER Karol Wójcik <Karol Wójcik>
 
 RUN yum install -y -q unzip curl make wget git zip tar
-RUN yum group install -y -q Development Tools
+RUN yum group install -y -q 'Development Tools'
 
 ENV CLJ_CACHE=/project/.holy-lambda/clojure
 ENV CLJ_COFIG=/project/.holy-lambda/clojure
@@ -13,12 +13,12 @@ ENV XDG_CONFIG_HOME=/project/.holy-lambda
 ENV XDG_DATA_HOME=/project/.holy-lambda
 ENV GITLIBS=/project/.holy-lambda/.gitlibs/
 ENV LANG=en_US.UTF-8 
-ENV JAVA_HOME=/opt/graalvm-ce-java{{java}}-{{version}}
+ENV JAVA_HOME={{java-home}}
 
 # --------------- UPDATE ------------------
 # -----------------------------------------
-ARG BABASHKA_VERSION=0.6.1
-ARG GRAALVM_JAVA_URL=https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-{{version}}/graalvm-ce-java{{java}}-linux-{{arch}}-{{version}}.tar.gz
+ARG BABASHKA_VERSION={{bb-version}}
+ARG GRAALVM_JAVA_URL={{graalvm-url}}
 ARG GRAALVM_JAVA_CORD=graalvm-ce-linux.tar.gz
 # -----------------------------------------
 
