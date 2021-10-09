@@ -55,3 +55,4 @@ template-modified.yml
 packaged.yml
 docker/Dockerfile.ce
 docker/Dockerfile-ce-dev
+*.zip

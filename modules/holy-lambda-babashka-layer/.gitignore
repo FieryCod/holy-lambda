@@ -1,2 +1,4 @@
 packaged.yml
 holy-lambda-babashka-runtime.zip
+Dockerfile.amd64
+Dockerfile.arm64

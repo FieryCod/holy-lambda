@@ -20,7 +20,7 @@ export BABASHKA_CLASSPATH=$FULL_CLASSPATH
 export BABASHKA_PRELOADS='(load-file "/opt/hacks.clj")'
 
 if [ -z "$HL_ENTRYPOINT" ]; then
-  echo "Environment variable \"HL_ENTRYPOINT\" is not set. See "
+  echo "Environment variable \"HL_ENTRYPOINT\" is not set. See https://fierycod.github.io/holy-lambda/#/babashka-backend-tutorial"
 fi;
 
 /opt/bb -Duser.home=/var/task -m "$HL_ENTRYPOINT"
