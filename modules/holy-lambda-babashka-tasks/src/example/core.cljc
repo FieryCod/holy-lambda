@@ -12,7 +12,7 @@
 
 (defn ExampleLambdav2
   [request]
-  (hr/text "Test another invocation"))
+  (hr/text "Hello world"))
 
 (h/entrypoint [#'ExampleLambda #'ExampleLambdav2])
 

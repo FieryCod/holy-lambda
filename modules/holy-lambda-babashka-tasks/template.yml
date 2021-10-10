@@ -9,7 +9,7 @@ Parameters:
     Default: 40
   MemorySize:
     Type: Number
-    Default: 128
+    Default: 512
   Entrypoint:
     Type: String
     Default: example.core
@@ -20,37 +20,41 @@ Globals:
     MemorySize: !Ref MemorySize
     Environment:
       Variables:
-        Entrypoint: !Ref Entrypoint
+        HL_ENTRYPOINT: !Ref Entrypoint
 
 Resources:
   ExampleLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: provided.al2
-      Handler: example.core.ExampleLambda
-      CodeUri: ./.holy-lambda/build/latest.zip
+      Handler: example.core.ExampleLambdav2
+      CodeUri: src
       Architectures:
         - arm64
+      Layers:
+        - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime-arm64:1
       Events:
         HelloEvent:
           Type: HttpApi
           Properties:
             ApiId: !Ref ServerlessHttpApi
-            Path: /
+            Path: /bb-arm64
             Method: GET
 
-  ExampleLambdaFunctionv2:
+  ExampleLambdaFunctionv3:
     Type: AWS::Serverless::Function
     Properties:
-      Runtime: provided
-      CodeUri: ./.holy-lambda/build/latest.zip
+      Runtime: provided.al2
       Handler: example.core.ExampleLambdav2
+      CodeUri: src
+      Layers:
+        - arn:aws:lambda:eu-central-1:443526418261:layer:holy-lambda-babashka-runtime-amd64:1
       Events:
         HelloEvent:
           Type: HttpApi
           Properties:
             ApiId: !Ref ServerlessHttpApi
-            Path: /example
+            Path: /bb-amd64
             Method: GET
 
   ServerlessHttpApi:
