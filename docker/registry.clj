@@ -25,6 +25,10 @@
   [{:version         "21.3.0-dev-20211006_0800"
     :partial-version "21.3.0-dev"
     :java            ["11" "17"]
+    :arch            ["amd64", "aarch64"]},
+   {:version         "21.3.0-dev-20211011_0738"
+    :partial-version "21.3.0-dev"
+    :java            ["11" "17"]
     :arch            ["amd64", "aarch64"]}])
 
 (defn dev-image-url
