@@ -28,8 +28,6 @@ jobs:
       WORKING_DIRECTORY: examples/bb/native/basic.example
     steps:
       - bash: |
-          # Regenerate partial cache
-          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip"
 
           # Bucket deletion
           printf "\n------------------------------------------------------\n"
@@ -98,8 +96,6 @@ jobs:
       WORKING_DIRECTORY: examples/bb/native/basic.example
     steps:
       - bash: |
-          # Regenerate partial cache
-          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip"
           # Sync
           bb hl:sync && \
           # Regular test tasks
@@ -128,9 +124,6 @@ jobs:
       WORKING_DIRECTORY: examples/bb/clojure/basic.example
     steps:
       - script: |
-          # Regenerate partial cache
-          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb hl:sync && \
-
           # Regular test tasks
           bb hl:compile && \
           sam build && \
@@ -172,9 +165,6 @@ jobs:
       WORKING_DIRECTORY: examples/bb/babashka/basic.example
     steps:
       - script: |
-         # Regenerate partial cache
-         bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb hl:sync
-
          # Copy freshly build babashka runtime
          cp ~/azure-agent/local_cache/holy-lambda-babashka-runtime.zip . && unzip -qq holy-lambda-babashka-runtime.zip -d holy-lambda-babashka-runtime
 
@@ -203,9 +193,6 @@ jobs:
       WORKING_DIRECTORY: examples/bb/babashka/aws-pod.example
     steps:
       - script: |
-         # Regenerate partial cache
-         bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb hl:sync
-
          # Copy freshly build babashka runtime
          cp ~/azure-agent/local_cache/holy-lambda-babashka-runtime.zip . && unzip -qq holy-lambda-babashka-runtime.zip -d holy-lambda-babashka-runtime
 
@@ -233,8 +220,6 @@ jobs:
       WORKING_DIRECTORY: examples/bb/native/hl.aws-bucket
     steps:
       - script: |
-          # Regenerate partial cache
-          bash -c "mkdir -p .holy-lambda/.m2 && cd .holy-lambda/.m2 && unzip -q ~/azure-agent/local_cache/m2-cached.zip" && bb hl:sync && \
 
           # Regular test tasks
           bb hl:compile && \
