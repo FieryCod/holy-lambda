@@ -19,7 +19,7 @@
 
 (defn should-build?
   []
-  (= 1 (:exit @(shell-no-exit false "git" "diff" "--exit-code" "HEAD~1" "HEAD" "--" "docker/registry.clj"))))
+  (= 1 (:exit @(shell-no-exit false "git" "diff" "--exit-code" "HEAD~1" "HEAD" "--" "."))))
 
 (def CE_IMAGES
   [{:version ["21.2.0" "21.1.0" "21.3.0"]

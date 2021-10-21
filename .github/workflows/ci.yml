@@ -14,8 +14,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
 
       - name: Prepare java
         uses: actions/setup-java@v2
@@ -50,6 +48,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
 
       - name: Login to Container Registry
         run: echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u FieryCod --password-stdin
@@ -77,6 +77,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
 
       - name: Login to Container Registry
         run: echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u FieryCod --password-stdin

@@ -90,14 +90,9 @@ jobs:
     condition: succeeded()
     strategy:
       matrix:
-        DOCKER_GRAALVM_CE_LATEST:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
-
         DOCKER_GRAALVM_CE_LATEST_MINUS_ONE:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
+          GRAALVM_IMAGE: ghcr.io/fierycod/holy-lambda-builder:amd64-java11-21.2.0
 
-        DOCKER_GRAALVM_EE_LATEST:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
     variables:
       HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/native/basic.example
@@ -125,14 +120,9 @@ jobs:
     condition: succeeded()
     strategy:
       matrix:
-        DOCKER_GRAALVM_CE_LATEST:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
-
         DOCKER_GRAALVM_CE_LATEST_MINUS_ONE:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
+          GRAALVM_IMAGE: ghcr.io/fierycod/holy-lambda-builder:amd64-java11-21.2.0
 
-        DOCKER_GRAALVM_EE_LATEST:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
     variables:
       HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/clojure/basic.example
@@ -170,14 +160,9 @@ jobs:
     displayName: '(5.1)-(Babashka)-(Basic)-(Docker) Babashka runtime test'
     strategy:
       matrix:
-        DOCKER_GRAALVM_CE_LATEST:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
-
         DOCKER_GRAALVM_CE_LATEST_MINUS_ONE:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
+          GRAALVM_IMAGE: ghcr.io/fierycod/holy-lambda-builder:amd64-java11-21.2.0
 
-        DOCKER_GRAALVM_EE_LATEST:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
     dependsOn:
       - tasks_health_check_1
       - babashka_basic_build_1
@@ -206,14 +191,9 @@ jobs:
     displayName: '(5.2)-(Babashka)-(Basic)-(Docker) Babashka runtime test v2'
     strategy:
       matrix:
-        DOCKER_GRAALVM_CE_LATEST:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
-
         DOCKER_GRAALVM_CE_LATEST_MINUS_ONE:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
+          GRAALVM_IMAGE: ghcr.io/fierycod/holy-lambda-builder:amd64-java11-21.2.0
 
-        DOCKER_GRAALVM_EE_LATEST:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
     dependsOn:
       - tasks_health_check_1
       - babashka_basic_build_1
@@ -245,14 +225,9 @@ jobs:
     condition: succeeded()
     strategy:
       matrix:
-        DOCKER_GRAALVM_CE_LATEST:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:ce
-
         DOCKER_GRAALVM_CE_LATEST_MINUS_ONE:
-          GRAALVM_IMAGE: fierycod/graalvm-native-image:dev
+          GRAALVM_IMAGE: ghcr.io/fierycod/holy-lambda-builder:amd64-java11-21.2.0
 
-        # DOCKER_GRAALVM_EE_LATEST:
-        #   GRAALVM_IMAGE: fierycod/graalvm-native-image:ee
     variables:
       HL_DOCKER_IMAGE: $(GRAALVM_IMAGE)
       WORKING_DIRECTORY: examples/bb/native/hl.aws-bucket
