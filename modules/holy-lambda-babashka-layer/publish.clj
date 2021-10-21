@@ -45,10 +45,10 @@
 
 (when (= task "publish")
   (doseq [arch ARCHS]
-    (let [arch arch
-          version SEMANTIC_VERSION
-          s3 "holy-lambda-babashka-layer"
+    (let [arch      arch
+          version   SEMANTIC_VERSION
+          s3        "holy-lambda-babashka-layer"
           s3-prefix "holy-lambda"
-          region "eu-central-1"]
+          region    "eu-central-1"]
       (shell (selm/<< "sam package --template-file template-{{arch}}.yml --output-template-file packaged-{{arch}}.yml --s3-bucket {{s3}} --s3-prefix {{s3-prefix}}"))
       (shell (selm/<< "sam publish --template-file packaged-{{arch}}.yml --semantic-version {{version}}")))))

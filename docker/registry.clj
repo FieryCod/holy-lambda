@@ -13,9 +13,20 @@
   [cmd]
   (exit-non-zero (p/process (p/tokenize cmd) {:inherit true})))
 
+(defn- shell-no-exit
+  [inherit? cmd & args]
+  (p/process (into (p/tokenize cmd) (remove nil? args)) {:inherit inherit?}))
+
+(defn should-build?
+  []
+  (= 1 (:exit @(shell-no-exit false "git" "diff" "--exit-code" "HEAD~1" "HEAD" "--" "docker/registry.clj"))))
+
 (def CE_IMAGES
   [{:version ["21.2.0" "21.1.0" "21.3.0"]
     :java    ["11"]
+    :arch    ["amd64", "aarch64"]}
+   {:version ["21.3.0"]
+    :java    ["17"]
     :arch    ["amd64", "aarch64"]}
    {:version ["21.2.0" "21.1.0"]
     :java    ["8"]
@@ -83,22 +94,23 @@
 (def requested-arch (first *command-line-args*))
 (def CE (= (second *command-line-args*) "CE"))
 
-(when CE
-  (doseq [{:keys [version java arch]} CE_IMAGES]
-    (doseq [version version]
+(when (should-build?)
+  (when CE
+    (doseq [{:keys [version java arch]} CE_IMAGES]
+      (doseq [version version]
+        (doseq [java java]
+          (doseq [arch arch]
+            (when (= requested-arch arch)
+              (build-pub-ce! {:version version
+                              :java    java
+                              :arch    arch})))))))
+
+  (when-not CE
+    (doseq [{:keys [version java arch partial-version]} DEV_IMAGES]
       (doseq [java java]
         (doseq [arch arch]
           (when (= requested-arch arch)
-            (build-pub-ce! {:version version
-                            :java    java
-                            :arch    arch})))))))
-
-(when-not CE
-  (doseq [{:keys [version java arch partial-version]} DEV_IMAGES]
-    (doseq [java java]
-      (doseq [arch arch]
-        (when (= requested-arch arch)
-          (build-pub-dev! {:version         version
-                           :partial-version partial-version
-                           :java            java
-                           :arch            arch}))))))
+            (build-pub-dev! {:version         version
+                             :partial-version partial-version
+                             :java            java
+                             :arch            arch})))))))
