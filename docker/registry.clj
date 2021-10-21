@@ -14,7 +14,7 @@
   (exit-non-zero (p/process (p/tokenize cmd) {:inherit true})))
 
 (def CE_IMAGES
-  [{:version ["21.2.0" "21.1.0"]
+  [{:version ["21.2.0" "21.1.0" "21.3.0"]
     :java    ["11"]
     :arch    ["amd64", "aarch64"]}
    {:version ["21.2.0" "21.1.0"]
