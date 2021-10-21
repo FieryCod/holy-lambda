@@ -96,9 +96,6 @@ jobs:
       WORKING_DIRECTORY: examples/bb/native/basic.example
     steps:
       - bash: |
-          # Sync
-          bb hl:sync && \
-          # Regular test tasks
           bb hl:compile && \
           bb hl:native:executable && \
           output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \
@@ -142,9 +139,11 @@ jobs:
       WORKING_DIRECTORY: modules/holy-lambda-babashka-layer
     steps:
       - script: |
-          rm -Rf holy-lambda-babashka-runtime.zip && make build-artifact-in-place
-          rm -Rf ~/azure-agent/local_cache/holy-lambda-babashka-runtime.zip
-          cp holy-lambda-babashka-runtime.zip ~/azure-agent/local_cache/
+          rm -Rf holy-lambda-babashka-runtime.zip
+          bb publish.clj build
+          rm -Rf ~/azure-agent/local_cache/holy-lambda-babashka-runtime-*.zip
+          cp holy-lambda-babashka-runtime-amd64.zip ~/azure-agent/local_cache/
+          cp holy-lambda-babashka-runtime-arm64.zip ~/azure-agent/local_cache/
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Build holy-lambda-babashka layer'
 
@@ -166,7 +165,7 @@ jobs:
     steps:
       - script: |
          # Copy freshly build babashka runtime
-         cp ~/azure-agent/local_cache/holy-lambda-babashka-runtime.zip . && unzip -qq holy-lambda-babashka-runtime.zip -d holy-lambda-babashka-runtime
+         cp ~/azure-agent/local_cache/holy-lambda-babashka-runtime-*.zip . && unzip -qq holy-lambda-babashka-runtime-amd64.zip -d holy-lambda-babashka-runtime-amd64 && unzip -qq holy-lambda-babashka-runtime-arm64.zip -d holy-lambda-babashka-runtime-arm64
 
          # Test
          output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \

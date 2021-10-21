@@ -6,7 +6,7 @@ Description: >
 Parameters:
   Runtime:
     Type: String
-    Default: provided
+    Default: provided.al2
   Timeout:
     Type: Number
     Default: 40
@@ -36,9 +36,9 @@ Resources:
     Properties:
       LayerName: HLBabashkaLocalRuntime
       Description: Shared dependencies for stack.
-      ContentUri: ./holy-lambda-babashka-runtime
+      ContentUri: ./holy-lambda-babashka-runtime-amd64
       CompatibleRuntimes:
-        - provided
+        - provided.al2
 
   ExampleLambdaFunction:
     Type: AWS::Serverless::Function

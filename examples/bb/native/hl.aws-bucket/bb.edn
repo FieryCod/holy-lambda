@@ -1,8 +1,6 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:local/root "../../../../modules/holy-lambda-babashka-tasks"}}
 
- :mvn/local-repo ".holy-lambda/.m2"
-
  :min-bb-version "0.3.7"
 
  :holy-lambda/options {
@@ -13,7 +11,7 @@
 
                                 :image "fierycod/graalvm-native-image:ce"}
 
-                       :build {:clj-alias nil
+                       :build {:compile-cmd "clojure -X:uberjar"
 
                                :graalvm-home nil}
 
@@ -29,10 +27,6 @@
                         ;;
                         ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
                         ;; :pods                {org.babashka/aws "0.0.5"}
-
-                        ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
-                        ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
-                        :entrypoint          hl.aws-bucket.core
 
 
                         ;; For `:native` runtime you can provide your own bootstrap file

@@ -3,7 +3,6 @@
 
  :mvn/local-repo ".holy-lambda/.m2"
 
- :min-bb-version "0.3.7"
 
  :holy-lambda/options {
                        :docker {:volumes [{:docker     "/holy-lambda"

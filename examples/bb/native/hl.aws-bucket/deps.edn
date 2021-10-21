@@ -1,27 +1,15 @@
-{:deps {}
+{:deps {org.clojure/clojure            {:mvn/version "1.10.3"}
+        io.github.FieryCod/holy-lambda {:local/root "../../../../"}
+        com.cognitect.aws/api          {:mvn/version "0.8.515"}
+        com.cognitect.aws/endpoints    {:mvn/version "1.1.12.13"}
+        com.cognitect.aws/s3           {:mvn/version "811.2.934.0"}}
 
- ;; Local repositories should be downloaded to `.holy-lambda` directory
- ;; This way project artifacts are separated from global ~/.m2 and only project artifacts
- ;; are deployed to AWS Lambda
- :mvn/local-repo                        ".holy-lambda/.m2"
+ :paths ["src" "resources"]
 
- :paths                                 ["src" "resources"]
-
- :aliases                               {:holy-lambda
-                                         {:extra-deps {org.clojure/clojure             {:mvn/version "1.10.3"}
-                                                       io.github.FieryCod/holy-lambda  {:local/root "/holy-lambda"}
-                                                       com.cognitect.aws/api           {:mvn/version "0.8.515"}
-                                                       com.cognitect.aws/endpoints     {:mvn/version "1.1.12.13"}
-                                                       com.cognitect.aws/s3            {:mvn/version "811.2.934.0"}}}
-
-                                         :holy-lambda-local
-                                         {:extra-deps {org.clojure/clojure             {:mvn/version "1.10.3"}
-                                                       io.github.FieryCod/holy-lambda  {:local/root "../../../../"}
-                                                       com.cognitect.aws/api           {:mvn/version "0.8.515"}
-                                                       com.cognitect.aws/endpoints     {:mvn/version "1.1.12.13"}
-                                                       com.cognitect.aws/s3            {:mvn/version "811.2.934.0"}}}
-
-                                         :uberjar
-                                         {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
-                                          :exec-fn hf.depstar/uberjar
-                                          :exec-args {}}}}
+ :aliases {:uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
+                     :exec-fn      hf.depstar/uberjar
+                     :exec-args    {:aot        ["hl.aws-bucket.core"]
+                                    :main-class "hl.aws-bucket.core"
+                                    :jar        ".holy-lambda/build/output.jar"
+                                    :jvm-opts   ["-Dclojure.compiler.direct-linking=true"
+                                                 "-Dclojure.spec.skip-macros=true"]}}}}
