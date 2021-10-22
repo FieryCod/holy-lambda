@@ -32,6 +32,7 @@ The extraordinary simple, performant, and extensible custom AWS Lambda runtime f
 ## Companies & Inviduals using Holy Lambda?
   - [nextdoc.io](https://nextdoc.io) - 6 native lambdas: api-gateway custom authorizer, file access control, openapi data source etc.
   - [scalably.ai](https://scalably.ai) - 14 native lambdas: xml transformations, sftp interactions, message routing, encryption etc.
+  - [retailic](https://retailic.com/) - native lambda that uses compatibility layer with ring, regular Clojure api on ARM64 
 
 ## Documentation
 The holy-lambda documentation is available [here](https://fierycod.github.io/holy-lambda).
