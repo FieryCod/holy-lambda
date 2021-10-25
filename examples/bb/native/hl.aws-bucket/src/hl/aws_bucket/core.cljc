@@ -14,20 +14,6 @@
    [fierycod.holy-lambda.agent :as agent]
    [fierycod.holy-lambda.core :as h]))
 
-;; (defn initialize-at-build-time-list
-;;   [& args]
-;;   (println
-;;    (->> (map ns-name (all-ns))
-;;         (remove #(clojure.string/starts-with? % "clojure"))
-;;         (map #(clojure.string/split (str %) #"\."))
-;;         (keep butlast)
-;;         (map #(clojure.string/join "." %))
-;;         distinct
-;;         (map munge)
-;;         (cons "clojure")
-;;         (clojure.string/join ","))))
-
-;; (initialize-at-build-time-list)
 (def s3 (delay (aws/client {:api :s3})))
 
 (defn ExampleLambda

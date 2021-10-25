@@ -9,7 +9,7 @@
 
                                 :network "host"
 
-                                :image "fierycod/graalvm-native-image:ce"}
+                                :image "ghcr.io/fierycod/holy-lambda-builder:amd64-java11-21.3.0"}
 
                        :build {:compile-cmd "clojure -X:uberjar"
 
@@ -42,11 +42,10 @@
                         :native-image-args
                         ["--verbose"
                          "--no-fallback"
-                         "--enable-url-protocols=http,https"
                          "--report-unsupported-elements-at-runtime"
                          "-H:+AllowIncompleteClasspath"
-                         "--no-server"
-                         "--initialize-at-build-time"]}}
+                         "--initialize-at-build-time"
+                         "--no-server"]}}
 
  :tasks {:requires              ([holy-lambda.tasks])
 

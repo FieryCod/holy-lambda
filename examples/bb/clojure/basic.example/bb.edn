@@ -1,10 +1,6 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:local/root "../../../../modules/holy-lambda-babashka-tasks"}}
 
- ;; Local repositories should be downloaded to `.holy-lambda` directory
- ;; This way project artifacts are separated from global ~/.m2 and only project artifacts
- ;; are deployed to AWS Lambda
- :mvn/local-repo                                    ".holy-lambda/.m2"
 
  ;; Minimal babashka version which should be used in conjuction with holy-lambda
  :min-bb-version                                    "0.3.7"
@@ -37,51 +33,33 @@
                                 ;; GraalVM Community holy-lambda compatible docker image
                                 ;; You can always build your own GraalVM image with enterprise edition
                                 :image              "fierycod/graalvm-native-image:ce"}
+                       :build {:compile-cmd "clojure -X:uberjar"
 
-                       :build {;; clj alias might be set via environment variable
-                               ;; `HL_CLJ_ALIAS` like:  HL_CLJ_ALIAS="dev"
-                               :clj-alias           nil
-
-                               ;; Used when either :docker is nil or
-                               ;; `HL_NO_DOCKER` environment variable is set to "true"
-                               ;; Might be set via `GRAALVM_HOME` environment variable
-                               :graalvm-home        "~/.graalvm"}
+                               :graalvm-home nil}
 
                        :runtime
                        {
 
-                        ;; Runtime `:babashka` provides a way to include native libraries called pods https://github.com/babashka/pods
-                        ;; Holy lambda ships code exists to provide fast feedback loop therefore pods should be shipped using AWS Layers
-                        ;; Check this template https://github.com/aws-samples/aws-lambda-layers-aws-sam-examples/blob/master/aws-sdk-layer/template.yaml
-                        ;; and official docs https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-layers.html
-                        ;; CodeUri should be `.holy-lambda/pods`
-                        ;; For now pods should be declared in `bb.edn`. See: https://github.com/babashka/babashka/issues/768#issuecomment-825016317
-                        ;;
-                        ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
-                        :pods                      {}
-
-                        ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
-                        ;; :entrypoint should always point to a namespace with includes (h/entrypoint) call
-                        :entrypoint                basic.example.core
+                        ;; :pods                {org.babashka/aws "0.0.5"}
 
                         ;; For `:native` runtime you can provide your own bootstrap file
-                        :bootstrap-file            "bootstrap"
+                        :bootstrap-file "bootstrap"
 
                         ;; For `:native` runtime you can provide some native resources which will be available during lambda execution
                         ;; Resources are packed as is.
-                        :native-deps               "resources"
+                        :native-deps "resources"
 
                         ;; Specify custom arguments for native image generation
+                        ;; Works only on `:native` runtime.
                         ;; Check https://www.graalvm.org/reference-manual/native-image/Options/
-                        :native-image-args         ["--verbose"
-                                                    "--no-fallback"
-                                                    "--enable-url-protocols=http,https"
-                                                    "--report-unsupported-elements-at-runtime"
-                                                    "-H:+AllowIncompleteClasspath"
-                                                    "--no-server"
-                                                    "--initialize-at-build-time"]}
-                       }
-
+                        :native-image-args
+                        ["--verbose"
+                         "--no-fallback"
+                         "--enable-url-protocols=http,https"
+                         "--report-unsupported-elements-at-runtime"
+                         "-H:+AllowIncompleteClasspath"
+                         "--no-server"
+                         "--initialize-at-build-time"]}}
 
  :tasks {:requires                                ([holy-lambda.tasks])
 
