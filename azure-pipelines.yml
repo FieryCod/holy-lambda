@@ -167,6 +167,8 @@ jobs:
          # Copy freshly build babashka runtime
          cp ~/.az-agent/local_cache/holy-lambda-babashka-runtime-*.zip . && unzip -qq holy-lambda-babashka-runtime-amd64.zip -d holy-lambda-babashka-runtime-amd64 && unzip -qq holy-lambda-babashka-runtime-arm64.zip -d holy-lambda-babashka-runtime-arm64
 
+         bb hl:babashka:sync
+
          # Test
          output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \
          echo "$output" && \
@@ -194,6 +196,8 @@ jobs:
       - script: |
          # Copy freshly build babashka runtime
          cp ~/.az-agent/local_cache/holy-lambda-babashka-runtime-*.zip . && unzip -qq holy-lambda-babashka-runtime-amd64.zip -d holy-lambda-babashka-runtime-amd64 && unzip -qq holy-lambda-babashka-runtime-arm64.zip -d holy-lambda-babashka-runtime-arm64
+
+         bb hl:babashka:sync
 
          # Test
          output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \

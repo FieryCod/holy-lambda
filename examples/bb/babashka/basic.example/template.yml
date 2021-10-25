@@ -16,7 +16,7 @@ Parameters:
   CodeUri:
     Type: String
     Default: ./src
-  Entrypoint:
+  HL_ENTRYPOINT:
     Type: String
     Default: basic.example.core
 
@@ -28,7 +28,7 @@ Globals:
     CodeUri: !Ref CodeUri
     Environment:
       Variables:
-        Entrypoint: !Ref Entrypoint
+        HL_ENTRYPOINT: !Ref HL_ENTRYPOINT
 
 Resources:
   HLBabashkaLocalRuntime:

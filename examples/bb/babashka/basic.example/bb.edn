@@ -1,9 +1,6 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:local/root "../../../../modules/holy-lambda-babashka-tasks"}}
 
- :mvn/local-repo ".holy-lambda/.m2"
-
-
  :holy-lambda/options {
                        :docker {:volumes [{:docker     "/holy-lambda"
                                            :host       "../../../../"}]
@@ -29,10 +26,6 @@
                         ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
                         :pods                {}
 
-                        ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
-                        ;; :entrypoint should always point to a namespace with includes (native/entrypoint) call
-                        :entrypoint          basic.example.core
-
                         ;; For `:native` runtime you can provide your own bootstrap file
                         :bootstrap-file      "bootstrap"
 
@@ -52,17 +45,14 @@
                          "--no-server"
                          "--initialize-at-build-time"]}}
 
- :tasks {:requires              ([holy-lambda.tasks])
-
-         hl:docker:run             holy-lambda.tasks/hl:docker:run
-
-         hl:native:conf            holy-lambda.tasks/hl:native:conf
-         hl:native:executable      holy-lambda.tasks/hl:native:executable
-
-         hl:sync                   holy-lambda.tasks/hl:sync
-         hl:compile                holy-lambda.tasks/hl:compile
-         hl:doctor                 holy-lambda.tasks/hl:doctor
-         hl:clean                  holy-lambda.tasks/hl:clean
-         hl:version                holy-lambda.tasks/hl:version
-         }
+ :tasks {:requires            ([holy-lambda.tasks])
+         hl:docker:run        holy-lambda.tasks/hl:docker:run
+         hl:native:conf       holy-lambda.tasks/hl:native:conf
+         hl:native:executable holy-lambda.tasks/hl:native:executable
+         hl:sync              holy-lambda.tasks/hl:sync
+         hl:babashka:sync     holy-lambda.tasks/hl:babashka:sync
+         hl:compile           holy-lambda.tasks/hl:compile
+         hl:doctor            holy-lambda.tasks/hl:doctor
+         hl:clean             holy-lambda.tasks/hl:clean
+         hl:version           holy-lambda.tasks/hl:version}
  }
