@@ -467,7 +467,7 @@
 (defn build-stale?
   []
   (if-not (file-exists? "src")
-    false
+    true
     (boolean (seq (fs/modified-since OUTPUT_JAR_PATH (fs/glob "src" "**/**.{clj,cljc,cljs}"))))))
 
 (defn hl:native:conf
