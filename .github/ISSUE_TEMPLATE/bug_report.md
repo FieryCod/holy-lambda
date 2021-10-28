@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[BUG] xxxx"
+title: "[BUG] ---"
 labels: bug
 assignees: FieryCod
 
@@ -10,7 +10,7 @@ assignees: FieryCod
 **Describe the bug**
 A clear and concise description of what the bug is.
 
-**To Reproduce**
+**To reproduce**
 Steps to reproduce the behavior:
 
 **Expected behavior**
