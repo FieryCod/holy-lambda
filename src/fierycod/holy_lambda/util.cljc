@@ -1,5 +1,6 @@
 (ns ^:no-doc ^:private fierycod.holy-lambda.util
   (:require
+   [clojure.string :as s]
    [fierycod.holy-lambda.retriever :as retriever]
    #?(:bb [cheshire.core :as json]
       :clj [jsonista.core :as json]))
@@ -113,7 +114,7 @@
 
 (defn- json-content-type?
   [ctype]
-  (= ctype "application/json"))
+  (s/includes? ctype "application/json"))
 
 (defn in->edn-event
   [^InputStream event-stream]
