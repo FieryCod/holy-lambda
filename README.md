@@ -33,8 +33,10 @@ The extraordinary simple, performant, and extensible custom AWS Lambda runtime f
   - [scalably.ai](https://scalably.ai) - 14 native lambdas: xml transformations, sftp interactions, message routing, encryption etc.
   - [retailic](https://retailic.com/) - native lambda that uses compatibility layer with ring, regular Clojure api on ARM64 
 
-## Documentation
-The holy-lambda documentation is available [here](https://fierycod.github.io/holy-lambda).
+## Resources
+- [Documentation](https://fierycod.github.io/holy-lambda)
+- [Docker images with GraalVM CE + native-image (ARM64/AMD64) for Holy Lambda](https://github.com/FieryCod/holy-lambda/pkgs/container/holy-lambda-builder)
+- [GraalVM native-image with Clojure docs](https://github.com/clj-easy/graal-docs)
 
 ## Current Version 
 [![Clojars Project](https://img.shields.io/clojars/v/io.github.FieryCod/holy-lambda?labelColor=283C67&color=729AD1&style=for-the-badge&logo=clojure&logoColor=fff)](https://clojars.org/io.github.FieryCod/holy-lambda)
