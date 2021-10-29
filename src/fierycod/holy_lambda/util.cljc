@@ -114,7 +114,7 @@
 
 (defn- json-content-type?
   [ctype]
-  (s/includes? ctype "application/json"))
+  (some-> ctype (s/includes? "application/json")))
 
 (defn in->edn-event
   [^InputStream event-stream]
