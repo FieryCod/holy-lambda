@@ -1,6 +1,6 @@
 # Troubleshooting 
 
-## Project did not sync properly
+## Project did not sync properly (fixed 0.6)
   Running `bb hl:sync` results in:
   
   ```bash
@@ -50,11 +50,11 @@
    time="2021-05-17T16:52:48.279" level=error msg="INIT DONE failed: Runtime.InvalidEntrypoint"
    ```
   
-  This is most likely due to misconfiguration in either layers or `Entrypoint` environment variable.
+  This is most likely due to misconfiguration in either layers or `HL_ENTRYPOINT` environment variable.
   
   **Solution**:
   If you're using `babashka` runtime make sure to include corresponding layer.
-  Set `Entrypoint` variable to your core namespace.
+  Set `HL_ENTRYPOINT` variable to your core namespace.
 
   ```yml
   Resources:
@@ -73,10 +73,10 @@
          - <ARN_OF_THE_DEPLOYED_BABASHKA_LAYER>
         Environment:
           Variables:
-            Entrypoint: com.example
+            HL_ENTRYPOINT: com.example
   
   ```
-## Unable to use `:local/root` (deps.edn)
+## Unable to use `:local/root` (deps.edn) (no longer required in 0.6.0)
   **Solution**:
 
   Holy lambda uses docker context for reproducible builds and GraalVM native-image compilation, therefore local libraries referenced in `deps.edn` will not work out of the box. However it's fairly simple to support local libraries via `:docker:volumes` + custom clojure alias.
@@ -176,11 +176,4 @@
   - code which tries to `produce` the class on both compilation and run phase
 
 ## HL CLI hangs on M1 
-  **Solution**:
-  None!
-
-  We need to wait for Official GraalVM CE Images unfortunetely.
-  
-  **Related issues & workarounds**
-  - https://github.com/oracle/graal/issues/2666
-  - https://github.com/FieryCod/holy-lambda/issues/61
+  Use ARM64 version of holy-lambda-builder and switch to ARM64 architecture.  

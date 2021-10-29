@@ -88,7 +88,7 @@ This section will take you through the basics of Clojure backend.
         MemorySize:
           Type: Number
           Default: 512
-        Entrypoint:
+        HL_ENTRYPOINT:
           Type: String
           Default: com.company.example-lambda.core
 
@@ -98,7 +98,7 @@ This section will take you through the basics of Clojure backend.
           MemorySize: !Ref MemorySize
           Environment:
             Variables:
-              Entrypoint: !Ref Entrypoint
+              HL_ENTRYPOINT: !Ref HL_ENTRYPOINT
 
       Resources:
         ExampleLambdaFunction:
@@ -131,9 +131,9 @@ This section will take you through the basics of Clojure backend.
             Fn::Sub: https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com
 
       ```
-5. Sync & Compile
+5. Compile
   ```
-  bb hl:sync && bb hl:compile
+  bb hl:compile
   ```
   
 6. Build a docker image using:
@@ -216,7 +216,7 @@ Configuring SAM deploy
         AWS Region [eu-central-1]: 
         Parameter Timeout [40]: 
         Parameter MemorySize [512]: 
-        Parameter Entrypoint [com.company.example-lambda.core]: 
+        Parameter HL_ENTRYPOINT [com.company.example-lambda.core]: 
         #Shows you resources changes to be deployed and require a 'Y' to initiate deploy
         Confirm changes before deploy [Y/n]: y
         #SAM needs permission to be able to create roles to connect to the resources in your template
@@ -249,7 +249,7 @@ Configuring SAM deploy
                                        }
         Deployment s3 bucket         : <S3_BUCKET>
         Capabilities                 : ["CAPABILITY_IAM"]
-        Parameter overrides          : {"Timeout": "40", "MemorySize": "512", "Entrypoint": "com.company.example-lambda.core"}
+        Parameter overrides          : {"Timeout": "40", "MemorySize": "512", "HL_ENTRYPOINT": "com.company.example-lambda.core"}
         Signing Profiles             : {}
 
 Initiating deployment

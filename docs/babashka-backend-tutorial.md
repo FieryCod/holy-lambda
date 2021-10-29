@@ -41,7 +41,7 @@ This section will take you through the basics of Babashka backend.
 
     6 directories, 7 files
     ```
-3. Visit the following [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime) and click deploy. Now you should be redirected to `AWS Lambda Function` dashboard. Scroll down and click deploy! Wait few seconds. Now you should be redirected to `AWS Lambda Applications dashboard`. Wait few more seconds, so that `Cloudformation` can finish the deployment. 
+3. Visit the following [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime-amd64) and click deploy. Now you should be redirected to `AWS Lambda Function` dashboard. Scroll down and click deploy! Wait few seconds. Now you should be redirected to `AWS Lambda Applications dashboard`. Wait few more seconds, so that `Cloudformation` can finish the deployment. 
 
     > :warning: Guide supports Babashka backend version >= 0.5.1
 
@@ -58,7 +58,7 @@ This section will take you through the basics of Babashka backend.
       MemorySize:
         Type: Number
         Default: 128
-      Entrypoint:
+      HL_ENTRYPOINT:
         Type: String
         Default: com.company.example-lambda.core
 
@@ -68,7 +68,7 @@ This section will take you through the basics of Babashka backend.
         MemorySize: !Ref MemorySize
         Environment:
           Variables:
-          Entrypoint: !Ref Entrypoint
+          HL_ENTRYPOINT: !Ref HL_ENTRYPOINT
 
     Resources:
       ExampleLambdaFunction:
@@ -103,7 +103,7 @@ This section will take you through the basics of Babashka backend.
     Mounting <PATH> as /var/task:ro,delegated inside runtime container
     START RequestId: 5dc1e421-69c9-462c-9f90-f0e840426ad8 Version: $LATEST
 
-    {"statusCode":200,"headers":{"content-type":"text/plain; charset=utf-8"},"body":"Hello world. Babashka is a sweet friend of mine! Babashka version: 0.6.0"}
+    {"statusCode":200,"headers":{"content-type":"text/plain; charset=utf-8"},"body":"Hello world. Babashka is a sweet friend of mine! Babashka version: 0.6.2"}
 
     END RequestId: 5dc1e421-69c9-462c-9f90-f0e840426ad8
     REPORT RequestId: 5dc1e421-69c9-462c-9f90-f0e840426ad8
@@ -134,7 +134,7 @@ Configuring SAM deploy
         AWS Region [eu-central-1]: 
         Parameter Timeout [40]: 
         Parameter MemorySize [128]: 
-        Parameter Entrypoint [com.company.example-lambda.core]: 
+        Parameter HL_ENTRYPOINT [com.company.example-lambda.core]: 
         #Shows you resources changes to be deployed and require a 'Y' to initiate deploy
         Confirm changes before deploy [y/N]: y
         #SAM needs permission to be able to create roles to connect to the resources in your template
@@ -165,7 +165,7 @@ Configuring SAM deploy
         Confirm changeset            : True
         Deployment s3 bucket         : <DEPLOYMENT_BUCKET>
         Capabilities                 : ["CAPABILITY_IAM"]
-        Parameter overrides          : {"Runtime": "provided", "Timeout": "40", "MemorySize": "128", "Entrypoint": "com.company.example-lambda.core"}
+        Parameter overrides          : {"Runtime": "provided", "Timeout": "40", "MemorySize": "128", "HL_ENTRYPOINT": "com.company.example-lambda.core"}
         Signing Profiles             : {}
 
 Initiating deployment

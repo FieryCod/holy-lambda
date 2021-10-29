@@ -1,4 +1,5 @@
 - [Prerequisites](prerequisites.md)
+- [Migration Guide](migration-guide.md)
 - [Getting Started](getting-started.md)
   - [Project Scaffolding](project-scaffolding.md)
   - [Overview diagram](overview-diagram.md)

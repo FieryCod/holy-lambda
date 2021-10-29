@@ -1,17 +1,33 @@
 # Changelog
 
-## 0.5.1 (UNRELEASED)
+## 0.6.0 
 - [holy-lambda] Improved performance of the runtime
-- [bb layer] Renamed the Entrypoint environment variable in AWS Lambda to `HL_ENTRYPOINT`.
-- [bb tasks] Rename `hl:sync` to `hl:babashka-sync`. Sync downloads only `pods` and Babashka deps. Dependencies for babashka should be specified in bb.edn.
+- [bb layer] Renamed the `Entrypoint` environment variable for Babashka runtimes to `HL_ENTRYPOINT`.
+- [bb tasks] Rename `hl:sync` to `hl:babashka:sync`. Sync downloads only `pods` and Babashka deps. Dependencies for babashka should be specified in bb.edn.
 - [bb tasks] Remove `:mvn/local-repo` from `deps.edn`. Dependencies for Clojure & Native backend are not downloaded to a local directory. 
 - [bb tasks] Project compilation happens without Docker now.
 - [bb tasks] HL reverts allowance for not specifying the backend name. 
 - [bb tasks] Rename `:runtime` in `bb.edn` to `:backend` to match the documentation. 
 - [bb tasks] Remove `:entrypoint` and `:clj-alias` support. Use `:compile-cmd` in `:build` instead!
 - [docker] Holy Lambda images are now available at ghcr. Please use the new `ghcr.io/fierycod/holy-lambda-builder` instead of `fierycod/graalvm-native-image`. Images don't include `aws`, `aws sam`, and `clojure`.
-- [docker] Holy Lambda now supports aarch64 for all of the runtimes.
 - [holy-lambda] Fix `application/json` content type detection
+- [docker] Holy Lambda images are now available at ghcr. Please use the new `ghcr.io/fierycod/holy-lambda-builder` instead of `fierycod/graalvm-native-image`. Images don't include `aws`, `aws sam`, and `clojure`. 
+  See here(https://github.com/FieryCod/holy-lambda/pkgs/container/holy-lambda-builder/versions)
+- [docker] Holy Lambda now supports aarch64 for all of the runtimes and is now compatible with MacOS M1 :) 
+- [docs] Documentation has been updated to match the newest version
+- [babashka] [Old](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime) babashka artifact has been deprecated. 
+  
+  **Use one of**:
+  - https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime-arm64
+  - https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime-amd64
+  
+- [babashka layer] Bump babashka to 0.6.2
+- [graalvm] Holy Lambda distributes configuration for GraalVM native-image to let the users use HL without `bb tasks`.
+- [runtime] Fix `:awsRequestId` ctx property to point to runtime `:invocation-id`.
+- [native:conf] Remove warning:
+  ```
+  WARNING: Could not resolve fierycod.holy_lambda.core$entrypoint$fn__6578 for reflection configuration. Reason: java.lang.ClassNotFoundException: fierycod.holy_lambda.core$entrypoint$fn__6578.
+  ```
 
 ## 0.5.0 
 

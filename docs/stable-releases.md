@@ -2,7 +2,7 @@
 ## Libraries
 | Artifact name                                    | Version | Purpose                                                                |
 |--------------------------------------------------|---------|------------------------------------------------------------------------|
-| io.github.FieryCod/holy-lambda                   | 0.5.0   | Core library / Custom runtime implementation                           |
+| io.github.FieryCod/holy-lambda                   | 0.6.0   | Core library / Custom runtime implementation                           |
 | io.github.FieryCod/holy-lambda-default-retriever | 0.5.0   | Built in library supporting regular responses*                         |
 | io.github.FieryCod/holy-lambda-async-retriever   | 0.5.0   | Additional support for `Channel<Map\|ByteArray\|nil>` response |
 
@@ -31,7 +31,8 @@ Add to `deps.edn` an additional tuple at `:deps` property
 ## CLI
   | Stable release `:sha`                      |
   |--------------------------------------------|
-  | `99fb7c975498945551e1ed8651f9017532be0a58` |
+  | `9e638fabae3506a3cbecefd375beda4774ae29fe` |
+
   ```clojure bb.edn
   {:deps 
    {io.github.FieryCod/holy-lambda-babashka-tasks
@@ -40,10 +41,13 @@ Add to `deps.edn` an additional tuple at `:deps` property
      :sha         "<STABLE_RELEASE>"}}}
   ```
 ## CLI & CI/CD Docker Images
-  | Image name                    | Tag | GraalVM version            | Source                                                                            |
-  |-------------------------------|-----|----------------------------|-----------------------------------------------------------------------------------|
-  | fierycod/graalvm-native-image | ce  | *21.2.0*                   | [link](https://github.com/FieryCod/holy-lambda/blob/master/docker/Dockerfile.ce)  |
-  | fierycod/graalvm-native-image | dev | *21.3.0-dev-20210910_2147* | [link](https://github.com/FieryCod/holy-lambda/blob/master/docker/Dockerfile.dev) |
+All available images: https://github.com/FieryCod/holy-lambda/pkgs/container/holy-lambda-builder/versions
+
+##### Recommended
+  | Image name                                                 | GraalVM  | Architecture | Java |
+  |------------------------------------------------------------|----------|--------------|------|
+  | ghcr.io/fierycod/holy-lambda-builder:aarch64-java11-21.3.0 | *21.3.0* | ARM64        | *11* |
+  | ghcr.io/fierycod/holy-lambda-builder:amd64-java11-21.3.0   | *21.3.0* | AMD64        | *11* |
 
 #### Using different Docker image in CLI
   ```clojure bb.edn
@@ -52,7 +56,14 @@ Add to `deps.edn` an additional tuple at `:deps` property
     {:image "<IMAGE_PLUS_TAG>"}}}
   ```
   
-## AWS Lambda Layers
+## Babashka Lambda Layers
+### Deprecated
   | Name                         | Backend         | Source                                                                                         | Serverless Repo                                                                                                   | Version |
   |------------------------------|-----------------|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|---------|
-  | holy-lambda-babashka-runtime | Babashka v0.6.0 | [link](https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-layer) | [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime) | 0.5.1   |
+  | (DEPRECATED) holy-lambda-babashka-runtime | Babashka v0.6.0 | [link](https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-layer) | [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime) | 0.5.1   |
+
+### Recommended
+  | Deployable ServerlesRepo Artifact                                                                                       | Babashka | Architecture |
+  |-------------------------------------------------------------------------------------------------------------------------|----------|--------------|
+  | [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime-amd64) | *21.3.0* | AMD64        |
+  | [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime-arm64) | *21.3.0* | ARM64        |

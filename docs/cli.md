@@ -13,21 +13,19 @@ CLI depends on the following programs:
 
 > :information_source: Usage of official CLI is highly recommended, since CLI ensures the Amazon Linux compatibile deployable artifacts. 
 
-> :information_source: Before using any of the below mentioned commands make sure to run `bb hl:sync` first
 
 ## Commands
   Signature: 
   
   `bb <command-name> <args>`
   
-  | Command name    | Description                                                                                                                                                                                     |
-  |-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-  | `hl:sync`       | Syncs project & dependencies. Creates `.holy-lambda` directory.                                                                                                                                 |
-  | `hl:compile`    | Compiles a project to `uberjar` via depstar. Only Clojure and Native backend. Argument `--force\|:force` forces recompilation. `--local\|:local` compiles project in local rather in docker env |
-  | `hl:doctor`     | Diagnoses common issues in the project.                                                                                                                                                         |
-  | `hl:clean`      | Removes HL dependencies. Cleans `.holy-lambda` directory.                                                                                                                                       |
-  | `hl:version`    | Prints the current version of the tasks.                                                                                                                                                        |
-  | `hl:docker:run` | Runs a command specified as a string argument in the docker environment.                                                                                                                        |
+  | Command name       | Description                                                              |
+  |--------------------|--------------------------------------------------------------------------|
+  | `hl:compile`       | Compiles a project to `uberjar` via provided `:compile-cmd` in bb.edn    |
+  | `hl:doctor`        | Diagnoses common issues in the project.                                  |
+  | `hl:clean`         | Removes HL dependencies. Cleans `.holy-lambda` directory.                |
+  | `hl:version`       | Prints the current version of the tasks.                                 |
+  | `hl:docker:run`    | Runs a command specified as a string argument in the docker environment. |
 
 #### Backend specific tasks
 ##### Native
@@ -35,17 +33,22 @@ CLI depends on the following programs:
   |------------------------|------------------------------------------------------------------------------------------------------------------------------------|
   | `hl:native:conf`       | Provides native configurations for the application. Uses GraalVM `java -agentlib` and generates `resources/native-configurations.` |
   | `hl:native:executable` | Provides native executable of the application, by using `native-image` under the hood. Generates `.holy-lambda/build/latest.zip`                                             |
+
+## Babashka
+  | Command name       | Description                                                                                                                                                     |
+  |--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  | `hl:babashka:sync` | Downloads pods & Clojure dependencies to `.holy-lambda` folder. Both `.holy-lambda/bb-clj-deps` and `.holy-lambda/pods` should be packed to the separate layers |
+
 ## Possible options in `bb.edn` tasks
   - `:docker {:volumes, :network, :image}` - Docker execution environment configuration.
     - `:volumes [{:docker <pathA> :host <pathB>}]` - Expose local directories/files in Docker context.
       - `:docker` - An alias for local path. Under this path the local directory/file will be available.
       - `:host` - Path to local directory/file relative to the root of the project.
-  - `:build {:clj-alias, :graalvm-home}` - Group for build related options.
-    - `clj-alias` - An alias from `deps.edn` that should be passed to HL commands.
+  - `:build {:compile-cmd, :graalvm-home}` - Group for build related options.
+    - `compile-cmd` - An alias from `deps.edn` that should be passed to HL commands.
     - `graalvm-home` - GraalVM home directory. Available only when `HL_NO_DOCKER` environment is set to `1|true`.
-  - `:runtime {:pods, :entrypoint, :bootstrap-file, :native-image-args}` - runtime/backend related group of options.
+  - `:backend {:pods, :bootstrap-file, :native-image-args}` - runtime/backend related group of options.
     - `:pods {<pod-cord> <pod-version>}` - upon `bb hl:sync` downloads all the Amazon Linux compatible Babashka pods to `.holy-lambda/pods`.
-    - `:entrypoint` - used in `uberjar` generation. Entrypoint should point to main namespace with `(h/entrypoint)`.
     - `:native-image-args []` - vector of arguments that should be passed to GraalVM `native-image` tool. For more information click [here](https://www.graalvm.org/reference-manual/native-image/).
 
 ## CLI Paths
@@ -77,7 +80,6 @@ CLI depends on the following programs:
   | **HL_PROFILE**      | `string`              | AWS Profile used in `hl:native:conf` takes precedence over **AWS_PROFILE**                  |
   | **AWS_PROFILE**     | `string`              | AWS Profile used in `hl:native:conf` takes precedence over **AWS_DEFAULT_PROFILE**          |
   | **HL_NO_PROFILE**   | `string`              | Disable checking for `HL_AWS_PROFILE\|AWS_PROFILE\|DEFAULT_AWS_PROFILE` *(2)*               |
-  | **HL_CLJ_ALIAS**    | `string`              | Custom alias used during `hl:(native:conf\|native:executable)\|compile\|sync` *(3)*         |
   | **GRAALVM_HOME**    | `string`              | Home of the GraalVM. Used only when `HL_NO_DOCKER` is set to either `true` or `1`. *(4)*         |
 
   1) `HL_NO_DOCKER` - Useful for using the HL CLI on CI/CD, where the builder is an image based on `fierycod/graalvm-native-image`. 

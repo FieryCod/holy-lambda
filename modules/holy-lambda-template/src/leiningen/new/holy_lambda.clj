@@ -22,12 +22,7 @@
               :main-ns main-ns
               :sanitized (name-to-path name)}
         render* #(render % data)]
-    (main/info "Generating new project based on holy-lambda. Make sure that you have babashka tool installed, `docker` running and AWS account properly configured via `aws configure`.
-If you're using AWS Vault make sure to set `HL_NO_PROFILE=1` environment variable.
-
-First steps in new project:
-- 1. Run bb hl:sync to sync the project with dockerized version of holy-lambda
-- 2. Run bb tasks to get full list of tasks")
+    (main/info "Generating new project based on holy-lambda. See docs: https://fierycod.github.io/holy-lambda/#/")
 
     (->files data
              ["src/{{nested-dirs}}/core.cljc" (render* "core.cljc")]

@@ -14,14 +14,14 @@
    
      **Build command**
      ```bash
-     bb hl:sync && bb hl:compile
+     bb hl:compile
      ```
 
    - Native -> `.holy-lambda/build/latest.zip`
    
      **Build command**
      ``` 
-     bb hl:sync && bb hl:compile && bb hl:native:executable
+     bb hl:compile && bb hl:native:executable
      ```
      
      **Content of latest.zip**

@@ -1,12 +1,7 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:git/url                                   "https://github.com/FieryCod/holy-lambda"
          :deps/root                                 "./modules/holy-lambda-babashka-tasks"
-         :sha                                       "99fb7c975498945551e1ed8651f9017532be0a58"}}
-
- ;; Local repositories should be downloaded to `.holy-lambda` directory
- ;; This way project artifacts are separated from global ~/.m2 and only project artifacts
- ;; are deployed to AWS Lambda
- :mvn/local-repo                                    ".holy-lambda/.m2"
+         :sha                                       "9e638fabae3506a3cbecefd375beda4774ae29fe"}}
 
  ;; Minimal babashka version which should be used in conjuction with holy-lambda
  :min-bb-version                                    "0.3.7"
@@ -37,12 +32,9 @@
 
                                 ;; GraalVM Community holy-lambda compatible docker image
                                 ;; You can always build your own GraalVM image with enterprise edition
-                                :image              "fierycod/graalvm-native-image:ce"}
+                                :image              "ghcr.io/fierycod/holy-lambda-builder:amd64-java11-21.3.0"}
 
-                       :build {;; clj alias might be set via environment variable
-                               ;; `HL_CLJ_ALIAS` like:  HL_CLJ_ALIAS="dev"
-                               :clj-alias           nil
-
+                       :build {:compile-cmd  "clojure -X:uberjar"
                                ;; Used when either :docker is nil or
                                ;; `HL_NO_DOCKER` environment variable is set to "true"
                                ;; Might be set via `GRAALVM_HOME` environment variable
@@ -59,10 +51,6 @@
                         ;;
                         ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
                         :pods                      {}
-
-                        ;; Native runtimes have a special environment variable $Entrypoint which is available during code execution
-                        ;; :entrypoint should always point to a namespace with includes (h/entrypoint) call
-                        :entrypoint                com.company.example-lambda.core
 
                         ;; For `:native` runtime you can provide your own bootstrap file
                         :bootstrap-file            "bootstrap"
@@ -83,18 +71,12 @@
                        
 
 
- :tasks {:requires                 ([holy-lambda.tasks])
-
-         hl:docker:run             holy-lambda.tasks/hl:docker:run
-
-         hl:native:conf            holy-lambda.tasks/hl:native:conf
-         hl:native:executable      holy-lambda.tasks/hl:native:executable
-
-         hl:sync                   holy-lambda.tasks/hl:sync
-         hl:compile                holy-lambda.tasks/hl:compile
-         hl:doctor                 holy-lambda.tasks/hl:doctor
-         hl:clean                  holy-lambda.tasks/hl:clean
-         hl:version                holy-lambda.tasks/hl:version}}
-
-         
- 
+ :tasks {:requires            ([holy-lambda.tasks])
+         hl:docker:run        holy-lambda.tasks/hl:docker:run
+         hl:native:conf       holy-lambda.tasks/hl:native:conf
+         hl:native:executable holy-lambda.tasks/hl:native:executable
+         hl:babashka:sync     holy-lambda.tasks/hl:babashka:sync
+         hl:compile           holy-lambda.tasks/hl:compile
+         hl:doctor            holy-lambda.tasks/hl:doctor
+         hl:clean             holy-lambda.tasks/hl:clean
+         hl:version           holy-lambda.tasks/hl:version}}

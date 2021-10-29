@@ -42,25 +42,14 @@ This section will take you through the basics of Native backend.
     ```
 3. Add following dependencies to the `deps.edn`
   ```
-  com.github.clj-easy/graal-build-time {:mvn/version "0.1.0"}
+  com.github.clj-easy/graal-build-time {:mvn/version "0.1.4"}
   ```
   
   The library should populate `--initialize-at-built-time` argument with all the necessary Clojure namespaces. You can read about it [here](https://github.com/clj-easy/graal-build-time).
   
-4. Provide the additional `--initialize-at-build-time` option for jsonista.
-
-   > :information_source: With the `holy-lambda` >= 0.5.2 this step will not be neccessary. See this [PR](https://github.com/metosin/jsonista/pull/58/files)
-   
-   ```clojure
-   :native-image-args [
-    ...,
-    "--initialize-at-build-time=com.fasterxml.jackson"
-   ]
-   ```
-  
-5. Sync & Compile
+5. Compile
   ```bash
-  bb hl:sync && bb hl:compile
+  bb hl:compile
   ```
   
 6. Generate a native executable

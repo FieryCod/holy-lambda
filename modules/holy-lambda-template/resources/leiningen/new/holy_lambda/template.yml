@@ -46,7 +46,7 @@ Resources:
     #   DockerContext: .
     #   DockerTag: v1
 
-  ServerlessHttpApi:
+  ExampleHttpApi:
     Type: AWS::Serverless::HttpApi
     DeletionPolicy: Retain
     Properties:
@@ -56,4 +56,4 @@ Outputs:
   ExampleLambdaEndpoint:
     Description: Endpoint for ExampleLambdaFunction
     Value:
-      Fn::Sub: https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com
+      Fn::Sub: https://${ExampleHttpApi}.execute-api.${AWS::Region}.amazonaws.com

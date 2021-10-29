@@ -10,11 +10,13 @@
   
   There are two more configuration files left, that are less commonly used in Clojure world. One is `serialization-config.json` in which you have to specify the classes, that are serialized during the execution of the program. The example of library that requires the additional `serialization-config.json` is [nippy](https://github.com/ptaoussanis/nippy). Although nippy works great in native-image when regular Clojure structures are `freezed` or `thawed`, it fails to freeze the instance of `ExceptionInfo`, and Java `Throwable`'s types. 
   
-  > :information_source: The additional support for Nippy's freeze of Java/Clojure exceptions is distributed via [graal-config](https://github.com/clj-easy/graal-config).
+  > :information_source: The additional support for Nippy's freeze of Java/Clojure exceptions is distributed via [clj-easy/graal-config](https://github.com/clj-easy/graal-config).
   
   Another one is `jni-config.json`, that has to be provided only if the code uses native JDK code. Regular JNI can be successfully traced via GraalVM [native-image Java agent](https://www.graalvm.org/reference-manual/native-image/Agent/), but JNA requires some additional configuration, and it's troublesome to specify the full list of the natively provided JNA functions.
   
   > :information_source: For JNA example you should take a look into [this](https://github.com/amahfouz1/jna-graalvm)
+  
+  > :information_source: If you find incompatibility between Clojure library and GraalVM native-image, please report library name here: [clj-easy/graal-config](https://github.com/clj-easy/graal-config)
 
 ## Reflection free Clojure programs
   To ensure reflection free program set the dynamic `*warn-on-reflection*` Clojure var. Highly encourage to set the var in the every possible namespace just below it's declaration.
