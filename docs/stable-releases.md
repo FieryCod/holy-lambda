@@ -31,7 +31,7 @@ Add to `deps.edn` an additional tuple at `:deps` property
 ## CLI
   | Stable release `:sha`                      |
   |--------------------------------------------|
-  | `9e638fabae3506a3cbecefd375beda4774ae29fe` |
+  | `eb299bf6e380bcc8e484e80f8f16363bc5deb41c` |
 
   ```clojure bb.edn
   {:deps 

@@ -37,7 +37,7 @@ Resources:
         HelloEvent:
           Type: HttpApi
           Properties:
-            ApiId: !Ref ServerlessHttpApi
+            ApiId: !Ref ExampleHttpApi
             Path: /
             Method: GET
     # For docker based deployments
@@ -48,9 +48,6 @@ Resources:
 
   ExampleHttpApi:
     Type: AWS::Serverless::HttpApi
-    DeletionPolicy: Retain
-    Properties:
-      StageName: Prod
 
 Outputs:
   ExampleLambdaEndpoint:

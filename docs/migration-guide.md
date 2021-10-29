@@ -23,7 +23,7 @@
             hl:version           holy-lambda.tasks/hl:version}}
      ``` 
      
-   3. Replace the `:sha` in `bb.edn` with the newest tag version: `9e638fabae3506a3cbecefd375beda4774ae29fe`
+   3. Replace the `:sha` in `bb.edn` with the newest tag version: `eb299bf6e380bcc8e484e80f8f16363bc5deb41c`
    4. Remove `:mvn/local-repo` property from `deps.edn`
    5. Replace `:uberjar` alias in `deps.edn` with the following:
     ```clojure
