@@ -33,7 +33,11 @@
     :arch    ["amd64"]}])
 
 (def DEV_IMAGES
-  [{:version         "21.3.0-dev-20211006_0800"
+  [{:version         "22.0.0-dev-20211028_1927"
+    :partial-version "22.0.0-dev"
+    :java            ["11" "17"]
+    :arch            ["amd64", "aarch64"]}
+   {:version         "21.3.0-dev-20211006_0800"
     :partial-version "21.3.0-dev"
     :java            ["11" "17"]
     :arch            ["amd64", "aarch64"]},
