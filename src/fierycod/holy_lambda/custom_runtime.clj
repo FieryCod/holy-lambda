@@ -51,10 +51,10 @@
 
     (cond
       (u/json-content-type? ctype)
-      (assoc-in event [:event :body-parsed] (u/json-string->x body))
+      (assoc event :body-parsed (u/json-string->x body))
 
       (u/edn-content-type? ctype)
-      (assoc-in event [:event :body-parsed] (edn/read-string body))
+      (assoc event :body-parsed (edn/read-string body))
 
       :else event)))
 
