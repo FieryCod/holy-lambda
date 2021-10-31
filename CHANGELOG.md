@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.1
+- [bb layer] Update babashka to 0.6.3
+- [holy-lambda] Parse inner body to `:body-parsed` (see https://github.com/FieryCod/holy-lambda/issues/74)
+
 ## 0.6.0 
 - [holy-lambda] Improved performance of the runtime
 - [bb layer] Renamed the `Entrypoint` environment variable for Babashka runtimes to `HL_ENTRYPOINT`.
