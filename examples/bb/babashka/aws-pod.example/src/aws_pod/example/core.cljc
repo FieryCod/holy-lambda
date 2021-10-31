@@ -1,9 +1,8 @@
 (ns aws-pod.example.core
   (:gen-class)
   (:require
-   #?(:bb
-      [fierycod.holy-lambda-ring-adapter.core :as hlra]
-      [babashka.pods :as pods])
+   [fierycod.holy-lambda-ring-adapter.core :as hlra]
+   [babashka.pods :as pods]
    [fierycod.holy-lambda.response :as hr]
    [fierycod.holy-lambda.agent :as agent]
    [fierycod.holy-lambda.core :as h]))
@@ -12,15 +11,12 @@
 
 (def region "eu-central-1")
 
-#?(:bb
-   (pods/load-pod 'org.babashka/aws "0.0.6"))
+(pods/load-pod 'org.babashka/aws "0.0.6")
 
-#?(:bb
-   (require '[pod.babashka.aws :as aws]))
+(require '[pod.babashka.aws :as aws])
 
-#?(:bb
-   (def s3-client
-     (aws/client {:api :s3 :region region})))
+(def s3-client
+  (aws/client {:api :s3 :region region}))
 
 (defn ExampleLambda
   [{:keys [event ctx]}]

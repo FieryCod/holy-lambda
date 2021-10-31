@@ -1,34 +1,36 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:local/root "../../../../modules/holy-lambda-babashka-tasks"}
+        io.github.FieryCod/holy-lambda
+        {:local/root "../../../../"}
         io.github.FieryCod/holy-lambda-ring-adapter
-        {:git/url                                   "https://github.com/FieryCod/holy-lambda-ring-adapter"
-         :deps/root                                 "."
-         :sha                                       "32e94365b089175a1d6bf35b7d8175eb260d2d4c"}}
+        {:git/url   "https://github.com/FieryCod/holy-lambda-ring-adapter"
+         :deps/root "."
+         :sha       "32e94365b089175a1d6bf35b7d8175eb260d2d4c"}}
 
  :min-bb-version "0.3.7"
 
  :holy-lambda/options {
-                       :docker {:volumes [{:docker     "/holy-lambda"
-                                           :host       "../../../../"}]
+                       :docker {:volumes [{:docker "/holy-lambda"
+                                           :host   "../../../../"}]
 
                                 :network "host"
 
                                 :image "fierycod/graalvm-native-image:ce"}
 
-                       :build {:clj-alias nil
+                       :build {:clj-alias    nil
                                :graalvm-home nil}
 
                        :runtime
                        {
 
-                        :pods                {org.babashka/aws "0.0.6"}
+                        :pods {org.babashka/aws "0.0.6"}
 
                         ;; For `:native` runtime you can provide your own bootstrap file
-                        :bootstrap-file      "bootstrap"
+                        :bootstrap-file "bootstrap"
 
                         ;; For `:native` runtime you can provide some native resources which will be available during lambda execution
                         ;; Resources are packed as is.
-                        :native-deps         "resources"
+                        :native-deps "resources"
 
                         ;; Specify custom arguments for native image generation
                         ;; Works only on `:native` runtime.

@@ -40,6 +40,15 @@ Resources:
       CompatibleRuntimes:
         - provided.al2
 
+  SharedClojureDeps:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: SharedBabashkaDepsLayer
+      Description: Shared pods for stack.
+      ContentUri: ./.holy-lambda/bb-clj-deps
+      CompatibleRuntimes:
+        - provided.al2
+
   SharedBabashkaDepsLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -57,6 +66,7 @@ Resources:
       Layers:
         - !Ref SharedBabashkaDepsLayer
         - !Ref HLBabashkaLocalRuntime
+        - !Ref SharedClojureDeps
       Events:
         HelloEvent:
           Type: Api

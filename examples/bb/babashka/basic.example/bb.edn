@@ -1,15 +1,15 @@
-{:deps {io.github.FieryCod/holy-lambda-babashka-tasks
-        {:local/root "../../../../modules/holy-lambda-babashka-tasks"}}
+{:deps {io.github.FieryCod/holy-lambda-babashka-tasks {:local/root "../../../../modules/holy-lambda-babashka-tasks"}
+        io.github.FieryCod/holy-lambda                {:local/root "../../../../"}}
 
  :holy-lambda/options {
-                       :docker {:volumes [{:docker     "/holy-lambda"
-                                           :host       "../../../../"}]
+                       :docker {:volumes [{:docker "/holy-lambda"
+                                           :host   "../../../../"}]
 
                                 :network "host"
 
                                 :image "fierycod/graalvm-native-image:ce"}
 
-                       :build {:clj-alias nil
+                       :build {:clj-alias    nil
                                :graalvm-home nil}
 
 
@@ -24,14 +24,14 @@
                         ;; For now pods should be declared in `bb.edn`. See: https://github.com/babashka/babashka/issues/768#issuecomment-825016317
                         ;;
                         ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
-                        :pods                {}
+                        :pods {}
 
                         ;; For `:native` runtime you can provide your own bootstrap file
-                        :bootstrap-file      "bootstrap"
+                        :bootstrap-file "bootstrap"
 
                         ;; For `:native` runtime you can provide some native resources which will be available during lambda execution
                         ;; Resources are packed as is.
-                        :native-deps         "resources"
+                        :native-deps "resources"
 
                         ;; Specify custom arguments for native image generation
                         ;; Works only on `:native` runtime.
