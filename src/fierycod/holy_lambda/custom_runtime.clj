@@ -44,11 +44,11 @@
     (when-not success?
       (send-runtime-error runtime iid (u/->ex "AWS did not accept your lambda payload:\n" (pr-str body))))))
 
-(defn- event-with-parsed-body
+(defn- normalize-event
   [event]
-  (let [inner-event (:event event)
-        body        (:body inner-event)
-        ctype       (u/content-type inner-event)]
+  (let [body        (:body event)
+        ctype       (u/content-type event)]
+
     (cond
       (u/json-content-type? ctype)
       (assoc-in event [:event :body-parsed] (u/json-string->x body))
@@ -82,7 +82,7 @@
 
     (when (and iid (aws-event :success?))
       (try
-        (send-response runtime iid (handler {:event (event-with-parsed-body event)
-                                             :ctx (->aws-context iid headers event env-vars)}))
+        (send-response runtime iid (handler {:event (normalize-event event)
+                                             :ctx   (->aws-context iid headers event env-vars)}))
         (catch Exception err
           (send-runtime-error runtime iid err))))))
