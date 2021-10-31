@@ -1,5 +1,9 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
-        {:local/root "../../../../modules/holy-lambda-babashka-tasks"}}
+        {:local/root "../../../../modules/holy-lambda-babashka-tasks"}
+        io.github.FieryCod/holy-lambda-ring-adapter
+        {:git/url                                   "https://github.com/FieryCod/holy-lambda-ring-adapter"
+         :deps/root                                 "."
+         :sha                                       "32e94365b089175a1d6bf35b7d8175eb260d2d4c"}}
 
  :min-bb-version "0.3.7"
 

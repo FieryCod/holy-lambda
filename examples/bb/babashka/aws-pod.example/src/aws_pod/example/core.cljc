@@ -2,10 +2,13 @@
   (:gen-class)
   (:require
    #?(:bb
+      [fierycod.holy-lambda-ring-adapter.core :as hlra]
       [babashka.pods :as pods])
    [fierycod.holy-lambda.response :as hr]
    [fierycod.holy-lambda.agent :as agent]
    [fierycod.holy-lambda.core :as h]))
+
+(def handler (hlra/wrap-hl-req-res-model identity))
 
 (def region "eu-central-1")
 

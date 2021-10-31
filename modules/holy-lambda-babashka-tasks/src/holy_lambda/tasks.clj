@@ -441,7 +441,7 @@
 (defn deps-sync--babashka
   []
   (shell "mkdir -p .holy-lambda/bb-clj-deps")
-  (shell "bb" "-cp" (s/trim (shs "bb" "--clojure" "-Spath")) "--uberjar" ".holy-lambda/bb-clj-deps/.m2/libs.jar")
+  (shell "bb" "--uberjar" ".holy-lambda/bb-clj-deps/.m2/libs.jar")
   (shell "bash -c \"cd .holy-lambda/bb-clj-deps/.m2 && unzip -oq libs.jar && rm -Rf libs.jar\"")
   (when-not (empty? (:pods RUNTIME))
     (hpr "Babashka pods found! Syncing" (str (accent "babashka pods") ".") "Pods should be distributed via a layer which points to" (accent ".holy-lambda/pods"))

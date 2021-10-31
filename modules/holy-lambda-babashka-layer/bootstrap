@@ -13,10 +13,7 @@ export CLOJURE_TOOLS_DIR=/opt
 export CLJ_CACHE=/opt
 export CLJ_CONFIG=/opt
 
-JARS_CLASSPATH=$(find /opt/.m2 -name '*.jar' -printf "%p:")
-FULL_CLASSPATH="$JARS_CLASSPATH/var/task/src:/var/task/.m2:/var/task:/var/task/src/clj:/var/task/src/cljc:src/cljc:src/clj:/var/task/resources"
-
-export BABASHKA_CLASSPATH=$FULL_CLASSPATH
+export BABASHKA_CLASSPATH="/opt/.m2:var/task/src:/var/task/.m2:/var/task:/var/task/src/clj:/var/task/src/cljc:src/cljc:src/clj:/var/task/resources"
 export BABASHKA_PRELOADS='(load-file "/opt/hacks.clj")'
 
 if [ -z "$HL_ENTRYPOINT" ]; then
