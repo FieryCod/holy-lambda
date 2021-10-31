@@ -40,6 +40,15 @@ Resources:
       CompatibleRuntimes:
         - provided.al2
 
+  ClojureDepsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: ClojureDepsLayer
+      Description: Shared dependencies for stack.
+      ContentUri: ./.holy-lambda/bb-clj-deps
+      CompatibleRuntimes:
+        - provided.al2
+
   ExampleLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -47,6 +56,7 @@ Resources:
       Handler: basic.example.core.ExampleLambda
       Layers:
         - !Ref HLBabashkaLocalRuntime
+        - !Ref ClojureDepsLayer
       Events:
         HelloEvent:
           Type: Api
