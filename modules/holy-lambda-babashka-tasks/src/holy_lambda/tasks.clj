@@ -12,7 +12,7 @@
    [holy-lambda.refl :as refl])
   (:refer-clojure :exclude [spit]))
 
-(def TASKS_VERSION "0.5.1")
+(def TASKS_VERSION "0.6.1")
 
 ;; Coloring taken from https://github.com/trhura/clojure-term-colors/blob/master/src/clojure/term/colors.clj
 ;; Included as is to prevent the syncing of deps

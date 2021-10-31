@@ -108,13 +108,17 @@
     (seq (:multiValueHeaders event))
     (update :multiValueHeaders normalize-headers)))
 
-(defn- content-type
+(defn content-type
   [x]
   (get (get x :headers) "content-type"))
 
-(defn- json-content-type?
+(defn json-content-type?
   [ctype]
   (some-> ctype (s/includes? "application/json")))
+
+(defn edn-content-type?
+  [ctype]
+  (some-> ctype (s/includes? "application/edn")))
 
 (defn in->edn-event
   [^InputStream event-stream]

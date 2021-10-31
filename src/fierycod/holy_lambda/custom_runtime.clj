@@ -1,5 +1,6 @@
 (ns fierycod.holy-lambda.custom-runtime
   (:require
+   [clojure.edn :as edn]
    [fierycod.holy-lambda.util :as u]))
 
 (defn- url
@@ -43,6 +44,20 @@
     (when-not success?
       (send-runtime-error runtime iid (u/->ex "AWS did not accept your lambda payload:\n" (pr-str body))))))
 
+(defn- event-with-parsed-body
+  [event]
+  (let [inner-event (:event event)
+        body        (:body inner-event)
+        ctype       (u/content-type inner-event)]
+    (cond
+      (u/json-content-type? ctype)
+      (assoc-in event [:event :body-parsed] (u/json-string->x body))
+
+      (u/edn-content-type? ctype)
+      (assoc-in event [:event :body-parsed] (edn/read-string body))
+
+      :else event)))
+
 (defn next-iter
   [maybe-handler routes env-vars]
   (let [runtime      (env-vars "AWS_LAMBDA_RUNTIME_API")
@@ -67,6 +82,7 @@
 
     (when (and iid (aws-event :success?))
       (try
-        (send-response runtime iid (handler {:event event :ctx (->aws-context iid headers event env-vars)}))
+        (send-response runtime iid (handler {:event (event-with-parsed-body event)
+                                             :ctx (->aws-context iid headers event env-vars)}))
         (catch Exception err
           (send-runtime-error runtime iid err))))))
