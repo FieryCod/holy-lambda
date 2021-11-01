@@ -11,7 +11,7 @@ Resources:
       LayerName: holy-lambda-babashka-runtime-arm64
       Description: holy-lambda micro framework babashka compatible backend layer for
         arm64.
-      ContentUri: s3://holy-lambda-babashka-layer/holy-lambda/df290d92ad0fe43c3384d7972509c8b7
+      ContentUri: s3://holy-lambda-babashka-layer/holy-lambda/c8d2897b7b675b258372fc67c4d21d3f
       CompatibleRuntimes:
       - provided
       - provided.al2

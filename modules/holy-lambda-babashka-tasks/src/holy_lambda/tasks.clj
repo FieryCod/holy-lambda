@@ -451,6 +451,7 @@
     (docker-run command)))
 
 (defn hl:update-bb-tasks
+  "     \033[0;31m>\033[0m Update \033[0;31m:sha\033[0m of \033[0;31mio.github.FieryCod/holy-lambda-babashka-tasks\033[0m to latest stable version"
   []
   (print-task "hl:update-bb-tasks")
   (let [new-version (new-available-tasks-version)]
@@ -463,8 +464,7 @@
                                       (fn [x]
                                         (if-not (:sha (r/sexpr x))
                                           x
-                                          (assoc (r/sexpr x) :sha new-version)))))
-          )))))
+                                          (assoc (r/sexpr x) :sha new-version))))))))))
 
 (defn deps-sync--babashka
   []
@@ -480,7 +480,7 @@
       (shell "cp -R .holy-lambda/.babashka .holy-lambda/pods/"))))
 
 (defn hl:babashka:sync
-  "     \033[0;31m>\033[0m Syncs dependencies bb.edn :backend:pods and dependencies to .holy-lambda directory. "
+  "     \033[0;31m>\033[0m Syncs dependencies from \033[0;31mbb.edn\033[0m \033[0;31m:backend:pods\033[0m and \033[0;31m:deps\033[0m to \033[0;31m.holy-lambda\033[0m directory. "
   []
   (print-task "hl:babashka:sync")
   (deps-sync--babashka)

@@ -1,7 +1,7 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:git/url   "https://github.com/FieryCod/holy-lambda"
          :deps/root "./modules/holy-lambda-babashka-tasks"
-         :sha       "eb299bf6e380bcc8e484e80f8f16363bc5deb41c"}}
+         :sha       "596a5692c85c3ed0e7ff7115e67d4c7b1d6f32a8"}}
 
  ;; Minimal babashka version which should be used in conjuction with holy-lambda
  :min-bb-version "0.3.7"
@@ -69,4 +69,5 @@
          hl:compile           holy-lambda.tasks/hl:compile
          hl:doctor            holy-lambda.tasks/hl:doctor
          hl:clean             holy-lambda.tasks/hl:clean
+         hl:update-bb-tasks   holy-lambda.tasks/hl:update-bb-tasks
          hl:version           holy-lambda.tasks/hl:version}}
