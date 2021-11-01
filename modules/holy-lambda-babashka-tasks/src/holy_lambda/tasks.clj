@@ -453,12 +453,18 @@
 (defn hl:update-bb-tasks
   []
   (print-task "hl:update-bb-tasks")
-  (hpr "Updating from tasks version:" (accent TASKS_VERSION_SHA) "to:" (accent (new-available-tasks-version)))
-  (let [edn (r/parse-string BB_EDN_STRING)]
-    (println edn)
-    )
-
-  )
+  (let [new-version (new-available-tasks-version)]
+    (if (= new-version TASKS_VERSION_SHA)
+      (hpr "You're using the latest tasks :sha. No update necessary!")
+      (do
+        (hpr "Updating from tasks version:" (accent TASKS_VERSION_SHA) "to:" (accent (new-available-tasks-version)))
+        (let [edn (r/parse-string BB_EDN_STRING)]
+          (spit "bb.edn" (r/update-in edn [:deps 'io.github.FieryCod/holy-lambda-babashka-tasks]
+                                      (fn [x]
+                                        (if-not (:sha (r/sexpr x))
+                                          x
+                                          (assoc (r/sexpr x) :sha new-version)))))
+          )))))
 
 (defn deps-sync--babashka
   []
