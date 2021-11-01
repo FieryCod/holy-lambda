@@ -5,6 +5,7 @@
    [clojure.java.shell :as csh]
    [clojure.edn :as edn]
    [cheshire.core :as json]
+   [babashka.deps :as deps]
    [babashka.curl :as curl]
    [babashka.fs :as fs]
    [babashka.process :as p]
@@ -12,7 +13,10 @@
    [holy-lambda.refl :as refl])
   (:refer-clojure :exclude [spit]))
 
-(def TASKS_VERSION "0.6.1")
+(def TASKS_VERSION "0.6.1") ;; Deprecated don't update
+
+(deps/add-deps '{:deps {borkdude/rewrite-edn {:mvn/version "0.1.0"}}})
+(require '[borkdude.rewrite-edn :as r])
 
 ;; Coloring taken from https://github.com/trhura/clojure-term-colors/blob/master/src/clojure/term/colors.clj
 ;; Included as is to prevent the syncing of deps
@@ -211,10 +215,17 @@
   (clojure.core/spit file content))
 
 (def REMOTE_TASKS "https://raw.githubusercontent.com/FieryCod/holy-lambda/master/modules/holy-lambda-babashka-tasks/STABLE_VERSION")
+(def REMOTE_TASKS_SHA "https://raw.githubusercontent.com/FieryCod/holy-lambda/master/modules/holy-lambda-babashka-tasks/STABLE_VERSION_SHA")
+
+(defn new-available-tasks-version
+  []
+  (s/trim (:body (curl/get REMOTE_TASKS_SHA))))
+
+(def BB_EDN_STRING (slurp (io/file "bb.edn")))
 
 (defn bb-edn
   []
-  (edn/read-string (slurp (io/file "bb.edn"))))
+  (edn/read-string BB_EDN_STRING))
 
 (def BB_EDN
   (try
@@ -225,6 +236,7 @@
              (str "\n" (pre "Original message: ") (pre (.getMessage err))))
         (System/exit 1)))))
 
+(def TASKS_VERSION_SHA (or (:sha (get (:deps BB_EDN) 'io.github.FieryCod/holy-lambda-babashka-tasks)) "LOCAL"))
 (def OPTIONS
   (if-let [opts (:holy-lambda/options BB_EDN)]
     opts
@@ -438,6 +450,16 @@
       (System/exit 1))
     (docker-run command)))
 
+(defn hl:update-bb-tasks
+  []
+  (print-task "hl:update-bb-tasks")
+  (hpr "Updating from tasks version:" (accent TASKS_VERSION_SHA) "to:" (accent (new-available-tasks-version)))
+  (let [edn (r/parse-string BB_EDN_STRING)]
+    (println edn)
+    )
+
+  )
+
 (defn deps-sync--babashka
   []
   (shell "mkdir -p .holy-lambda/bb-clj-deps")
@@ -592,8 +614,7 @@ set -e
       (hpr " AWS directory is:        " (accent AWS_DIR))
       (hpr " AWS directory exists?:   " (accent AWS_DIR_EXISTS?))
       (hpr " Docker version:          " (accent (or (s/trim (shs-no-err "docker" "--version")) "UNKNOWN")))
-      (hpr " Babashka tasks sha:      " (accent (or (:sha (get (:deps BB_EDN) 'io.github.FieryCod/holy-lambda-babashka-tasks)) "LOCAL")))
-      (hpr " Babashka tasks version:  " (accent TASKS_VERSION))
+      (hpr " Babashka tasks sha:      " (accent TASKS_VERSION_SHA))
       (hpr " Babashka version:        " (accent (or (s/trim (shs-no-err "bb" "version")) "UNKNOWN")))
       (hpr " TTY:                     " (accent TTY?))
       (hpr "---------------------------------------\n"))
@@ -622,9 +643,9 @@ set -e
   "     \033[0;31m>\033[0m Outputs holy-lambda babashka tasks version"
   []
   (print-task "hl:version")
-  (hpr (str (prs "Current tasks version is: ") (accent TASKS_VERSION)))
-  (when-not (= (s/trim (:body (curl/get REMOTE_TASKS))) TASKS_VERSION)
-    (hpr (prw "Local version of tasks does not match stable tasks version. Update tasks sha!"))))
+  (hpr (str (prs "Current tasks version is: ") (accent TASKS_VERSION_SHA)))
+  (when-not (= (new-available-tasks-version) TASKS_VERSION_SHA)
+    (hpr (prw "Local version of tasks does not match stable tasks version. Consider updating the tasks via `bb hl:update-bb-tasks`"))))
 
 (defn hl:sync
   "     \033[0;31m>\033[0m DEPRECATED! See HL changelog"
