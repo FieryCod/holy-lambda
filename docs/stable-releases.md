@@ -2,7 +2,7 @@
 ## Libraries
 | Artifact name                                    | Version | Purpose                                                                |
 |--------------------------------------------------|---------|------------------------------------------------------------------------|
-| io.github.FieryCod/holy-lambda                   | 0.6.0   | Core library / Custom runtime implementation                           |
+| io.github.FieryCod/holy-lambda                   | 0.6.2   | Core library / Custom runtime implementation                           |
 | io.github.FieryCod/holy-lambda-default-retriever | 0.5.0   | Built in library supporting regular responses*                         |
 | io.github.FieryCod/holy-lambda-async-retriever   | 0.5.0   | Additional support for `Channel<Map\|ByteArray\|nil>` response |
 
@@ -31,7 +31,7 @@ Add to `deps.edn` an additional tuple at `:deps` property
 ## CLI
   | Stable release `:sha`                      |
   |--------------------------------------------|
-  | `eb299bf6e380bcc8e484e80f8f16363bc5deb41c` |
+  | `e6c47274a2bfc7576a9da0ccdbc079c1e83bee17` |
 
   ```clojure bb.edn
   {:deps 
@@ -63,7 +63,7 @@ All available images: https://github.com/FieryCod/holy-lambda/pkgs/container/hol
   | (DEPRECATED) holy-lambda-babashka-runtime | Babashka v0.6.0 | [link](https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-layer) | [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime) | 0.5.1   |
 
 ### Recommended
-  | Deployable ServerlesRepo Artifact                                                                                       | Babashka | Architecture |
-  |-------------------------------------------------------------------------------------------------------------------------|----------|--------------|
-  | [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime-amd64) | *21.3.0* | AMD64        |
-  | [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime-arm64) | *21.3.0* | ARM64        |
+  | Deployable ServerlesRepo Artifact                                                                                       | Babashka | Architecture | Version |
+  |-------------------------------------------------------------------------------------------------------------------------|----------|--------------|---------|
+  | [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime-amd64) | *21.3.0* | AMD64        | 0.6.2   |
+  | [link](https://serverlessrepo.aws.amazon.com/applications/eu-central-1/443526418261/holy-lambda-babashka-runtime-arm64) | *21.3.0* | ARM64        | 0.6.2   |

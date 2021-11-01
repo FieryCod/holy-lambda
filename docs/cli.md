@@ -19,13 +19,14 @@ CLI depends on the following programs:
   
   `bb <command-name> <args>`
   
-  | Command name       | Description                                                              |
-  |--------------------|--------------------------------------------------------------------------|
-  | `hl:compile`       | Compiles a project to `uberjar` via provided `:compile-cmd` in bb.edn    |
-  | `hl:doctor`        | Diagnoses common issues in the project.                                  |
-  | `hl:clean`         | Removes HL dependencies. Cleans `.holy-lambda` directory.                |
-  | `hl:version`       | Prints the current version of the tasks.                                 |
-  | `hl:docker:run`    | Runs a command specified as a string argument in the docker environment. |
+  | Command name         | Description                                                                      |
+  |----------------------|----------------------------------------------------------------------------------|
+  | `hl:compile`         | Compiles a project to `uberjar` via provided `:compile-cmd` in bb.edn            |
+  | `hl:doctor`          | Diagnoses common issues in the project.                                          |
+  | `hl:clean`           | Removes HL dependencies. Cleans `.holy-lambda` directory.                        |
+  | `hl:version`         | Prints the current version of the tasks.                                         |
+  | `hl:docker:run`      | Runs a command specified as a string argument in the docker environment.         |
+  | `hl:update-bb-tasks` | Automatically update the local version of tasks to latest stable remote version. |
 
 #### Backend specific tasks
 ##### Native
@@ -35,9 +36,9 @@ CLI depends on the following programs:
   | `hl:native:executable` | Provides native executable of the application, by using `native-image` under the hood. Generates `.holy-lambda/build/latest.zip`                                             |
 
 ## Babashka
-  | Command name       | Description                                                                                                                                                     |
-  |--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-  | `hl:babashka:sync` | Downloads pods & Clojure dependencies to `.holy-lambda` folder. Both `.holy-lambda/bb-clj-deps` and `.holy-lambda/pods` should be packed to the separate layers |
+  | Command name       | Description                                                                                                                                                                                                                                                 |
+  |--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  | `hl:babashka:sync` | Downloads pods & Clojure dependencies to `.holy-lambda` folder. Dependencies are taken from `bb.edn :deps`, and `bb:edn :holy-lambda/options:backend:pods`. Both `.holy-lambda/bb-clj-deps` and `.holy-lambda/pods` should be packed to the separate layers |
 
 ## Possible options in `bb.edn` tasks
   - `:docker {:volumes, :network, :image}` - Docker execution environment configuration.

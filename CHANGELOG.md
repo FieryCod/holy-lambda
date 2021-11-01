@@ -1,5 +1,70 @@
 # Changelog
 
+## 0.6.2
+See [migration guide](https://fierycod.github.io/holy-lambda/#/migration-guide)
+
+- [bb tasks] Introduce `bb hl:update-bb-tasks` as an automation for updating to stable version of tasks.
+- [bb layer] Update babashka runtime to version `0.6.2`. Runtime does not precalculates the classpath. Cold start should be lower now! :) 
+- [bb layer] Use `bb.edn` for specifying dependencies for babashka code instead of relying on `deps.edn`.
+- [bb layer] Remove `babashka-shim` from the runtime, remove direct dependency on `holy-lambda`. 
+  Users should put the newest `holy-lambda` version in `bb.edn` and use `bb hl:babashka:sync` to download the dependencies.
+  Pack dependencies in the layer and reference it's ARN in `template.yml`.
+  
+  **Example**
+  ```
+  AWSTemplateFormatVersion: '2010-09-09'
+  Transform: AWS::Serverless-2016-10-31
+  Description: >
+    Example basic lambda using `holy-lambda` micro library
+
+  Parameters:
+    Runtime:
+      Type: String
+      Default: provided
+    Timeout:
+      Type: Number
+      Default: 40
+    MemorySize:
+      Type: Number
+      Default: 128
+    HL_ENTRYPOINT:
+      Type: String
+      Default: com.company.example-lambda.core
+
+  Globals:
+    Function:
+      Runtime: !Ref Runtime
+      Timeout: !Ref Timeout
+      MemorySize: !Ref MemorySize
+      Environment:
+        Variables:
+          HL_ENTRYPOINT: !Ref HL_ENTRYPOINT
+
+  Resources:
+    BabashkaDepsLayer:
+      Type: AWS::Serverless::LayerVersion
+      Properties:
+        LayerName: BabashkaDepsLayer
+        ContentUri: ./.holy-lambda/bb-clj-deps
+
+    ExampleLambdaFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        FunctionName: ExampleLambdaFunction
+        Handler: com.company.example-lambda.core.ExampleLambda
+        CodeUri: src
+        Events:
+          HelloEvent:
+            Type: HttpApi
+            Properties:
+              ApiId: !Ref ServerlessHttpApi
+              Path: /
+              Method: GET
+        Layers:
+          - <HERE_PUT_PHISICAL_ID>
+          - !Ref BabashkaDepsLayer 
+   ...
+  ```
 ## 0.6.1
 - [bb layer] Update babashka to 0.6.3
 - [holy-lambda] Parse inner body to `:body-parsed` (see https://github.com/FieryCod/holy-lambda/issues/74)

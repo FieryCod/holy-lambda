@@ -51,7 +51,15 @@ This section will take you through the basics of Babashka backend.
 4. Copy the `Phisical ID` and put it in `template.yml`. Make sure to include `CodeUri` in the function properties and remove the global `CodeUri` set in `Parameters`.
 
     ```yml 
+    AWSTemplateFormatVersion: '2010-09-09'
+    Transform: AWS::Serverless-2016-10-31
+    Description: >
+      Example basic lambda using `holy-lambda` micro library
+
     Parameters:
+      Runtime:
+        Type: String
+        Default: provided
       Timeout:
         Type: Number
         Default: 40
@@ -64,18 +72,25 @@ This section will take you through the basics of Babashka backend.
 
     Globals:
       Function:
+        Runtime: !Ref Runtime
         Timeout: !Ref Timeout
         MemorySize: !Ref MemorySize
         Environment:
           Variables:
-          HL_ENTRYPOINT: !Ref HL_ENTRYPOINT
+            HL_ENTRYPOINT: !Ref HL_ENTRYPOINT
 
     Resources:
+      BabashkaDepsLayer:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+          LayerName: BabashkaDepsLayer
+          ContentUri: ./.holy-lambda/bb-clj-deps
+
       ExampleLambdaFunction:
         Type: AWS::Serverless::Function
         Properties:
-          Runtime: provided
           FunctionName: ExampleLambdaFunction
+          Handler: com.company.example-lambda.core.ExampleLambda
           CodeUri: src
           Events:
             HelloEvent:
@@ -86,8 +101,10 @@ This section will take you through the basics of Babashka backend.
                 Method: GET
           Layers:
             - <HERE_PUT_PHISICAL_ID>
-    ...
+            - !Ref BabashkaDepsLayer 
+       ...
     ```
+  4. Run `hl:babashka:sync` to download all necessary dependencies.
   5. Try to invoke the function using `AWS SAM CLI`
 
     ```bash

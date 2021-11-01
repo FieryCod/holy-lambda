@@ -1,15 +1,13 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:git/url   "https://github.com/FieryCod/holy-lambda"
          :deps/root "./modules/holy-lambda-babashka-tasks"
-         :sha       "9e638fabae3506a3cbecefd375beda4774ae29fe"}}
+         :sha       "e6c47274a2bfc7576a9da0ccdbc079c1e83bee17"}
+        io.github.FieryCod/holy-lambda {:mvn/version "0.6.2"}}
 
  ;; Minimal babashka version which should be used in conjuction with holy-lambda
  :min-bb-version "0.3.7"
 
  :holy-lambda/options {
-                       ;; User should use docker for local development and use `HL_NO_DOCKER` environment variable
-                       ;; set to "true" for CI based deployments.
-                       ;; For CI based deployments user should base it's builder image on `fierycod/graalvm-native-image:ce`
                        :docker {
 
                                 ;; Check https://docs.docker.com/network/
@@ -17,25 +15,19 @@
                                 ;; Options: "host"|"bridge"|"overlay"|"none"|nil|"macvlan"
                                 :network nil
 
-                                ;; HL runs bb tasks in docker context which means that local libraries will not work out-of-the-box.
-                                ;;
-                                ;; To make local libraries work with HL you have to:
-                                ;; 1. Mount your local library folder as a docker volume.
-                                ;; 2. Modify the `deps.edn` to use library path available in docker context.
-                                ;; Preferably use `deps.edn` alias and reference it's name in `:build:clj-name`
+                                ;; HL runs some bb tasks in docker context. You can put additional resources to the context by using volumes.
                                 ;; ----------------------------------------------------------------------------
                                 ;; Single volume definition:
                                 ;;
-                                ;; {:docker "/path-where-to-mount-local-library-on-docker"
-                                ;;  :host   "relative-local-library-path"}
+                                ;; {:docker "/where-to-mount-in-docker"
+                                ;;  :host   "relative-local-path"}
                                 :volumes []
 
                                 ;; GraalVM Community holy-lambda compatible docker image
                                 ;; You can always build your own GraalVM image with enterprise edition
                                 :image "ghcr.io/fierycod/holy-lambda-builder:amd64-java11-21.3.0"}
 
-                       :build {
-                               :compile-cmd  "clojure -X:uberjar"
+                       :build {:compile-cmd  "clojure -X:uberjar"
                                ;; Used when either :docker is nil or
                                ;; `HL_NO_DOCKER` environment variable is set to "true"
                                ;; Might be set via `GRAALVM_HOME` environment variable
@@ -43,7 +35,6 @@
 
                        :backend
                        {
-
                         ;; Babashka pods should be shipped using AWS Lambda Layer
                         ;; Check this template https://github.com/aws-samples/aws-lambda-layers-aws-sam-examples/blob/master/aws-sdk-layer/template.yaml
                         ;; and official docs https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-layers.html
@@ -53,10 +44,10 @@
                         ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
                         :pods {}
 
-                        ;; For `:native` runtime you can provide your own bootstrap file
+                        ;; For `:native` backend you can provide your own bootstrap file
                         :bootstrap-file "bootstrap"
 
-                        ;; For `:native` runtime you can provide some native resources which will be available during lambda execution
+                        ;; For `:native` backend you can provide some native resources which will be available during lambda execution
                         ;; Resources are packed as is.
                         :native-deps "resources"
 
@@ -64,12 +55,9 @@
                         ;; Check https://www.graalvm.org/reference-manual/native-image/Options/
                         :native-image-args ["--verbose"
                                             "--no-fallback"
-                                            "--enable-url-protocols=http,https"
                                             "--report-unsupported-elements-at-runtime"
                                             "-H:+AllowIncompleteClasspath"
-                                            "--no-server"
-                                            "--initialize-at-build-time"]}}
-
+                                            "--no-server"]}}
 
  :tasks {:requires            ([holy-lambda.tasks])
          hl:docker:run        holy-lambda.tasks/hl:docker:run
@@ -79,4 +67,5 @@
          hl:compile           holy-lambda.tasks/hl:compile
          hl:doctor            holy-lambda.tasks/hl:doctor
          hl:clean             holy-lambda.tasks/hl:clean
+         hl:update-bb-tasks   holy-lambda.tasks/hl:update-bb-tasks
          hl:version           holy-lambda.tasks/hl:version}}

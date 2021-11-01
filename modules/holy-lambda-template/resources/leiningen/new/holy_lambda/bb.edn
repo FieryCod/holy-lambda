@@ -1,15 +1,13 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:git/url   "https://github.com/FieryCod/holy-lambda"
          :deps/root "./modules/holy-lambda-babashka-tasks"
-         :sha       "596a5692c85c3ed0e7ff7115e67d4c7b1d6f32a8"}}
+         :sha       "e6c47274a2bfc7576a9da0ccdbc079c1e83bee17"}
+        io.github.FieryCod/holy-lambda {:mvn/version "0.6.2"}}
 
  ;; Minimal babashka version which should be used in conjuction with holy-lambda
  :min-bb-version "0.3.7"
 
  :holy-lambda/options {
-                       ;; User should use docker for local development and use `HL_NO_DOCKER` environment variable
-                       ;; set to "true" for CI based deployments.
-                       ;; For CI based deployments user should base it's builder image on `fierycod/graalvm-native-image:ce`
                        :docker {
 
                                 ;; Check https://docs.docker.com/network/

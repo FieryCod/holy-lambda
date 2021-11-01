@@ -32,6 +32,9 @@ The extraordinary simple, performant, and extensible custom AWS Lambda runtime f
   - [nextdoc.io](https://nextdoc.io) - 6 native lambdas: api-gateway custom authorizer, file access control, openapi data source etc.
   - [scalably.ai](https://scalably.ai) - 14 native lambdas: xml transformations, sftp interactions, message routing, encryption etc.
   - [retailic](https://retailic.com/) - native lambda that uses compatibility layer with ring, regular Clojure api on ARM64 
+  
+## Extensions
+  - [holy-lambda-ring-adapter](https://github.com/FieryCod/holy-lambda-ring-adapter) - Supports running full featured Ring apps on AWS Lambda
 
 ## Resources
 - [Documentation](https://fierycod.github.io/holy-lambda)

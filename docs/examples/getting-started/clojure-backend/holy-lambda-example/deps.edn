@@ -1,5 +1,5 @@
 {:deps {org.clojure/clojure            {:mvn/version "1.10.3"}
-        io.github.FieryCod/holy-lambda {:mvn/version "0.6.0"}}
+        io.github.FieryCod/holy-lambda {:mvn/version "0.6.2"}}
 
  :paths ["src" "resources"]
 
