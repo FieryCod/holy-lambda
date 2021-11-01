@@ -1,6 +1,3 @@
-* Upstream bugs
-  - Slow docker emulation on M1: https://github.com/oracle/graal/issues/2666
-
 * Roadmap
 ** [ ] 0.8.0
 - Add fully functional live development environment, but Clojure style :)
