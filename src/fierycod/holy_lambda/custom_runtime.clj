@@ -13,15 +13,15 @@
     {:getRemainingTimeInMs (fn []
                              (- (Long/parseLong (u/getf-header headers "Lambda-Runtime-Deadline-Ms"))
                                 (System/currentTimeMillis)))
-     :fnName               (env-vars "AWS_LAMBDA_FUNCTION_NAME")
-     :fnVersion            (env-vars "AWS_LAMBDA_FUNCTION_VERSION")
-     :fnInvokedArn         (u/->str "arn:aws:lambda:" ^String (env-vars "AWS_REGION")
+     :fnName               (System/getenv "AWS_LAMBDA_FUNCTION_NAME")
+     :fnVersion            (System/getenv "AWS_LAMBDA_FUNCTION_VERSION")
+     :fnInvokedArn         (u/->str "arn:aws:lambda:" ^String (System/getenv "AWS_REGION")
                                     ":" (or ^String (get request-context :accountId) "0000000")
-                                    ":function:" ^String (env-vars "AWS_LAMBDA_FUNCTION_NAME"))
-     :memoryLimitInMb      (env-vars "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
+                                    ":function:" ^String (System/getenv "AWS_LAMBDA_FUNCTION_NAME"))
+     :memoryLimitInMb      (System/getenv "AWS_LAMBDA_FUNCTION_MEMORY_SIZE")
      :awsRequestId         iid
-     :logGroupName         (env-vars "AWS_LAMBDA_LOG_GROUP_NAME")
-     :logStreamName        (env-vars "AWS_LAMBDA_LOG_STREAM_NAME")
+     :logGroupName         (System/getenv "AWS_LAMBDA_LOG_GROUP_NAME")
+     :logStreamName        (System/getenv "AWS_LAMBDA_LOG_STREAM_NAME")
      :identity             (get request-context :identity)
      :clientContext        (get request-context :clientContext)
      :envs                 env-vars}))
@@ -33,14 +33,16 @@
                          {:statusCode 500
                           :headers    {"content-type" "application/json"}
                           :body       {:runtime-error true
-                                       :err           (Throwable->map err)}})]
+                                       :err           (Throwable->map err)}}
+                         nil
+                         nil)]
     (when-not (response :success?)
       (u/println-err! (u/->str "[holy-lambda] Runtime error failed sent to AWS.\n" (str (response :body))))
       (System/exit 1))))
 
 (defn- send-response
   [runtime iid response]
-  (let [{:keys [success? body]} (u/http "POST" (url runtime iid "/response") response)]
+  (let [{:keys [success? body]} (u/http "POST" (url runtime iid "/response") response nil nil)]
     (when-not success?
       (send-runtime-error runtime iid (u/->ex "AWS did not accept your lambda payload:\n" (pr-str body))))))
 
@@ -58,11 +60,16 @@
 
       :else event)))
 
+(defn register-shutdown-hook!
+  [runtime shutdown-hook]
+  (u/http "POST" (str "http://" runtime "/2020-01-01/extension/register")
+          {:events ["SHUTDOWN"]}
+          "Lambda-Extension-Name" "holy-lambda-internal-shutdown")
+  (.addShutdownHook (Runtime/getRuntime) (Thread. shutdown-hook)))
+
 (defn next-iter
-  [maybe-handler routes env-vars]
-  (let [runtime      (env-vars "AWS_LAMBDA_RUNTIME_API")
-        handler-name (or maybe-handler (env-vars "_HANDLER"))
-        aws-event    (u/http "GET" (url runtime "" "next"))
+  [runtime handler-name routes env-vars]
+  (let [aws-event    (u/http "GET" (url runtime "" "next") nil nil nil)
         headers      (aws-event :headers)
         iid          (u/getf-header headers "Lambda-Runtime-Aws-Request-Id")
         handler      (routes handler-name)

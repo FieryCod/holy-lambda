@@ -156,14 +156,18 @@
 
 #?(:clj
    (defn http
-     [method url-s & [response]]
-     (let [push?                        (.equals "POST" method)
-           response-bytes               (when push? (response->bytes (response-event->normalized-event response)))
-           ^HttpURLConnection http-conn (-> url-s (URL.) (.openConnection))]
-       (doto ^HttpURLConnection http-conn
-         (.setDoOutput push?)
-         (.setRequestProperty "content-type" "application/json")
-         (.setRequestMethod method))
+     [method url-s response header-key header-value]
+     (let [push?                                (.equals "POST" method)
+           response-bytes                       (when push? (response->bytes (response-event->normalized-event response)))
+           ^HttpURLConnection http-conn-initial (-> url-s (URL.) (.openConnection))
+           ^HttpURLConnection http-conn         (doto ^HttpURLConnection http-conn-initial
+                                                  (.setDoOutput push?)
+                                                  (.setRequestProperty "content-type" "application/json")
+                                                  (.setRequestMethod method))]
+
+       (when (and header-key header-value)
+         (.setRequestProperty http-conn header-key header-value))
+
        (when push?
          (let [output-stream (.getOutputStream http-conn)]
            (if (bytes? response-bytes)
