@@ -66,7 +66,7 @@ This section will take you through the basics of Babashka backend.
       MemorySize:
         Type: Number
         Default: 128
-      HL_ENTRYPOINT:
+      Entrypoint:
         Type: String
         Default: com.company.example-lambda.core
 
@@ -77,7 +77,7 @@ This section will take you through the basics of Babashka backend.
         MemorySize: !Ref MemorySize
         Environment:
           Variables:
-            HL_ENTRYPOINT: !Ref HL_ENTRYPOINT
+            HL_ENTRYPOINT: !Ref Entrypoint
 
     Resources:
       BabashkaDepsLayer:
@@ -151,7 +151,7 @@ Configuring SAM deploy
         AWS Region [eu-central-1]: 
         Parameter Timeout [40]: 
         Parameter MemorySize [128]: 
-        Parameter HL_ENTRYPOINT [com.company.example-lambda.core]: 
+        Parameter Entrypoint [com.company.example-lambda.core]: 
         #Shows you resources changes to be deployed and require a 'Y' to initiate deploy
         Confirm changes before deploy [y/N]: y
         #SAM needs permission to be able to create roles to connect to the resources in your template
@@ -182,7 +182,7 @@ Configuring SAM deploy
         Confirm changeset            : True
         Deployment s3 bucket         : <DEPLOYMENT_BUCKET>
         Capabilities                 : ["CAPABILITY_IAM"]
-        Parameter overrides          : {"Runtime": "provided", "Timeout": "40", "MemorySize": "128", "HL_ENTRYPOINT": "com.company.example-lambda.core"}
+        Parameter overrides          : {"Runtime": "provided", "Timeout": "40", "MemorySize": "128", "Entrypoint": "com.company.example-lambda.core"}
         Signing Profiles             : {}
 
 Initiating deployment

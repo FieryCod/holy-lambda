@@ -60,13 +60,6 @@
 
       :else event)))
 
-(defn register-shutdown-hook!
-  [runtime shutdown-hook]
-  (u/http "POST" (str "http://" runtime "/2020-01-01/extension/register")
-          {:events ["SHUTDOWN"]}
-          "Lambda-Extension-Name" "holy-lambda-internal-shutdown")
-  (.addShutdownHook (Runtime/getRuntime) (Thread. shutdown-hook)))
-
 (defn next-iter
   [runtime handler-name routes env-vars]
   (let [aws-event    (u/http "GET" (url runtime "" "next") nil nil nil)

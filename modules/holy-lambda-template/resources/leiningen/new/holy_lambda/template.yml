@@ -10,7 +10,7 @@ Parameters:
   MemorySize:
     Type: Number
     Default: 128
-  HL_ENTRYPOINT:
+  Entrypoint:
     Type: String
     Default: {{main-ns}}.core
 
@@ -20,7 +20,7 @@ Globals:
     MemorySize: !Ref MemorySize
     Environment:
       Variables:
-        HL_ENTRYPOINT: !Ref HL_ENTRYPOINT
+        HL_ENTRYPOINT: !Ref Entrypoint
 
 Resources:
   ExampleLambdaFunction:

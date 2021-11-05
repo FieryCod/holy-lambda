@@ -7,19 +7,13 @@
 (defmacro entrypoint
   "Generates the `-main` function that executes Clojure functions upon `AWS Lambda` event. Takes care of producing valid `AWS Lambda` routing. See docs for more."
   {:added "0.0.1"}
-  [lambdas & [{:keys [init-hook shutdown-hook] :or {init-hook (fn [] nil)}}]]
+  [lambdas & [{:keys [init-hook] :or {init-hook (fn [] nil)}}]]
   `(do
      (def ~'PRVL_ROUTES (into {} (mapv (fn [l#] [(str (str (:ns (meta l#)) "." (str (:name (meta l#))))) l#]) ~lambdas)))
      (defn ~'-main [& attrs#]
 
        ;; Side effect init-hook
        (~init-hook)
-
-       ;; Registers an extension that listens for shutdown event
-       (when ~shutdown-hook
-         (#'fierycod.holy-lambda.custom-runtime/register-shutdown-hook!
-          (System/getenv "AWS_LAMBDA_RUNTIME_API")
-          ~shutdown-hook))
 
        ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image`
        ;;                               will be generated via the agent.
@@ -31,7 +25,8 @@
 
          ;; Start custom runtime loop
          (while true
-           (#'fierycod.holy-lambda.custom-runtime/next-iter (System/getenv "AWS_LAMBDA_RUNTIME_API")
-                                                            (or (first attrs#) (System/getenv "_HANDLER"))
-                                                            ~'PRVL_ROUTES
-                                                            (#'fierycod.holy-lambda.util/adopt-map (System/getenv))))))))
+           (#'fierycod.holy-lambda.custom-runtime/next-iter
+            (System/getenv "AWS_LAMBDA_RUNTIME_API")
+            (or (first attrs#) (System/getenv "_HANDLER"))
+            ~'PRVL_ROUTES
+            (#'fierycod.holy-lambda.util/adopt-map (System/getenv))))))))
