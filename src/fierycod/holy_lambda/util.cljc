@@ -156,7 +156,7 @@
 
 #?(:clj
    (defn http
-     [method url-s response header-key header-value]
+     [method url-s response]
      (let [push?                                (.equals "POST" method)
            response-bytes                       (when push? (response->bytes (response-event->normalized-event response)))
            ^HttpURLConnection http-conn-initial (-> url-s (URL.) (.openConnection))
@@ -165,8 +165,8 @@
                                                   (.setRequestProperty "content-type" "application/json")
                                                   (.setRequestMethod method))]
 
-       (when (and header-key header-value)
-         (.setRequestProperty http-conn header-key header-value))
+       ;; (when (and header-key header-value)
+       ;;   (.setRequestProperty http-conn header-key header-value))
 
        (when push?
          (let [output-stream (.getOutputStream http-conn)]

@@ -28,5 +28,4 @@
            (#'fierycod.holy-lambda.custom-runtime/next-iter
             (System/getenv "AWS_LAMBDA_RUNTIME_API")
             (or (first attrs#) (System/getenv "_HANDLER"))
-            ~'PRVL_ROUTES
-            (#'fierycod.holy-lambda.util/adopt-map (System/getenv))))))))
+            ~'PRVL_ROUTES))))))

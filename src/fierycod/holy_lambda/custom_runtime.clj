@@ -8,7 +8,7 @@
   (u/->str "http://" ^String runtime "/2018-06-01/runtime/invocation/" ^String iid ^String path))
 
 (defn- ->aws-context
-  [iid headers event env-vars]
+  [iid headers event]
   (let [request-context (event :requestContext)]
     {:getRemainingTimeInMs (fn []
                              (- (Long/parseLong (u/getf-header headers "Lambda-Runtime-Deadline-Ms"))
@@ -23,8 +23,7 @@
      :logGroupName         (System/getenv "AWS_LAMBDA_LOG_GROUP_NAME")
      :logStreamName        (System/getenv "AWS_LAMBDA_LOG_STREAM_NAME")
      :identity             (get request-context :identity)
-     :clientContext        (get request-context :clientContext)
-     :envs                 env-vars}))
+     :clientContext        (get request-context :clientContext)}))
 
 (defn- send-runtime-error
   [runtime iid ^Exception err]
@@ -33,16 +32,14 @@
                          {:statusCode 500
                           :headers    {"content-type" "application/json"}
                           :body       {:runtime-error true
-                                       :err           (Throwable->map err)}}
-                         nil
-                         nil)]
+                                       :err           (Throwable->map err)}})]
     (when-not (response :success?)
       (u/println-err! (u/->str "[holy-lambda] Runtime error failed sent to AWS.\n" (str (response :body))))
       (System/exit 1))))
 
 (defn- send-response
   [runtime iid response]
-  (let [{:keys [success? body]} (u/http "POST" (url runtime iid "/response") response nil nil)]
+  (let [{:keys [success? body]} (u/http "POST" (url runtime iid "/response") response)]
     (when-not success?
       (send-runtime-error runtime iid (u/->ex "AWS did not accept your lambda payload:\n" (pr-str body))))))
 
@@ -61,8 +58,8 @@
       :else event)))
 
 (defn next-iter
-  [runtime handler-name routes env-vars]
-  (let [aws-event    (u/http "GET" (url runtime "" "next") nil nil nil)
+  [runtime handler-name routes]
+  (let [aws-event    (u/http "GET" (url runtime "" "next") nil)
         headers      (aws-event :headers)
         iid          (u/getf-header headers "Lambda-Runtime-Aws-Request-Id")
         handler      (routes handler-name)
@@ -83,6 +80,6 @@
     (when (and iid (aws-event :success?))
       (try
         (send-response runtime iid (handler {:event (normalize-event event)
-                                             :ctx   (->aws-context iid headers event env-vars)}))
+                                             :ctx   (->aws-context iid headers event)}))
         (catch Exception err
           (send-runtime-error runtime iid err))))))

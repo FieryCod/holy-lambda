@@ -1,6 +1,6 @@
 {:name "aws-interop-v2.example.core.ExampleLambda",
  :request {:event {:event   {:pathParameters                         {}
                              :nextdoc.aws-lambda-client/native-conf? true},
-                   :context {}},
-           :context {}},
+                   :ctx {}},
+           :ctx {}},
  :propagate true}

@@ -17,7 +17,7 @@ Handler<HLEvent, HLContext> => HLResponse
 **[Runtime/Backend initialization](/api)**
 
 ```clojure
-(h/entrypoint [HandlerVar] opts)
+(h/entrypoint [#'BasicHandler] opts)
 ```
 
 ## HLContext
@@ -35,7 +35,6 @@ Handler<HLEvent, HLContext> => HLResponse
   | `:logStreamName`        | `string`                     | Log stream name                                                                  |
   | `:identity`             | `Option<CognitoIdentity>`    | Information about the Amazon Cognito identity that authorized the request        |
   | `:clientContext`        | `ClientContext`              | (mobile apps) Client context that's provided to Lambda by the client application |
-  | `:envs`                 | `ClojureMap<string, string>` | All environment variables of the application                                     |
 
 #### CognitoIdentity
   **Map of**
