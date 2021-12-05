@@ -9,7 +9,7 @@
 (def FILES #{"README.md.template" "Dockerfile.bb.template" "template.yml.template"})
 
 (def BABASHKA_VERSION "0.6.8")
-(def SEMANTIC_VERSION "0.6.3")
+(def SEMANTIC_VERSION "0.6.4")
 
 (defn arch->subcord
   [arch]

@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: 'Holy-lambda micro framework babashka compatible runtime/backend layer
-  - amd64
+Description: 'Holy-lambda micro framework babashka compatible runtime/backend layer:
+  - Architecture: amd64, - Babashka: 0.6.8, - SemanticVersion: 0.6.4
 
   '
 Resources:
@@ -11,7 +11,9 @@ Resources:
       LayerName: holy-lambda-babashka-runtime-amd64
       Description: holy-lambda micro framework babashka compatible backend layer for
         amd64.
-      ContentUri: s3://holy-lambda-babashka-layer/holy-lambda/7cf7c7cfa583cccb14ad963973fd1ecb
+      ContentUri: s3://holy-lambda-babashka-layer/holy-lambda/b39df81c4846751b2591f7af75ad5dcc
+      CompatibleArchitectures:
+      - x86_64
       CompatibleRuntimes:
       - provided
       - provided.al2
@@ -35,9 +37,9 @@ Metadata:
     - clojure
     SpdxLicenseId: MIT
     Description: 'Holy-lambda micro framework babashka compatible runtime/backend
-      layer. Architecture: amd64. For more info check https://github.com/FieryCod/holy-lambda
+      layer: - Architecture: amd64, - Babashka: 0.6.8, - SemanticVersion: 0.6.4
 
       '
     LicenseUrl: s3://holy-lambda-babashka-layer/holy-lambda/85789fb51c8e8f53b03fd823913f46a9
-    ReadmeUrl: s3://holy-lambda-babashka-layer/holy-lambda/e48f41db44f33ad1704e45c0f2bde9f6
+    ReadmeUrl: s3://holy-lambda-babashka-layer/holy-lambda/3868ab5497946a8b301731e9eadbd520
     SourceCodeUrl: https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-layer
