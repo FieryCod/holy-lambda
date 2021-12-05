@@ -1,4 +1,12 @@
 # Changelog
+## 0.6.3
+See [migration guide](https://fierycod.github.io/holy-lambda/#/migration-guide)
+
+- [bb layer] Update babashka runtime to version `0.6.3`. Put in ServerlessRepo's README.md all necessary information regarding the layer.
+- [bb layer] Update babashka to version `0.6.8`.
+- [holy-lambda] Remove `:envs` property from `:ctx` to prevent security issues. Use `System/getenv` instead!
+- [holy-lambda] Add analytics that sends the version of the framework + Java/Babashka version to AWS. Users can disable this option by setting `disable-analytics?=true` in `h/entrypoint`.
+- [docs] Update documentation
 
 ## 0.6.2
 See [migration guide](https://fierycod.github.io/holy-lambda/#/migration-guide)

@@ -173,7 +173,7 @@ jobs:
          # Test
          output=$(sam local invoke "ExampleLambdaFunction" 2> /dev/null | jq .body -r) && \
          echo "$output" && \
-         bb -e "(assert (= \"$output\" \"Hello world. Babashka is sweet friend of mine! Babashka version: 0.6.3\"))"
+         bb -e "(assert (= \"$output\" \"Hello world. Babashka is sweet friend of mine! Babashka version: 0.6.8\"))"
 
         workingDirectory: ${{variables.WORKING_DIRECTORY}}
         displayName: 'Basic babashka invoke'
