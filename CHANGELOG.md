@@ -1,4 +1,8 @@
 # Changelog
+
+## 0.6.4
+- [holy-lambda] Remove debug UserAgent header
+
 ## 0.6.3
 See [migration guide](https://fierycod.github.io/holy-lambda/#/migration-guide)
 

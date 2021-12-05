@@ -1,5 +1,5 @@
 {:deps {org.clojure/clojure                  {:mvn/version "1.10.3"}
-        io.github.FieryCod/holy-lambda       {:mvn/version "0.6.3"}
+        io.github.FieryCod/holy-lambda       {:mvn/version "0.6.4"}
         com.github.clj-easy/graal-build-time {:mvn/version "0.1.4"}}
 
  :paths   ["src" "resources"]

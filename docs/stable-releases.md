@@ -2,7 +2,7 @@
 ## Libraries
 | Artifact name                                    | Version | Purpose                                                        |
 |--------------------------------------------------|---------|----------------------------------------------------------------|
-| io.github.FieryCod/holy-lambda                   | 0.6.3   | Core library / Custom runtime implementation                   |
+| io.github.FieryCod/holy-lambda                   | 0.6.4   | Core library / Custom runtime implementation                   |
 | io.github.FieryCod/holy-lambda-default-retriever | 0.5.0   | Built in library supporting regular responses*                 |
 | io.github.FieryCod/holy-lambda-async-retriever   | 0.5.0   | Additional support for `Channel<Map\|ByteArray\|nil>` response |
 

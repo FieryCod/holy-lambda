@@ -71,7 +71,7 @@
       (System/setProperty "com.amazonaws.xray.traceHeader" trace-id))
 
     (when-not handler
-      (send-runtime-error runtime iid (u/->ex "Handler " ^String handler-name " not found!" disable-analitics?))
+      (send-runtime-error runtime iid (u/->ex "Handler " ^String handler-name " not found!") disable-analitics?)
       (System/exit 1))
 
     (when-not iid

@@ -15,6 +15,13 @@
       [java.net URL HttpURLConnection]
       [java.io InputStream InputStreamReader])))
 
+(def HL_VERSION "0.6.4")
+(def USER_AGENT_HEADER "User-Agent")
+(def USER_AGENT_VALUE (str "holy-lambda/" #?(:bb (str "bb-" (System/getProperty "babashka.version"))
+                                             :clj (str "java-" (System/getProperty "java.vendor.version")))
+                           "-"
+                           HL_VERSION))
+
 (defn- compress-strings
   [args]
   (into
@@ -154,13 +161,6 @@
       :else 
       (x->json-bytes response))))
 
-(def HL_VERSION "0.6.3")
-(def USER_AGENT_HEADER "User-Agent")
-(def USER_AGENT_VALUE (str "holy-lambda/" #?(:bb (str "bb-" (System/getProperty "babashka.version"))
-                                             :clj (str "java-" (System/getProperty "java.vendor.version")))
-                           "-"
-                           HL_VERSION))
-
 #?(:clj
    (defn http
      [method url-s response disable-analytics?]
@@ -171,8 +171,6 @@
                                                   (.setDoOutput push?)
                                                   (.setRequestProperty "content-type" "application/json")
                                                   (.setRequestMethod method))]
-
-       (println USER_AGENT_HEADER USER_AGENT_VALUE)
 
        (when-not disable-analytics?
          (.setRequestProperty http-conn USER_AGENT_HEADER USER_AGENT_VALUE))
