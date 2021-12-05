@@ -26,22 +26,23 @@
      :clientContext        (get request-context :clientContext)}))
 
 (defn- send-runtime-error
-  [runtime iid ^Exception err]
+  [runtime iid ^Exception err disable-analytics?]
   (u/println-err! (u/->str "[holy-lambda] Runtime error:\n" (pr-str (Throwable->map err))))
   (let [response (u/http "POST" (url runtime iid "/error")
                          {:statusCode 500
                           :headers    {"content-type" "application/json"}
                           :body       {:runtime-error true
-                                       :err           (Throwable->map err)}})]
+                                       :err           (Throwable->map err)}}
+                         disable-analytics?)]
     (when-not (response :success?)
       (u/println-err! (u/->str "[holy-lambda] Runtime error failed sent to AWS.\n" (str (response :body))))
       (System/exit 1))))
 
 (defn- send-response
-  [runtime iid response]
-  (let [{:keys [success? body]} (u/http "POST" (url runtime iid "/response") response)]
+  [runtime iid response disable-analytics?]
+  (let [{:keys [success? body]} (u/http "POST" (url runtime iid "/response") response disable-analytics?)]
     (when-not success?
-      (send-runtime-error runtime iid (u/->ex "AWS did not accept your lambda payload:\n" (pr-str body))))))
+      (send-runtime-error runtime iid (u/->ex "AWS did not accept your lambda payload:\n" (pr-str body)) disable-analytics?))))
 
 (defn- normalize-event
   [event]
@@ -58,28 +59,31 @@
       :else event)))
 
 (defn next-iter
-  [runtime handler-name routes]
-  (let [aws-event    (u/http "GET" (url runtime "" "next") nil)
-        headers      (aws-event :headers)
-        iid          (u/getf-header headers "Lambda-Runtime-Aws-Request-Id")
-        handler      (routes handler-name)
-        event        (aws-event :body)]
+  [runtime handler-name routes disable-analitics?]
+  (let [aws-event (u/http "GET" (url runtime "" "next") nil disable-analitics?)
+        headers   (aws-event :headers)
+        iid       (u/getf-header headers "Lambda-Runtime-Aws-Request-Id")
+        handler   (routes handler-name)
+        event     (aws-event :body)]
 
     ;; https://github.com/aws/aws-xray-sdk-java/blob/master/aws-xray-recorder-sdk-core/src/main/java/com/amazonaws/xray/contexts/LambdaSegmentContext.java#L40
     (when-let [trace-id (u/getf-header (aws-event :headers) "Lambda-Runtime-Trace-Id")]
       (System/setProperty "com.amazonaws.xray.traceHeader" trace-id))
 
     (when-not handler
-      (send-runtime-error runtime iid (u/->ex "Handler " ^String handler-name " not found!"))
+      (send-runtime-error runtime iid (u/->ex "Handler " ^String handler-name " not found!" disable-analitics?))
       (System/exit 1))
 
     (when-not iid
-      (send-runtime-error runtime iid (u/->ex "Failed to determine new invocation-id"))
+      (send-runtime-error runtime iid (u/->ex "Failed to determine new invocation-id") disable-analitics?)
       (System/exit 1))
 
     (when (and iid (aws-event :success?))
       (try
-        (send-response runtime iid (handler {:event (normalize-event event)
-                                             :ctx   (->aws-context iid headers event)}))
+        (send-response runtime
+                       iid
+                       (handler {:event (normalize-event event)
+                                 :ctx (->aws-context iid headers event)})
+                       disable-analitics?)
         (catch Exception err
-          (send-runtime-error runtime iid err))))))
+          (send-runtime-error runtime iid err disable-analitics?))))))

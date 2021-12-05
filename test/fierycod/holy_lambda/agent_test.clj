@@ -14,7 +14,7 @@
   (println request))
 
 (t/deftest agents-payloads->invoke-map-test
-  (t/testing "should generate the map from pairs [HandlerName, [{:event sth, :ctx sth, :envs sth, :path sth}, ...]]"
+  (t/testing "should generate the map from pairs [HandlerName, [{:event sth, :ctx sth, :path sth}, ...]]"
     (t/is (= '({:request {:ctx {},
                           :event {}}
                 :name "fierycod.holy-lambda.impl.agent-test.HolyLambda",

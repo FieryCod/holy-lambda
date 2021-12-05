@@ -154,9 +154,16 @@
       :else 
       (x->json-bytes response))))
 
+(def HL_VERSION "0.6.3")
+(def USER_AGENT_HEADER "User-Agent")
+(def USER_AGENT_VALUE (str "holy-lambda/" #?(:bb (str "bb-" (System/getProperty "babashka.version"))
+                                             :clj (str "java-" (System/getProperty "java.vendor.version")))
+                           "-"
+                           HL_VERSION))
+
 #?(:clj
    (defn http
-     [method url-s response]
+     [method url-s response disable-analytics?]
      (let [push?                                (.equals "POST" method)
            response-bytes                       (when push? (response->bytes (response-event->normalized-event response)))
            ^HttpURLConnection http-conn-initial (-> url-s (URL.) (.openConnection))
@@ -165,8 +172,10 @@
                                                   (.setRequestProperty "content-type" "application/json")
                                                   (.setRequestMethod method))]
 
-       ;; (when (and header-key header-value)
-       ;;   (.setRequestProperty http-conn header-key header-value))
+       (println USER_AGENT_HEADER USER_AGENT_VALUE)
+
+       (when-not disable-analytics?
+         (.setRequestProperty http-conn USER_AGENT_HEADER USER_AGENT_VALUE))
 
        (when push?
          (let [output-stream (.getOutputStream http-conn)]
