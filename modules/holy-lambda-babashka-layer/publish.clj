@@ -36,12 +36,14 @@
 
 (def task (first *command-line-args*))
 
-(when (= task "render")
+(when (or (= task "render")
+          (= task "all"))
   (doseq [arch ARCHS]
     (doseq [file FILES]
       (render file arch))))
 
-(when (= task "build")
+(when (or (= task "build")
+          (= task "all"))
   (doseq [arch ARCHS]
     (shell (str "docker build . --target BUILDER -t holy-lambda-babashka-layer-" arch  " -f Dockerfile-" arch ".bb"))
     (shell "bash -c \"docker rm build || true\"")
@@ -50,7 +52,8 @@
     (shell "bash -c \"docker rm build || true\"")
     (shell (str "docker image rm -f holy-lambda-babashka-layer-" arch))))
 
-(when (= task "publish")
+(when (or (= task "publish")
+          (= task "all"))
   (doseq [arch ARCHS]
     (let [arch      arch
           version   SEMANTIC_VERSION
