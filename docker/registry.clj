@@ -1,7 +1,7 @@
 (require '[selmer.parser :as selm])
 (require '[babashka.process :as p])
 
-(def BABASHKA_VERSION "0.6.1")
+(def BABASHKA_VERSION "0.6.8")
 
 (defn- exit-non-zero
   [proc]

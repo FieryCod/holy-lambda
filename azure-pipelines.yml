@@ -140,6 +140,7 @@ jobs:
     steps:
       - script: |
           rm -Rf holy-lambda-babashka-runtime.zip
+          bb publish.clj render
           bb publish.clj build
           rm -Rf ~/.az-agent/local_cache/holy-lambda-babashka-runtime-*.zip
           cp holy-lambda-babashka-runtime-amd64.zip ~/.az-agent/local_cache/

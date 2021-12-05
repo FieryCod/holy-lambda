@@ -8,6 +8,9 @@
 (def ARCHS #{ARM64 AMD64})
 (def FILES #{"README.md.template" "Dockerfile.bb.template" "template.yml.template"})
 
+(def BABASHKA_VERSION "0.6.8")
+(def SEMANTIC_VERSION "0.6.3")
+
 (defn arch->subcord
   [arch]
   (get {"arm64" "aarch64" "amd64" "amd64"} arch))
@@ -19,7 +22,13 @@
 
 (defn render
   [template arch]
-  (spit (template->filename template arch) (selm/render (slurp template) {:arch arch :aarch (arch->subcord arch) :arch_is (if (= arch "arm64") "arm64" "x86_64")})))
+  (spit (template->filename template arch)
+        (selm/render (slurp template)
+                     {:arch arch
+                      :semantic-version SEMANTIC_VERSION
+                      :babashka-version BABASHKA_VERSION
+                      :aarch (arch->subcord arch)
+                      :arch_is (if (= arch "arm64") "arm64" "x86_64")})))
 
 (defn- shell
   [cmd]
@@ -41,14 +50,14 @@
     (shell "bash -c \"docker rm build || true\"")
     (shell (str "docker image rm -f holy-lambda-babashka-layer-" arch))))
 
-(def SEMANTIC_VERSION (s/trim (slurp "LAYER_VERSION")))
-
 (when (= task "publish")
   (doseq [arch ARCHS]
     (let [arch      arch
           version   SEMANTIC_VERSION
           s3        "holy-lambda-babashka-layer"
           s3-prefix "holy-lambda"
-          region    "eu-central-1"]
+          region    "eu-central-1"
+          babashka-version BABASHKA_VERSION
+          semantic-version SEMANTIC_VERSION]
       (shell (selm/<< "sam package --template-file template-{{arch}}.yml --output-template-file packaged-{{arch}}.yml --s3-bucket {{s3}} --s3-prefix {{s3-prefix}}"))
       (shell (selm/<< "sam publish --template-file packaged-{{arch}}.yml --semantic-version {{version}}")))))

@@ -1,7 +1,10 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  Holy-lambda micro framework babashka compatible runtime/backend layer - arm64
+  Holy-lambda micro framework babashka compatible runtime/backend layer
+  Architecture: arm64
+  Babashka: 0.6.8
+  SemanticVersion: 0.6.3
 
 Resources:
   BabashkaLayer:
