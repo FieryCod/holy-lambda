@@ -86,7 +86,7 @@
     :statusCode 200})
   
   ;; Initialize the runtime loop
-  (h/entrypoint [#"Lambda"])
+  (h/entrypoint [#'Lambda])
     
   (fierycod.holy-lambda.agent/in-context 
     (call-1)

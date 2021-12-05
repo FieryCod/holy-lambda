@@ -8,7 +8,7 @@ clojure -Tclj-new create :template holy-lambda :name basic.example
 Alternatively you can use `lein new`:
 
 ``` clojure
-lein new holy-lambda example ;; <-- Replace `example` with the name of the project
+lein new holy-lambda example 
 ```
 
 

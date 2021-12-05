@@ -1,4 +1,31 @@
 # Migration Guide
+## 0.6.2 -> 0.6.3
+  1. In this release `:envs` property from `:ctx` object has been removed to prevent cases, where the credentials are exposed in CloudWatch.
+  
+     To get the `:envs` please use `(System/getenv "ENVIRONMENT_VARIABLE")` instead. 
+
+     For cases where the env was passed in `agent-native-payloads` use following helper:
+
+     ```clojure
+     (defn get-env
+       [env & [ctx]]
+       (or (get ctx env) (System/getenv env)))
+     ```
+
+     ```clojure
+     (defn LambdaFunction
+       [{:keys [ctx event]}]
+       (let [hl-entrypoint (get-env ctx "HL_ENTRYPOINT")]
+         (println hl-entrypoint)))
+     ```
+     
+   2. Bump `holy-lambda` dependency in `bb.edn` and `deps.edn`:
+   ```clojure
+    {:deps {...
+            io.github.FieryCod/holy-lambda {:mvn/version "0.6.3"}}
+   ```
+  
+  
 ## 0.6.0 -> 0.6.2
 ### Tasks
   1. Add a `holy-lambda` dependency in `bb.edn`

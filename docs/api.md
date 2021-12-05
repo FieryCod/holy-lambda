@@ -6,9 +6,11 @@
  - `entrypoint [vector-of-lambdas-var, & opts]`
  
     **Documentation**
-
-      Generates the `-main` function that executes Clojure functions upon `AWS Lambda` event. Takes care of producing valid `AWS Lambda` routing.
-      
+    
+    Generates the `-main` function, which is an entrypoint for `bootstrap` script. Lambdas passed as a first parameter are converted to a routing map `{HANDLER_NAME -> HANDLER_FN}`. 
+    
+    Routing is persisted in static `PRVL_ROUTES` var that is later used via a AWS Lambda Custom runtime to match the `HANDLER_NAME` with a corresponding `HANDLER_FN`.
+    
       1. The `-main` might be then launched on `AWS Lambda`.
       2. The `-main` might be used to generate the `native-configuration` necessary to compile the project to native (native backend).
 
@@ -17,14 +19,15 @@
           2. https://github.com/oracle/graal/blob/master/substratevm/CONFIGURE.md
           3. https://github.com/oracle/graal/blob/master/substratevm/REFLECTION.md
 
-          According to the comment of the @cstancu with the help of the agent we can find the majority of the reflective calls and generate the configuration. Generated configuration might then be used
-          by `native-image` tool.
+          According to the comment of the @cstancu with the help of the agent we can find the majority of the reflective calls and generate the configuration. 
+          
+          Generated configuration might then be used by `native-image` tool.
           
       **Opts**
-      - `:init-hook` - side effect function with no arguments that is called on initialization phase of the runtime
+      - `init-hook` - Side effect function with no arguments that is run before the runtime loop starts. Useful for initialization of the outer state.
+      - `disable-analytics?` - Boolean for disabling the basic information (Runtime + Java version) send via `UserAgent` header AWS API.
       
       **Usage**:
-
       ```clojure
       (ns some-ns
         (:require
