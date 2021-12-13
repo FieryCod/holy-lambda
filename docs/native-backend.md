@@ -55,13 +55,13 @@
    :propagate false}
   ```
  
- | Option       | Description                                                                                                                                           |
- |--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
- | `:name`      | Qualified path of Lambda Handler                                                                                                                      |
- | `:request`   | Aggregates HLEvent & HLContext                                                                                                                        |
- | `:event`     | [HLEvent](http://localhost:3000/#/model?id=hlevent) - depends on event provider. Highly encourage to generate an event via `sam local generate-event` |
- | `:ctx`       | [HLContext](http://localhost:3000/#/model?id=hlcontext)                                                                                               |
- | `:propagate` | Should stop the agent when invocation error occurs?                                                                                                   |
+ | Option       | Description                                                                                                                    |
+ |--------------|--------------------------------------------------------------------------------------------------------------------------------|
+ | `:name`      | Qualified path of Lambda Handler                                                                                               |
+ | `:request`   | Aggregates HLEvent & HLContext                                                                                                 |
+ | `:event`     | [HLEvent](/model?id=hlevent) - depends on event provider. Highly encourage to generate an event via `sam local generate-event` |
+ | `:ctx`       | [HLContext](/model?id=hlcontext)                                                                                               |
+ | `:propagate` | Should stop the agent when invocation error occurs?                                                                            |
 
  EDN's are alphabetically sorted before execution. A typical way of preserving sort of the payloads is by specifying the number prefix like `1-api.edn`, `2-sqs.edn`. 
  

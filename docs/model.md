@@ -66,7 +66,7 @@ Handler<HLEvent, HLContext> => HLResponse
 
 ## HLResponse
  1. `nil` (indicates the ACK in SQS) OR
- 2. `Map` OR
+ 2. `Map` 
  
      **Map of**
      
@@ -77,18 +77,20 @@ Handler<HLEvent, HLContext> => HLResponse
      | `:multiValueHeaders` | `ClojureMap<string,vector<string>`             |
      | `:body`              | `string\|nil\|boolean\|vector<any>\|list<any>` |
      | `:isBase64Encoded`   | `boolean`                                      |
+
+ OR 
  
  3. `ByteArray` OR
      
      Stringified `Map` (2) converted to `ByteArray`.
      
- 4. `Future<Map|String|ByteArray|nil>` OR
+ 5. `Future<Map|String|ByteArray|nil>` OR
  
      Composite type of `Future` + primitive.
- 5. `ClojurePromise<Map|String|ByteArray|nil>` OR
+ 6. `ClojurePromise<Map|String|ByteArray|nil>` OR
  
      Composite type of `ClojurePromise` + primitive.
- 6. `Channel<Map|String|ByteArray|nil` (only with [async-retriever](/stable-releases?id=stable-releases))
+ 7. `Channel<Map|String|ByteArray|nil` (only with [async-retriever](/stable-releases?id=stable-releases))
      
      Composite type of `Channel` + primitive.
 

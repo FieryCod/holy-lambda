@@ -2,6 +2,7 @@
 
 ## 0.6.5
 See [migration guide](https://fierycod.github.io/holy-lambda/#/migration-guide)
+
 - [bb layer] Update babashka runtime to version `0.6.5`. Babashka version included `0.7.0`.
 - [holy-lambda] Bump jsonista to version `0.3.5`
 - [bb tasks] Update tasks debug info
