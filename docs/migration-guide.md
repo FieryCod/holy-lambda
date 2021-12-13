@@ -1,4 +1,12 @@
 # Migration Guide
+
+## 0.6.5 -> 0.6.5
+  1. Update `holy-lambda` version in `bb.edn` and `deps.edn`.
+  2. Use `hl:update-bb-tasks` to update the tasks.
+  
+## 0.6.3 -> 0.6.4
+  Update `holy-lambda` version in `bb.edn` and `deps.edn`.
+  
 ## 0.6.2 -> 0.6.3
   1. In this release `:envs` property from `:ctx` object has been removed to prevent cases, where the credentials are exposed in CloudWatch.
   

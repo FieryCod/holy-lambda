@@ -4,6 +4,8 @@
 See [migration guide](https://fierycod.github.io/holy-lambda/#/migration-guide)
 - [bb layer] Update babashka runtime to version `0.6.5`. Babashka version included `0.7.0`.
 - [holy-lambda] Bump jsonista to version `0.3.5`
+- [bb tasks] Update tasks debug info
+- [holy-lambda-template] Bump HL version
 
 ## 0.6.4
 - [holy-lambda] Remove debug UserAgent header
