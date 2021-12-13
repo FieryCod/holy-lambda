@@ -13,8 +13,6 @@
    [holy-lambda.refl :as refl])
   (:refer-clojure :exclude [spit]))
 
-(def TASKS_VERSION "0.6.1") ;; Deprecated don't update
-
 (deps/add-deps '{:deps {borkdude/rewrite-edn {:mvn/version "0.1.0"}}})
 (require '[borkdude.rewrite-edn :as r])
 
@@ -603,6 +601,7 @@ set -e
       (stat-file ".holy-lambda/build/output.jar")
       (hpr "Uberjar artifact of the project is available at" (accent ".holy-lambda/build/output.jar")))))
 
+
 (defn hl:doctor
   "     \033[0;31m>\033[0m Diagnoses common issues in the project"
   []
@@ -612,7 +611,8 @@ set -e
     (do
       (println "")
       (hpr "---------------------------------------")
-      (hpr " Checking health of holy-lambda stack")
+      (hpr " Checking health of tools")
+      (hpr "---------------------------------------")
       (hpr " Home directory is:       " (accent HOME_DIR))
       (hpr " Project directory is:    " (accent PROJECT_DIRECTORY))
       (hpr " AWS SAM version:         " (accent (or (s/trim (shs-no-err "sam" "--version")) "UNKNOWN")))
@@ -622,6 +622,7 @@ set -e
       (hpr " Docker version:          " (accent (or (s/trim (shs-no-err "docker" "--version")) "UNKNOWN")))
       (hpr " Babashka tasks sha:      " (accent TASKS_VERSION_SHA))
       (hpr " Babashka version:        " (accent (or (s/trim (shs-no-err "bb" "version")) "UNKNOWN")))
+      (hpr " Docker image:            " (accent (:image DOCKER)))
       (hpr " TTY:                     " (accent TTY?))
       (hpr "---------------------------------------\n"))
 

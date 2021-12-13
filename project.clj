@@ -1,4 +1,4 @@
-(defproject io.github.FieryCod/holy-lambda   "0.6.4"
+(defproject io.github.FieryCod/holy-lambda   "0.6.5-SNAPSHOT"
   :description "Micro framework which turns your code into AWS Lambda functions"
 
   :url "https://github.com/FieryCod/holy-lambda"
@@ -11,7 +11,7 @@
   :global-vars {*warn-on-reflection* true}
 
   :dependencies [[org.clojure/clojure                              "1.10.3" :scope "provided"]
-                 [metosin/jsonista                                 "0.3.4"]
+                 [metosin/jsonista                                 "0.3.5"]
                  [io.github.FieryCod/holy-lambda-default-retriever "0.5.0"]]
 
   :resources ["resources"]
