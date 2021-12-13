@@ -52,4 +52,5 @@
             (callable-var request)
             (catch Exception _err nil)))
         (println "[holy-lambda] Succesfully called" (:name invoke-map) "with payloads from" (re-find #"(?<=.*)[A-Za-z0-9-_]*\..*" path)))))
-  (println "[holy-lambda] Succesfully called all the lambdas"))
+  (println "[holy-lambda] Succesfully called all the lambdas")
+  (shutdown-agents))
