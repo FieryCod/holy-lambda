@@ -622,17 +622,31 @@ set -e
       (hpr " Docker version:          " (accent (or (s/trim (shs-no-err "docker" "--version")) "UNKNOWN")))
       (hpr " Babashka tasks sha:      " (accent TASKS_VERSION_SHA))
       (hpr " Babashka version:        " (accent (or (s/trim (shs-no-err "bb" "version")) "UNKNOWN")))
+      (hpr " Clojure version:         " (accent (or (s/trim (shs-no-err "clojure" "--version")) "UNKNOWN")))
       (hpr " Docker image:            " (accent (:image DOCKER)))
+      (hpr " Java version:            " (accent (or (s/trim (first (s/split-lines (shs-no-err "java" "--version")))) "UNKNOWN")))
       (hpr " TTY:                     " (accent TTY?))
-      (hpr "---------------------------------------\n"))
+      (hpr "---------------------------------------"))
 
     (when-not (file-exists? AWS_DIR)
       (hpr (pre "$HOME/.aws does not exists. Did you run") (accent "aws configure"))
       (exit-code-err!))
 
-    (when-not (file-exists? "deps.edn")
-      (hpr (pre "File deps.edn does not exists!"))
-      (exit-code-err!))
+    (if-not (file-exists? "deps.edn")
+      (do
+        (hpr (pre "File deps.edn does not exists!"))
+        (exit-code-err!))
+      (do (hpr " --------------" (accent "deps.edn") "-------------")
+        (pprint/pprint (edn/read-string (slurp "deps.edn")))
+        (hpr " ---------------" (accent "deps.edn") "--------------")))
+
+    (if-not (file-exists? "bb.edn")
+      (do
+        (hpr (pre "File bb.edn does not exists!"))
+        (exit-code-err!))
+      (do (hpr " --------------- " (accent "bb.edn") " --------------")
+        (pprint/pprint (edn/read-string (slurp "bb.edn")))
+        (hpr " ---------------- " (accent "bb.edn") " ---------------")))
 
     (when (and NATIVE_DEPS_PATH
                (not (file-exists? NATIVE_DEPS_PATH)))
