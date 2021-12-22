@@ -1,9 +1,0 @@
-* Roadmap
-** [ ] 0.8.0
-- Add fully functional live development environment, but Clojure style :)
-  https://docs.serverless-stack.com/live-lambda-development
-
-  Discussion?!
-
-** [ ] 0.9.0
-- Investigate how to support step functions in a more Clojure'y way
