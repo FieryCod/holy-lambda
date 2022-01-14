@@ -48,7 +48,7 @@ This section will take you through the basics of Babashka backend.
     **You should see the following image**
     ![Babashla layer](images/babashka_layer_serverless_application.png "Babashka layer")
 
-4. Copy the `Phisical ID` and put it in `template.yml`. Make sure to include `CodeUri` in the function properties and remove the global `CodeUri` set in `Parameters`.
+4. Copy the `Physical ID` and put it in `template.yml`. Make sure to include `CodeUri` in the function properties and remove the global `CodeUri` set in `Parameters`.
 
     ```yml 
     AWSTemplateFormatVersion: '2010-09-09'
