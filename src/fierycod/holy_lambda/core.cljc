@@ -47,27 +47,29 @@
   "
   {:added "0.0.1"}
   [lambdas & [{:keys [init-hook disable-analytics?]
-               :or {init-hook (fn [] nil)
-                    disable-analytics? false}}]]
+               :or   {init-hook          (fn [] nil)
+                      disable-analytics? false}}]]
   `(do
      (def ~'PRVL_ROUTES (into {} (mapv (fn [l#] [(str (str (:ns (meta l#)) "." (str (:name (meta l#))))) l#]) ~lambdas)))
      (defn ~'-main [& attrs#]
+       (let [runtime-api-url# (System/getenv "AWS_LAMBDA_RUNTIME_API")
+             handler-name#    (or (first attrs#) (System/getenv "_HANDLER"))]
 
-       ;; Side effect init-hook
-       (~init-hook)
+         ;; Side effect init-hook
+         (~init-hook)
 
-       ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image`
-       ;;                               will be generated via the agent.
-       ;;
-       ;; executor = anything else   -- Run provided runtime loop
-       (if (= (System/getProperty "executor") @#'fierycod.holy-lambda.agent/AGENT_EXECUTOR)
-         ;; Generate the native configuration for the lambdas
-         (#'fierycod.holy-lambda.agent/routes->reflective-call! ~'PRVL_ROUTES)
+         ;; executor = native-agent    -- Indicates that the configuration for compiling via `native-image`
+         ;;                               will be generated via the agent.
+         ;;
+         ;; executor = anything else   -- Run provided runtime loop
+         (if (= (System/getProperty "executor") @#'fierycod.holy-lambda.agent/AGENT_EXECUTOR)
+           ;; Generate the native configuration for the lambdas
+           (#'fierycod.holy-lambda.agent/routes->reflective-call! ~'PRVL_ROUTES)
 
-         ;; Start custom runtime loop
-         (while true
-           (#'fierycod.holy-lambda.custom-runtime/next-iter
-            (System/getenv "AWS_LAMBDA_RUNTIME_API")
-            (or (first attrs#) (System/getenv "_HANDLER"))
-            ~'PRVL_ROUTES
-            ~disable-analytics?))))))
+           ;; Start custom runtime loop
+           (while true
+             (#'fierycod.holy-lambda.custom-runtime/next-iter
+              runtime-api-url#
+              handler-name#
+              ~'PRVL_ROUTES
+              ~disable-analytics?)))))))

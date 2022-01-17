@@ -31,11 +31,10 @@
   (let [response (u/http "POST" (url runtime iid "/error")
                          {:statusCode 500
                           :headers    {"content-type" "application/json"}
-                          :body       {:runtime-error true
-                                       :err           (Throwable->map err)}}
+                          :body       (Throwable->map err)}
                          disable-analytics?)]
     (when-not (response :success?)
-      (u/println-err! (u/->str "[holy-lambda] Runtime error failed sent to AWS.\n" (str (response :body))))
+      (u/println-err! (u/->str "[holy-lambda] Runtime error sent failed.\n" (str (response :body))))
       (System/exit 1))))
 
 (defn- send-response
@@ -74,16 +73,12 @@
       (send-runtime-error runtime iid (u/->ex "Handler " ^String handler-name " not found!") disable-analitics?)
       (System/exit 1))
 
-    (when-not iid
-      (send-runtime-error runtime iid (u/->ex "Failed to determine new invocation-id") disable-analitics?)
-      (System/exit 1))
-
-    (when (and iid (aws-event :success?))
+    (when (aws-event :success?)
       (try
         (send-response runtime
                        iid
                        (handler {:event (normalize-event event)
-                                 :ctx (->aws-context iid headers event)})
+                                 :ctx   (->aws-context iid headers event)})
                        disable-analitics?)
         (catch Exception err
           (send-runtime-error runtime iid err disable-analitics?))))))
