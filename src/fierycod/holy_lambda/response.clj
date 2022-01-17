@@ -90,7 +90,7 @@
   ([?status]
    {:statusCode ?status
     :headers    {}
-    :body       {}})
+    :body       nil})
   ([resp ?status]
    (assoc resp :statusCode ?status)))
 
