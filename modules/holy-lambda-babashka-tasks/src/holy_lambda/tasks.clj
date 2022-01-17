@@ -624,7 +624,10 @@ set -e
       (hpr " Babashka version:        " (accent (or (s/trim (shs-no-err "bb" "version")) "UNKNOWN")))
       (hpr " Clojure version:         " (accent (or (s/trim (shs-no-err "clojure" "--version")) "UNKNOWN")))
       (hpr " Docker image:            " (accent (:image DOCKER)))
-      (hpr " Java version:            " (accent (or (s/trim (first (s/split-lines (shs-no-err "java" "--version")))) "UNKNOWN")))
+      (hpr " Java version:            " (accent (or (some-> (shs "java" "-version") (s/split-lines)
+                                                            first
+                                                            s/trim)
+                                                    "UNKNOWN")))
       (hpr " TTY:                     " (accent TTY?))
       (hpr "---------------------------------------"))
 
