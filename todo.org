@@ -1,0 +1,20 @@
+* 0.7.0
+** TODO [#C] Publish a minimal JVM layers for Clojure backend
+- [ ] Java11,
+- [ ] Java 17
+** TODO [#C] Move from depstar to build.tools
+** TODO [#C] Pimp documentation
+- [ ] Add additional section for native runtime describing how most common errors on GraalVM should be interpreted
+- [ ] Add two troubleshooting hints:
+  - What if the ~hl:native:conf~ hangs?
+  - What if the ~hl:native:compile~ hangs?
+- [ ] Add additional tutorial for running Clojure with the Layers.
+
+* [ ] 0.8.0
+- Add fully functional live development environment, but Clojure style :)
+  https://docs.serverless-stack.com/live-lambda-development
+
+  Discussion?!
+
+* [ ] 0.9.0
+- Investigate how to support step functions in a more Clojure'y way

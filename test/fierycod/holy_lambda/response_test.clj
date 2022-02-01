@@ -15,7 +15,7 @@
              (r/response {}))))
 
   (t/testing "status basic template"
-    (t/is (= {:statusCode 200, :headers {} :body {}}
+    (t/is (= {:statusCode 200, :headers {}, :body nil}
              (r/status 200)))
     (t/is (= {:statusCode 200, :body "hello"}
              (r/status {:body "hello"} 200))))
