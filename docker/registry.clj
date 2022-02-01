@@ -22,10 +22,10 @@
   (= 1 (:exit @(shell-no-exit false "git" "diff" "--exit-code" "HEAD~1" "HEAD" "--" "."))))
 
 (def CE_IMAGES
-  [;; ALREADY BUILT IMAGES
-   ;; {:version ["21.2.0" "21.1.0" "21.3.0"]
-   ;;  :java    ["11"]
-   ;;  :arch    ["amd64", "aarch64"]}
+  [{:version ["22.0.0.2"]
+    :java    ["11" "17"]
+    :arch    ["amd64", "aarch64"]}
+   ;; ALREADY BUILT IMAGES
    ;; {:version ["21.3.0"]
    ;;  :java    ["17"]
    ;;  :arch    ["amd64", "aarch64"]}
@@ -35,10 +35,11 @@
    ])
 
 (def DEV_IMAGES
-  [{:version         "22.1.0-dev-20211209_2306"
-    :partial-version "22.1.0-dev",
-    :java            ["11" "17"],
-    :arch            ["amd64", "aarch64"]}])
+  [;; {:version         "22.1.0-dev-20211209_2306"
+   ;;  :partial-version "22.1.0-dev",
+   ;;  :java            ["11" "17"],
+   ;;  :arch            ["amd64", "aarch64"]}
+   ])
 
 (defn dev-image-url
   [{:keys [version java arch]}]
