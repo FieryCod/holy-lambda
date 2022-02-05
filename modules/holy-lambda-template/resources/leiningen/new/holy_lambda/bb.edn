@@ -1,8 +1,8 @@
 {:deps {io.github.FieryCod/holy-lambda-babashka-tasks
         {:git/url   "https://github.com/FieryCod/holy-lambda"
          :deps/root "./modules/holy-lambda-babashka-tasks"
-         :sha       "2a69818f57112c62bb31f4fcc1a7b36f4dfd63ac"}
-        io.github.FieryCod/holy-lambda {:mvn/version "0.6.5"}}
+         :sha       "e3cb94db8f0ac0e8b241afa6d8cba3f0485ff0d4"}
+        io.github.FieryCod/holy-lambda {:mvn/version "0.6.6"}}
 
  ;; Minimal babashka version which should be used in conjuction with holy-lambda
  :min-bb-version "0.3.7"
@@ -25,7 +25,7 @@
 
                                 ;; GraalVM Community holy-lambda compatible docker image
                                 ;; You can always build your own GraalVM image with enterprise edition
-                                :image "ghcr.io/fierycod/holy-lambda-builder:amd64-java11-21.3.0"}
+                                :image "ghcr.io/fierycod/holy-lambda-builder:amd64-java11-22.0.0.2"}
 
                        :build {:compile-cmd  "clojure -X:uberjar"
                                ;; Used when either :docker is nil or
