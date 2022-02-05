@@ -16,17 +16,14 @@ The extraordinary simple, performant, and extensible custom AWS Lambda runtime f
   - Native Clojure (GraalVM compiled), 
   - Clojure (much faster than official AWS Java runtime),
 
-**Incoming**
-  - [nbb](https://github.com/borkdude/nbb)
-  - ClojureScript
-
 ## Goals
-  - **Low cold starts** - Clojure goes fast on AWS Lambda!
-  - **Multiple backends support** - Unified runtime for Clojure/script!
-  - **Minimal API** - Just stuff that gets the job done!
+  - **Low cold starts** - Clojure goes fast on AWS Lambda.
+  - **Multiple backends support** - Unified runtime for Clojure.
+  - **Minimal API** - Just stuff that gets the job done.
 
 ## Non-Goals
-  - **Tight integration with deployment tools** - I don't want to do this!
+  - **Tight integration with deployment tools** - I don't want to do this.
+  - **ClojureScript support** - there is no additional value HL may provide for Clojurescript. Use either [nbb][https://github.com/babashka/nbb] or [shadow-cljs][https://github.com/thheller/shadow-cljs] with advanced compilation.
 
 ## Companies & Inviduals using Holy Lambda?
   - [nextdoc.io](https://nextdoc.io) - 6 native lambdas: api-gateway custom authorizer, file access control, openapi data source etc.

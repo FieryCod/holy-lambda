@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.6
+See [migration guide](https://fierycod.github.io/holy-lambda/#/migration-guide)
+
+- [holy-lambda] Simplify default & async retrievers
+- [bb tasks] Fix tasks `hl:doctor` command
+- [holy-lambda] Add images of GraalVM 22.2.0
+- [docs] Update docs
+- [babashka] Fix typo in babashka tutorial
+- [holy-lambda] Fix 1 arity of `#'hr/status`
+
 ## 0.6.5
 See [migration guide](https://fierycod.github.io/holy-lambda/#/migration-guide)
 

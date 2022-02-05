@@ -22,9 +22,9 @@
   (= 1 (:exit @(shell-no-exit false "git" "diff" "--exit-code" "HEAD~1" "HEAD" "--" "."))))
 
 (def CE_IMAGES
-  [{:version ["22.0.0.2"]
-    :java    ["11" "17"]
-    :arch    ["amd64", "aarch64"]}
+  [;; {:version ["22.0.0.2"]
+   ;;  :java    ["11" "17"]
+   ;;  :arch    ["amd64", "aarch64"]}
    ;; ALREADY BUILT IMAGES
    ;; {:version ["21.3.0"]
    ;;  :java    ["17"]
