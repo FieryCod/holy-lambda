@@ -18,14 +18,16 @@
 (def ^:private AGENT_EXECUTOR "native-agent")
 
 (defmacro in-context
-  "Executes body in safe agent context for native configuration generation. See docs for more."
+  "Executes body in safe agent context for native configuration generation.
+   Catches all errors thrown during execution."
   [& body]
   (if-not (System/getenv "USE_AGENT_CONTEXT")
     nil
     `(when (= (System/getProperty "executor") @#'fierycod.holy-lambda.agent/AGENT_EXECUTOR)
-       (try (do ~@body)
-            (catch Exception err#
-              (println "Exception in agent-context: " err#))))))
+       (try
+         (do ~@body)
+         (catch Exception err#
+           (println "Exception in agent-context: " err#))))))
 
 (defn- agents-payloads->invoke-map
   []
