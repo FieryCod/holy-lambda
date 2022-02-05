@@ -1,5 +1,9 @@
 # Migration Guide
 
+## 0.6.5 -> 0.6.6
+1. Update `holy-lambda` version in `bb.edn` and `deps.edn`.
+2. Use `hl:update-bb-tasks` to update the tasks.
+
 ## 0.6.4 -> 0.6.5
 1. Update `holy-lambda` version in `bb.edn` and `deps.edn`.
 2. Use `hl:update-bb-tasks` to update the tasks.

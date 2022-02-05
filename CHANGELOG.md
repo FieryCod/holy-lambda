@@ -3,6 +3,7 @@
 ## 0.6.6
 See [migration guide](https://fierycod.github.io/holy-lambda/#/migration-guide)
 
+- [bb layer] Upgrade Babashka to v0.7.4
 - [holy-lambda] Simplify default & async retrievers
 - [bb tasks] Fix tasks `hl:doctor` command
 - [holy-lambda] Add images of GraalVM 22.2.0

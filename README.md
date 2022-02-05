@@ -23,7 +23,7 @@ The extraordinary simple, performant, and extensible custom AWS Lambda runtime f
 
 ## Non-Goals
   - **Tight integration with deployment tools** - I don't want to do this.
-  - **ClojureScript support** - there is no additional value HL may provide for Clojurescript. Use either [nbb][https://github.com/babashka/nbb] or [shadow-cljs][https://github.com/thheller/shadow-cljs] with advanced compilation.
+  - **ClojureScript support** - there is no additional value HL may provide for Clojurescript. Use either [nbb](https://github.com/babashka/nbb) or [shadow-cljs](https://github.com/thheller/shadow-cljs) with advanced compilation.
 
 ## Companies & Inviduals using Holy Lambda?
   - [nextdoc.io](https://nextdoc.io) - 6 native lambdas: api-gateway custom authorizer, file access control, openapi data source etc.
@@ -36,8 +36,8 @@ The extraordinary simple, performant, and extensible custom AWS Lambda runtime f
 
 ## Resources
 - [Documentation](https://fierycod.github.io/holy-lambda)
-- [Docker images with GraalVM CE + native-image (ARM64/AMD64) for Holy Lambda](https://github.com/FieryCod/holy-lambda/pkgs/container/holy-lambda-builder)
-- [GraalVM native-image with Clojure docs](https://github.com/clj-easy/graal-docs)
+- [HL Builder Images](https://github.com/FieryCod/holy-lambda/pkgs/container/holy-lambda-builder)
+- [GraalVM & Clojure](https://github.com/clj-easy/graal-docs)
 
 ## Current Version 
 [![Clojars Project](https://img.shields.io/clojars/v/io.github.FieryCod/holy-lambda?labelColor=283C67&color=729AD1&style=for-the-badge&logo=clojure&logoColor=fff)](https://clojars.org/io.github.FieryCod/holy-lambda)
