@@ -4,33 +4,42 @@ Description: >
   Example basic lambda using `holy-lambda` micro library
 
 Parameters:
-  Runtime:
-    Type: String
-    Default: <HOLY_LAMBDA_RUNTIME>
   Timeout:
     Type: Number
     Default: 40
   MemorySize:
     Type: Number
-    Default: 2000
-  CodeUri:
-    Type: String
-    Default: <HOLY_LAMBDA_CODE_URI>
+    Default: 128
   Entrypoint:
     Type: String
-    Default: <HOLY_LAMBDA_ENTRYPOINT>
+    Default: sqs.example.core
 
 Globals:
   Function:
-    Runtime: !Ref Runtime
     Timeout: !Ref Timeout
     MemorySize: !Ref MemorySize
-    CodeUri: !Ref CodeUri
     Environment:
       Variables:
-        Entrypoint: !Ref Entrypoint
+        HL_ENTRYPOINT: !Ref Entrypoint
 
 Resources:
+  SubscribeLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: sqs.example.core.SubscribeLambda
+      Runtime: provided
+      CodeUri: .holy-lambda/build/latest.zip
+      FunctionName: SubscribeLambdaFunction
+      Events:
+        ReceiveStringEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ExampleSQS.Arn
+            BatchSize: 1
+      Environment:
+        Variables:
+          SQS_URL: !Ref ExampleSQS
+
   ExampleSQS:
     Type: AWS::SQS::Queue
     Properties:
@@ -42,10 +51,13 @@ Resources:
     Properties:
       Handler: sqs.example.core.ApiProxyMessage
       FunctionName: ApiProxyMessageFunction
+      Runtime: provided
+      CodeUri: .holy-lambda/build/latest.zip
       Events:
         ProxyMessageEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
+            ApiId: !Ref ExampleHttpApi
             Path: /{message}
             Method: get
 
@@ -58,17 +70,11 @@ Resources:
             QueueName:
               !GetAtt ExampleSQS.QueueName
 
-  SubscribeLambdaFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: sqs.example.core.SubscribeLambda
-      FunctionName: SubscribeLambdaFunction
-      Events:
-        ReceiveStringEvent:
-          Type: SQS
-          Properties:
-            Queue: !GetAtt ExampleSQS.Arn
-            BatchSize: 1
-      Environment:
-        Variables:
-          SQS_URL: !Ref ExampleSQS
+  ExampleHttpApi:
+    Type: AWS::Serverless::HttpApi
+
+Outputs:
+  LambdaEndpoint:
+    Description: Proxy endpoint for ApiProxyMessageFunction
+    Value:
+      Fn::Sub: https://${ExampleHttpApi}.execute-api.${AWS::Region}.amazonaws.com

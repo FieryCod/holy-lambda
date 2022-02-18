@@ -1,9 +1,35 @@
 [ {
-  "name" : "boolean[]"
+  "name" : "[B"
 }, {
-  "name" : "byte[]"
+  "name" : "[C"
 }, {
-  "name" : "char[]"
+  "name" : "[D"
+}, {
+  "name" : "[F"
+}, {
+  "name" : "[I"
+}, {
+  "name" : "[J"
+}, {
+  "name" : "[Lcom.fasterxml.jackson.databind.deser.Deserializers;"
+}, {
+  "name" : "[Lcom.fasterxml.jackson.databind.deser.KeyDeserializers;"
+}, {
+  "name" : "[Lcom.fasterxml.jackson.databind.deser.ValueInstantiators;"
+}, {
+  "name" : "[Lcom.fasterxml.jackson.databind.ser.Serializers;"
+}, {
+  "name" : "[Ljava.lang.Object;"
+}, {
+  "name" : "[Ljava.lang.String;"
+}, {
+  "name" : "[Ljava.nio.HeapByteBuffer;"
+}, {
+  "name" : "[Lsun.security.pkcs.SignerInfo;"
+}, {
+  "name" : "[S"
+}, {
+  "name" : "[Z"
 }, {
   "name" : "clojure.asm.ClassReader"
 }, {
@@ -537,10 +563,8 @@
   "name" : "clojure.lang.IMeta"
 }, {
   "name" : "clojure.lang.IObj",
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true
-}, {
-  "name" : "clojure.lang.IPending"
+  "queryAllDeclaredMethods" : true,
+  "queryAllPublicMethods" : true
 }, {
   "name" : "clojure.lang.IPersistentCollection"
 }, {
@@ -577,7 +601,7 @@
   "name" : "clojure.lang.LispReader$ReaderException"
 }, {
   "name" : "clojure.lang.LockingTransaction",
-  "allPublicMethods" : true
+  "queryAllPublicMethods" : true
 }, {
   "name" : "clojure.lang.MapEntry"
 }, {
@@ -588,12 +612,16 @@
   "name" : "clojure.lang.Named"
 }, {
   "name" : "clojure.lang.Namespace",
-  "allPublicMethods" : true
+  "queryAllPublicMethods" : true
 }, {
   "name" : "clojure.lang.Numbers"
 }, {
   "name" : "clojure.lang.PersistentArrayMap",
-  "allPublicMethods" : true
+  "queryAllPublicMethods" : true,
+  "methods" : [ {
+    "name" : "create",
+    "parameterTypes" : [ "java.util.Map" ]
+  } ]
 }, {
   "name" : "clojure.lang.PersistentArrayMap$Seq"
 }, {
@@ -612,7 +640,7 @@
   "name" : "clojure.lang.PersistentVector$ChunkedSeq"
 }, {
   "name" : "clojure.lang.RT",
-  "allPublicMethods" : true
+  "queryAllPublicMethods" : true
 }, {
   "name" : "clojure.lang.Ratio"
 }, {
@@ -629,14 +657,14 @@
   "name" : "clojure.lang.StringSeq"
 }, {
   "name" : "clojure.lang.Symbol",
-  "allPublicMethods" : true
+  "queryAllPublicMethods" : true
 }, {
   "name" : "clojure.lang.TaggedLiteral"
 }, {
   "name" : "clojure.lang.Util"
 }, {
   "name" : "clojure.lang.Var",
-  "allPublicMethods" : true
+  "queryAllPublicMethods" : true
 }, {
   "name" : "clojure.lang.Volatile"
 }, {
@@ -769,8 +797,8 @@
   "name" : "clojure.tools.logging.impl.Logger"
 }, {
   "name" : "clojure.tools.logging.impl.LoggerFactory",
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true
+  "queryAllDeclaredMethods" : true,
+  "queryAllPublicMethods" : true
 }, {
   "name" : "clojure.tools.logging.impl__init"
 }, {
@@ -884,14 +912,6 @@
 }, {
   "name" : "cognitect.http_client__init"
 }, {
-  "name" : "com.amazonaws.services.lambda.runtime.Client"
-}, {
-  "name" : "com.amazonaws.services.lambda.runtime.ClientContext"
-}, {
-  "name" : "com.amazonaws.services.lambda.runtime.CognitoIdentity"
-}, {
-  "name" : "com.amazonaws.services.lambda.runtime.Context"
-}, {
   "name" : "com.fasterxml.jackson.core.JsonFactory"
 }, {
   "name" : "com.fasterxml.jackson.core.JsonGenerator$Feature"
@@ -906,12 +926,6 @@
 }, {
   "name" : "com.fasterxml.jackson.databind.SerializationFeature"
 }, {
-  "name" : "com.fasterxml.jackson.databind.deser.Deserializers[]"
-}, {
-  "name" : "com.fasterxml.jackson.databind.deser.KeyDeserializers[]"
-}, {
-  "name" : "com.fasterxml.jackson.databind.deser.ValueInstantiators[]"
-}, {
   "name" : "com.fasterxml.jackson.databind.ext.Java7SupportImpl",
   "methods" : [ {
     "name" : "<init>",
@@ -919,8 +933,6 @@
   } ]
 }, {
   "name" : "com.fasterxml.jackson.databind.module.SimpleModule"
-}, {
-  "name" : "com.fasterxml.jackson.databind.ser.Serializers[]"
 }, {
   "name" : "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule"
 }, {
@@ -937,12 +949,6 @@
   } ]
 }, {
   "name" : "com.sun.crypto.provider.HmacCore$HmacSHA256",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "com.sun.crypto.provider.SunJCE",
   "methods" : [ {
     "name" : "<init>",
     "parameterTypes" : [ ]
@@ -966,45 +972,30 @@
     "parameterTypes" : [ ]
   } ]
 }, {
-  "name" : "com.sun.net.ssl.internal.ssl.Provider",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "com.sun.security.sasl.Provider",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
   "name" : "com.sun.xml.internal.stream.XMLInputFactoryImpl",
   "methods" : [ {
     "name" : "<init>",
     "parameterTypes" : [ ]
   } ]
 }, {
-  "name" : "double[]"
-}, {
   "name" : "fierycod.holy_lambda.agent__init"
+}, {
+  "name" : "fierycod.holy_lambda.core$entrypoint$fn__11131",
+  "queryAllPublicConstructors" : true,
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
 }, {
   "name" : "fierycod.holy_lambda.core__init"
 }, {
-  "name" : "fierycod.holy_lambda.interceptor__init"
-}, {
-  "name" : "fierycod.holy_lambda.java_runtime__init"
-}, {
-  "name" : "fierycod.holy_lambda.native_runtime__init"
+  "name" : "fierycod.holy_lambda.custom_runtime__init"
 }, {
   "name" : "fierycod.holy_lambda.response__init"
 }, {
   "name" : "fierycod.holy_lambda.retriever__init"
 }, {
   "name" : "fierycod.holy_lambda.util__init"
-}, {
-  "name" : "float[]"
-}, {
-  "name" : "int[]"
 }, {
   "name" : "java.io.BufferedInputStream"
 }, {
@@ -1059,13 +1050,13 @@
   "name" : "java.io.Writer"
 }, {
   "name" : "java.lang.Boolean",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
 }, {
   "name" : "java.lang.Byte",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
@@ -1075,24 +1066,28 @@
   "name" : "java.lang.Character"
 }, {
   "name" : "java.lang.Class",
-  "allPublicMethods" : true
+  "queryAllPublicMethods" : true,
+  "methods" : [ {
+    "name" : "getModule",
+    "parameterTypes" : [ ]
+  } ]
 }, {
   "name" : "java.lang.ClassLoader"
 }, {
   "name" : "java.lang.Double",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
 }, {
   "name" : "java.lang.Float",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
 }, {
   "name" : "java.lang.Integer",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
@@ -1100,25 +1095,38 @@
   "name" : "java.lang.Iterable"
 }, {
   "name" : "java.lang.Long",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "java.lang.Module",
+  "methods" : [ {
+    "name" : "getLayer",
+    "parameterTypes" : [ ]
+  }, {
+    "name" : "getName",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "java.lang.ModuleLayer",
+  "methods" : [ {
+    "name" : "configuration",
+    "parameterTypes" : [ ]
   } ]
 }, {
   "name" : "java.lang.Number"
 }, {
   "name" : "java.lang.Object",
   "allDeclaredFields" : true,
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true,
-  "allDeclaredConstructors" : true
-}, {
-  "name" : "java.lang.Object[]"
+  "queryAllDeclaredMethods" : true,
+  "queryAllPublicMethods" : true,
+  "queryAllDeclaredConstructors" : true
 }, {
   "name" : "java.lang.Runnable"
 }, {
   "name" : "java.lang.Short",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
@@ -1126,9 +1134,11 @@
   "name" : "java.lang.StackTraceElement"
 }, {
   "name" : "java.lang.String",
-  "allPublicMethods" : true
-}, {
-  "name" : "java.lang.String[]"
+  "queryAllPublicMethods" : true,
+  "methods" : [ {
+    "name" : "contains",
+    "parameterTypes" : [ "java.lang.CharSequence" ]
+  } ]
 }, {
   "name" : "java.lang.ThreadLocal"
 }, {
@@ -1154,6 +1164,24 @@
     "parameterTypes" : [ ]
   } ]
 }, {
+  "name" : "java.lang.module.Configuration",
+  "methods" : [ {
+    "name" : "findModule",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "java.lang.module.ModuleReference",
+  "methods" : [ {
+    "name" : "location",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "java.lang.module.ResolvedModule",
+  "methods" : [ {
+    "name" : "reference",
+    "parameterTypes" : [ ]
+  } ]
+}, {
   "name" : "java.lang.ref.ReferenceQueue"
 }, {
   "name" : "java.lang.ref.SoftReference"
@@ -1163,6 +1191,12 @@
   "name" : "java.lang.reflect.Constructor"
 }, {
   "name" : "java.lang.reflect.Field"
+}, {
+  "name" : "java.lang.reflect.Method",
+  "methods" : [ {
+    "name" : "canAccess",
+    "parameterTypes" : [ "java.lang.Object" ]
+  } ]
 }, {
   "name" : "java.lang.reflect.Modifier"
 }, {
@@ -1198,8 +1232,6 @@
 }, {
   "name" : "java.nio.ByteBuffer"
 }, {
-  "name" : "java.nio.HeapByteBuffer[]"
-}, {
   "name" : "java.nio.charset.Charset"
 }, {
   "name" : "java.nio.file.Files"
@@ -1213,6 +1245,8 @@
   "name" : "java.security.MessageDigest"
 }, {
   "name" : "java.security.MessageDigestSpi"
+}, {
+  "name" : "java.security.SecureRandomParameters"
 }, {
   "name" : "java.security.interfaces.ECPrivateKey"
 }, {
@@ -1244,6 +1278,8 @@
 }, {
   "name" : "java.util.GregorianCalendar"
 }, {
+  "name" : "java.util.HashMap"
+}, {
   "name" : "java.util.Iterator"
 }, {
   "name" : "java.util.LinkedList"
@@ -1253,7 +1289,11 @@
   "name" : "java.util.Map"
 }, {
   "name" : "java.util.Properties",
-  "allPublicMethods" : true
+  "queryAllPublicMethods" : true,
+  "methods" : [ {
+    "name" : "getProperty",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
 }, {
   "name" : "java.util.Queue"
 }, {
@@ -1315,7 +1355,7 @@
   "allPublicFields" : true
 }, {
   "name" : "java.util.logging.Logger",
-  "allPublicMethods" : true
+  "queryAllPublicMethods" : true
 }, {
   "name" : "java.util.regex.Matcher"
 }, {
@@ -1364,6 +1404,8 @@
 }, {
   "name" : "jsonista.core__init"
 }, {
+  "name" : "jsonista.jackson.ArrayListDeserializer"
+}, {
   "name" : "jsonista.jackson.DateSerializer"
 }, {
   "name" : "jsonista.jackson.FunctionalKeyDeserializer"
@@ -1371,6 +1413,8 @@
   "name" : "jsonista.jackson.FunctionalKeywordSerializer"
 }, {
   "name" : "jsonista.jackson.FunctionalSerializer"
+}, {
+  "name" : "jsonista.jackson.HashMapDeserializer"
 }, {
   "name" : "jsonista.jackson.KeywordKeyDeserializer"
 }, {
@@ -1383,8 +1427,6 @@
   "name" : "jsonista.jackson.RatioSerializer"
 }, {
   "name" : "jsonista.jackson.SymbolSerializer"
-}, {
-  "name" : "long[]"
 }, {
   "name" : "org.eclipse.jetty.client.HttpClient"
 }, {
@@ -1412,6 +1454,9 @@
     "name" : "getCodeSourceLocation",
     "parameterTypes" : [ "java.lang.Class" ]
   }, {
+    "name" : "getModuleLocation",
+    "parameterTypes" : [ "java.lang.Class" ]
+  }, {
     "name" : "getSystemClassLoaderLocation",
     "parameterTypes" : [ "java.lang.Class" ]
   } ]
@@ -1422,95 +1467,23 @@
 }, {
   "name" : "org.eclipse.jetty.util.ssl.SslContextFactory"
 }, {
-  "name" : "org.jcp.xml.dsig.internal.dom.XMLDSigRI",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
   "name" : "org.objectweb.asm.Type"
-}, {
-  "name" : "short[]"
 }, {
   "name" : "sqs.example.core__init"
 }, {
   "name" : "sqs.example.static_load__init"
 }, {
-  "name" : "sun.misc.Unsafe"
-}, {
-  "name" : "sun.security.ec.ECDHKeyAgreement",
+  "name" : "sun.security.pkcs12.PKCS12KeyStore",
   "methods" : [ {
     "name" : "<init>",
     "parameterTypes" : [ ]
   } ]
 }, {
-  "name" : "sun.security.ec.ECDSASignature$Raw",
+  "name" : "sun.security.pkcs12.PKCS12KeyStore$DualFormatPKCS12",
   "methods" : [ {
     "name" : "<init>",
     "parameterTypes" : [ ]
   } ]
-}, {
-  "name" : "sun.security.ec.ECDSASignature$SHA1",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECDSASignature$SHA224",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECDSASignature$SHA256",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECDSASignature$SHA384",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECDSASignature$SHA512",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECKeyFactory",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECKeyPairGenerator",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.SunEC",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.jgss.SunProvider",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.krb5.PrincipalName",
-  "fields" : [ {
-    "name" : "nameStrings",
-    "allowUnsafeAccess" : true
-  } ]
-}, {
-  "name" : "sun.security.pkcs.SignerInfo[]"
 }, {
   "name" : "sun.security.provider.DSA$SHA224withDSA",
   "methods" : [ {
@@ -1572,12 +1545,6 @@
     "parameterTypes" : [ ]
   } ]
 }, {
-  "name" : "sun.security.provider.Sun",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
   "name" : "sun.security.provider.X509Factory",
   "methods" : [ {
     "name" : "<init>",
@@ -1585,6 +1552,12 @@
   } ]
 }, {
   "name" : "sun.security.provider.certpath.PKIXCertPathValidator",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "sun.security.rsa.PSSParameters",
   "methods" : [ {
     "name" : "<init>",
     "parameterTypes" : [ ]
@@ -1614,18 +1587,6 @@
     "parameterTypes" : [ ]
   } ]
 }, {
-  "name" : "sun.security.rsa.SunRsaSign",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.smartcardio.SunPCSC",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
   "name" : "sun.security.ssl.SSLContextImpl$TLSContext",
   "methods" : [ {
     "name" : "<init>",
@@ -1633,12 +1594,6 @@
   } ]
 }, {
   "name" : "sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.util.ECParameters",
   "methods" : [ {
     "name" : "<init>",
     "parameterTypes" : [ ]

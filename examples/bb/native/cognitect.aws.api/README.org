@@ -1,0 +1,106 @@
+* Cognitect AWS API template
+
+** How to ensure AWS API works under native-image?
+1. Make sure to include all required dependencies for AWS clients in ~deps.edn~.
+   
+   #+begin_src clojure
+     ;; Required global dependencies
+     com.cognitect.aws/api                {:mvn/version "0.8.539"}
+     com.cognitect.aws/endpoints          {:mvn/version "1.1.12.153"}
+
+     ;; Client specific dependencies
+     ;; See https://github.com/cognitect-labs/aws-api/blob/master/latest-releases.edn
+
+   #+end_src
+   
+2. Create a ~static-load~ namespace with the following content.
+   
+   #+begin_src clojure
+     (ns your-ns.static-load
+       (:require
+        [cognitect.aws.client.api]
+        ;; add this for graalvm (explicit load)
+        ;; there are dynamically loaded at runtime
+        [cognitect.aws.http.cognitect]
+        [cognitect.aws.protocols.query]
+        [cognitect.aws.protocols.json]
+        [cognitect.aws.protocols.common]
+        [cognitect.aws.protocols.rest]
+        [cognitect.aws.protocols.rest-xml]))
+   #+end_src
+   
+3. Import ~static-load~ namespace in your ~core~ namespace.
+   
+   #+begin_src clojure
+     (ns your-ns.core
+       (:gen-class)
+       (:require
+        [your-ns.static-load]
+        [cognitect.aws.http.cognitect :as http]
+        [cognitect.aws.client.api :as aws]
+        [fierycod.holy-lambda.agent :as agent]
+        [fierycod.holy-lambda.core :as h]))
+   #+end_src
+   
+4. Create a delayed instance of ~http-client~ in ~core~.
+   
+   #+begin_src clojure
+    (def http-client (delay (http/create)))
+   #+end_src
+   
+5. Create a delayed of client for each API e.g.
+   
+   #+begin_src clojure
+    (def sqs (delay (aws/client {:api :sqs
+                                 :http-client @http-client})))
+   #+end_src
+   
+6. Create a ~in-context~ calls to ensure the API service ~.edn~ files will land
+   in ~resources/native-configuration/resource-config.json~ e.g.
+   
+   #+begin_src clojure
+     (agent/in-context
+       (aws/invoke @sqs {:op :SendMessage
+                         :request {:QueueUrl queue-url
+                                   :MessageBody msg}}))
+   #+end_src
+
+   *Every client should have a corresponding* ~service.edn~
+   
+   #+begin_src js
+     {
+         "resources" : {
+             "includes" : [ {
+                 "pattern" : "\\QMETA-INF/services/org.eclipse.jetty.http.HttpFieldPreEncoder\\E"
+             }, {
+                 "pattern" : "\\Qclojure/version.properties\\E"
+             }, {
+                 "pattern" : "\\Qcognitect/aws/endpoints.edn\\E"
+             }, {
+                 "pattern" : "\\Qcognitect/aws/sqs/service.edn\\E"
+             }, {
+                 "pattern" : "\\Qcognitect_aws_http.edn\\E"
+             }, {
+                 "pattern" : "\\Qorg/eclipse/jetty/version/build.properties\\E"
+             } ]
+         },
+         "bundles" : [ ]
+     }
+   #+end_src
+   
+7. Add required build time initializers in ~bb.edn~ ~:native-image-args~ argument
+   
+   #+begin_src bash
+   "--initialize-at-build-time=jdk.xml.internal,com.sun.org.apache.xerces.internal.impl,javax.xml.parsers.FactoryFinder,com.sun.org.apache.xerces.internal.util,com.sun.org.apache.xerces.internal.utils,com.sun.org.apache.xerces.internal.xni"
+   #+end_src
+
+8. Compile with ~bb hl:compile~ and run ~bb hl:native:conf~.
+   The following step will run all ~in-context~ call and gather reflections and resource configurations.
+   Re-run ~bb hl:native:conf~ in situations where you add new dependency in ~deps.edn~.
+
+9. Run ~bb hl:native:executable~. Voila!
+   
+   
+   
+   
+

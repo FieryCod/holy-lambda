@@ -1,0 +1,16 @@
+{:deps {org.clojure/clojure                  {:mvn/version "1.10.3"}
+        io.github.FieryCod/holy-lambda       {:mvn/version "0.6.6"}
+        com.github.clj-easy/graal-build-time {:mvn/version "0.1.4"}
+        com.cognitect.aws/api                {:mvn/version "0.8.539"}
+        com.cognitect.aws/endpoints          {:mvn/version "1.1.12.153"}
+        com.cognitect.aws/s3                 {:mvn/version "814.2.1053.0"}}
+
+ :paths ["src" "resources"]
+
+ :aliases {:uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
+                     :exec-fn      hf.depstar/uberjar
+                     :exec-args    {:aot        ["sqs.example.core"]
+                                    :main-class "sqs.example.core"
+                                    :jar        ".holy-lambda/build/output.jar"
+                                    :jvm-opts   ["-Dclojure.compiler.direct-linking=true"
+                                                 "-Dclojure.spec.skip-macros=true"]}}}}

@@ -12,10 +12,6 @@
       "pattern" : "\\Qcognitect_aws_http.edn\\E"
     }, {
       "pattern" : "\\Qorg/eclipse/jetty/version/build.properties\\E"
-    }, {
-      "pattern" : "\\Qsun/net/idn/uidna.spp\\E"
-    }, {
-      "pattern" : "\\Qsun/text/resources/unorm.icu\\E"
     } ]
   },
   "bundles" : [ ]

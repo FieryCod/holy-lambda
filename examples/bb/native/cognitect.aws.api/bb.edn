@@ -1,0 +1,72 @@
+{:deps {io.github.FieryCod/holy-lambda-babashka-tasks
+        {:git/url   "https://github.com/FieryCod/holy-lambda"
+         :deps/root "./modules/holy-lambda-babashka-tasks"
+         :sha       "aad552d90f9b87929755a13641a8e73468430ba0"}
+        io.github.FieryCod/holy-lambda {:mvn/version "0.6.6"}}
+
+ ;; Minimal babashka version which should be used in conjuction with holy-lambda
+ :min-bb-version "0.3.7"
+
+ :holy-lambda/options {
+                       :docker {
+
+                                ;; Check https://docs.docker.com/network/
+                                ;; Network setting for future versions of HL will propagate to AWS SAM as well
+                                ;; Options: "host"|"bridge"|"overlay"|"none"|nil|"macvlan"
+                                :network nil
+
+                                ;; HL runs some bb tasks in docker context. You can put additional resources to the context by using volumes.
+                                ;; ----------------------------------------------------------------------------
+                                ;; Single volume definition:
+                                ;;
+                                ;; {:docker "/where-to-mount-in-docker"
+                                ;;  :host   "relative-local-path"}
+                                :volumes []
+
+                                ;; GraalVM Community holy-lambda compatible docker image
+                                ;; You can always build your own GraalVM image with enterprise edition
+                                :image "ghcr.io/fierycod/holy-lambda-builder:amd64-java11-22.0.0.2"}
+
+                       :build {:compile-cmd  "clojure -X:uberjar"
+                               ;; Used when either :docker is nil or
+                               ;; `HL_NO_DOCKER` environment variable is set to "true"
+                               ;; Might be set via `GRAALVM_HOME` environment variable
+                               :graalvm-home "~/.graalvm"}
+
+                       :backend
+                       {
+                        ;; Babashka pods should be shipped using AWS Lambda Layer
+                        ;; Check this template https://github.com/aws-samples/aws-lambda-layers-aws-sam-examples/blob/master/aws-sdk-layer/template.yaml
+                        ;; and official docs https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-layers.html
+                        ;; CodeUri should be `.holy-lambda/pods`
+                        ;; For now pods should be declared in `bb.edn`. See: https://github.com/babashka/babashka/issues/768#issuecomment-825016317
+                        ;;
+                        ;; `IMPORTANT:` 3rd party babashka compatible libraries should be distributed as a layers (CodeUri: .holy-lambda/bb-clj-deps)
+                        :pods {}
+
+                        ;; For `:native` backend you can provide your own bootstrap file
+                        :bootstrap-file "bootstrap"
+
+                        ;; For `:native` backend you can provide some native resources which will be available during lambda execution
+                        ;; Resources are packed as is.
+                        :native-deps "resources"
+
+                        ;; Specify custom arguments for native image generation
+                        ;; Check https://www.graalvm.org/reference-manual/native-image/Options/
+                        :native-image-args ["--verbose"
+                                            "--no-fallback"
+                                            "--report-unsupported-elements-at-runtime"
+                                            "-H:+AllowIncompleteClasspath"
+                                            "--initialize-at-build-time=jdk.xml.internal,com.sun.org.apache.xerces.internal.impl,javax.xml.parsers.FactoryFinder,com.sun.org.apache.xerces.internal.util,com.sun.org.apache.xerces.internal.utils,com.sun.org.apache.xerces.internal.xni"
+                                            "--no-server"]}}
+
+ :tasks {:requires            ([holy-lambda.tasks])
+         hl:docker:run        holy-lambda.tasks/hl:docker:run
+         hl:native:conf       holy-lambda.tasks/hl:native:conf
+         hl:native:executable holy-lambda.tasks/hl:native:executable
+         hl:babashka:sync     holy-lambda.tasks/hl:babashka:sync
+         hl:compile           holy-lambda.tasks/hl:compile
+         hl:doctor            holy-lambda.tasks/hl:doctor
+         hl:clean             holy-lambda.tasks/hl:clean
+         hl:update-bb-tasks   holy-lambda.tasks/hl:update-bb-tasks
+         hl:version           holy-lambda.tasks/hl:version}}

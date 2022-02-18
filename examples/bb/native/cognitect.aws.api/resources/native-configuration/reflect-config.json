@@ -1,17 +1,41 @@
 [ {
-  "name" : "com.fasterxml.jackson.databind.deser.Deserializers[]"
+  "name" : "[B"
 }, {
-  "name" : "com.fasterxml.jackson.databind.deser.KeyDeserializers[]"
+  "name" : "[C"
 }, {
-  "name" : "com.fasterxml.jackson.databind.deser.ValueInstantiators[]"
+  "name" : "[D"
+}, {
+  "name" : "[F"
+}, {
+  "name" : "[I"
+}, {
+  "name" : "[J"
+}, {
+  "name" : "[Lcom.fasterxml.jackson.databind.deser.Deserializers;"
+}, {
+  "name" : "[Lcom.fasterxml.jackson.databind.deser.KeyDeserializers;"
+}, {
+  "name" : "[Lcom.fasterxml.jackson.databind.deser.ValueInstantiators;"
+}, {
+  "name" : "[Lcom.fasterxml.jackson.databind.ser.Serializers;"
+}, {
+  "name" : "[Ljava.lang.Object;"
+}, {
+  "name" : "[Ljava.lang.String;"
+}, {
+  "name" : "[Ljava.nio.HeapByteBuffer;"
+}, {
+  "name" : "[Lsun.security.pkcs.SignerInfo;"
+}, {
+  "name" : "[S"
+}, {
+  "name" : "[Z"
 }, {
   "name" : "com.fasterxml.jackson.databind.ext.Java7SupportImpl",
   "methods" : [ {
     "name" : "<init>",
     "parameterTypes" : [ ]
   } ]
-}, {
-  "name" : "com.fasterxml.jackson.databind.ser.Serializers[]"
 }, {
   "name" : "com.sun.crypto.provider.AESCipher$General",
   "methods" : [ {
@@ -26,12 +50,6 @@
   } ]
 }, {
   "name" : "com.sun.crypto.provider.HmacCore$HmacSHA256",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "com.sun.crypto.provider.SunJCE",
   "methods" : [ {
     "name" : "<init>",
     "parameterTypes" : [ ]
@@ -55,18 +73,6 @@
     "parameterTypes" : [ ]
   } ]
 }, {
-  "name" : "com.sun.net.ssl.internal.ssl.Provider",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "com.sun.security.sasl.Provider",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
   "name" : "com.sun.xml.internal.stream.XMLInputFactoryImpl",
   "methods" : [ {
     "name" : "<init>",
@@ -74,56 +80,75 @@
   } ]
 }, {
   "name" : "java.lang.Boolean",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
 }, {
   "name" : "java.lang.Byte",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
 }, {
   "name" : "java.lang.Class",
-  "allPublicMethods" : true
+  "queryAllPublicMethods" : true,
+  "methods" : [ {
+    "name" : "getModule",
+    "parameterTypes" : [ ]
+  } ]
 }, {
   "name" : "java.lang.Double",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
 }, {
   "name" : "java.lang.Float",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
 }, {
   "name" : "java.lang.Integer",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
 }, {
   "name" : "java.lang.Long",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
 }, {
-  "name" : "java.lang.Object[]"
+  "name" : "java.lang.Module",
+  "methods" : [ {
+    "name" : "getLayer",
+    "parameterTypes" : [ ]
+  }, {
+    "name" : "getName",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "java.lang.ModuleLayer",
+  "methods" : [ {
+    "name" : "configuration",
+    "parameterTypes" : [ ]
+  } ]
 }, {
   "name" : "java.lang.Short",
-  "methods" : [ {
+  "queriedMethods" : [ {
     "name" : "valueOf",
     "parameterTypes" : [ "java.lang.String" ]
   } ]
 }, {
   "name" : "java.lang.String",
-  "allPublicMethods" : true
-}, {
-  "name" : "java.lang.String[]"
+  "queryAllPublicMethods" : true,
+  "methods" : [ {
+    "name" : "contains",
+    "parameterTypes" : [ "java.lang.CharSequence" ]
+  } ]
 }, {
   "name" : "java.lang.management.ManagementFactory",
   "methods" : [ {
@@ -137,13 +162,37 @@
     "parameterTypes" : [ ]
   } ]
 }, {
-  "name" : "java.nio.HeapByteBuffer[]"
+  "name" : "java.lang.module.Configuration",
+  "methods" : [ {
+    "name" : "findModule",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
+}, {
+  "name" : "java.lang.module.ModuleReference",
+  "methods" : [ {
+    "name" : "location",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "java.lang.module.ResolvedModule",
+  "methods" : [ {
+    "name" : "reference",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "java.lang.reflect.AccessibleObject",
+  "methods" : [ {
+    "name" : "canAccess",
+    "parameterTypes" : [ "java.lang.Object" ]
+  } ]
 }, {
   "name" : "java.security.AlgorithmParametersSpi"
 }, {
   "name" : "java.security.KeyStoreSpi"
 }, {
   "name" : "java.security.MessageDigestSpi"
+}, {
+  "name" : "java.security.SecureRandomParameters"
 }, {
   "name" : "java.security.interfaces.ECPrivateKey"
 }, {
@@ -154,10 +203,14 @@
   "name" : "java.security.interfaces.RSAPublicKey"
 }, {
   "name" : "java.util.Properties",
-  "allPublicMethods" : true
+  "queryAllPublicMethods" : true,
+  "methods" : [ {
+    "name" : "getProperty",
+    "parameterTypes" : [ "java.lang.String" ]
+  } ]
 }, {
   "name" : "java.util.logging.Logger",
-  "allPublicMethods" : true
+  "queryAllPublicMethods" : true
 }, {
   "name" : "javax.security.auth.x500.X500Principal",
   "fields" : [ {
@@ -176,93 +229,26 @@
     "name" : "getCodeSourceLocation",
     "parameterTypes" : [ "java.lang.Class" ]
   }, {
+    "name" : "getModuleLocation",
+    "parameterTypes" : [ "java.lang.Class" ]
+  }, {
     "name" : "getSystemClassLoaderLocation",
     "parameterTypes" : [ "java.lang.Class" ]
   } ]
 }, {
   "name" : "org.eclipse.jetty.util.log.Slf4jLog"
 }, {
-  "name" : "org.jcp.xml.dsig.internal.dom.XMLDSigRI",
+  "name" : "sun.security.pkcs12.PKCS12KeyStore",
   "methods" : [ {
     "name" : "<init>",
     "parameterTypes" : [ ]
   } ]
 }, {
-  "name" : "sun.misc.Unsafe"
-}, {
-  "name" : "sun.security.ec.ECDHKeyAgreement",
+  "name" : "sun.security.pkcs12.PKCS12KeyStore$DualFormatPKCS12",
   "methods" : [ {
     "name" : "<init>",
     "parameterTypes" : [ ]
   } ]
-}, {
-  "name" : "sun.security.ec.ECDSASignature$Raw",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECDSASignature$SHA1",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECDSASignature$SHA224",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECDSASignature$SHA256",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECDSASignature$SHA384",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECDSASignature$SHA512",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECKeyFactory",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.ECKeyPairGenerator",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.ec.SunEC",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.jgss.SunProvider",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.krb5.PrincipalName",
-  "fields" : [ {
-    "name" : "nameStrings",
-    "allowUnsafeAccess" : true
-  } ]
-}, {
-  "name" : "sun.security.pkcs.SignerInfo[]"
 }, {
   "name" : "sun.security.provider.DSA$SHA224withDSA",
   "methods" : [ {
@@ -324,12 +310,6 @@
     "parameterTypes" : [ ]
   } ]
 }, {
-  "name" : "sun.security.provider.Sun",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
   "name" : "sun.security.provider.X509Factory",
   "methods" : [ {
     "name" : "<init>",
@@ -337,6 +317,12 @@
   } ]
 }, {
   "name" : "sun.security.provider.certpath.PKIXCertPathValidator",
+  "methods" : [ {
+    "name" : "<init>",
+    "parameterTypes" : [ ]
+  } ]
+}, {
+  "name" : "sun.security.rsa.PSSParameters",
   "methods" : [ {
     "name" : "<init>",
     "parameterTypes" : [ ]
@@ -366,18 +352,6 @@
     "parameterTypes" : [ ]
   } ]
 }, {
-  "name" : "sun.security.rsa.SunRsaSign",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.smartcardio.SunPCSC",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
   "name" : "sun.security.ssl.SSLContextImpl$TLSContext",
   "methods" : [ {
     "name" : "<init>",
@@ -385,12 +359,6 @@
   } ]
 }, {
   "name" : "sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
-  "methods" : [ {
-    "name" : "<init>",
-    "parameterTypes" : [ ]
-  } ]
-}, {
-  "name" : "sun.security.util.ECParameters",
   "methods" : [ {
     "name" : "<init>",
     "parameterTypes" : [ ]
