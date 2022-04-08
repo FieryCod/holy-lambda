@@ -17,9 +17,10 @@
 
 (def ^:private AGENT_EXECUTOR "native-agent")
 
-(defmacro in-context
+(defmacro ^:deprecated in-context
   "Executes body in safe agent context for native configuration generation.
-   Catches all errors thrown during execution."
+   Catches all errors thrown during execution.
+   Use `in-context!` instead."
   [& body]
   (if-not (System/getenv "USE_AGENT_CONTEXT")
     nil
@@ -28,6 +29,14 @@
          (do ~@body)
          (catch Exception err#
            (println "Exception in agent-context: " err#))))))
+
+(defmacro in-context!
+  "Executes body in [agent context](https://www.graalvm.org/22.0/reference-manual/native-image/Agent/) for native configuration generation."
+  [& body]
+  (if-not (System/getenv "USE_AGENT_CONTEXT")
+    nil
+    `(when (= (System/getProperty "executor") @#'fierycod.holy-lambda.agent/AGENT_EXECUTOR)
+       (do ~@body))))
 
 (defn- agents-payloads->invoke-map
   []

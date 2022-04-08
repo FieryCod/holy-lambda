@@ -13,7 +13,7 @@
    [holy-lambda.refl :as refl])
   (:refer-clojure :exclude [spit]))
 
-(deps/add-deps '{:deps {borkdude/rewrite-edn {:mvn/version "0.1.0"}}})
+(deps/add-deps '{:deps {borkdude/rewrite-edn {:mvn/version "0.0.2"}}})
 (require '[borkdude.rewrite-edn :as r])
 
 ;; Coloring taken from https://github.com/trhura/clojure-term-colors/blob/master/src/clojure/term/colors.clj
