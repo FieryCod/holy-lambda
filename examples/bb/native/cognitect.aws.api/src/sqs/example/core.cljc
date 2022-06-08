@@ -2,6 +2,7 @@
   (:gen-class)
   (:require
    [sqs.example.static-load]
+   [fierycod.holy-lambda.response :as hr]
    [cognitect.aws.http.cognitect :as http]
    [cognitect.aws.client.api :as aws]
    [fierycod.holy-lambda.agent :as agent]
