@@ -28,11 +28,14 @@
 (defn- send-runtime-error
   [runtime iid ^Exception err disable-analytics?]
   (u/println-err! (u/->str "[holy-lambda] Runtime error:\n" (pr-str (Throwable->map err))))
-  (let [response (u/http "POST" (url runtime iid "/error")
-                         {:statusCode 500
-                          :headers    {"content-type" "application/json"}
-                          :body       (Throwable->map err)}
-                         disable-analytics?)]
+  (let [response
+        (u/http "POST" (url runtime iid "/error")
+          {:errorMessage (.getMessage err)
+           :errorType    (or
+                           (:type (ex-data err))
+                           (.getName (.getClass ^Class err)))
+           :stackTrace   (mapv str (.getStackTrace err))}
+          disable-analytics?)]
     (when-not (response :success?)
       (u/println-err! (u/->str "[holy-lambda] Runtime error sent failed.\n" (str (response :body))))
       (System/exit 1))))
