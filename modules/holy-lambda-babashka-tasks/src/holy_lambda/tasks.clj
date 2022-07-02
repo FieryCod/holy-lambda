@@ -379,21 +379,6 @@
 (def AWS_ACCESS_KEY_ID (atom (System/getenv "AWS_ACCESS_KEY_ID")))
 (def AWS_SECRET_ACCESS_KEY (atom (System/getenv "AWS_SECRET_ACCESS_KEY")))
 
-(when (and (not HL_NO_PROFILE?)
-           (not @AWS_ACCESS_KEY_ID)
-           (not @AWS_SECRET_ACCESS_KEY))
-  (if-not (command-exists? "aws")
-    (do (hpr (accent "aws") (pre "command does not exists. Did you install AWS command line application?"))
-        (System/exit 1))
-    (try
-      (let [access-key (obtain-from-aws-profile "aws_access_key_id")
-            secret-key (obtain-from-aws-profile "aws_secret_access_key")]
-        (reset! AWS_ACCESS_KEY_ID access-key)
-        (reset! AWS_SECRET_ACCESS_KEY secret-key))
-      (catch Exception e
-        (hpr (ex-message e))
-        (System/exit 1)))))
-
 (def USER_GID
   (str (s/trim (shs "id -u"))
        ":" (s/trim (shs "id -g"))))
@@ -419,6 +404,20 @@
 
 (defn- docker-run
   [command]
+  (when (and (not HL_NO_PROFILE?)
+             (not @AWS_ACCESS_KEY_ID)
+             (not @AWS_SECRET_ACCESS_KEY))
+    (if-not (command-exists? "aws")
+      (do (hpr (accent "aws") (pre "command does not exists. Did you install AWS command line application?"))
+          (System/exit 1))
+      (try
+        (let [access-key (obtain-from-aws-profile "aws_access_key_id")
+              secret-key (obtain-from-aws-profile "aws_secret_access_key")]
+          (reset! AWS_ACCESS_KEY_ID access-key)
+          (reset! AWS_SECRET_ACCESS_KEY secret-key))
+        (catch Exception e
+          (hpr (ex-message e))
+          (System/exit 1)))))
   (if-not HL_NO_DOCKER?
     (apply shell
            (concat
