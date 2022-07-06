@@ -158,7 +158,7 @@
       (x->json-bytes {:body       nil
                       :statusCode 200})
 
-      :else 
+      :else
       (x->json-bytes response))))
 
 #?(:clj
@@ -179,8 +179,9 @@
          (let [output-stream (.getOutputStream http-conn)]
            (if (bytes? response-bytes)
              (.write output-stream ^"[B" response-bytes)
-             (do (println "[holy-lambda] Response has not beed parsed to bytes array:" response-bytes)
-                 (throw (->ex "Failed to parse response to byte array. Response type:" (str (type response-bytes))))))
+             (do
+               (println "[holy-lambda] Response has not beed parsed to bytes array: " response-bytes)
+               (throw (->ex "Failed to parse response to byte array. Response type: " (str (type response-bytes))))))
            (.flush output-stream)
            (.close output-stream)))
        ;; It's not necessary to normalize the response headers for runtimes since

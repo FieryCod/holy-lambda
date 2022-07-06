@@ -1,5 +1,6 @@
 (ns fierycod.holy-lambda.custom-runtime
   (:require
+   [clojure.string :as str]
    [clojure.edn :as edn]
    [fierycod.holy-lambda.util :as u]))
 
@@ -25,17 +26,29 @@
      :identity             (get request-context :identity)
      :clientContext        (get request-context :clientContext)}))
 
+(defn- ex->exv
+  [^Exception err]
+  [(mapv str (.getStackTrace err))
+   (or
+    (:type (ex-data err))
+    (.getName (.getClass ^Class err)))
+   (.getMessage err)])
+
+(defn- ex-println
+  [msg [error-stacktrace error-type error-message]]
+  (u/println-err! (u/->str msg "\"" error-type "\"\n\nMessage: " error-message "\n\nStacktrace: \n  " (str/join "\n  " error-stacktrace))))
+
 (defn- send-runtime-error
   [runtime iid ^Exception err disable-analytics?]
-  (u/println-err! (u/->str "[holy-lambda] Runtime error:\n" (pr-str (Throwable->map err))))
-  (let [response
-        (u/http "POST" (url runtime iid "/error")
-          {:errorMessage (.getMessage err)
-           :errorType    (or
-                           (:type (ex-data err))
-                           (.getName (.getClass ^Class err)))
-           :stackTrace   (mapv str (.getStackTrace err))}
-          disable-analytics?)]
+  (println runtime)
+  (let [exv                                         (ex->exv err)
+        [error-stacktrace error-type error-message] exv
+        _!                                          (ex-println "[holy-lambda] Runtime error: " exv)
+        response                                    (u/http "POST" (url runtime iid "/error")
+                                                            {:errorMessage error-message
+                                                             :errorType    error-type
+                                                             :stackTrace   error-stacktrace}
+                                                            disable-analytics?)]
     (when-not (response :success?)
       (u/println-err! (u/->str "[holy-lambda] Runtime error sent failed.\n" (str (response :body))))
       (System/exit 1))))
