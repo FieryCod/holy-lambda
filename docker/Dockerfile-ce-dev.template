@@ -1,4 +1,4 @@
-FROM {{image-prefix}}amazonlinux
+FROM amazonlinux:latest
 MAINTAINER Karol Wójcik <Karol Wójcik>
 
 RUN yum install -y -q unzip curl make wget git zip tar
@@ -12,7 +12,7 @@ ENV XDG_CACHE_HOME=/project/.holy-lambda
 ENV XDG_CONFIG_HOME=/project/.holy-lambda
 ENV XDG_DATA_HOME=/project/.holy-lambda
 ENV GITLIBS=/project/.holy-lambda/.gitlibs/
-ENV LANG=en_US.UTF-8 
+ENV LANG=en_US.UTF-8
 ENV JAVA_HOME={{java-home}}
 
 # --------------- UPDATE ------------------
@@ -51,6 +51,6 @@ RUN wget -cq https://github.com/babashka/babashka/releases/download/v$BABASHKA_V
     && chmod +x bb \
     && mv bb /bin/bb
 
-RUN gu install -n native-image nodejs{{additional-components}}
+RUN gu install -n native-image
 
 WORKDIR /project

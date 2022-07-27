@@ -64,11 +64,7 @@
                                          (assoc spec
                                                 :bb-version BABASHKA_VERSION
                                                 :java-home (str "/opt/graalvm-ce-java" java "-" version)
-                                                :graalvm-url (ce-image-url spec)
-                                                :image-prefix (if-not (= arch "aarch64") "" "arm64v8/")
-                                                :additional-components (if (= arch "aarch64")
-                                                                         ""
-                                                                         " python ruby R")))
+                                                :graalvm-url (ce-image-url spec)))
         image-uri           (str "ghcr.io/fierycod/holy-lambda-builder:" arch "-java" java "-" version)]
     (spit dockerfile dockerfile-content)
     (println "> Building:" image-uri)
