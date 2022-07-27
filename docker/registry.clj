@@ -1,7 +1,7 @@
 (require '[selmer.parser :as selm])
 (require '[babashka.process :as p])
 
-(def BABASHKA_VERSION "0.8.1")
+(def BABASHKA_VERSION "0.8.157")
 
 (defn- exit-non-zero
   [proc]
@@ -22,11 +22,14 @@
   (= 1 (:exit @(shell-no-exit false "git" "diff" "--exit-code" "HEAD~1" "HEAD" "--" "."))))
 
 (def CE_IMAGES
-  [{:version ["22.1.0"]
+  [{:version ["22.2.0"]
     :java    ["11" "17"]
     :arch    ["amd64", "aarch64"]}
 
    ;; ALREADY BUILT IMAGES
+   ;; {:version ["22.1.0"]
+   ;;  :java    ["11" "17"]
+   ;;  :arch    ["amd64", "aarch64"]}
    ;; {:version ["22.0.0.2"]
    ;;  :java    ["11" "17"]
    ;;  :arch    ["amd64", "aarch64"]}
