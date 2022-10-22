@@ -3,8 +3,8 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   Holy-lambda micro framework babashka compatible runtime/backend layer:
   - Architecture: amd64,
-  - Babashka: 0.7.4,
-  - SemanticVersion: 0.6.6
+  - Babashka: 0.9.162,
+  - SemanticVersion: 0.7.0
 
 Resources:
   BabashkaLayer:
@@ -36,8 +36,8 @@ Metadata:
     Description: >
       Holy-lambda micro framework babashka compatible runtime/backend layer:
       - Architecture: amd64,
-      - Babashka: 0.7.4,
-      - SemanticVersion: 0.6.6
+      - Babashka: 0.9.162,
+      - SemanticVersion: 0.7.0
     LicenseUrl: LICENSE
     ReadmeUrl: README-amd64.md
     SourceCodeUrl: https://github.com/FieryCod/holy-lambda/tree/master/modules/holy-lambda-babashka-layer

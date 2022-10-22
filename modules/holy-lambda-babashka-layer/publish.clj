@@ -8,8 +8,8 @@
 (def ARCHS #{ARM64 AMD64})
 (def FILES #{"README.md.template" "Dockerfile.bb.template" "template.yml.template"})
 
-(def BABASHKA_VERSION "0.8.0")
-(def SEMANTIC_VERSION "0.6.7")
+(def BABASHKA_VERSION "0.9.162")
+(def SEMANTIC_VERSION "0.7.0")
 
 (defn arch->subcord
   [arch]
