@@ -27,7 +27,7 @@
                                 ;; You can always build your own GraalVM image with enterprise edition
                                 :image "ghcr.io/fierycod/holy-lambda-builder:amd64-java11-22.0.0.2"}
 
-                       :build {:compile-cmd  "clojure -X:uberjar"
+                       :build {:compile-cmd  "clojure -T:build uber"
                                ;; Used when either :docker is nil or
                                ;; `HL_NO_DOCKER` environment variable is set to "true"
                                ;; Might be set via `GRAALVM_HOME` environment variable

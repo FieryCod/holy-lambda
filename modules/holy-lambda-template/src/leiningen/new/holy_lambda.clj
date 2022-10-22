@@ -29,6 +29,7 @@
              ["resources/native-agents-payloads/1.edn" (render* "1.edn")]
              ["README.md" (render* "README.md")]
              ["bb.edn" (render* "bb.edn")]
+             ["build.clj" (render* "build.clj")]
              ["Dockerfile" (render* "Dockerfile")]
              ["deps.edn" (render* "deps.edn")]
              ["template.yml" (render* "template.yml")]
