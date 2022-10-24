@@ -2,11 +2,11 @@
   (:require
    [clojure.tools.build.api :as b]))
 
-(def class-dir "target/classes")
+(def class-dir ".holy-lambda/target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
 
 (defn clean [_]
-  (b/delete {:path "target"})
+  (b/delete {:path ".holy-lambda/target"})
   (b/delete {:path ".holy-lambda/build"}))
 
 (defn uber [_]
