@@ -5,4 +5,5 @@
  :paths  ["src" "resources"]
  :aliases
  {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.3" :git/sha "0d20256"}}
-          :ns-default build}}}
+          :ns-default build
+          :jvm-opts ["-Dclojure.compiler.direct-linking=true" "-Dclojure.spec.skip-macros=true"]}}}
