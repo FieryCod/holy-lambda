@@ -45,7 +45,11 @@
    ])
 
 (def DEV_IMAGES
-  [;; {:version         "22.1.0-dev-20211209_2306"
+  [ {:version         "23.0.0-dev-20221020_1959"
+     :partial-version "23.0.0-dev",
+     :java            ["11" "17" "19"],
+     :arch            ["amd64", "aarch64"]}
+   ;; {:version         "22.1.0-dev-20211209_2306"
    ;;  :partial-version "22.1.0-dev",
    ;;  :java            ["11" "17"],
    ;;  :arch            ["amd64", "aarch64"]}
