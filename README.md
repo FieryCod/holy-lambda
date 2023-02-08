@@ -12,9 +12,9 @@
 The extraordinary simple, performant, and extensible custom AWS Lambda runtime for Clojure.
 
 **Holy Lambda supports multiple backends**
-  - [Babashka](https://github.com/babashka/babashka),
-  - Native Clojure (GraalVM compiled), 
-  - Clojure (much faster than official AWS Java runtime),
+  - [Babashka](https://github.com/babashka/babashka)
+  - Native Clojure (GraalVM compiled)
+  - Clojure (much faster than official AWS Java runtime)
 
 ## Goals
   - **Low cold starts** - Clojure goes fast on AWS Lambda.
