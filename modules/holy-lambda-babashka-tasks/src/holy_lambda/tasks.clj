@@ -358,16 +358,26 @@
   (hpr (prw "No AWS Profile has been specified. ACCESS, SECRET keys from environment variables will be taken instead!")
        (prw "You can use env variable HL_NO_PROFILE=1 to hide this message!")))
 
-(defn obtain-from-aws-profile
-  [what]
-  (let [result (csh/sh "aws" "configure" "get" what "--profile" AWS_PROFILE)]
+(defn obtain-from-profile
+  [profile what]
+  (csh/sh "aws" "configure" "get" what "--profile" profile))
+
+(defn required-obtain-from-aws-profile
+  [profile what]
+  (let [result (obtain-from-profile profile what)]
     (if-not (= (:exit result) 0)
-      (throw (ex-info (str (pre "AWS configuration check failed. Unable to get value from the profile: ") (accent AWS_PROFILE)
+      (throw (ex-info (str (pre "AWS configuration check failed. Unable to get value from the profile: ") (accent profile)
                            (when-not (s/blank? (:err result))
                              (str "\n" (pre (:err result))))
                            (pre "\nDid you run command: ") (accent "aws configure") (pre "?"))
                       {}))
       (s/trim (:out result)))))
+
+(defn optional-obtain-from-aws-profile
+  [profile what]
+  (-> (obtain-from-profile profile what)
+      :out
+      (s/trim)))
 
 (def OUTPUT_JAR_PATH ".holy-lambda/build/output.jar")
 (def OUTPUT_JAR_PATH_WITH_AGENT ".holy-lambda/build/output-agent.jar")
@@ -402,6 +412,13 @@
   [edn]
   (with-out-str (pprint/pprint edn)))
 
+(defn top-most-profile
+  [profile]
+  (let [upper-profile (optional-obtain-from-aws-profile profile "source_profile")]
+    (if (s/blank? upper-profile)
+      profile
+      (recur upper-profile))))
+
 (defn- docker-run
   [command]
   (when (and (not HL_NO_PROFILE?)
@@ -411,8 +428,9 @@
       (do (hpr (accent "aws") (pre "command does not exists. Did you install AWS command line application?"))
           (System/exit 1))
       (try
-        (let [access-key (obtain-from-aws-profile "aws_access_key_id")
-              secret-key (obtain-from-aws-profile "aws_secret_access_key")]
+        (let [profile    (top-most-profile AWS_PROFILE)
+              access-key (required-obtain-from-aws-profile profile "aws_access_key_id")
+              secret-key (required-obtain-from-aws-profile profile "aws_secret_access_key")]
           (reset! AWS_ACCESS_KEY_ID access-key)
           (reset! AWS_SECRET_ACCESS_KEY secret-key))
         (catch Exception e
