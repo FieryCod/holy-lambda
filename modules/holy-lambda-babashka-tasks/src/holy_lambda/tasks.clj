@@ -219,7 +219,7 @@
   []
   (s/trim (:body (curl/get REMOTE_TASKS_SHA))))
 
-(def BB_EDN_STRING (slurp (io/file "bb.edn")))
+(def BB_EDN_STRING (slurp (io/file (System/getProperty "babashka.config"))))
 
 (defn bb-edn
   []
