@@ -46,6 +46,6 @@ The extraordinary simple, performant, and extensible custom AWS Lambda runtime f
 [![Get help on Slack](http://img.shields.io/badge/slack-clojurians%20%23holy--lambda-97C93C?labelColor=283C67&logo=slack&style=for-the-badge)](https://clojurians.slack.com/channels/holy-lambda)
 
 ## License
-Copyright © 2021 Karol Wojcik aka Fierycod
+Copyright © 2023 Karol Wojcik aka Fierycod
 
 Released under the MIT license.
