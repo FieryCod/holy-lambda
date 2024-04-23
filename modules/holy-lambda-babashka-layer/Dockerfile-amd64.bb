@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y wget zip
 
 ENV GITLIBS=".gitlibs/"
 ENV CLOJURE_TOOLS_DIR=/opt
-ARG BABASHKA_VERSION=0.9.162
+ARG BABASHKA_VERSION=1.3.190
 
 COPY bootstrap .
 COPY hacks.clj .

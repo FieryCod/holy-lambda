@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.8
+- [bb layer] Upgrade Babashka to v1.3.190
+
 ## 0.6.6
 See [migration guide](https://fierycod.github.io/holy-lambda/#/migration-guide)
 
