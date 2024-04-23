@@ -2,8 +2,8 @@
 [Holy Lambda](https://github.com/FieryCod/holy-lambda) is an extraordinary simple, performant, and extensible custom AWS Lambda runtime for Clojure.
 
 - Architecture: amd64
-- Babashka: 0.9.162
-- Semantic version: 0.7.0
+- Babashka: 1.3.190
+- Semantic version: 0.8.0
 
 # Documentation
 The holy-lambda documentation is available [here](https://fierycod.github.io/holy-lambda).
