@@ -11,7 +11,7 @@ Handler<HLEvent, HLContext> => HLResponse
   [{:keys [event ctx]}]
   {:statusCode 200
    :headers {"content-type" "application/json"}
-   :body {:hello "world"})
+   :body {:hello "world"}})
 ```
 
 **[Runtime/Backend initialization](/api)**
